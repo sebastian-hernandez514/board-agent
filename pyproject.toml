@@ -1,0 +1,12 @@
+[project]
+name = "board-agent"
+version = "0.1.0"
+description = "Orquestador y validador del pipeline de Template Board"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+    "boto3>=1.34",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

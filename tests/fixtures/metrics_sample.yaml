@@ -1,0 +1,51 @@
+# Extracto real de Template Board/data/metrics.yaml (mayo-26, generado 2026-06-18)
+# Recortado a los campos que usa phase4_validator.py — no es un mock inventado,
+# son los valores reales del board v37 ya publicado (incluye el hallazgo R8).
+
+cutoff_month: "2026-05"
+is_quarter_end: false
+arr_total: "$29.2M"
+new_mrr: "$71K"
+new_mrr_core_fmt: "$24K"
+new_mrr_lite_fmt: "$47K"
+logo_churn_global: 4.1
+
+chart_arr_history:
+  months: ["Mar-26", "Apr-26", "May-26"]
+  alegra_spot: [27.3, 28.27, 28.16]
+  alanube_spot: [955172, 940000, 1010000]
+
+arr_walk_table:
+  quarters: ["Jan-26", "Feb-26", "Mar-26", "Apr-26", "May-26"]
+  sections:
+    - rows:
+        - label: "Total EoP"
+          cells: ["56.8", "56.7", "57.6", "58.4", "59.0"]
+        - label: "Logo Monthly New Adds %"
+          cells: ["5.2%", "5.0%", "5.7%", "5.3%", "5.2%"]
+        - label: "Logo Monthly Churn %"
+          cells: ["5.1%", "5.3%", "4.0%", "4.0%", "4.1%"]
+    - rows:
+        - label: "ARR BoP"
+          cells: ["26.6", "27.0", "27.0", "27.3", "28.3"]
+        - label: "Additions"
+          cells: ["0.8", "0.8", "1.0", "1.0", "0.9"]
+        - label: "Recovered"
+          cells: ["0.2", "0.2", "0.2", "0.2", "0.2"]
+        - label: "Net Churn"
+          cells: ["(1.1)", "(1.3)", "(0.9)", "(1.0)", "(0.9)"]
+        - label: "Net Expansion"
+          cells: ["0.1", "0.0", "0.3", "0.2", "0.3"]
+        - label: "(+/−) FX Impact"
+          cells: ["0.5", "0.2", "(0.3)", "0.5", "(0.5)"]
+        - label: "ARR EoP"
+          cells: ["27.0", "27.0", "27.3", "28.3", "28.2"]
+        - label: "Net New ARR"
+          cells: ["0.5", "(0.1)", "0.3", "1.0", "(0.1)"]
+        - label: "ARR EoP (Constant Currency)"
+          cells: ["25.4", "25.2", "25.8", "26.2", "26.5"]
+    - rows:
+        - label: "S&M Total Spend ($K)"
+          cells: ["$611K", "$710K", "$655K", "$722K", "$737K"]
+        - label: "CAC Payback (meses)"
+          cells: ["8.8", "10.2", "7.9", "8.6", "10.0"]
