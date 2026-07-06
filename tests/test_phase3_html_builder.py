@@ -24,37 +24,69 @@ def isolated_dirs(tmp_path, monkeypatch):
     return data_dir, output_dir
 
 
-def test_reembed_cr_image_warn_when_image_missing(isolated_dirs):
+def test_reembed_cr_image_pass_when_no_image_referenced(isolated_dirs):
+    """Un mes sin ninguna slide con imagen (topic solo de texto) no debe ser un WARN — no hay
+    nada roto, simplemente no aplica."""
     data_dir, output_dir = isolated_dirs
     (output_dir / "2_discussion_topic.html").write_text("<html></html>")
     r = f3._reembed_cr_image("2026-05")
+    assert r.status == "PASS"
+    assert "sin imágenes" in r.detail
+
+
+def test_reembed_cr_image_warn_when_referenced_image_missing_on_disk(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "2_discussion_topic.html"
+    html_path.write_text('<img src="../data/assets/2026-05/image-2.png">', encoding="utf-8")
+    r = f3._reembed_cr_image("2026-05")
     assert r.status == "WARN"
+    assert "image-2.png" in r.detail
 
 
 def test_reembed_cr_image_fail_when_html_missing(isolated_dirs):
     data_dir, output_dir = isolated_dirs
     img_dir = data_dir / "assets" / "2026-05"
     img_dir.mkdir(parents=True)
-    (img_dir / "cr-landing-icp.png").write_bytes(b"\x89PNG fake")
+    (img_dir / "image-2.png").write_bytes(b"\x89PNG fake")
     r = f3._reembed_cr_image("2026-05")
     assert r.status == "FAIL"
 
 
-def test_reembed_cr_image_pass_embeds_base64(isolated_dirs):
+def test_reembed_cr_image_pass_embeds_base64_regardless_of_filename(isolated_dirs):
+    """Reproduce el bug real encontrado 2026-07-06: el template usaba 'image-2.png', no
+    'cr-landing-icp.png' — la función debe embeber cualquier nombre de archivo, no uno fijo."""
     data_dir, output_dir = isolated_dirs
     img_dir = data_dir / "assets" / "2026-05"
     img_dir.mkdir(parents=True)
     img_bytes = b"\x89PNG fake bytes"
-    (img_dir / "cr-landing-icp.png").write_bytes(img_bytes)
+    (img_dir / "image-2.png").write_bytes(img_bytes)
     html_path = output_dir / "2_discussion_topic.html"
-    html_path.write_text('<img src="assets/2026-05/cr-landing-icp.png">', encoding="utf-8")
+    html_path.write_text('<img src="../data/assets/2026-05/image-2.png">', encoding="utf-8")
 
     r = f3._reembed_cr_image("2026-05")
     assert r.status == "PASS"
     new_html = html_path.read_text(encoding="utf-8")
     expected_b64 = base64.b64encode(img_bytes).decode()
     assert f'src="data:image/png;base64,{expected_b64}"' in new_html
-    assert "cr-landing-icp.png" not in new_html
+    assert "image-2.png" not in new_html
+
+
+def test_reembed_cr_image_embeds_multiple_images_in_same_month(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    img_dir = data_dir / "assets" / "2026-05"
+    img_dir.mkdir(parents=True)
+    (img_dir / "image-2.png").write_bytes(b"one")
+    (img_dir / "image-3.jpg").write_bytes(b"two")
+    html_path = output_dir / "2_discussion_topic.html"
+    html_path.write_text(
+        '<img src="../data/assets/2026-05/image-2.png">'
+        '<img src="../data/assets/2026-05/image-3.jpg">', encoding="utf-8")
+
+    r = f3._reembed_cr_image("2026-05")
+    assert r.status == "PASS"
+    new_html = html_path.read_text(encoding="utf-8")
+    assert "data:image/png;base64," in new_html
+    assert "data:image/jpeg;base64," in new_html
 
 
 def test_run_stops_early_if_generate_fails(monkeypatch, isolated_dirs):
@@ -67,7 +99,8 @@ def test_run_stops_early_if_generate_fails(monkeypatch, isolated_dirs):
 
 def test_run_stops_before_merge_reembed_still_runs(monkeypatch, isolated_dirs):
     data_dir, output_dir = isolated_dirs
-    (output_dir / "2_discussion_topic.html").write_text("<html></html>")  # sin imagen -> WARN
+    (output_dir / "2_discussion_topic.html").write_text(
+        '<img src="../data/assets/2026-05/image-2.png">')  # referenciada pero no existe en disco -> WARN
 
     calls = {"n": 0}
 

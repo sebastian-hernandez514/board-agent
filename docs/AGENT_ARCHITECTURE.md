@@ -97,7 +97,7 @@ FASE 0 — Human Inputs Gate            ← DEBE DESAPARECER      ✅ implementa
 FASE 1 — Data Freshness Check         ← fuentes automáticas   ✅ implementada (phase1_freshness.py)
 FASE 2 — Metrics Computation          ← fetch_metrics.py      ✅ implementada (phase2_metrics.py)
 FASE 3 — HTML Builder                 ← generate.py + merge + fixes  ✅ implementada (phase3_html_builder.py)
-FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 14/15 reglas activas (phase4_validator.py)
+FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 15/16 reglas activas (phase4_validator.py)
 FASE 5 — Diff Review                  ← vs board anterior     ✅ implementada, 7/7 reglas activas incl. D7 (phase5_diff.py)
 FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ implementada, gate manual a propósito (phase6_pdf.py)
 ```
@@ -112,18 +112,19 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 **Por qué existe:** Porque varias fuentes no están en ninguna base de datos todavía.
 **Estado objetivo:** Esta fase desaparece cuando todas las fuentes sean automatizadas.
 
-**Checks actuales (mientras dure):**
+**Checks actuales — 4 en total (`board_agent/phase0_gate.py::run()`, verificado 2026-07-06):**
 
-| Check | Tipo | Blocker |
+| ID | Check | Blocker |
 |---|---|---|
-| `paises_fx.csv` tiene fila del mes actual | Automático | ✅ Sí |
-| `chart_alanube.yaml` tiene el mes actual | Automático | ✅ Sí |
-| `Payback.csv` tiene el mes actual | Automático | ✅ Sí |
-| `P&L Histórico- ACtual.csv` tiene el mes actual | Automático | ✅ Sí |
-| `editorial/ceo.yaml` no tiene placeholders vacíos | Automático | ⚠️ Warning |
-| `editorial/discussion_topics.yaml` no vacío | Automático | ⚠️ Warning |
-| Template 4 (Finance HTML) fue recibido | Manual | ✅ Sí |
-| NPS screenshots existen en `data/assets/YYYY-MM/` | Automático | ⚠️ Warning |
+| F0.4 | `P&L Histórico- ACtual.csv` tiene el mes actual (o `data/pnl_override.yaml`) | ✅ Sí (FAIL) |
+| F0.5 | `editorial/ceo.yaml` no tiene placeholders vacíos | ⚠️ Warning |
+| F0.6 | `editorial/discussion_topics.yaml` no vacío | ⚠️ Warning |
+| F0.7 | `editorial/arr_walk.yaml` con comentarios llenos | ⚠️ Warning |
+
+**4 checks que existían en versiones anteriores de esta tabla y ya NO corren en este gate** (tabla desactualizada hasta 2026-07-06, corregida tras revisión de código):
+- `paises_fx.csv`, `chart_alanube.yaml`, `Payback.csv` — se automatizaron y se movieron a Fase 1/2 (ver sección "Camino para eliminarla" abajo, fechas 2026-07-03/06).
+- "Template 4 (Finance HTML) fue recibido" — **nunca tuvo una función de check real en el código**, a diferencia de las otras 3; quedó en la tabla como aspiracional.
+- NPS screenshots — la lógica de NPS se movió a `_build_nps()` en Fase 2 (lee `data/nps_snapshot.yaml`), no vive en este gate.
 
 **Output:** Lista ✅/⚠️/❌. Si hay ❌ blocker: para y lista exactamente qué falta y quién lo provee.
 
@@ -260,6 +261,18 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 | R14 | Churn Rate y CAC: delta invertido (negativo = verde, positivo = rojo) — ✅ implementada, 40/40 celdas correctas |
 | R15 | Resto de métricas: positivo = verde, negativo = rojo — ✅ implementada, 119/119 celdas correctas |
 
+**Reglas de cumplimiento de diseño (gap identificado en la reunión de colaboración 19-jun-2026 —
+ver `memory/project_board_collaboration_roadmap.md`):**
+
+| # | Regla |
+|---|---|
+| R16 | Ningún slide-shell (`SLIDE_CLASS_TOKENS`) fuerza width/height en px vía inline style — protege el 960×540 que viene de `--slide-width`/`--slide-height` en `base.css` — ✅ implementada 2026-07-06, verificado 0 falsos positivos contra los 8 templates reales |
+
+Candidatos evaluados y **descartados** por ahora (riesgo real de falsos positivos, no solo teórico):
+- "Todo `.slide-header` debe traer `.title` y `.period`" — **falso**: `8_appendix.j2` tiene 3 slides de "Churned companies breakdown" con header solo-título, legítimo. Verificado con grep contra los 8 templates antes de escribir la regla.
+- Paleta de colores permitida (grep de hex codes) — alto riesgo de falsos positivos: hay colores semánticos legítimos fuera de los tokens de `base.css` (ej. verde/ámbar/rojo de NPS, morado de banners) que no son errores de diseño.
+- Detección real de overflow de texto — requeriría Playwright (mismo approach que `generate_pdf.py`) renderizando cada slide y midiendo `scrollHeight` vs `clientHeight`. Es el check que de verdad atraparía "el diseño se rompió", pero no se implementó esta sesión — mayor esfuerzo, decidido con el usuario 2026-07-06 quedarse con las reglas estructurales rápidas por ahora.
+
 **Output:** Reporte PASS/FAIL por regla con los valores que fallan. Si alguna regla dura falla → no avanzar a versión final sin revisión humana explícita.
 
 ---
@@ -370,7 +383,7 @@ uv run --with playwright --with pillow python scripts/generate_pdf.py
                                        │
                     ┌──────────────────▼──────────────────────┐
                     │         FASE 4: Validator               │
-                    │  15 reglas duras + consistencia         │
+                    │  16 reglas duras + consistencia         │
                     └──────────────────┬──────────────────────┘
                                        │
                     ┌──────────────────▼──────────────────────┐

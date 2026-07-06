@@ -37,7 +37,14 @@ def _file_stem(cutoff_month: str, version: int) -> str:
 
 def _update_pdf_script_targets(html_rel: str, pdf_rel: str, pdf_script: Path = None) -> None:
     """Reescribe HTML_FILE/PDF_OUT en generate_pdf.py con regex — mismo patrón que
-    phase6_pdf.py ya usa en modo lectura, ahora también para escribir."""
+    phase6_pdf.py ya usa en modo lectura, ahora también para escribir.
+
+    Si _TARGET_RE no matchea nada (ej. alguien reformatea generate_pdf.py y cambia el estilo
+    de comillas o el nombre de la variable ROOT), re.sub() no fallaba — escribía el archivo
+    sin cambios y save_version() reportaba éxito igual, dejando generate_pdf.py apuntando en
+    silencio a la versión vieja. Corregido 2026-07-06 (mismo patrón de falso-positivo-por-regex
+    encontrado en phase3_html_builder._reembed_cr_image): ahora cuenta los reemplazos y explota
+    si no fueron exactamente 2 (HTML_FILE + PDF_OUT), en vez de fallar en silencio."""
     script_path = pdf_script or paths.PDF_SCRIPT
     content = script_path.read_text(encoding="utf-8")
 
@@ -47,7 +54,13 @@ def _update_pdf_script_targets(html_rel: str, pdf_rel: str, pdf_script: Path = N
         folder, fname = rel.split("/", 1)
         return f'{var} = ROOT / "boards" / "{folder}" / "{fname}"'
 
-    new_content = _TARGET_RE.sub(_repl, content)
+    new_content, n_subs = _TARGET_RE.subn(_repl, content)
+    if n_subs != 2:
+        raise RuntimeError(
+            f"_update_pdf_script_targets: se esperaban 2 reemplazos (HTML_FILE, PDF_OUT) en "
+            f"{script_path}, se hicieron {n_subs} — el patrón _TARGET_RE ya no matchea el "
+            f"formato real del archivo, revisar antes de confiar en el PDF generado."
+        )
     script_path.write_text(new_content, encoding="utf-8")
 
 

@@ -12,8 +12,13 @@ versión reducida y honesta de la regla original: solo verifica completitud del 
 de budget en cierre de Q, no reproduce la aritmética completa de vs_budget (no se
 pudo validar contra un mes de cierre de Q real en esta sesión — mayo-26 no lo es).
 
-Reglas R5, R13-15 quedan como SKIP explícito: requieren datos que metrics.yaml no
-expone (los 12 buckets crudos) o parsear CSS del render. No se fingen como cubiertas.
+R5 y R13-15 están implementadas y activas desde 2026-07-06 (commit "Completar Validator
+R5, R13-15"): R5 recomputa Net Expansion desde arr_walk_raw_buckets, R13-15 parsean el HTML
+generado para verificar colores de delta. Caen a SKIP solo cuando el dato que necesitan no
+existe (metrics.yaml viejo sin arr_walk_raw_buckets, o HTML no disponible), no por diseño.
+
+R16 (cumplimiento de diseño, agregada 2026-07-06) también cae a SKIP si no encuentra ningún
+elemento con clase de slide-shell en el HTML — ver docstring de _check_r16_slide_dimensions.
 """
 
 import csv
@@ -123,6 +128,57 @@ def _check_color_rules(html_path: Path) -> list[CheckResult]:
         else:
             results.append(CheckResult(rid, desc, "PASS", f"{checked[rid]} celdas verificadas, todas correctas"))
     return results
+
+
+_DIV_TAG_RE = re.compile(r'<div\s+([^>]*)>')
+_CLASS_ATTR_RE = re.compile(r'class="([^"]*)"')
+_STYLE_ATTR_RE = re.compile(r'style="([^"]*)"')
+_PX_OVERRIDE_RE = re.compile(r'(width|height)\s*:\s*[\d.]+px')
+
+
+def _check_r16_slide_dimensions(html_path: Path) -> CheckResult:
+    """R16 — primera regla de cumplimiento de diseño (ver docs/AGENT_ARCHITECTURE.md, gap
+    identificado en la reunión de colaboración del 19-jun-2026). Sin renderizar en navegador:
+    verifica que ningún elemento con una clase de slide-shell (SLIDE_CLASS_TOKENS, las que
+    heredan 960×540 de --slide-width/--slide-height en base.css) tenga un inline style que
+    fije width/height en px — eso pisaría el tamaño fijo del slide sin que nadie lo note.
+
+    v2 (2026-07-06, corregido tras revisión de código): la v1 buscaba el literal
+    `class="..." style="..."` con ese orden exacto y sin nada en medio — un `id="x"` intercalado
+    o `style` antes que `class` en cualquier .j2 futuro desactivaba la regla en silencio (falso
+    negativo). Ahora se extraen `class`/`style` de forma independiente del atributo completo del
+    tag, sin importar orden. También se agrega un contador `checked`: la v1 devolvía PASS incluso
+    si el regex no encontraba ningún slide-shell (0 revisados = 0 violaciones = "PASS" engañoso,
+    indistinguible de "revisé todo y está bien") — ahora eso es SKIP explícito, mismo criterio
+    que usan R13-R15 con su propio contador `checked`.
+    Alcance conocido: solo detecta overrides en unidades px (no %, vw, calc()) — cubre el caso
+    real que motivó la regla, no es un parser de CSS completo."""
+    try:
+        html = html_path.read_text(encoding="utf-8")
+    except Exception as e:
+        return CheckResult("R16", "Ningún slide-shell fuerza dimensión px inline", "SKIP", f"error: {e}")
+
+    checked = 0
+    violations = []
+    for m in _DIV_TAG_RE.finditer(html):
+        attrs = m.group(1)
+        class_m = _CLASS_ATTR_RE.search(attrs)
+        if not class_m or not (set(class_m.group(1).split()) & paths.SLIDE_CLASS_TOKENS):
+            continue
+        checked += 1
+        style_m = _STYLE_ATTR_RE.search(attrs)
+        if style_m and _PX_OVERRIDE_RE.search(style_m.group(1)):
+            violations.append(f'class="{class_m.group(1)}" style="{style_m.group(1)}"')
+
+    if checked == 0:
+        return CheckResult("R16", "Ningún slide-shell fuerza dimensión px inline", "SKIP",
+                            "no se encontró ningún elemento con clase de slide-shell en el HTML")
+    if violations:
+        sample = "; ".join(violations[:3])
+        return CheckResult("R16", "Ningún slide-shell fuerza dimensión px inline", "FAIL",
+                            f"{len(violations)}/{checked} slides con width/height px inline: {sample}")
+    return CheckResult("R16", "Ningún slide-shell fuerza dimensión px inline", "PASS",
+                        f"{checked} slides verificados, sin overrides de dimensión")
 
 
 def _count_slides(html_path: Path) -> int:
@@ -351,5 +407,6 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
         results.append(CheckResult("R12", f"~{paths.EXPECTED_SLIDE_COUNT} slides en el standalone", "SKIP", f"error: {e}"))
 
     results.extend(_check_color_rules(html_path))
+    results.append(_check_r16_slide_dimensions(html_path))
 
     return results

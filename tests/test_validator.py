@@ -1,9 +1,13 @@
 import copy
+import csv
+import sys
+import types
 from pathlib import Path
 
+import pytest
 import yaml
 
-from board_agent import phase4_validator
+from board_agent import paths, phase4_validator
 
 FIXTURE = Path(__file__).parent / "fixtures" / "metrics_sample.yaml"
 MISSING_HTML = Path("/nonexistent/board_standalone.html")
@@ -132,6 +136,168 @@ def test_r5_skip_when_raw_buckets_missing(tmp_path):
     assert _results_by_id(results)["R5"].status == "SKIP"
 
 
+# ── R3, R6 — aisladas del smoke test (que solo verifica el caso PASS/FAIL del fixture real) ──
+
+def _set_glo_row(metrics, label, value):
+    """Reemplaza la última celda de una fila de la sección ARR Walk GLO (identificada por
+    tener 'ARR BoP' y 'Net New ARR', igual que _arr_walk_glo_rows en producción)."""
+    for section in metrics["arr_walk_table"]["sections"]:
+        labels = {r["label"] for r in section["rows"]}
+        if "ARR BoP" in labels and "Net New ARR" in labels:
+            for row in section["rows"]:
+                if row["label"] == label:
+                    row["cells"][-1] = value
+                    return
+    raise KeyError(label)
+
+
+def test_r3_fails_when_buckets_dont_sum_to_net_new_arr(tmp_path):
+    """Reproduce el caso que R3 existe para atrapar: alguien rompe la aritmética del ARR
+    Walk (ej. un bucket con signo volteado en fetch_metrics.py) y Net New ARR deja de
+    cuadrar con la suma de los 5 buckets."""
+    metrics = _load_fixture()
+    _set_glo_row(metrics, "Net New ARR", "5.0")  # el real de mayo-26 es "(0.1)" — ver fixture
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R3"].status == "FAIL"
+
+
+def test_r6_fails_when_fx_impact_exceeds_3m(tmp_path):
+    """FX residual grande es señal de error de lógica FX, no una variación normal del mes."""
+    metrics = _load_fixture()
+    _set_glo_row(metrics, "(+/−) FX Impact", "5.0")  # $5M > límite de $3M
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R6"].status == "FAIL"
+
+
+def test_r6_passes_when_fx_impact_is_within_limit(tmp_path):
+    metrics = _load_fixture()
+    _set_glo_row(metrics, "(+/−) FX Impact", "1.0")  # $1M, dentro del límite de $3M
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R6"].status == "PASS"
+
+
+# ── R7 — dedup de logos vía query RS independiente (mockeada, nunca contra RS real) ─────────
+
+@pytest.fixture
+def fake_redshift_guard(monkeypatch):
+    """Mismo patrón que tests/test_phase1_freshness.py — phase4_validator importa
+    redshift_guard de forma diferida dentro de _check_r7_logos_dedup."""
+    fake = types.ModuleType("redshift_guard")
+
+    def run_query(**kwargs):
+        return {"status": "executed", "statement_id": "fake-id"}
+
+    fake.run_query = run_query
+    fake.fetch_results = lambda sid: [{"logos_eop": 58974}]
+    monkeypatch.setitem(sys.modules, "redshift_guard", fake)
+    return fake
+
+
+def test_r7_passes_when_independent_query_matches_reported(tmp_path, fake_redshift_guard):
+    metrics = _load_fixture()
+    metrics["smb_logos_eop"] = 58974  # coincide con el fake_redshift_guard de arriba
+    results = _write_and_run(tmp_path, metrics)
+    r = _results_by_id(results)["R7"]
+    assert r.status == "PASS"
+    assert "58,974" in r.detail
+
+
+def test_r7_fails_when_independent_query_diverges(tmp_path, fake_redshift_guard):
+    """Reproduce el caso real validado 2026-07-03 (match exacto 58,974) pero forzando un
+    divergencia — ej. metrics.yaml quedó con un valor viejo de una corrida anterior."""
+    metrics = _load_fixture()
+    metrics["smb_logos_eop"] = 59000  # diverge del fake (58974)
+    results = _write_and_run(tmp_path, metrics)
+    r = _results_by_id(results)["R7"]
+    assert r.status == "FAIL"
+    assert "diff=" in r.detail
+
+
+def test_r7_skip_when_smb_logos_eop_field_missing(tmp_path):
+    """Sin mockear redshift_guard: el fixture real no tiene smb_logos_eop, así que ni
+    siquiera llega a intentar la query — cae directo a SKIP por KeyError."""
+    metrics = _load_fixture()
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R7"].status == "SKIP"
+
+
+# ── R11 — completitud del budget CSV en cierre de quarter ────────────────────────────────
+
+def _write_budget_csv(tmp_path, rows):
+    p = tmp_path / "Metricas_budget.csv"
+    header = ["Metric", "Fecha", "Apr - 26", "May - 26", "Jun - 26"]
+    with open(p, "w", encoding="utf-8-sig", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=header)
+        w.writeheader()
+        for r in rows:
+            w.writerow(r)
+    return p
+
+
+def test_r11_skip_when_not_quarter_end(tmp_path):
+    metrics = _load_fixture()  # is_quarter_end: false, mayo no es cierre de Q
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R11"].status == "SKIP"
+
+
+def test_r11_passes_when_all_three_quarter_months_present(tmp_path, monkeypatch):
+    metrics = _load_fixture()
+    metrics["cutoff_month"] = "2026-06"
+    metrics["is_quarter_end"] = True
+    budget_csv = _write_budget_csv(tmp_path, [
+        {"Metric": "ARR EoP", "Fecha": "Apr - 26", "Apr - 26": "27000000"},
+        {"Metric": "ARR EoP", "Fecha": "May - 26", "May - 26": "27500000"},
+        {"Metric": "ARR EoP", "Fecha": "Jun - 26", "Jun - 26": "28000000"},
+    ])
+    monkeypatch.setattr(paths, "METRICAS_BUDGET_CSV", budget_csv)
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R11"].status == "PASS"
+
+
+def test_r11_fails_when_a_quarter_month_is_missing_from_budget_csv(tmp_path, monkeypatch):
+    metrics = _load_fixture()
+    metrics["cutoff_month"] = "2026-06"
+    metrics["is_quarter_end"] = True
+    budget_csv = _write_budget_csv(tmp_path, [
+        {"Metric": "ARR EoP", "Fecha": "Apr - 26", "Apr - 26": "27000000"},
+        {"Metric": "ARR EoP", "Fecha": "May - 26", "May - 26": "27500000"},
+        # Jun - 26 falta por completo
+    ])
+    monkeypatch.setattr(paths, "METRICAS_BUDGET_CSV", budget_csv)
+    results = _write_and_run(tmp_path, metrics)
+    r = _results_by_id(results)["R11"]
+    assert r.status == "FAIL"
+    assert "Jun - 26" in r.detail
+
+
+# ── R12 — conteo de slides en el standalone (~47) ────────────────────────────────────────
+
+def _html_with_n_slides(tmp_path, n):
+    body = "".join(f'<div class="dt-slide"></div>' for _ in range(n))
+    return _write_raw_html(tmp_path, body)
+
+
+def test_r12_passes_with_expected_slide_count(tmp_path):
+    html_path = _html_with_n_slides(tmp_path, paths.EXPECTED_SLIDE_COUNT)
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R12"]
+    assert r.status == "PASS"
+    assert str(paths.EXPECTED_SLIDE_COUNT) in r.detail
+
+
+def test_r12_warns_when_slightly_below_expected(tmp_path):
+    n = paths.MIN_SLIDE_COUNT_WARNING + 1  # entre el mínimo de warning y el esperado-2
+    html_path = _html_with_n_slides(tmp_path, n)
+    results = _run_with_html(tmp_path, html_path)
+    assert _results_by_id(results)["R12"].status == "WARN"
+
+
+def test_r12_fails_when_far_below_minimum(tmp_path):
+    html_path = _html_with_n_slides(tmp_path, paths.MIN_SLIDE_COUNT_WARNING - 5)
+    results = _run_with_html(tmp_path, html_path)
+    assert _results_by_id(results)["R12"].status == "FAIL"
+
+
 # ── R13/R14/R15 — reglas de color (parsean el HTML renderizado, no metrics.yaml) ──────────
 
 def _delta_td(css_class, text):
@@ -247,3 +413,77 @@ def test_r13_14_15_skip_when_no_matching_rows_found(tmp_path):
     by_id = _results_by_id(results)
     for rid in ("R13", "R14", "R15"):
         assert by_id[rid].status == "SKIP"
+
+
+def _write_raw_html(tmp_path, body: str):
+    p = tmp_path / "board_standalone.html"
+    p.write_text(f"<html><body>{body}</body></html>", encoding="utf-8")
+    return p
+
+
+def test_r16_pass_when_no_slide_has_inline_px_override(tmp_path):
+    """Reproduce el patrón real de los 8 templates (verificado 2026-07-06): slides sin
+    inline style de dimensión, o con style que no toca width/height en px (ej. padding:0
+    del full-bleed image en 2_discussion_topic.j2)."""
+    html_path = _write_raw_html(tmp_path, '''
+        <div class="dt-slide" style="padding:0;"><img src="x.png"></div>
+        <div class="slide section-divider">cover</div>
+    ''')
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R16"]
+    assert r.status == "PASS"
+
+
+def test_r16_fails_when_slide_shell_has_px_dimension_override(tmp_path):
+    """Alguien agrega un slide nuevo con width/height fijo inline, pisando el 960x540 que
+    debería venir de --slide-width/--slide-height en base.css — exactamente el tipo de error
+    que este check existe para atrapar."""
+    html_path = _write_raw_html(tmp_path, '''
+        <div class="dt-slide" style="width:800px;height:400px;">roto</div>
+    ''')
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R16"]
+    assert r.status == "FAIL"
+    assert "dt-slide" in r.detail
+
+
+def test_r16_ignores_non_shell_elements_with_px_styles(tmp_path):
+    """Un <div> interno cualquiera (no un slide-shell) puede tener width/height en px sin
+    problema — R16 solo le importa a los contenedores de slide completo."""
+    html_path = _write_raw_html(tmp_path, '''
+        <div class="dt-slide"><div class="icon" style="width:24px;height:24px;">x</div></div>
+    ''')
+    results = _run_with_html(tmp_path, html_path)
+    assert _results_by_id(results)["R16"].status == "PASS"
+
+
+def test_r16_skip_when_html_missing():
+    results = phase4_validator.run(metrics_path=FIXTURE, html_path=MISSING_HTML)
+    assert _results_by_id(results)["R16"].status == "SKIP"
+
+
+def test_r16_skip_when_no_slide_shell_found_at_all(tmp_path):
+    """v1 de esta regla devolvía PASS aunque no hubiera ningún slide-shell en el HTML —
+    indistinguible de 'revisé todo y está bien'. Debe ser SKIP explícito, mismo criterio que
+    R13-R15 cuando no encuentran filas que verificar."""
+    html_path = _write_raw_html(tmp_path, '<div class="not-a-slide">contenido irrelevante</div>')
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R16"]
+    assert r.status == "SKIP"
+
+
+def test_r16_fails_when_style_attribute_comes_before_class(tmp_path):
+    """Bug real encontrado en revisión de código 2026-07-06: la v1 exigía literalmente
+    class="..." seguido de style="..." en ese orden — este caso (orden invertido) pasaba
+    desapercibido como falso negativo. Debe detectarse igual."""
+    html_path = _write_raw_html(tmp_path, '<div style="width:800px;" class="dt-slide">roto</div>')
+    results = _run_with_html(tmp_path, html_path)
+    assert _results_by_id(results)["R16"].status == "FAIL"
+
+
+def test_r16_fails_when_attribute_is_interleaved_between_class_and_style(tmp_path):
+    """Mismo bug: un atributo intermedio (ej. id) entre class y style también desactivaba
+    la v1 en silencio."""
+    html_path = _write_raw_html(tmp_path, '<div class="dt-slide" id="foo" style="height:400px;">roto</div>')
+    results = _run_with_html(tmp_path, html_path)
+    assert _results_by_id(results)["R16"].status == "FAIL"

@@ -85,3 +85,13 @@ def test_save_version_updates_generate_pdf_targets(isolated_paths):
     # Los valores viejos (mayo, v41) ya no deben quedar
     assert "2026-05" not in content
     assert "v41" not in content
+
+
+def test_update_pdf_script_targets_raises_if_pattern_does_not_match(isolated_paths):
+    """Bug real encontrado en revisión de código 2026-07-06: si generate_pdf.py cambia de
+    formato (ej. otro estilo de comillas) y _TARGET_RE deja de matchear, re.sub() no fallaba
+    — escribía el archivo sin cambios y save_version() reportaba éxito, dejando el PDF
+    apuntando en silencio a la versión vieja. Ahora debe explotar en vez de fallar en silencio."""
+    paths.PDF_SCRIPT.write_text("HTML_FILE = 'algo que no matchea el regex'\n", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="se esperaban 2 reemplazos"):
+        versioning.save_version(MONTH, [], [])
