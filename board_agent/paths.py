@@ -9,15 +9,14 @@ TEMPLATE_BOARD = ALEGRA_IA_ROOT / "Template Board"
 DATA_DIR = TEMPLATE_BOARD / "data"
 METRICS_YAML = DATA_DIR / "metrics.yaml"
 CONFIG_YAML = DATA_DIR / "config.yaml"
-CHART_ALANUBE_YAML = DATA_DIR / "chart_alanube.yaml"
 EDITORIAL_DIR = DATA_DIR / "editorial"
 CEO_YAML = EDITORIAL_DIR / "ceo.yaml"
 DISCUSSION_TOPICS_YAML = EDITORIAL_DIR / "discussion_topics.yaml"
 ARR_WALK_YAML = EDITORIAL_DIR / "arr_walk.yaml"
 
+# paises_fx.csv, chart_alanube.yaml y Payback.csv salieron de acá — fetch_metrics.py ahora
+# lee esas 3 fuentes directo de Redshift (ver phase0_gate.py y phase1_freshness.py).
 CSV_DIR = TEMPLATE_BOARD / "csv"
-PAISES_FX_CSV = CSV_DIR / "paises_fx.csv"
-PAYBACK_CSV = CSV_DIR / "Payback.csv"
 PNL_ACTUAL_CSV = CSV_DIR / "P&L Histórico- ACtual.csv"
 METRICAS_BUDGET_CSV = CSV_DIR / "Metricas_budget.csv"
 

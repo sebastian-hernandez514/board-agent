@@ -27,8 +27,6 @@ def _write_csv(path, header, rows):
 def isolated_paths(tmp_path, monkeypatch):
     """Redirige todas las rutas que lee phase0_gate.py a un directorio temporal —
     ninguno de estos tests toca los archivos reales de Template Board."""
-    monkeypatch.setattr(paths, "CHART_ALANUBE_YAML", tmp_path / "chart_alanube.yaml")
-    monkeypatch.setattr(paths, "PAYBACK_CSV", tmp_path / "Payback.csv")
     monkeypatch.setattr(paths, "PNL_ACTUAL_CSV", tmp_path / "pnl_actual.csv")
     monkeypatch.setattr(paths, "CEO_YAML", tmp_path / "ceo.yaml")
     monkeypatch.setattr(paths, "DISCUSSION_TOPICS_YAML", tmp_path / "discussion_topics.yaml")
@@ -38,9 +36,6 @@ def isolated_paths(tmp_path, monkeypatch):
 
 
 def _seed_all_pass(tmp_path, month=MONTH):
-    _write_yaml(tmp_path / "chart_alanube.yaml", {"spot": {month: 1_000_000}})
-    _write_csv(tmp_path / "Payback.csv", ["Type", "Segment", "fecha", "valor"],
-               [{"Type": "Todos", "Segment": "Total", "fecha": month, "valor": "10.0"}])
     _write_csv(tmp_path / "pnl_actual.csv", ["Date", "Category", "Type", "Technical Team", "sum Amount USD"],
                [{"Date": "5/31/2026", "Category": "x", "Type": "y", "Technical Team": "z", "sum Amount USD": "100"}])
     _write_yaml(tmp_path / "ceo.yaml", {"ceo_title": "CEO Highlights", "highlights": ["a"], "lowlights": ["b"]})
@@ -55,24 +50,8 @@ def _by_id(results):
 def test_gate_all_pass(isolated_paths):
     _seed_all_pass(isolated_paths)
     results = _by_id(phase0_gate.run(MONTH))
-    for rid in ("F0.2", "F0.3", "F0.4", "F0.5", "F0.6", "F0.7"):
+    for rid in ("F0.4", "F0.5", "F0.6", "F0.7"):
         assert results[rid].status == "PASS", f"{rid}: {results[rid].detail}"
-
-
-def test_chart_alanube_missing_month_fails(isolated_paths):
-    _seed_all_pass(isolated_paths)
-    _write_yaml(isolated_paths / "chart_alanube.yaml", {"spot": {"2026-04": 900_000}})
-    results = _by_id(phase0_gate.run(MONTH))
-    assert results["F0.2"].status == "FAIL"
-    assert "2026-04" in results["F0.2"].detail
-
-
-def test_payback_missing_month_fails(isolated_paths):
-    _seed_all_pass(isolated_paths)
-    _write_csv(isolated_paths / "Payback.csv", ["Type", "Segment", "fecha", "valor"],
-               [{"Type": "Todos", "Segment": "Total", "fecha": "2026-04", "valor": "10.0"}])
-    results = _by_id(phase0_gate.run(MONTH))
-    assert results["F0.3"].status == "FAIL"
 
 
 def test_pnl_override_fallback_passes(isolated_paths):

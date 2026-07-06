@@ -27,26 +27,6 @@ def _month_label_es(month: str) -> str:
     return f"{MESES_ES[int(m)]} {y}"
 
 
-def _check_chart_alanube(month: str) -> CheckResult:
-    with open(paths.CHART_ALANUBE_YAML, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-    hit = month in (data.get("spot") or {})
-    status = "PASS" if hit else "FAIL"
-    last_month = max((data.get("spot") or {}).keys(), default="?")
-    return CheckResult("F0.2", f"chart_alanube.yaml tiene el mes {month}", status,
-                        "" if hit else f"último mes cargado: {last_month} — pedir ARR EoP Alanube a Finance")
-
-
-def _check_payback(month: str) -> CheckResult:
-    with open(paths.PAYBACK_CSV, encoding="utf-8") as f:
-        rows = list(csv.DictReader(f))
-    hit = any(r["fecha"] == month for r in rows)
-    status = "PASS" if hit else "FAIL"
-    last_month = max((r["fecha"] for r in rows), default="?")
-    return CheckResult("F0.3", f"Payback.csv tiene filas de {month}", status,
-                        "" if hit else f"último mes cargado: {last_month} — extraer del Drive (ver CLAUDE.md)")
-
-
 def _check_pnl_actual(month: str) -> CheckResult:
     """merge_pnl() en fetch_metrics.py cae a data/pnl_override.yaml si el CSV no
     tiene filas del mes (workaround ya en uso, con datos de Finance a mano) —
@@ -125,12 +105,14 @@ def _check_arr_walk_yaml() -> CheckResult:
 
 def run(month: str) -> list[CheckResult]:
     """month en formato 'YYYY-MM' (mes objetivo del próximo board).
-    paises_fx.csv salió de este gate: fetch_metrics.py ahora lee la tasa FX
-    directo de dwh_dimensions.tb_trm_banrep (RS) — ver Fase 1, check F1.5.
+
+    Fuentes que salieron de este gate porque ya se automatizaron (fetch_metrics.py las lee
+    directo de RS, dejaron de ser un input manual — ver docs/AGENT_ARCHITECTURE.md):
+    - paises_fx.csv → dwh_dimensions.tb_trm_banrep (Fase 1, check F1.5)
+    - chart_alanube.yaml → bi_alanube.fact_alanube_arr_walk (load_alanube_arr(), 2026-07-03)
+    - Payback.csv → bi_strategic.payback_cohort_results (load_payback(), 2026-07-06)
     """
     return [
-        _check_chart_alanube(month),
-        _check_payback(month),
         _check_pnl_actual(month),
         _check_ceo_yaml(month),
         _check_discussion_topics(),

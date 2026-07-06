@@ -50,6 +50,81 @@ def _arr_walk_glo_rows(metrics: dict) -> list:
     raise KeyError("no se encontró la sección del ARR Walk GLO en arr_walk_table")
 
 
+_TR_RE = re.compile(r'<tr[^>]*>(.*?)</tr>', re.S)
+_METRIC_NAME_RE = re.compile(r'<span class="metric-name[^"]*">([^<]+)</span>')
+_DELTA_TD_RE = re.compile(r'<td class="delta ([a-z]+)[^"]*">\s*([^<]*?)\s*</td>')
+
+_R13_NEUTRAL_METRICS = {"Investment"}
+_R14_INVERTED_METRICS = {"Churn Rate", "CAC"}
+
+
+def _delta_sign(text: str):
+    """+1/-1 según el signo del texto ya formateado (ej. '+2.6%', '-7.5%') — None si está
+    vacío o es 0% (ahí cualquier clase es defendible, no hay violación posible)."""
+    t = text.strip()
+    if not t or t in ("—", "-", "0%", "0.0%", "+0%", "+0.0%"):
+        return None
+    return -1 if t.startswith("-") or t.startswith("(") else 1
+
+
+def _check_color_rules(html_path: Path) -> list[CheckResult]:
+    """R13/R14/R15 — reglas de color de las filas 'butterfly' (Country Performance en
+    3_arr_walk.j2 y Global Country Performance en 1_inicio.j2, misma estructura en ambas).
+    Cada <tr> trae <span class="metric-name"> como ancla confiable (no hay data-attribute) —
+    ver memory/project_board_agent.md 2026-07-06. Clases reales: 'pos'/'neg'/'neutral',
+    siempre junto a la clase base 'delta' (ej. class="delta pos right")."""
+    definitions = [
+        ("R13", "Investment: delta neutro (sin verde/rojo)"),
+        ("R14", "Churn/CAC: delta invertido"),
+        ("R15", "Resto de métricas: signo estándar de color"),
+    ]
+    try:
+        html = html_path.read_text(encoding="utf-8")
+    except Exception as e:
+        return [CheckResult(rid, desc, "SKIP", f"error: {e}") for rid, desc in definitions]
+
+    checked = {"R13": 0, "R14": 0, "R15": 0}
+    violations = {"R13": [], "R14": [], "R15": []}
+
+    for tr_match in _TR_RE.finditer(html):
+        tr_html = tr_match.group(1)
+        name_m = _METRIC_NAME_RE.search(tr_html)
+        deltas = _DELTA_TD_RE.findall(tr_html)
+        if not name_m or not deltas:
+            continue
+        metric = name_m.group(1).strip()
+        rid = ("R13" if metric in _R13_NEUTRAL_METRICS
+                else "R14" if metric in _R14_INVERTED_METRICS
+                else "R15")
+
+        for css_class, text in deltas:
+            if rid == "R13":
+                checked[rid] += 1
+                if css_class != "neutral":
+                    violations[rid].append(f"{metric}={text} → clase={css_class} (esperado 'neutral')")
+                continue
+            sign = _delta_sign(text)
+            if sign is None:
+                continue
+            checked[rid] += 1
+            want_pos = (sign < 0) if rid == "R14" else (sign > 0)
+            expected = "pos" if want_pos else "neg"
+            if css_class != expected:
+                violations[rid].append(f"{metric}={text} → clase={css_class} (esperado '{expected}')")
+
+    results = []
+    for rid, desc in definitions:
+        if checked[rid] == 0:
+            results.append(CheckResult(rid, desc, "SKIP", "no se encontraron filas de esta métrica en el HTML"))
+        elif violations[rid]:
+            sample = "; ".join(violations[rid][:3])
+            results.append(CheckResult(rid, desc, "FAIL",
+                                        f"{len(violations[rid])}/{checked[rid]} celdas mal coloreadas: {sample}"))
+        else:
+            results.append(CheckResult(rid, desc, "PASS", f"{checked[rid]} celdas verificadas, todas correctas"))
+    return results
+
+
 def _count_slides(html_path: Path) -> int:
     html = html_path.read_text(encoding="utf-8")
     count = 0
@@ -209,6 +284,28 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
         ]:
             results.append(CheckResult(rid, desc, "SKIP", f"error: {e}"))
 
+    # R5 — Net Expansion = upsell + down + pricing + cross_new + cross_readop − cross_down
+    # (trampa de signos: cross_down viene positivo del SQL, hay que restarlo — ver CLAUDE.md
+    # de Template Board). Verificación independiente: recomputa desde los 12 buckets crudos
+    # (arr_walk_raw_buckets, expuestos 2026-07-06) y compara contra el "Net Expansion" ya
+    # mostrado en arr_walk_table — detecta si la fórmula de exportación de buckets crudos y
+    # la de arr_walk_table alguna vez divergen (código duplicado, mismo riesgo que motivó R1/R2).
+    try:
+        b = metrics["arr_walk_raw_buckets"]
+        rows = _arr_walk_glo_rows(metrics)
+        net_expansion_shown = parse_money_cell(last(find_row(rows, "Net Expansion")))
+        net_expansion_recomputed = (b["a_upsell"] + b["a_down"] + b["a_pricing"]
+                                     + b["a_cross_new"] + b["a_cross_readop"] - b["a_cross_down"])
+        diff = net_expansion_recomputed - net_expansion_shown
+        status = "PASS" if abs(diff) <= TOL_ARR_WALK else "FAIL"
+        results.append(CheckResult(
+            "R5", "cross_down restado en Net Expansion", status,
+            f"recomputado={net_expansion_recomputed:,.0f} vs mostrado={net_expansion_shown:,.0f} (diff={diff:,.0f}); "
+            f"cross_down={b['a_cross_down']:,.0f} (debe restarse, no sumarse)",
+        ))
+    except Exception as e:
+        results.append(CheckResult("R5", "cross_down restado en Net Expansion", "SKIP", f"error: {e}"))
+
     # R9 — Consistencia MoM vs QoQ según mes de cierre de quarter
     try:
         cutoff_month = metrics["cutoff_month"]  # 'YYYY-MM'
@@ -253,13 +350,6 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
     except Exception as e:
         results.append(CheckResult("R12", f"~{paths.EXPECTED_SLIDE_COUNT} slides en el standalone", "SKIP", f"error: {e}"))
 
-    # Reglas con gap de datos conocido — no se fingen como cubiertas
-    for rid, desc, why in [
-        ("R5", "cross_down restado en Net Expansion", "requiere los 12 buckets crudos (no expuestos en metrics.yaml)"),
-        ("R13", "Investment: delta neutro (sin verde/rojo)", "requiere parsear clases CSS del HTML — no implementado aún"),
-        ("R14", "Churn/CAC: delta invertido", "requiere parsear clases CSS del HTML — no implementado aún"),
-        ("R15", "Resto de métricas: signo estándar de color", "requiere parsear clases CSS del HTML — no implementado aún"),
-    ]:
-        results.append(CheckResult(rid, desc, "SKIP", why))
+    results.extend(_check_color_rules(html_path))
 
     return results

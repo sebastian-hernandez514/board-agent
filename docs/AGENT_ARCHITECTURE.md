@@ -37,18 +37,19 @@ fetch_metrics.py  →  data/metrics.yaml  →  generate.py  →  output/*.html
 | `dm_retention.bi_customer_monthly_status` | Redshift | cluster-1 | Automático | ✅ |
 | `dwh_dimensions.tb_trm_banrep` | Redshift | cluster-2 | Automático | ✅ (2026-07-03, reemplazó `csv/paises_fx.csv`) |
 | `bi_alanube.fact_alanube_arr_walk` | Redshift | cluster-2 | Automático | ✅ parcial (2026-07-03, reemplazó `data/chart_alanube.yaml` — solo ARR EoP de Chart 1 y `arr_total`; el ARR Walk completo de Alanube en `3_arr_walk.j2` sigue editorial manual) |
-| `csv/Payback.csv` | CSV manual | — | Mensual humano (Drive) | ⚠️ Manual |
-| `csv/P&L Histórico- ACtual.csv` | CSV manual | — | Mensual humano | ⚠️ Manual |
+| `bi_strategic.payback_cohort_results` | Redshift | cluster-2 | Mensual (`CALL refresh_payback()`, ya programado por el usuario) | ✅ (2026-07-04, reemplazó `csv/Payback.csv`, `load_payback()`) |
+| `bi_strategic_relationships.fact_headcount_*` (4 tablas) | Redshift | cluster-2 | Automático | ✅ (2026-07-03/04, reemplazó los 2 Sheets de Headcount, `load_headcount_*()` + template `7_headcount.j2` convertido a Jinja2) |
+| `bi_sales.sales_actions` / `fact_closed_deals` (funnel), `flywheel`, `bi_accountant.accountant_master_table` (supercontadores/value events) | Redshift | cluster-2 | Automático | ✅ ya conectado a `metrics.gtm.*` — la doc anterior (2026-06-19) decía "hardcodeado", quedó desactualizada; verificado 2026-07-04 leyendo `5_go_to_market.j2` directamente |
+| `csv/P&L Histórico- ACtual.csv` | CSV manual | — | Mensual humano | ⚠️ Manual — **descartado automatizar** por decisión del usuario (Finance maneja su reporte aparte) |
 | `csv/P&L Histórico - Budget.csv` | CSV manual | — | Estático anual | ⚠️ Manual |
-| `csv/Metricas_budget.csv` | CSV manual | — | Estático anual | ⚠️ Manual |
-| Headcount EoP (Google Sheets) | Sheets | — | Mensual humano | ⚠️ Manual |
-| Headcount Forecast (Google Sheets) | Sheets | — | Mensual humano | ⚠️ Manual |
-| Template 4 HTML (Finance) | HTML externo | — | Mensual — equipo externo | ⚠️ Dependencia |
-| NPS screenshots (Amplitude) | Imagen manual | — | Mensual humano | ⚠️ Manual |
-| `data/editorial/ceo.yaml` | YAML editorial | — | Mensual humano | ⚠️ Manual |
-| `data/editorial/discussion_topics.yaml` | YAML editorial | — | Mensual humano | ⚠️ Manual |
-| `data/editorial/arr_walk.yaml` | YAML editorial | — | Mensual humano | ⚠️ Manual |
-| Arrays JS hardcodeados (5 slides GTM + Appendix) | Hardcode en .j2 | — | Mensual humano | ⚠️ Manual |
+| `csv/Metricas_budget.csv` | CSV manual | — | Estático anual | ⚠️ Manual (prioridad baja — estático) |
+| Template 4 HTML (Finance) | HTML externo | — | Mensual — equipo externo | ⚠️ Dependencia — **descartado automatizar**, decisión del usuario |
+| NPS scores (`6_rd.j2`) | `data/nps_snapshot.yaml` (snapshot asistido) | — | Mensual, vía MCP de Amplitude en sesión de Claude (ya no requiere screenshots) | ✅ Parcial (2026-07-06) — datos ya no hardcodeados en el template, pero la fuente sigue siendo un paso asistido mensual (no una API que `fetch_metrics.py` llame solo) — ver `Template Board/CLAUDE.md` sección "Template 6 — NPS" |
+| `data/editorial/ceo.yaml` | YAML editorial | — | Mensual humano | ⚠️ Manual — correcto que sea manual (narrativa) |
+| `data/editorial/discussion_topics.yaml` | YAML editorial | — | Mensual humano | ⚠️ Manual — correcto que sea manual (narrativa) |
+| `data/editorial/arr_walk.yaml` | YAML editorial | — | Mensual humano | ⚠️ Manual — correcto que sea manual (narrativa) |
+| `8_appendix.j2` "Churned by tenure" (GLO/Core/Lite) | `db_retention.bi_churn_retired` + `dwh_facts.fact_customers_mrr` | cluster-2 | Automático | ✅ Hecho 2026-07-06 (`_build_churn_tenure()`, reemplazó el script externo `~/Downloads/board/update_board.py` que usaba perfil SSO/db_user distintos al resto del proyecto) |
+| Footnote "May-26 ratio (47%/53%)" en `5_go_to_market.j2` (Flywheel Quarterly) | Texto literal en HTML | — | Mensual humano | ⚠️ Manual — trivial (una línea de texto) |
 
 ### Bugs conocidos que llegaron a producción
 
@@ -60,18 +61,16 @@ fetch_metrics.py  →  data/metrics.yaml  →  generate.py  →  output/*.html
 
 ### Slides con datos NO en metrics.yaml (hardcodeados hoy)
 
-Estas slides no pasan por el pipeline `fetch → yaml → template`. Son puntos ciegos del validator:
+**Verificado línea por línea 2026-07-04** — la versión anterior de esta tabla estaba desactualizada (`5_go_to_market.j2` y `7_headcount.j2` ya no son ciertos como se describían). Estado real:
 
-| Template | Slide | Contenido hardcodeado |
-|---|---|---|
-| `5_go_to_market.j2` | Acquisition Funnel (slide 4) | Arrays `funnelHist`, `funnelBands`, `allLogos` |
-| `5_go_to_market.j2` | Flywheel Quarterly (slide 4b) | `qLabels`, `qIdx`, ratio 47%/53% |
-| `5_go_to_market.j2` | Value Events (slide 4c) | JSON `window.DATA` completo |
-| `5_go_to_market.j2` | Supercontadores (slide 4d) | JSON `window.DATA` completo |
-| `5_go_to_market.j2` | Flywheel Growth Play | Solo fecha en header |
-| `8_appendix.j2` | Net ARR Expansion (slides 3-5) | Arrays `others`, `upsell`, `cross` |
-| `7_headcount.j2` | Todas las slides | Tabla y charts hardcodeados |
-| `6_rd.j2` | NPS | Score global, scores por país, trend MoM |
+| Template | Slide | Contenido hardcodeado | Estado |
+|---|---|---|---|
+| `5_go_to_market.j2` | Acquisition Funnel, Flywheel, Value Events, Supercontadores | — | ✅ Ya conectado a `metrics.gtm.*` (funnel_countries, flywheel, supercontadores, value_events) — `funnelBands` que queda hardcodeado es solo config de estilo del chart (colores/labels), no data |
+| `5_go_to_market.j2` | Flywheel Growth Play (header) | — | ✅ Ya dinámico (`config.month_label`) |
+| `5_go_to_market.j2` | Flywheel Quarterly (footnote) | Texto "May-26 ratio (47%/53%)" | ⚠️ Manual — trivial |
+| `8_appendix.j2` | Churned by tenure GLO/Core/Lite | — | ✅ Ya conectado a `metrics.churn_tenure.*` (2026-07-06) |
+| `7_headcount.j2` | Todas las slides | — | ✅ Convertido a Jinja2 2026-07-04 (Fase 1+2 completas, ver `memory/project_board_agent.md`) — solo quedan manuales los bloques de "Comments" (editorial, por diseño) |
+| `6_rd.j2` | NPS (slide 3) | — | ✅ Ya conectado a `metrics.nps.*` (2026-07-06) — la fuente (`data/nps_snapshot.yaml`) sigue siendo un snapshot asistido mensual, no una tabla RS ni una API que fetch_metrics.py llame sola
 
 ### Paso post-generación que se rompe siempre
 
@@ -98,8 +97,8 @@ FASE 0 — Human Inputs Gate            ← DEBE DESAPARECER      ✅ implementa
 FASE 1 — Data Freshness Check         ← fuentes automáticas   ✅ implementada (phase1_freshness.py)
 FASE 2 — Metrics Computation          ← fetch_metrics.py      ✅ implementada (phase2_metrics.py)
 FASE 3 — HTML Builder                 ← generate.py + merge + fixes  ✅ implementada (phase3_html_builder.py)
-FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 9/15 reglas activas (phase4_validator.py)
-FASE 5 — Diff Review                  ← vs board anterior     ✅ implementada, D7 pendiente (phase5_diff.py)
+FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 14/15 reglas activas (phase4_validator.py)
+FASE 5 — Diff Review                  ← vs board anterior     ✅ implementada, 7/7 reglas activas incl. D7 (phase5_diff.py)
 FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ implementada, gate manual a propósito (phase6_pdf.py)
 ```
 
@@ -257,9 +256,9 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 
 | # | Regla |
 |---|---|
-| R13 | Investment: delta en negro/neutro (sin verde/rojo) |
-| R14 | Churn Rate y CAC: delta invertido (negativo = verde, positivo = rojo) |
-| R15 | Resto de métricas: positivo = verde, negativo = rojo |
+| R13 | Investment: delta en negro/neutro (sin verde/rojo) — ✅ implementada 2026-07-06, parsea HTML (`_check_color_rules`), validado 20/20 celdas en mayo-26 |
+| R14 | Churn Rate y CAC: delta invertido (negativo = verde, positivo = rojo) — ✅ implementada, 40/40 celdas correctas |
+| R15 | Resto de métricas: positivo = verde, negativo = rojo — ✅ implementada, 119/119 celdas correctas |
 
 **Output:** Reporte PASS/FAIL por regla con los valores que fallan. Si alguna regla dura falla → no avanzar a versión final sin revisión humana explícita.
 
@@ -280,7 +279,7 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 | FX Impact | Absoluto > $2M (señal de error FX) |
 
 **Output:**
-- Lista de slides que cambiaron vs board anterior
+- Lista de slides que cambiaron vs board anterior — ✅ D7, implementado 2026-07-06: parte el HTML en slides (mismo criterio que R12) y compara chunk a chunk contra la última versión guardada (mismo mes, o mes anterior si es la primera corrida del mes). Validado contra datos reales: 19/47 slides detectadas correctamente tras los cambios de Payback/Headcount/Alanube/NPS del mismo día.
 - Comparativa de KPIs clave (valor anterior → valor nuevo → delta)
 - Sugerencia de versión (vN)
 - Flag si algún cambio supera los thresholds
@@ -303,31 +302,35 @@ uv run --with playwright --with pillow python scripts/generate_pdf.py
 
 ## 3. Deuda Técnica — Lo que bloquea la automatización completa
 
-### Prioridad alta (bloquea la Fase 0)
+### Prioridad alta (bloquea la Fase 0) — ✅ TODAS hechas a 2026-07-04
 
 | Item | Esfuerzo | Impacto | Estado |
 |---|---|---|---|
-| `fetch_payback_from_sheets()` en `fetch_metrics.py` | Medio | Elimina update manual de `Payback.csv` | ⚠️ En proceso — ver `memory/project_board_agent.md` (prompt corriendo en otra sesión) |
-| Conectar `chart_alanube.yaml` a `bi_alanube.fact_alanube_arr_walk` (schema real, no `dm_alanube`) | Bajo | Elimina update manual de ARR Alanube | ✅ Hecho 2026-07-03 (`load_alanube_arr()` en `fetch_metrics.py`) |
+| `load_payback()` en `fetch_metrics.py` desde `bi_strategic.payback_cohort_results` | Medio | Elimina update manual de `Payback.csv` | ✅ Hecho 2026-07-04 |
+| Conectar `chart_alanube.yaml` a `bi_alanube.fact_alanube_arr_walk` | Bajo | Elimina update manual de ARR Alanube (Chart 1) | ✅ Hecho 2026-07-03 (`load_alanube_arr()`) |
 | FX rates desde RS en lugar de `paises_fx.csv` | Medio | Elimina update manual de FX | ✅ Hecho 2026-07-03 (`dwh_dimensions.tb_trm_banrep`, `load_fx()`) |
 | P&L real desde Sheets (Drive API) | Alto | Elimina update manual de P&L CSVs | ❌ Descartado — Finance maneja su reporte por separado, fuera de alcance por decisión del usuario |
 | Automatizar re-embed imagen CRI post-generación | Muy bajo | Elimina paso manual que siempre se olvida | ✅ Hecho 2026-07-03 (`phase3_html_builder.py`) |
+| Migrar `7_headcount.j2` a datos dinámicos desde RS | Alto | Slide Headcount completamente automatizada | ✅ Hecho 2026-07-03/04 (`load_headcount_*()` + template convertido a Jinja2, Fase 1+2) |
 
-### Prioridad media (bloquea el Validator)
+**Con esto, de la Fase 0 original ya no queda ningún blocker automatizable pendiente** — lo que resta (P&L, Template 4 Finance, editorial YAMLs) son exclusiones deliberadas, no deuda.
+
+### Prioridad media — lo que queda genuinamente sin automatizar (verificado 2026-07-04)
 
 | Item | Esfuerzo | Impacto | Estado |
 |---|---|---|---|
-| Migrar arrays JS hardcodeados de `5_go_to_market.j2` a `metrics.yaml` | Alto | 5 slides quedan bajo control del Validator | ❌ No iniciado |
-| Migrar `7_headcount.j2` a datos dinámicos desde Sheets | Alto | Slide Headcount completamente automatizada | ⚠️ En proceso — prompt de diseño de tablas RS entregado, ver `Headcount/PROMPT_crear_tabla_headcount_rs.md` |
-| Migrar NPS scores de `6_rd.j2` a `metrics.yaml` (desde Amplitude API) | Medio | NPS bajo control del Validator | ❌ No iniciado |
-| Migrar Net ARR Expansion arrays de `8_appendix.j2` a `metrics.yaml` | Bajo | Appendix bajo control del Validator | ❌ No iniciado |
+| NPS (`6_rd.j2`) — snapshot asistido | Medio | Elimina screenshots, datos bajo control del template (no del Validator todavía) | ✅ Hecho 2026-07-06 (`_build_nps()` + `data/nps_snapshot.yaml`) — se investigó calcular 100% desde RS (`amplitude_events_gold` tiene los eventos reales) pero la fórmula reconstruida dio 2-8% de diferencia vs Amplitude; el usuario prefirió exactitud sobre automatización completa por ahora |
+| ~~Sacar "Churned by tenure" del script externo~~ | — | — | ✅ Hecho 2026-07-06 (`_build_churn_tenure()` en `fetch_metrics.py`, ver `memory/project_board_agent.md`) |
+| ~~Automatizar el ARR Walk completo de Alanube~~ | — | — | ✅ Hecho 2026-07-06 (`_build_alanube_walk_table()`, slide 9 de `1_inicio.j2` — 17 filas, 4 bloques, validado contra el Excel oficial de Alanube). "ARR Growth Rate MoM/QoQ" y "Avg. ARR per Logo" no reconcilian ni con la fuente oficial — fórmula estándar documentada como pendiente de confirmar con Finance/Alanube |
+| ~~Footnote "May-26 ratio" en `5_go_to_market.j2`~~ | — | — | ✅ Hecho 2026-07-06 (`out["gtm"]["own_pct"]/"client_pct"/"own_ratio_label"`) |
+| ~~Migrar arrays JS de `5_go_to_market.j2`~~ | — | — | ✅ Ya estaba hecho — la doc anterior estaba desactualizada, verificado 2026-07-04 |
 
 ### Prioridad baja (calidad de vida)
 
 | Item |
 |---|
 | Template 4 (Finance): definir API o formato de intercambio con el equipo de Finance |
-| Sistema de versiones: guardar solo 3-4 versiones por mes (hoy llegó a v37) |
+| Sistema de versiones: guardar solo 3-4 versiones por mes (hoy llegó a v42) |
 | `Metricas_budget.csv` → cargar a RS como tabla estática anual |
 
 ---
@@ -390,10 +393,10 @@ Todo lo demás es automatizable.
 
 ## 5. Métricas de éxito
 
-| Métrica | Estado actual | Objetivo |
+| Métrica | Estado actual (2026-07-04) | Objetivo |
 |---|---|---|
-| Versiones por board mensual | ~v37 (Mayo-26) | ≤ v5 |
-| Fuentes manuales | 9 | 0 (salvo CEO commentary) |
-| Bugs detectados post-publicación | 2 en Mayo-26 | 0 |
+| Versiones por board mensual | ~v42 (Mayo-26) | ≤ v5 |
+| Fuentes manuales | 5 (NPS, Churn-by-tenure externo, ARR Walk Alanube, footnote GTM, P&L/Template4/editorial — estos 3 últimos deliberadamente excluidos) | 0 automatizable (salvo CEO commentary + P&L/Template4 Finance) |
+| Bugs detectados post-publicación | 5 (ARR Alanube, New MRR /12, Constant Currency, Headcount Attrition/columnas, — todos ya corregidos) | 0 |
 | Tiempo total de generación | ~4-6 horas con iteraciones | < 30 min |
-| Slides con datos no validables | 8 slides hardcodeadas | 0 |
+| Slides con datos no validables | 2 (NPS, Churn-by-tenure) — antes 8 | 0 |
