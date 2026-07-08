@@ -15,12 +15,12 @@ Sistema que automatiza la generación del board ejecutivo mensual de Alegra: cal
 | `skills/ceo-highlights/` | Skill de self-service para editar Highlights/Lowlights/Financial Update del CEO |
 | `skills/slide-comments/` | Skill de self-service para agregar un comentario/ask a las slides ARR Core/Lite |
 | `preview.py` | Vista previa (screenshot) de una slide ya generada, sin tocar Template Board — solo lee `output/*.html` |
-| `docs/AGENT_ARCHITECTURE.md` | Arquitectura técnica completa: las 6 fases, las 18 reglas del Validator, y qué falta por automatizar |
+| `docs/AGENT_ARCHITECTURE.md` | Arquitectura técnica completa: las 6 fases, las 19 reglas del Validator, y qué falta por automatizar |
 | `docs/BOARD_PLAYBOOK_DRAFT.md` | Borrador del Playbook (la versión publicada vive en la wiki, enlace arriba) |
 | `docs/ONBOARDING.md` | Checklist de prerrequisitos para alguien nuevo — leer antes de correr el pipeline por primera vez |
 | `check_setup.py` | Diagnóstico de arranque (solo lectura) — corre esto antes que `run.py` |
 | `run.py` | Punto de entrada — corre el pipeline completo |
-| `tests/` | 160 tests automatizados |
+| `tests/` | 165 tests automatizados |
 
 ## Cómo correrlo
 

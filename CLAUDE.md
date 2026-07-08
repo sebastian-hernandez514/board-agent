@@ -2,7 +2,7 @@
 
 ## Punto de entrada — leer primero
 
-Antes de cualquier tarea, leer: `docs/AGENT_ARCHITECTURE.md` — tiene el inventario completo de fuentes, las 6 fases, las 18 reglas del Validator, la deuda técnica priorizada y la visión final del sistema.
+Antes de cualquier tarea, leer: `docs/AGENT_ARCHITECTURE.md` — tiene el inventario completo de fuentes, las 6 fases, las 19 reglas del Validator, la deuda técnica priorizada y la visión final del sistema.
 
 ---
 

@@ -24,6 +24,12 @@ R18 (overflow de texto, agregada 2026-07-08 — Bloque 4 del roadmap de colabora
 memory/project_board_collaboration_roadmap.md) requiere Playwright + Chromium instalados;
 si no están disponibles, SKIP — no es una dependencia dura del pipeline. Arranca en WARN por
 decisión explícita del usuario (regla nueva, sin historial de falsos positivos todavía).
+
+R19 (agregada 2026-07-08 — "Agente 3" de la reunión original del 19-jun, consistencia entre
+slides): verifica que el ARR EoP mostrado en "Monthly Performance" coincida literalmente con
+el de "YTD Performance" en el HTML ya renderizado. FAIL, no WARN — es el mismo tipo de bug
+real que ya pasó una vez (v36, ARR sin Alanube en una vista) y no un heurístico nuevo sin
+historial.
 """
 
 import csv
@@ -263,6 +269,57 @@ def _check_r18_slide_overflow(html_path: Path) -> CheckResult:
         return CheckResult("R18", label, "WARN",
                             f"{len(violations)}/{checked} slides con contenido desbordado: {sample}")
     return CheckResult("R18", label, "PASS", f"{checked} slides verificados, sin desbordes")
+
+
+_R19_ARR_SLIDE_LABELS = ("Monthly Performance", "YTD Performance")
+_R19_ARR_VALUE_RE = re.compile(r'ks-p-name">ARR</div>\s*<div class="ks-p-val[^"]*">([^<]+)</div>')
+_R19_SEARCH_WINDOW = 4000
+
+
+def _check_r19_arr_slide_consistency(html_path: Path) -> CheckResult:
+    """R19 — "Agente 3" de la reunión original del 19-jun (ver
+    memory/project_board_collaboration_roadmap.md): Sebastián pidió explícito un check que
+    compare que la misma cifra coincida entre distintas slides, no solo que la aritmética
+    interna cuadre (eso ya lo hacen R1-R3 contra metrics.yaml). Caso real y documentado en
+    Template Board/CLAUDE.md: 1_inicio.j2 renderiza `{{ metrics.arr_total }}` dos veces —
+    en "Monthly Performance" y en "YTD Performance" — y ambas DEBEN mostrar el mismo ARR
+    (Alegra + Alanube). No es un check tautológico: ya hubo un bug real de esta forma (v36,
+    ARR sin Alanube en una de las dos vistas), y este codebase permite ediciones manuales
+    puntuales del HTML ya generado (Template 4, re-embed de imágenes) que podrían romper esta
+    igualdad sin que Jinja2 se entere. FAIL, no WARN — mismo criterio que R1."""
+    label = "ARR EoP coincide entre Monthly Performance y YTD Performance"
+    try:
+        html = html_path.read_text(encoding="utf-8")
+    except Exception as e:
+        return CheckResult("R19", label, "SKIP", f"error: {e}")
+
+    monthly_label, ytd_label = _R19_ARR_SLIDE_LABELS
+    idx_monthly = html.find(monthly_label)
+    idx_ytd = html.find(ytd_label)
+    if idx_monthly == -1 or idx_ytd == -1:
+        missing = monthly_label if idx_monthly == -1 else ytd_label
+        return CheckResult("R19", label, "SKIP", f"no se encontró la slide '{missing}' en el HTML")
+
+    # Acotar la búsqueda de "Monthly" a ANTES de que empiece "YTD" — si no, una regex sin match
+    # en la slide de Monthly puede colarse y encontrar el bloque de ARR de la slide siguiente.
+    monthly_end = idx_ytd if idx_ytd > idx_monthly else min(len(html), idx_monthly + _R19_SEARCH_WINDOW)
+    bounds = [
+        (monthly_label, idx_monthly, monthly_end),
+        (ytd_label, idx_ytd, min(len(html), idx_ytd + _R19_SEARCH_WINDOW)),
+    ]
+
+    values = []
+    for slide_label, start, end in bounds:
+        m = _R19_ARR_VALUE_RE.search(html, start, end)
+        if not m:
+            return CheckResult("R19", label, "SKIP",
+                                f"no se encontró el valor de ARR dentro de la slide '{slide_label}'")
+        values.append(m.group(1).strip())
+
+    if values[0] != values[1]:
+        return CheckResult("R19", label, "FAIL",
+                            f"Monthly Performance muestra {values[0]!r} pero YTD Performance muestra {values[1]!r}")
+    return CheckResult("R19", label, "PASS", f"ambas slides muestran {values[0]}")
 
 
 def _count_slides(html_path: Path) -> int:
@@ -509,5 +566,6 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
     results.extend(_check_color_rules(html_path))
     results.append(_check_r16_slide_dimensions(html_path))
     results.append(_check_r18_slide_overflow(html_path))
+    results.append(_check_r19_arr_slide_consistency(html_path))
 
     return results

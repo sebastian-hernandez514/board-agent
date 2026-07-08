@@ -25,7 +25,7 @@ El sistema corre en 6 pasos (fases), uno después del otro:
 | 1 — Data Freshness | Revisa que Redshift tenga los datos del mes que se va a generar | "¿Ya está la información del mes cerrado?" |
 | 2 — Metrics Computation | Calcula todos los números (ARR, MRR, Churn, etc.) | "Hacer las cuentas" |
 | 3 — HTML Builder | Arma el HTML final del board con esos números | "Armar las slides" |
-| 4 — Validator | Revisa que los números cuadren entre sí (18 reglas hoy) — por ejemplo, que el ARR total sí incluya Alanube | "¿Esto tiene sentido matemáticamente?" |
+| 4 — Validator | Revisa que los números cuadren entre sí (19 reglas hoy) — por ejemplo, que el ARR total sí incluya Alanube | "¿Esto tiene sentido matemáticamente?" |
 | 5 — Diff Review | Compara este board contra el mes anterior y avisa si algo cambió mucho de golpe | "¿Hay algo raro que valga la pena revisar antes de mandarlo?" |
 | 6 — PDF | Genera el PDF final, solo cuando alguien lo aprueba a mano | "Ya quedó, generar el PDF" |
 

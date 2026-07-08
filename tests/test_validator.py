@@ -53,7 +53,7 @@ def test_smoke_against_real_may_2026_data():
     # que R17 da FAIL acá por un hueco del fixture, no porque el board real de mayo no tuviera P&L.
     assert by_id["R17"].status == "FAIL"
 
-    for rid in ("R5", "R7", "R11", "R13", "R14", "R15", "R18"):
+    for rid in ("R5", "R7", "R11", "R13", "R14", "R15", "R18", "R19"):
         assert by_id[rid].status == "SKIP"
 
 
@@ -672,3 +672,66 @@ def test_r18_skip_on_playwright_runtime_error(tmp_path, monkeypatch):
     r = _results_by_id(results)["R18"]
     assert r.status == "SKIP"
     assert "Executable" in r.detail
+
+
+def _write_r19_html(tmp_path, monthly_arr, ytd_arr):
+    body = f'''
+        <!-- SLIDE 5 — Monthly Performance -->
+        <div class="slide">
+          <div class="ks-p-name">ARR</div>
+          <div class="ks-p-val">{monthly_arr}</div>
+        </div>
+        <!-- SLIDE 5 — YTD Performance -->
+        <div class="slide">
+          <div class="ks-p-name">ARR</div>
+          <div class="ks-p-val ks-p-val-green">{ytd_arr}</div>
+        </div>
+    '''
+    return _write_raw_html(tmp_path, body)
+
+
+def test_r19_pass_when_arr_matches_across_slides(tmp_path):
+    html_path = _write_r19_html(tmp_path, "$29.8M", "$29.8M")
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R19"]
+    assert r.status == "PASS"
+    assert "$29.8M" in r.detail
+
+
+def test_r19_fails_when_arr_diverges_across_slides(tmp_path):
+    """Reproduce el bug real v36: ARR sin Alanube en una de las dos vistas."""
+    html_path = _write_r19_html(tmp_path, "$29.8M", "$28.8M")
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R19"]
+    assert r.status == "FAIL"
+    assert "$29.8M" in r.detail
+    assert "$28.8M" in r.detail
+
+
+def test_r19_skip_when_html_missing():
+    results = phase4_validator.run(metrics_path=FIXTURE, html_path=MISSING_HTML)
+    assert _results_by_id(results)["R19"].status == "SKIP"
+
+
+def test_r19_skip_when_slide_not_found(tmp_path):
+    html_path = _write_raw_html(tmp_path, '<div class="slide">contenido sin las slides esperadas</div>')
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R19"]
+    assert r.status == "SKIP"
+    assert "Monthly Performance" in r.detail
+
+
+def test_r19_skip_when_arr_value_not_found_in_slide(tmp_path):
+    """La slide existe pero no tiene el bloque ks-p-name/ks-p-val esperado — no debe
+    confundirse con un FAIL, es un formato distinto al esperado."""
+    html_path = _write_raw_html(tmp_path, '''
+        <!-- SLIDE 5 — Monthly Performance -->
+        <div class="slide">sin el bloque de ARR</div>
+        <!-- SLIDE 5 — YTD Performance -->
+        <div class="slide">
+          <div class="ks-p-name">ARR</div>
+          <div class="ks-p-val">$29.8M</div>
+        </div>
+    ''')
+    results = _run_with_html(tmp_path, html_path)
+    assert _results_by_id(results)["R19"].status == "SKIP"

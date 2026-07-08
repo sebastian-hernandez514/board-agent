@@ -97,7 +97,7 @@ FASE 0 — Human Inputs Gate            ← DEBE DESAPARECER      ✅ implementa
 FASE 1 — Data Freshness Check         ← fuentes automáticas   ✅ implementada (phase1_freshness.py)
 FASE 2 — Metrics Computation          ← fetch_metrics.py      ✅ implementada (phase2_metrics.py)
 FASE 3 — HTML Builder                 ← generate.py + merge + fixes  ✅ implementada (phase3_html_builder.py)
-FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 18/18 reglas activas (phase4_validator.py)
+FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 19/19 reglas activas (phase4_validator.py)
 FASE 5 — Diff Review                  ← vs board anterior     ✅ implementada, 7/7 reglas activas incl. D7 (phase5_diff.py)
 FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ implementada, gate manual a propósito (phase6_pdf.py)
 ```
@@ -260,6 +260,7 @@ usa `fetch_metrics.py`):**
 | R6 | FX residual pequeño | `abs(FX Impact) < $3M` | Si es mayor, hay error en lógica FX |
 | R7 | Logos usa deduplicación | `logos_eop` viene de `logos_all` (COUNT DISTINCT), no de `l_eop` del summary | Diferencia de ~38 logos |
 | R8 | CC del mes base = EoP regular | `arr_cc[mes_actual] ≈ arr_eop[mes_actual]` (ratio FX = 1) | — |
+| R19 | ARR EoP coincide entre "Monthly Performance" y "YTD Performance" (mismo `{{ metrics.arr_total }}` renderizado 2 veces en `1_inicio.j2`) — ✅ implementada 2026-07-08, "Agente 3" de la reunión original del 19-jun (consistencia entre slides, ver `memory/project_board_collaboration_roadmap.md`). Validado en vivo: PASS contra `board_standalone.html` real, ambas slides con $29.8M | Bug v36 (mismo patrón: ARR sin Alanube en una vista) |
 
 **Reglas de consistencia — si falla, revisar antes de publicar:**
 
@@ -407,7 +408,7 @@ uv run --with playwright --with pillow python scripts/generate_pdf.py
                                        │
                     ┌──────────────────▼──────────────────────┐
                     │         FASE 4: Validator               │
-                    │  18 reglas duras + consistencia         │
+                    │  19 reglas duras + consistencia         │
                     └──────────────────┬──────────────────────┘
                                        │
                     ┌──────────────────▼──────────────────────┐
