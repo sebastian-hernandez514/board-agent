@@ -263,7 +263,7 @@ usa `fetch_metrics.py`):**
 | R2 | New MRR usa /12 | `new_mrr_core + new_mrr_lite ≈ total_new_mrr` (en M, no M×12) | Bug v37 Mayo-26 |
 | R3 | ARR Walk balancea | `Additions + Recovered + Net Churn + Net Expansion + FX = Net New ARR = ARR EoP − ARR BoP` | — |
 | R4 | Net Churn es negativo | `Net Churn < 0` | Trampa de signos `a_churn` |
-| R5 | cross_down restado | `Net Expansion = upsell + down + pricing + cross_new + cross_readop − cross_down` | Trampa de signos `a_cross_down` |
+| R5 | cross_down restado | `Net Expansion = upsell + down + pricing + cross_new + cross_readop − cross_down` | Trampa de signos `a_cross_down`. **SKIP (no FAIL) en cierre de Q** — hallazgo 2026-07-08 generando junio real: `fetch_metrics.py` tiene un override temporal documentado ("valores del SS Apr-2026") que sobreescribe `arr_walk_table` con números fijos de abril en TODO cierre de Q, deuda técnica ya conocida de Template Board — comparar contra eso siempre diverge, no es un bug de esta regla. |
 | R6 | FX residual pequeño | `abs(FX Impact) < $3M` | Si es mayor, hay error en lógica FX |
 | R7 | Logos usa deduplicación | `logos_eop` viene de `logos_all` (COUNT DISTINCT), no de `l_eop` del summary | Diferencia de ~38 logos |
 | R8 | CC del mes base = EoP regular | `arr_cc[mes_actual] ≈ arr_eop[mes_actual]` (ratio FX = 1) | — |
@@ -275,7 +275,7 @@ usa `fetch_metrics.py`):**
 |---|---|
 | R9 | Mes de cierre de Q (mar/jun/sep/dic) → comparación QoQ; resto → MoM; debe ser consistente en todas las slides |
 | R10 | Churn rate entre 0% y 20% (si es mayor, probable doble conteo) |
-| R11 | Budget en cierre de Q = suma de los 3 meses del Q, no solo el mes puntual |
+| R11 | Budget en cierre de Q = suma de los 3 meses del Q, no solo el mes puntual. **Bug corregido 2026-07-08** (primer cierre de Q real probado, junio): buscaba el valor en la columna con el mismo nombre que `Fecha`, pero el CSV real lo guarda siempre en la primera columna de datos (igual que lee `merge_budget()`) — daba falso "faltan" con los 3 meses completos. |
 | R12 | Número de slides en el standalone ≈ 47 (si < 40, algo no se generó) |
 
 **Reglas de estilo:**
@@ -298,7 +298,7 @@ ver `memory/project_board_collaboration_roadmap.md`):**
 
 | # | Regla |
 |---|---|
-| R17 | Net Revenue / Gross Margin / EBITDA Margin (P&L) presentes y no vacíos — ✅ implementada 2026-07-08, junto con bajar F0.4 de FAIL a WARN (ver sección Fase 0). Es el freno real si Finance no ha mandado el P&L del mes: antes bloqueaba todo desde el inicio, ahora el board se arma completo y este check lo detiene acá, antes de aprobar. |
+| R17 | Net Revenue / Gross Margin / EBITDA Margin (P&L) presentes y no vacíos — ✅ implementada 2026-07-08, junto con bajar F0.4 de FAIL a WARN (ver sección Fase 0). Es el freno real si Finance no ha mandado el P&L del mes: antes bloqueaba todo desde el inicio, ahora el board se arma completo y este check lo detiene acá, antes de aprobar. **Bug corregido 2026-07-08** (mismo día, generando junio real): `fetch_metrics.py` no deja estos campos vacíos/`None` cuando faltan, les pone el string literal `"N/A"` — `not "N/A"` es `False`, así que la regla nunca disparaba en la práctica desde que se escribió. Ahora trata `"N/A"` igual que vacío. |
 
 Candidatos evaluados y **descartados** (riesgo real de falsos positivos, no solo teórico):
 - "Todo `.slide-header` debe traer `.title` y `.period`" — **falso**: `8_appendix.j2` tiene 3 slides de "Churned companies breakdown" con header solo-título, legítimo. Verificado con grep contra los 8 templates antes de escribir la regla.

@@ -20,7 +20,7 @@ Sistema que automatiza la generación del board ejecutivo mensual de Alegra: cal
 | `docs/ONBOARDING.md` | Checklist de prerrequisitos para alguien nuevo — leer antes de correr el pipeline por primera vez |
 | `check_setup.py` | Diagnóstico de arranque (solo lectura) — corre esto antes que `run.py` |
 | `run.py` | Punto de entrada — corre el pipeline completo |
-| `tests/` | 183 tests automatizados |
+| `tests/` | 186 tests automatizados |
 
 ## Cómo correrlo
 

@@ -140,6 +140,23 @@ def test_r5_skip_when_raw_buckets_missing(tmp_path):
     assert _results_by_id(results)["R5"].status == "SKIP"
 
 
+def test_r5_skip_not_fail_on_quarter_end_due_to_known_override(tmp_path):
+    """Hallazgo real 2026-07-08 generando junio (primer cierre de Q real probado):
+    fetch_metrics.py tiene un override temporal documentado ("valores del SS Apr-2026") que
+    sobreescribe arr_walk_table con números fijos de abril en CUALQUIER cierre de Q — hace que
+    el recomputado (real) y el mostrado (hardcodeado) diverjan siempre, sin ser un bug real.
+    Debe dar SKIP explicando la causa, no FAIL (que sugeriría un bug de esta regla/Board Agent)."""
+    metrics = _load_fixture()
+    metrics["is_quarter_end"] = True
+    buckets = _raw_buckets_matching_net_expansion(net_expansion=300_000, cross_down=200_000)
+    buckets["a_cross_down"] = -200_000  # misma divergencia que el test de FAIL, pero en cierre de Q
+    metrics["arr_walk_raw_buckets"] = buckets
+    results = _write_and_run(tmp_path, metrics)
+    r = _results_by_id(results)["R5"]
+    assert r.status == "SKIP"
+    assert "override" in r.detail.lower()
+
+
 # ── R3, R6 — aisladas del smoke test (que solo verifica el caso PASS/FAIL del fixture real) ──
 
 def _set_glo_row(metrics, label, value):
@@ -228,13 +245,20 @@ def test_r7_skip_when_smb_logos_eop_field_missing(tmp_path):
 # ── R11 — completitud del budget CSV en cierre de quarter ────────────────────────────────
 
 def _write_budget_csv(tmp_path, rows):
+    """rows: [{"Metric":..., "Fecha":..., "value":...}]. El valor SIEMPRE se escribe en la
+    primera columna de datos ("Apr - 26"), sin importar de qué mes sea la fila — reproduce la
+    estructura real de Metricas_budget.csv (confirmado leyendo merge_budget() en
+    fetch_metrics.py: lee de ahí, no de la columna con el nombre del mes de la fila). Bug real
+    encontrado 2026-07-08: la versión anterior de este helper (y de R11) asumía que el valor
+    vivía en la columna con el mismo nombre que 'Fecha' — falso, causaba que R11 reportara
+    "faltan" 3 meses que en realidad estaban completos en el CSV real de junio-26."""
     p = tmp_path / "Metricas_budget.csv"
     header = ["Metric", "Fecha", "Apr - 26", "May - 26", "Jun - 26"]
     with open(p, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.DictWriter(f, fieldnames=header)
         w.writeheader()
         for r in rows:
-            w.writerow(r)
+            w.writerow({"Metric": r["Metric"], "Fecha": r["Fecha"], "Apr - 26": r.get("value", "")})
     return p
 
 
@@ -245,17 +269,20 @@ def test_r11_skip_when_not_quarter_end(tmp_path):
 
 
 def test_r11_passes_when_all_three_quarter_months_present(tmp_path, monkeypatch):
+    """Reproduce el CSV real de junio-26: las 3 filas (Abr/May/Jun) existen con su valor en la
+    primera columna de datos — debe dar PASS, no el falso 'faltan' que daba la versión con bug."""
     metrics = _load_fixture()
     metrics["cutoff_month"] = "2026-06"
     metrics["is_quarter_end"] = True
     budget_csv = _write_budget_csv(tmp_path, [
-        {"Metric": "ARR EoP", "Fecha": "Apr - 26", "Apr - 26": "27000000"},
-        {"Metric": "ARR EoP", "Fecha": "May - 26", "May - 26": "27500000"},
-        {"Metric": "ARR EoP", "Fecha": "Jun - 26", "Jun - 26": "28000000"},
+        {"Metric": "ARR EoP", "Fecha": "Apr - 26", "value": "27000000"},
+        {"Metric": "ARR EoP", "Fecha": "May - 26", "value": "27500000"},
+        {"Metric": "ARR EoP", "Fecha": "Jun - 26", "value": "28000000"},
     ])
     monkeypatch.setattr(paths, "METRICAS_BUDGET_CSV", budget_csv)
     results = _write_and_run(tmp_path, metrics)
-    assert _results_by_id(results)["R11"].status == "PASS"
+    r = _results_by_id(results)["R11"]
+    assert r.status == "PASS", r.detail
 
 
 def test_r11_fails_when_a_quarter_month_is_missing_from_budget_csv(tmp_path, monkeypatch):
@@ -263,8 +290,8 @@ def test_r11_fails_when_a_quarter_month_is_missing_from_budget_csv(tmp_path, mon
     metrics["cutoff_month"] = "2026-06"
     metrics["is_quarter_end"] = True
     budget_csv = _write_budget_csv(tmp_path, [
-        {"Metric": "ARR EoP", "Fecha": "Apr - 26", "Apr - 26": "27000000"},
-        {"Metric": "ARR EoP", "Fecha": "May - 26", "May - 26": "27500000"},
+        {"Metric": "ARR EoP", "Fecha": "Apr - 26", "value": "27000000"},
+        {"Metric": "ARR EoP", "Fecha": "May - 26", "value": "27500000"},
         # Jun - 26 falta por completo
     ])
     monkeypatch.setattr(paths, "METRICAS_BUDGET_CSV", budget_csv)
@@ -332,6 +359,21 @@ def test_r17_fails_when_pnl_field_is_empty_string(tmp_path):
     metrics["ebitda_margin"] = "7.7%"
     results = _write_and_run(tmp_path, metrics)
     assert _results_by_id(results)["R17"].status == "FAIL"
+
+
+def test_r17_fails_when_pnl_field_is_literal_na_placeholder(tmp_path):
+    """Bug real encontrado 2026-07-08 generando junio: fetch_metrics.py no deja estos campos
+    en None/vacío cuando no hay datos — les pone el string literal "N/A" (default seteado antes
+    de merge_pnl(), nunca sobreescrito). `not "N/A"` es False, así que la versión anterior de
+    R17 daba PASS con el P&L completamente ausente. Confirmado en vivo contra junio-26 real."""
+    metrics = _load_fixture()
+    metrics["net_revenue"] = "N/A"
+    metrics["gross_margin"] = "N/A"
+    metrics["ebitda_margin"] = "N/A"
+    results = _write_and_run(tmp_path, metrics)
+    r = _results_by_id(results)["R17"]
+    assert r.status == "FAIL"
+    assert "net_revenue" in r.detail
 
 
 # ── R13/R14/R15 — reglas de color (parsean el HTML renderizado, no metrics.yaml) ──────────

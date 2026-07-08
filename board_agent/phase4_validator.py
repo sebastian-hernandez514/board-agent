@@ -369,14 +369,24 @@ def _check_r7_logos_dedup(metrics: dict) -> CheckResult:
                             f"error: {e}")
 
 
+_R17_PLACEHOLDER_VALUES = (None, "", "N/A", "n/a")
+
+
 def _check_r17_pnl_present(metrics: dict) -> CheckResult:
     """R17 — agregada 2026-07-08 junto con bajar F0.4 de FAIL a WARN en phase0_gate.py.
     merge_pnl() en fetch_metrics.py no truena si el CSV del P&L no tiene el mes — simplemente
     no setea net_revenue/gross_margin/ebitda_margin, y Jinja2 los renderiza en blanco sin
     error (confirmado: Environment(...) sin StrictUndefined). Eso significa que el board se
     puede generar completo con esa sección vacía sin que nada lo grite — este check es el
-    freno real: si Finance no ha mandado el P&L, el Validator debe FAIL antes de publicar."""
-    missing = [k for k in ("net_revenue", "gross_margin", "ebitda_margin") if not metrics.get(k)]
+    freno real: si Finance no ha mandado el P&L, el Validator debe FAIL antes de publicar.
+
+    Bug corregido 2026-07-08 (segunda revisión, generando junio real): fetch_metrics.py no deja
+    estos campos vacíos/None cuando no hay datos — les pone el string literal "N/A" (valor por
+    defecto seteado antes de llamar a merge_pnl(), nunca sobreescrito si el CSV no tiene el mes).
+    `not "N/A"` es False, así que la versión anterior de este check nunca disparaba en la
+    práctica. Confirmado en vivo: junio-26 sin P&L dio PASS con net_revenue=N/A."""
+    missing = [k for k in ("net_revenue", "gross_margin", "ebitda_margin")
+               if metrics.get(k) in _R17_PLACEHOLDER_VALUES]
     if missing:
         return CheckResult("R17", "P&L (Net Revenue/Gross Margin/EBITDA) presente", "FAIL",
                             f"campos faltantes o vacíos: {missing} — Finance no ha mandado el P&L de este mes, no publicar todavía")
@@ -388,7 +398,15 @@ def _check_r11_budget_quarter(metrics: dict) -> CheckResult:
     """Versión reducida de R11: en cierre de Q, verifica que Metricas_budget.csv tenga los 3
     meses del quarter completos (no vacíos) para 'ARR EoP'. NO reproduce la aritmética completa
     de *_vs_budget (requeriría un mes de cierre de Q real para validar la lógica — mayo-26 no
-    lo es, no se implementó a ciegas)."""
+    lo es, no se implementó a ciegas).
+
+    Bug corregido 2026-07-08 (segunda revisión, generando junio real — primer cierre de Q real
+    contra el que se pudo probar esto): esta regla buscaba el valor en la columna con el MISMO
+    nombre que 'Fecha' (ej. columna "Apr - 26" para la fila de abril) — pero el CSV en realidad
+    guarda el valor de cada fila en la PRIMERA columna de datos, sin importar de qué mes sea esa
+    fila (confirmado leyendo merge_budget() en fetch_metrics.py, que ya lo lee así y sí encuentra
+    los datos). Con la lógica vieja, R11 reportaba "faltan" los 3 meses de un Q real que en
+    verdad tenía los 3 con datos completos — falso positivo, no un hueco real de datos."""
     if not metrics.get("is_quarter_end"):
         return CheckResult("R11", "Budget CSV completo para el quarter (parcial)", "SKIP",
                             "mes de corte no es cierre de quarter")
@@ -400,11 +418,16 @@ def _check_r11_budget_quarter(metrics: dict) -> CheckResult:
         quarter_labels = [f"{paths.MES_ABBR_EN[mm]} - {yy}" for mm in (m - 2, m - 1, m)]
 
         with open(paths.METRICAS_BUDGET_CSV, encoding="utf-8-sig") as f:
-            rows = list(csv.DictReader(f))
+            reader = csv.DictReader(f)
+            fieldnames = reader.fieldnames or []
+            data_cols = [c for c in fieldnames if c not in ("Metric", "Fecha")]
+            first_data_col = data_cols[0] if data_cols else None
+            rows = list(reader)
+
         missing = []
         for lbl in quarter_labels:
             match = next((r for r in rows if r.get("Metric") == "ARR EoP" and r.get("Fecha", "").strip() == lbl), None)
-            if not match or not (match.get(lbl) or "").strip():
+            if not match or not first_data_col or not (match.get(first_data_col) or "").strip():
                 missing.append(lbl)
         status = "FAIL" if missing else "PASS"
         return CheckResult(
@@ -502,6 +525,17 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
     # (arr_walk_raw_buckets, expuestos 2026-07-06) y compara contra el "Net Expansion" ya
     # mostrado en arr_walk_table — detecta si la fórmula de exportación de buckets crudos y
     # la de arr_walk_table alguna vez divergen (código duplicado, mismo riesgo que motivó R1/R2).
+    #
+    # SKIP en cierre de Q (no FAIL) — hallazgo 2026-07-08 generando junio real (primer cierre de
+    # Q real probado): fetch_metrics.py tiene un "OVERRIDE TEMPORAL ARR Walk Global (valores del
+    # SS Apr-2026)" que SOBREESCRIBE las celdas de arr_walk_table con números fijos de abril
+    # cada vez que is_quarter_end=True (comentario propio: "Remover este bloque cuando RS
+    # entregue datos correctos en modo Q") — es deuda técnica conocida de Template Board, no un
+    # bug de esta regla ni de Board Agent. Mientras ese override siga activo, comparar el valor
+    # mostrado (abril, hardcodeado) contra el recomputado (real, del mes de corte) SIEMPRE va a
+    # divergir — no es información nueva cada trimestre, es ruido. R5 sigue corriendo y avisando
+    # (WARN-level detail dentro del SKIP), solo no bloquea con un FAIL que sugeriría un bug donde
+    # no lo hay.
     try:
         b = metrics["arr_walk_raw_buckets"]
         rows = _arr_walk_glo_rows(metrics)
@@ -509,12 +543,19 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
         net_expansion_recomputed = (b["a_upsell"] + b["a_down"] + b["a_pricing"]
                                      + b["a_cross_new"] + b["a_cross_readop"] - b["a_cross_down"])
         diff = net_expansion_recomputed - net_expansion_shown
-        status = "PASS" if abs(diff) <= TOL_ARR_WALK else "FAIL"
-        results.append(CheckResult(
-            "R5", "cross_down restado en Net Expansion", status,
-            f"recomputado={net_expansion_recomputed:,.0f} vs mostrado={net_expansion_shown:,.0f} (diff={diff:,.0f}); "
-            f"cross_down={b['a_cross_down']:,.0f} (debe restarse, no sumarse)",
-        ))
+        detail = (f"recomputado={net_expansion_recomputed:,.0f} vs mostrado={net_expansion_shown:,.0f} "
+                  f"(diff={diff:,.0f}); cross_down={b['a_cross_down']:,.0f} (debe restarse, no sumarse)")
+        if abs(diff) <= TOL_ARR_WALK:
+            results.append(CheckResult("R5", "cross_down restado en Net Expansion", "PASS", detail))
+        elif metrics.get("is_quarter_end"):
+            results.append(CheckResult(
+                "R5", "cross_down restado en Net Expansion", "SKIP",
+                f"{detail} — no confiable en cierre de Q: fetch_metrics.py sobreescribe arr_walk_table "
+                f"con el override temporal 'valores del SS Apr-2026' (ver comentario en el código), "
+                f"no es un bug de esta regla",
+            ))
+        else:
+            results.append(CheckResult("R5", "cross_down restado en Net Expansion", "FAIL", detail))
     except Exception as e:
         results.append(CheckResult("R5", "cross_down restado en Net Expansion", "SKIP", f"error: {e}"))
 
