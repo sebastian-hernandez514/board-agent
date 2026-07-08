@@ -60,12 +60,12 @@ se **consulta** antes de hacerla, y a quién se le **avisa** cuando está lista.
 
 | Insumo | Responsable (R) | Aprueba (A) | Consultado (C) | Informado (I) | Cuándo (relativo al cierre de mes) |
 |---|---|---|---|---|---|
-| CEO Highlights / Lowlights (`editorial/ceo.yaml`) | Sebastián | *a confirmar* | Liderazgo | Equipo Board | ~3 días antes del board |
+| CEO Highlights / Lowlights (`editorial/ceo.yaml`) | Mayra Gutiérrez | *a confirmar* | Liderazgo | Equipo Board | ~3 días antes del board |
 | Discussion Topics (contenido) | Luis Caro, Mayra Gutiérrez, Sebastián | *a confirmar* | — | Equipo Board | ~5 días antes del board |
 | Discussion Topics (HTML — vía skill, sección 5) | Quien tenga el contenido listo (ya no depende solo de Sebastián) | Sebastián (revisión de diseño) | — | — | Al mismo tiempo que el contenido |
 | ARR Walk Alanube (comentarios) | *a confirmar — hoy Sebastián* | *a confirmar* | Equipo Alanube | — | ~3 días antes |
 | Headcount (Sheets EoP + Forecast) | People & Talent | *a confirmar* | — | Sebastián | Antes del cierre de mes |
-| P&L (CSV real) | Santiago González | Finance | — | Sebastián | Cierre de mes contable |
+| P&L (CSV real) | Sofía Maldonado | Finance | — | Sebastián | Cierre de mes contable |
 | Template 4 (Financial Performance, HTML) | Sofía Maldonado | Finance | — | Sebastián | Mensual, antes de generar el HTML |
 | NPS snapshot | Sebastián (vía sesión de Claude + Amplitude) | *a confirmar* | — | Mayra | Mensual, mes anterior completo |
 | Tasas de cambio (`tb_trm_banrep`, Redshift) | *(por confirmar)* | — | Luis Caro (avisa/escala si no está al día) | Sebastián | Antes de correr el flujo del mes |
