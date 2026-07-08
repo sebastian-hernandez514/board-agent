@@ -436,3 +436,33 @@ Todo lo demás es automatizable.
 | Bugs detectados post-publicación | 5 (ARR Alanube, New MRR /12, Constant Currency, Headcount Attrition/columnas, — todos ya corregidos) | 0 |
 | Tiempo total de generación | ~4-6 horas con iteraciones | < 30 min |
 | Slides con datos no validables | 2 (NPS, Churn-by-tenure) — antes 8 | 0 |
+
+---
+
+## 6. Self-Service — Skills de colaboración (2026-07-08)
+
+Salidas del workshop de colaboración del 2026-07-08 (Luis Caro, Mayra Gutiérrez, Santiago González,
+Sofía Maldonado): el equipo pidió poder editar contenido del board sin depender de Sebastián. Se
+construyeron 2 skills de Claude Code (formato estándar: `SKILL.md` con frontmatter, Propósito,
+Contexto, Auto-pilot, Reglas de oro, Ejecución) más un prototipo de vista previa:
+
+| Skill/herramienta | Qué hace | Alcance |
+|---|---|---|
+| `skills/ceo-highlights/` | Edita `Template Board/data/editorial/ceo.yaml` (Highlights, Lowlights, Financial Update, `updated_for_month`) | Slide "CEO Highlights & Lowlights" (`1_inicio.j2`) |
+| `skills/slide-comments/` | Agrega/edita un comentario (`asks`) en `arr_walk.yaml` | Solo slides ARR Core y ARR Lite (`3_arr_walk.j2`) — **no** es un mecanismo genérico para cualquier slide todavía, ver limitantes en la skill |
+| `preview.py` | CLI que screenshotea una slide ya generada (Playwright, lectura de `Template Board/output/*.html`) para que alguien no técnico vea el resultado sin abrir un HTML | Cualquier template ya generado — busca por texto visible de la slide |
+
+**Bug real encontrado y corregido en el camino:** `arr_walk.yaml` tenía los campos `asks`/`alanube_insight`
+con CSS ya definido en `3_arr_walk.j2`, pero el template nunca los renderizaba — un panel fantasma
+desde antes de esta sesión. Se conectó `asks` (ver `skills/slide-comments/SKILL.md` para el detalle
+del fix y la validación visual con Playwright). `alanube_insight` sigue sin conectar — deuda técnica
+documentada, no arreglada en esta pasada.
+
+**Restricción de arquitectura respetada en todo esto:** ninguna de estas 3 piezas escribe dentro de
+`Template Board/` desde Board Agent — las skills editan YAMLs que Template Board ya leía, y
+`preview.py` solo lee `output/*.html` ya generado por `generate.py`. El único cambio de template
+(`3_arr_walk.j2`, para des-fantasmizar el panel) se hizo una vez, directo en Template Board, fuera
+del código de Board Agent — no se repite este patrón hacia adelante.
+
+**Pendiente:** tests para `preview.py` (hecho, `tests/test_preview.py`), documentar ambas skills +
+`preview.py` en el Playbook de la wiki (pendiente — ver `memory/project_board_collaboration_roadmap.md`).
