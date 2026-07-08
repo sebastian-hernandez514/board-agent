@@ -1,3 +1,4 @@
+import calendar
 import csv
 
 import pytest
@@ -31,6 +32,8 @@ def isolated_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, "CEO_YAML", tmp_path / "ceo.yaml")
     monkeypatch.setattr(paths, "DISCUSSION_TOPICS_YAML", tmp_path / "discussion_topics.yaml")
     monkeypatch.setattr(paths, "ARR_WALK_YAML", tmp_path / "arr_walk.yaml")
+    monkeypatch.setattr(paths, "CONFIG_YAML", tmp_path / "config.yaml")
+    monkeypatch.setattr(paths, "FINANCIAL_PERFORMANCE_TEMPLATE", tmp_path / "4_financial_performance.j2")
     monkeypatch.setattr(paths, "DATA_DIR", tmp_path)  # _check_pnl_actual busca pnl_override.yaml acá
     return tmp_path
 
@@ -41,6 +44,12 @@ def _seed_all_pass(tmp_path, month=MONTH):
     _write_yaml(tmp_path / "ceo.yaml", {"ceo_title": "CEO Highlights", "highlights": ["a"], "lowlights": ["b"]})
     _write_yaml(tmp_path / "discussion_topics.yaml", {"topics": [{"title_plain": "Topic real"}]})
     _write_yaml(tmp_path / "arr_walk.yaml", {"products": [{"id": "core", "asks": ["x"]}], "alanube_insight": "algo"})
+    y, m = month.split("-")
+    month_name_en = calendar.month_name[int(m)]
+    _write_yaml(tmp_path / "config.yaml", {"period": month, "month_label": f"{month_name_en} {y}"})
+    (tmp_path / "4_financial_performance.j2").write_text(
+        f"<title>Alegra Board — Financial Performance · {month_name_en} {y}</title>", encoding="utf-8"
+    )
 
 
 def _by_id(results):
@@ -50,7 +59,7 @@ def _by_id(results):
 def test_gate_all_pass(isolated_paths):
     _seed_all_pass(isolated_paths)
     results = _by_id(phase0_gate.run(MONTH))
-    for rid in ("F0.4", "F0.5", "F0.6", "F0.7"):
+    for rid in ("F0.4", "F0.5", "F0.6", "F0.7", "F0.8", "F0.9"):
         assert results[rid].status == "PASS", f"{rid}: {results[rid].detail}"
 
 
@@ -133,3 +142,65 @@ def test_arr_walk_empty_asks_warns(isolated_paths):
                 {"products": [{"id": "core", "asks": []}], "alanube_insight": "algo"})
     results = _by_id(phase0_gate.run(MONTH))
     assert results["F0.7"].status == "WARN"
+
+
+def test_discussion_topics_pass_includes_dead_scaffold_caveat(isolated_paths):
+    """F0.6 solo revisa el scaffold desconectado — el PASS debe dejarlo explícito, no fingir
+    que valida el contenido real de 2_discussion_topic.j2."""
+    _seed_all_pass(isolated_paths)
+    results = _by_id(phase0_gate.run(MONTH))
+    r = results["F0.6"]
+    assert r.status == "PASS"
+    assert "desconectado" in r.detail
+
+
+def test_config_month_fails_when_config_still_has_previous_month(isolated_paths):
+    """Reproduce el bug real reportado por el usuario: corrió run.py --month 2026-06 pero
+    config.yaml seguía en period: '2026-05' — varias slides del board mostraron 'May' en vez
+    de 'June'. F0.8 debe bloquear (FAIL), no solo avisar."""
+    _seed_all_pass(isolated_paths, month="2026-05")
+    results = _by_id(phase0_gate.run("2026-06"))
+    r = results["F0.8"]
+    assert r.status == "FAIL"
+    assert "2026-05" in r.detail and "2026-06" in r.detail
+
+
+def test_config_month_passes_when_period_matches(isolated_paths):
+    _seed_all_pass(isolated_paths, month="2026-06")
+    results = _by_id(phase0_gate.run("2026-06"))
+    assert results["F0.8"].status == "PASS"
+
+
+def test_financial_performance_month_warns_when_title_is_stale(isolated_paths):
+    """Reproduce el otro síntoma real reportado: el HTML de Finance (Template 4) sigue con el
+    <title> del mes anterior porque Sofía todavía no mandó el del mes nuevo."""
+    _seed_all_pass(isolated_paths, month="2026-06")
+    (isolated_paths / "4_financial_performance.j2").write_text(
+        "<title>Alegra Board — Financial Performance · May 2026</title>", encoding="utf-8"
+    )
+    results = _by_id(phase0_gate.run("2026-06"))
+    r = results["F0.9"]
+    assert r.status == "WARN"
+    assert "May 2026" in r.detail and "2026-06" in r.detail
+
+
+def test_financial_performance_month_passes_when_title_matches(isolated_paths):
+    _seed_all_pass(isolated_paths, month="2026-06")
+    results = _by_id(phase0_gate.run("2026-06"))
+    assert results["F0.9"].status == "PASS"
+
+
+def test_financial_performance_month_skips_when_title_pattern_missing(isolated_paths):
+    _seed_all_pass(isolated_paths)
+    (isolated_paths / "4_financial_performance.j2").write_text(
+        "<title>Alegra Board</title>", encoding="utf-8"
+    )
+    results = _by_id(phase0_gate.run(MONTH))
+    assert results["F0.9"].status == "SKIP"
+
+
+def test_financial_performance_month_skips_when_file_missing(isolated_paths):
+    _seed_all_pass(isolated_paths)
+    (isolated_paths / "4_financial_performance.j2").unlink()
+    results = _by_id(phase0_gate.run(MONTH))
+    assert results["F0.9"].status == "SKIP"

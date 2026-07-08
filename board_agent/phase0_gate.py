@@ -4,9 +4,19 @@ Verifica que las fuentes manuales (CSVs, YAMLs editoriales) tengan datos del
 mes objetivo ANTES de correr fetch_metrics.py. Esta fase debe desaparecer
 cuando esas fuentes se muevan a Redshift — mientras tanto, decirle al usuario
 exactamente qué falta y quién lo provee.
+
+F0.8 y F0.9 (agregadas 2026-07-08): hallazgo real reportado por el usuario tras generar el
+board de junio con el agente — varias slides seguían mostrando "May" pese a haber corrido
+`run.py --month 2026-06`. Causa raíz: `config.yaml` (period/month_label, usado en TODOS los
+templates para headers) y el HTML de Template 4 (Financial Performance, pegado a mano por
+Finance) no tenían NINGÚN check que comparara su mes contra el `--month` pedido — F0.8 y F0.9
+cierran ese gap. Alcance acordado con el usuario: solo detección (FAIL/WARN), sin modificar
+ningún archivo de Template Board para "vaciar" slides desactualizadas — eso queda pendiente
+como decisión de diseño aparte.
 """
 
 import csv
+import re
 from datetime import datetime
 
 import yaml
@@ -17,6 +27,11 @@ from .report import CheckResult
 MESES_ES = {
     1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo", 6: "junio",
     7: "julio", 8: "agosto", 9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre",
+}
+
+MESES_EN = {
+    "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
+    "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12,
 }
 
 PLACEHOLDER_MARKERS = ("por definir", "tbd", "todo", "pendiente de", "n/a")
@@ -104,14 +119,75 @@ def _check_ceo_yaml(month: str) -> CheckResult:
 
 
 def _check_discussion_topics() -> CheckResult:
+    """⚠️ Limitación conocida (documentada 2026-07-08, no corregida esta pasada): este check
+    lee `discussion_topics.yaml`, que es un scaffold DESCONECTADO — el contenido real de la
+    slide vive escrito a mano en `templates/2_discussion_topic.j2` y no tiene ningún campo de
+    mes verificable (no es YAML). Un PASS acá NO garantiza que el contenido real sea del mes
+    correcto — solo que este archivo, que nadie usa para renderizar, no está vacío. Se deja el
+    detail explícito para no repetir el error de F0.5 (falsa confianza)."""
     with open(paths.DISCUSSION_TOPICS_YAML, encoding="utf-8") as f:
         data = yaml.safe_load(f)
     topics = data.get("topics") or []
     placeholders = [t for t in topics if "por definir" in (t.get("title_plain") or "").lower()]
+    caveat = (" — OJO: este archivo está desconectado del template real (2_discussion_topic.j2); "
+              "esto NO verifica si el contenido real de la slide es del mes correcto")
     if not topics or placeholders:
         return CheckResult("F0.6", "editorial/discussion_topics.yaml no vacío", "WARN",
-                            f"{len(placeholders)}/{len(topics)} topics aún placeholder")
-    return CheckResult("F0.6", "editorial/discussion_topics.yaml no vacío", "PASS", f"{len(topics)} topics")
+                            f"{len(placeholders)}/{len(topics)} topics aún placeholder{caveat}")
+    return CheckResult("F0.6", "editorial/discussion_topics.yaml no vacío", "PASS", f"{len(topics)} topics{caveat}")
+
+
+def _check_config_month(month: str) -> CheckResult:
+    """F0.8 — ver nota de módulo. config.yaml es el ÚNICO paso manual del checklist mensual de
+    Template Board que no tenía ningún check en Fase 0, pese a que `config.period`/`month_label`
+    se usa en TODOS los templates para headers y títulos. FAIL, no WARN: es una comparación
+    exacta de texto, sin ambigüedad ni riesgo de falso positivo — si no coincide, el board
+    completo va a mostrar el mes viejo en los headers, sin excepción."""
+    with open(paths.CONFIG_YAML, encoding="utf-8") as f:
+        config = yaml.safe_load(f) or {}
+    period = config.get("period")
+    if period != month:
+        return CheckResult("F0.8", "config.yaml (period/month_label) coincide con el mes objetivo", "FAIL",
+                            f"config.yaml tiene period='{period}' pero se está generando '{month}' — "
+                            f"actualizar data/config.yaml antes de publicar, si no TODOS los headers/títulos "
+                            f"del board van a mostrar el mes viejo")
+    return CheckResult("F0.8", "config.yaml (period/month_label) coincide con el mes objetivo", "PASS",
+                        f"period='{period}', month_label='{config.get('month_label')}'")
+
+
+_TEMPLATE4_TITLE_RE = re.compile(r"Financial Performance\s*·\s*(\w+)\s+(\d{4})", re.IGNORECASE)
+
+
+def _check_financial_performance_month(month: str) -> CheckResult:
+    """F0.9 — ver nota de módulo. Template 4 es HTML completo pegado a mano por Sofía Maldonado
+    cada mes (ver RACI en docs/BOARD_PLAYBOOK_DRAFT.md) — no es YAML, no puede tener un campo
+    tipo 'updated_for_month'. Se reusa una convención ya existente en el archivo real: el
+    <title> siempre trae el mes (ej. "Financial Performance · May 2026"). WARN, no FAIL —
+    mismo criterio que F0.4 (P&L): es un insumo externo que llega tarde, no debe bloquear todo
+    el flujo, pero si el título no matchea es señal real de que el HTML sigue siendo del mes
+    anterior."""
+    label = "Template 4 (Financial Performance) — <title> coincide con el mes objetivo"
+    try:
+        html = paths.FINANCIAL_PERFORMANCE_TEMPLATE.read_text(encoding="utf-8")
+    except Exception as e:
+        return CheckResult("F0.9", label, "SKIP", f"error: {e}")
+
+    m = _TEMPLATE4_TITLE_RE.search(html)
+    if not m:
+        return CheckResult("F0.9", label, "SKIP",
+                            "no se encontró el patrón 'Financial Performance · Mes AAAA' en el <title>")
+
+    month_name, year = m.group(1).lower(), m.group(2)
+    month_num = MESES_EN.get(month_name)
+    if month_num is None:
+        return CheckResult("F0.9", label, "SKIP", f"mes '{m.group(1)}' del <title> no reconocido")
+
+    found_month = f"{year}-{month_num:02d}"
+    if found_month != month:
+        return CheckResult("F0.9", label, "WARN",
+                            f"el <title> dice '{m.group(1)} {year}' pero se está generando '{month}' — "
+                            f"avisar a Sofía Maldonado si todavía no mandó el HTML de Financial Performance de este mes")
+    return CheckResult("F0.9", label, "PASS", f"<title> dice '{m.group(1)} {year}', coincide")
 
 
 def _check_arr_walk_yaml() -> CheckResult:
@@ -140,4 +216,6 @@ def run(month: str) -> list[CheckResult]:
         _check_ceo_yaml(month),
         _check_discussion_topics(),
         _check_arr_walk_yaml(),
+        _check_config_month(month),
+        _check_financial_performance_month(month),
     ]

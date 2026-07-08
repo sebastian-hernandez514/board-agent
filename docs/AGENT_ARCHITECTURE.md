@@ -112,20 +112,25 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 **Por qué existe:** Porque varias fuentes no están en ninguna base de datos todavía.
 **Estado objetivo:** Esta fase desaparece cuando todas las fuentes sean automatizadas.
 
-**Checks actuales — 4 en total (`board_agent/phase0_gate.py::run()`, verificado 2026-07-06):**
+**Checks actuales — 6 en total (`board_agent/phase0_gate.py::run()`, ampliado 2026-07-08):**
 
 | ID | Check | Blocker |
 |---|---|---|
 | F0.4 | `P&L Histórico- ACtual.csv` tiene el mes actual (o `data/pnl_override.yaml`) | ⚠️ Warning (bajado de FAIL 2026-07-08 — ver nota abajo) |
 | F0.5 | `editorial/ceo.yaml` no tiene placeholders vacíos, y si trae `updated_for_month` que coincida con el mes objetivo | ⚠️ Warning |
-| F0.6 | `editorial/discussion_topics.yaml` no vacío | ⚠️ Warning |
+| F0.6 | `editorial/discussion_topics.yaml` no vacío — ⚠️ ver limitación conocida abajo | ⚠️ Warning |
 | F0.7 | `editorial/arr_walk.yaml` con comentarios llenos | ⚠️ Warning |
+| F0.8 | `data/config.yaml` (`period`) coincide con el `--month` pedido | ❌ **FAIL** |
+| F0.9 | Template 4 (`4_financial_performance.j2`) — `<title>` coincide con el mes objetivo | ⚠️ Warning |
 
 **F0.4 bajó de FAIL a WARN el 2026-07-08** (encontrado corriendo el flujo real para junio-26 y viendo que un solo dato de Finance tapaba la revisión de todo lo demás): `merge_pnl()` en `fetch_metrics.py` ya maneja la ausencia de datos sin romperse — no setea `net_revenue`/`gross_margin`/`ebitda_margin`, y Jinja2 (`Environment(...)` sin `StrictUndefined`) los renderiza en blanco sin error. El freno real se movió a **R17 del Validator** (Fase 4): si esos 3 campos faltan o vienen vacíos, el Validator da FAIL ahí, con el board ya armado y visible para revisar, en vez de bloquear todo desde el minuto uno.
 
-**4 checks que existían en versiones anteriores de esta tabla y ya NO corren en este gate** (tabla desactualizada hasta 2026-07-06, corregida tras revisión de código):
+**F0.8 y F0.9 agregadas 2026-07-08** — hallazgo real reportado por el usuario después de generar el board de junio con el agente: varias slides seguían mostrando "May" pese a haber corrido `run.py --month 2026-06`. Investigado y confirmado en código: `config.yaml` (usado por TODOS los templates para headers/títulos) y el HTML de Template 4 (pegado a mano por Finance) no tenían **ningún** check que comparara su mes contra el `--month` pedido — el gap de "Template 4 fue recibido" que quedaba como aspiracional en versiones anteriores de esta tabla (nunca tuvo función real) ahora sí existe como F0.9, reusando la convención ya existente del `<title>` del archivo (ej. "Financial Performance · May 2026"), sin pedirle a Finance ningún campo nuevo. F0.8 es FAIL (comparación exacta, cero ambigüedad); F0.9 es WARN (mismo criterio que F0.4: insumo externo que llega tarde). **Alcance acordado con el usuario:** solo detección — no se modificó ningún template de Template Board para "vaciar" slides desactualizadas, eso quedó fuera de esta pasada por decisión explícita.
+
+**F0.6 — limitación conocida, documentada pero no corregida esta pasada:** revisa `editorial/discussion_topics.yaml`, que es un scaffold **desconectado** del template real — el contenido de la slide vive escrito a mano en `2_discussion_topic.j2`, sin ningún campo de mes verificable (no es YAML). Un PASS de F0.6 no garantiza que el contenido real sea del mes correcto, solo que ese archivo (que nadie usa para renderizar) no está vacío. El `detail` de F0.6 ahora dice esto explícitamente para no repetir el error de falsa confianza que tenía F0.5 antes del 2026-07-08.
+
+**2 checks que existían en versiones anteriores de esta tabla y ya NO corren en este gate** (tabla desactualizada hasta 2026-07-06, corregida tras revisión de código):
 - `paises_fx.csv`, `chart_alanube.yaml`, `Payback.csv` — se automatizaron y se movieron a Fase 1/2 (ver sección "Camino para eliminarla" abajo, fechas 2026-07-03/06).
-- "Template 4 (Finance HTML) fue recibido" — **nunca tuvo una función de check real en el código**, a diferencia de las otras 3; quedó en la tabla como aspiracional.
 - NPS screenshots — la lógica de NPS se movió a `_build_nps()` en Fase 2 (lee `data/nps_snapshot.yaml`), no vive en este gate.
 
 **Output:** Lista ✅/⚠️/❌. Si hay ❌ blocker: para y lista exactamente qué falta y quién lo provee.
