@@ -194,6 +194,31 @@ def test_flag_stale_discussion_topics_warns_and_overlays_when_sentinel_is_old(is
     assert 'class="dt-slide stale-slide" style="padding:0;"' in new_html
 
 
+def test_flag_stale_discussion_topics_also_overlays_section_cover(isolated_dirs):
+    """Reproduce el hallazgo del usuario 2026-07-08 (segunda revisión): la portada de cada
+    topic (class="slide section-divider") revelaba el título del tema viejo (ej. "ICP Split
+    Costa Rica Update") aunque las slides de contenido ya estuvieran tapadas."""
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "2_discussion_topic.html"
+    html_path.write_text(
+        '<!-- updated_for_month: 2026-05 --><body>'
+        '<div class="slide section-divider"><div class="section-title">Mexico Strategy</div></div>'
+        '<div class="dt-slide">contenido</div>'
+        '<div class="slide section-divider"><div class="section-title">ICP Split Costa Rica Update</div></div>'
+        '<div class="dt-slide">contenido 2</div>'
+        '</body>', encoding="utf-8")
+
+    r = f3._flag_stale_discussion_topics("2026-06")
+    assert r.status == "WARN"
+    assert "portada" in r.detail
+
+    new_html = html_path.read_text(encoding="utf-8")
+    assert new_html.count('class="slide section-divider stale-slide"') == 2
+    assert new_html.count('class="dt-slide stale-slide"') == 2
+    assert "Mexico Strategy" in new_html  # texto original conservado, solo tapado
+    assert "ICP Split Costa Rica Update" in new_html
+
+
 def test_flag_stale_discussion_topics_skip_when_no_dt_slide_found(isolated_dirs):
     data_dir, output_dir = isolated_dirs
     html_path = output_dir / "2_discussion_topic.html"

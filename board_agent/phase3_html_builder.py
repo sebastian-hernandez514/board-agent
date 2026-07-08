@@ -22,7 +22,10 @@ romper HTML anidado con regex) — inserta un overlay que lo cubre visualmente p
 F3.5 (agregada 2026-07-08, mismo día): mismo mecanismo para Discussion Topics, usando el
 sentinel '<!-- updated_for_month: YYYY-MM -->' agregado a 2_discussion_topic.j2 (ver F0.6 en
 phase0_gate.py) — el comentario pasa intacto a través de Jinja2, así que se puede leer del
-output/2_discussion_topic.html ya generado sin tocar el .j2 fuente en esta fase.
+output/2_discussion_topic.html ya generado sin tocar el .j2 fuente en esta fase. Cubre tanto
+las slides de contenido (`.dt-slide`) como las portadas de cada topic (`.slide.section-divider`)
+— hallazgo del usuario 2026-07-08 (segunda revisión): la portada revelaba el título del tema
+viejo (ej. "ICP Split Costa Rica Update") aunque el contenido de abajo ya estuviera tapado.
 """
 
 import base64
@@ -98,29 +101,38 @@ _STALE_OVERLAY_HTML = (
 )
 
 
-def _overlay_stale_slides(html: str, slide_class: str, section: str, old_label: str) -> tuple[str, int]:
-    """Cubre cada slide de `slide_class` con un overlay "contenido pendiente", sin borrar ni
+def _overlay_stale_slides(html: str, slide_classes, section: str, old_label: str) -> tuple[str, int]:
+    """Cubre cada slide de `slide_classes` (un string o una lista de strings — ej. la portada
+    de un topic Y sus slides de contenido) con un overlay "contenido pendiente", sin borrar ni
     reescribir el HTML anidado existente debajo (evita el riesgo de romper la estructura con
     regex de reemplazo) — le agrega la clase marcadora `stale-slide` (position:relative, ver
     _STALE_OVERLAY_STYLE) e inserta el overlay como hijo justo después del tag de apertura.
     Devuelve (html_modificado, cantidad_de_slides_tapadas). 0 slides → no modifica nada."""
-    open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'"[^>]*>')
-    n = len(open_re.findall(html))
-    if n == 0:
-        return html, 0
+    if isinstance(slide_classes, str):
+        slide_classes = [slide_classes]
 
     overlay = _STALE_OVERLAY_HTML.format(section=section, old_label=old_label)
+    total = 0
+    for slide_class in slide_classes:
+        open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'"[^>]*>')
+        n = len(open_re.findall(html))
+        if n == 0:
+            continue
+        total += n
 
-    def _inject(m):
-        tag = m.group(0).replace(f'class="{slide_class}"', f'class="{slide_class} stale-slide"', 1)
-        return tag + overlay
+        def _inject(m, _cls=slide_class):
+            tag = m.group(0).replace(f'class="{_cls}"', f'class="{_cls} stale-slide"', 1)
+            return tag + overlay
 
-    html = open_re.sub(_inject, html)
+        html = open_re.sub(_inject, html)
+
+    if total == 0:
+        return html, 0
     if "</head>" in html:
         html = html.replace("</head>", _STALE_OVERLAY_STYLE + "</head>", 1)
     else:
         html = _STALE_OVERLAY_STYLE + html
-    return html, n
+    return html, total
 
 
 def _flag_stale_financial_performance(month: str) -> CheckResult:
@@ -166,14 +178,15 @@ def _flag_stale_discussion_topics(month: str) -> CheckResult:
     if sentinel_month == month:
         return CheckResult("F3.5", label, "PASS", f"marcado como '{sentinel_month}', coincide con {month}")
 
-    new_html, n_slides = _overlay_stale_slides(html, "dt-slide", "Discussion Topics", sentinel_month)
+    new_html, n_slides = _overlay_stale_slides(
+        html, ["dt-slide", "slide section-divider"], "Discussion Topics", sentinel_month)
     if n_slides == 0:
-        return CheckResult("F3.5", label, "SKIP", "no se encontró ningún .dt-slide en el HTML")
+        return CheckResult("F3.5", label, "SKIP", "no se encontró ningún .dt-slide/.section-divider en el HTML")
     html_path.write_text(new_html, encoding="utf-8")
 
     return CheckResult("F3.5", label, "WARN",
-                        f"{n_slides} slides de Discussion Topics ocultas con overlay — el archivo está marcado "
-                        f"como '{sentinel_month}' pero se está generando {month}.")
+                        f"{n_slides} slides de Discussion Topics ocultas con overlay (incluida la portada del "
+                        f"tema) — el archivo está marcado como '{sentinel_month}' pero se está generando {month}.")
 
 
 def run(month: str) -> list[CheckResult]:
