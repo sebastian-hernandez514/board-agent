@@ -228,6 +228,21 @@ def _check_r7_logos_dedup(metrics: dict) -> CheckResult:
                             f"error: {e}")
 
 
+def _check_r17_pnl_present(metrics: dict) -> CheckResult:
+    """R17 — agregada 2026-07-08 junto con bajar F0.4 de FAIL a WARN en phase0_gate.py.
+    merge_pnl() en fetch_metrics.py no truena si el CSV del P&L no tiene el mes — simplemente
+    no setea net_revenue/gross_margin/ebitda_margin, y Jinja2 los renderiza en blanco sin
+    error (confirmado: Environment(...) sin StrictUndefined). Eso significa que el board se
+    puede generar completo con esa sección vacía sin que nada lo grite — este check es el
+    freno real: si Finance no ha mandado el P&L, el Validator debe FAIL antes de publicar."""
+    missing = [k for k in ("net_revenue", "gross_margin", "ebitda_margin") if not metrics.get(k)]
+    if missing:
+        return CheckResult("R17", "P&L (Net Revenue/Gross Margin/EBITDA) presente", "FAIL",
+                            f"campos faltantes o vacíos: {missing} — Finance no ha mandado el P&L de este mes, no publicar todavía")
+    return CheckResult("R17", "P&L (Net Revenue/Gross Margin/EBITDA) presente", "PASS",
+                        f"net_revenue={metrics.get('net_revenue')} gross_margin={metrics.get('gross_margin')} ebitda_margin={metrics.get('ebitda_margin')}")
+
+
 def _check_r11_budget_quarter(metrics: dict) -> CheckResult:
     """Versión reducida de R11: en cierre de Q, verifica que Metricas_budget.csv tenga los 3
     meses del quarter completos (no vacíos) para 'ARR EoP'. NO reproduce la aritmética completa
@@ -389,6 +404,7 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
 
     results.append(_check_r7_logos_dedup(metrics))
     results.append(_check_r11_budget_quarter(metrics))
+    results.append(_check_r17_pnl_present(metrics))
 
     # R12 — Número de slides en el standalone ≈ 47 (selector real de generate_pdf.py)
     try:

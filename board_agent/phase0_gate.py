@@ -31,7 +31,14 @@ def _check_pnl_actual(month: str) -> CheckResult:
     """merge_pnl() en fetch_metrics.py cae a data/pnl_override.yaml si el CSV no
     tiene filas del mes (workaround ya en uso, con datos de Finance a mano) —
     el gate tiene que reconocer esa fuente también o reporta un falso bloqueante.
-    """
+
+    WARN, no FAIL (cambiado 2026-07-08): el resto del board (ARR, MRR, Churn, Headcount)
+    no depende del P&L — bloquear TODO el flujo por un dato que Finance manda aparte y
+    tarde le impedía a cualquiera revisar el resto mientras se espera. merge_pnl() ya
+    maneja la ausencia de datos sin romperse (no setea net_revenue/gross_margin/ebitda_margin,
+    Jinja2 los renderiza en blanco sin error) — el freno real ahora vive en R17 del Validator
+    (Fase 4), que sí bloquea la publicación si esos 3 campos faltan, con el board ya armado
+    y visible para revisar en vez de tapar todo desde el inicio."""
     target_y, target_m = (int(x) for x in month.split("-"))
     max_date = None
     hit_csv = False
@@ -59,8 +66,9 @@ def _check_pnl_actual(month: str) -> CheckResult:
     if hit_override:
         return CheckResult("F0.4", f"P&L tiene filas de {month} (CSV o override)", "PASS",
                             "fuente: data/pnl_override.yaml (manual, no el CSV)")
-    return CheckResult("F0.4", f"P&L tiene filas de {month} (CSV o override)", "FAIL",
-                        f"CSV parado en {max_date.date() if max_date else '?'} y sin entrada '{month}' en pnl_override.yaml")
+    return CheckResult("F0.4", f"P&L tiene filas de {month} (CSV o override)", "WARN",
+                        f"CSV parado en {max_date.date() if max_date else '?'} y sin entrada '{month}' en pnl_override.yaml "
+                        f"— el flujo sigue igual, pero R17 del Validator va a FAIL si Net Revenue/Gross Margin/EBITDA salen vacíos")
 
 
 def _check_ceo_yaml(month: str) -> CheckResult:

@@ -65,12 +65,14 @@ def test_pnl_override_fallback_passes(isolated_paths):
     assert "override" in results["F0.4"].detail
 
 
-def test_pnl_no_csv_no_override_fails(isolated_paths):
+def test_pnl_no_csv_no_override_warns_not_fails(isolated_paths):
+    """Cambiado 2026-07-08: el P&L sin datos ya no bloquea todo el flujo (ver decisión en
+    phase0_gate.py) — el freno real ahora es R17 del Validator, con el board ya armado."""
     _seed_all_pass(isolated_paths)
     _write_csv(isolated_paths / "pnl_actual.csv", ["Date", "Category", "Type", "Technical Team", "sum Amount USD"],
                [{"Date": "3/31/2026", "Category": "x", "Type": "y", "Technical Team": "z", "sum Amount USD": "100"}])
     results = _by_id(phase0_gate.run(MONTH))
-    assert results["F0.4"].status == "FAIL"
+    assert results["F0.4"].status == "WARN"
 
 
 def test_ceo_yaml_empty_lowlights_warns(isolated_paths):

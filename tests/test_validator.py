@@ -48,6 +48,10 @@ def test_smoke_against_real_may_2026_data():
     assert by_id["R9"].status == "PASS"  # mayo no es cierre de quarter
     assert by_id["R10"].status == "PASS"  # churn 4.1% dentro de 0-20%
     assert by_id["R12"].status == "SKIP"  # sin HTML disponible en el test
+    # El fixture está recortado a los campos que R1-R12 necesitaban cuando se armó (2026-06-18,
+    # antes de que existiera R17) — nunca incluyó net_revenue/gross_margin/ebitda_margin, así
+    # que R17 da FAIL acá por un hueco del fixture, no porque el board real de mayo no tuviera P&L.
+    assert by_id["R17"].status == "FAIL"
 
     for rid in ("R5", "R7", "R11", "R13", "R14", "R15"):
         assert by_id[rid].status == "SKIP"
@@ -296,6 +300,38 @@ def test_r12_fails_when_far_below_minimum(tmp_path):
     html_path = _html_with_n_slides(tmp_path, paths.MIN_SLIDE_COUNT_WARNING - 5)
     results = _run_with_html(tmp_path, html_path)
     assert _results_by_id(results)["R12"].status == "FAIL"
+
+
+# ── R17 — P&L presente (agregada 2026-07-08 al bajar F0.4 de FAIL a WARN) ────────────────
+
+def test_r17_passes_when_pnl_fields_present(tmp_path):
+    metrics = _load_fixture()
+    metrics["net_revenue"] = "$2.4M"
+    metrics["gross_margin"] = "68.0%"
+    metrics["ebitda_margin"] = "7.7%"
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R17"].status == "PASS"
+
+
+def test_r17_fails_when_pnl_fields_missing(tmp_path):
+    """Reproduce el escenario real que motivó esta regla: Finance no mandó el P&L del mes,
+    merge_pnl() no truena pero tampoco setea estos campos — el Validator debe atraparlo acá,
+    con el board ya armado, en vez de que F0.4 bloquee todo desde el inicio (WARN ahora)."""
+    metrics = _load_fixture()  # el fixture nunca tuvo estos 3 campos
+    results = _write_and_run(tmp_path, metrics)
+    r = _results_by_id(results)["R17"]
+    assert r.status == "FAIL"
+    assert "net_revenue" in r.detail
+
+
+def test_r17_fails_when_pnl_field_is_empty_string(tmp_path):
+    """No solo 'falta la clave' — un valor vacío/None también debe contar como faltante."""
+    metrics = _load_fixture()
+    metrics["net_revenue"] = ""
+    metrics["gross_margin"] = "68.0%"
+    metrics["ebitda_margin"] = "7.7%"
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R17"].status == "FAIL"
 
 
 # ── R13/R14/R15 — reglas de color (parsean el HTML renderizado, no metrics.yaml) ──────────

@@ -97,7 +97,7 @@ FASE 0 — Human Inputs Gate            ← DEBE DESAPARECER      ✅ implementa
 FASE 1 — Data Freshness Check         ← fuentes automáticas   ✅ implementada (phase1_freshness.py)
 FASE 2 — Metrics Computation          ← fetch_metrics.py      ✅ implementada (phase2_metrics.py)
 FASE 3 — HTML Builder                 ← generate.py + merge + fixes  ✅ implementada (phase3_html_builder.py)
-FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 16/16 reglas activas (phase4_validator.py)
+FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 17/17 reglas activas (phase4_validator.py)
 FASE 5 — Diff Review                  ← vs board anterior     ✅ implementada, 7/7 reglas activas incl. D7 (phase5_diff.py)
 FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ implementada, gate manual a propósito (phase6_pdf.py)
 ```
@@ -116,10 +116,12 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 
 | ID | Check | Blocker |
 |---|---|---|
-| F0.4 | `P&L Histórico- ACtual.csv` tiene el mes actual (o `data/pnl_override.yaml`) | ✅ Sí (FAIL) |
-| F0.5 | `editorial/ceo.yaml` no tiene placeholders vacíos | ⚠️ Warning |
+| F0.4 | `P&L Histórico- ACtual.csv` tiene el mes actual (o `data/pnl_override.yaml`) | ⚠️ Warning (bajado de FAIL 2026-07-08 — ver nota abajo) |
+| F0.5 | `editorial/ceo.yaml` no tiene placeholders vacíos, y si trae `updated_for_month` que coincida con el mes objetivo | ⚠️ Warning |
 | F0.6 | `editorial/discussion_topics.yaml` no vacío | ⚠️ Warning |
 | F0.7 | `editorial/arr_walk.yaml` con comentarios llenos | ⚠️ Warning |
+
+**F0.4 bajó de FAIL a WARN el 2026-07-08** (encontrado corriendo el flujo real para junio-26 y viendo que un solo dato de Finance tapaba la revisión de todo lo demás): `merge_pnl()` en `fetch_metrics.py` ya maneja la ausencia de datos sin romperse — no setea `net_revenue`/`gross_margin`/`ebitda_margin`, y Jinja2 (`Environment(...)` sin `StrictUndefined`) los renderiza en blanco sin error. El freno real se movió a **R17 del Validator** (Fase 4): si esos 3 campos faltan o vienen vacíos, el Validator da FAIL ahí, con el board ya armado y visible para revisar, en vez de bloquear todo desde el minuto uno.
 
 **4 checks que existían en versiones anteriores de esta tabla y ya NO corren en este gate** (tabla desactualizada hasta 2026-07-06, corregida tras revisión de código):
 - `paises_fx.csv`, `chart_alanube.yaml`, `Payback.csv` — se automatizaron y se movieron a Fase 1/2 (ver sección "Camino para eliminarla" abajo, fechas 2026-07-03/06).
@@ -283,6 +285,12 @@ ver `memory/project_board_collaboration_roadmap.md`):**
 |---|---|
 | R16 | Ningún slide-shell (`SLIDE_CLASS_TOKENS`) fuerza width/height en px vía inline style — protege el 960×540 que viene de `--slide-width`/`--slide-height` en `base.css` — ✅ implementada 2026-07-06, verificado 0 falsos positivos contra los 8 templates reales |
 
+**Regla de completitud de datos externos:**
+
+| # | Regla |
+|---|---|
+| R17 | Net Revenue / Gross Margin / EBITDA Margin (P&L) presentes y no vacíos — ✅ implementada 2026-07-08, junto con bajar F0.4 de FAIL a WARN (ver sección Fase 0). Es el freno real si Finance no ha mandado el P&L del mes: antes bloqueaba todo desde el inicio, ahora el board se arma completo y este check lo detiene acá, antes de aprobar. |
+
 Candidatos evaluados y **descartados** por ahora (riesgo real de falsos positivos, no solo teórico):
 - "Todo `.slide-header` debe traer `.title` y `.period`" — **falso**: `8_appendix.j2` tiene 3 slides de "Churned companies breakdown" con header solo-título, legítimo. Verificado con grep contra los 8 templates antes de escribir la regla.
 - Paleta de colores permitida (grep de hex codes) — alto riesgo de falsos positivos: hay colores semánticos legítimos fuera de los tokens de `base.css` (ej. verde/ámbar/rojo de NPS, morado de banners) que no son errores de diseño.
@@ -398,7 +406,7 @@ uv run --with playwright --with pillow python scripts/generate_pdf.py
                                        │
                     ┌──────────────────▼──────────────────────┐
                     │         FASE 4: Validator               │
-                    │  16 reglas duras + consistencia         │
+                    │  17 reglas duras + consistencia         │
                     └──────────────────┬──────────────────────┘
                                        │
                     ┌──────────────────▼──────────────────────┐

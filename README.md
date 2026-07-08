@@ -12,12 +12,12 @@ Sistema que automatiza la generación del board ejecutivo mensual de Alegra: cal
 |---|---|
 | `board_agent/` | El código de las 6 fases del pipeline (freshness check, cálculo de métricas, armado de HTML, validador de reglas de negocio, diff contra el mes anterior, PDF) |
 | `skills/discussion-topic/` | Skill de self-service para agregar una slide de "Discussion Topic" al board sin depender de Sebastián |
-| `docs/AGENT_ARCHITECTURE.md` | Arquitectura técnica completa: las 6 fases, las 16 reglas del Validator, y qué falta por automatizar |
+| `docs/AGENT_ARCHITECTURE.md` | Arquitectura técnica completa: las 6 fases, las 17 reglas del Validator, y qué falta por automatizar |
 | `docs/BOARD_PLAYBOOK_DRAFT.md` | Borrador del Playbook (la versión publicada vive en la wiki, enlace arriba) |
 | `docs/ONBOARDING.md` | Checklist de prerrequisitos para alguien nuevo — leer antes de correr el pipeline por primera vez |
 | `check_setup.py` | Diagnóstico de arranque (solo lectura) — corre esto antes que `run.py` |
 | `run.py` | Punto de entrada — corre el pipeline completo |
-| `tests/` | 145 tests automatizados |
+| `tests/` | 148 tests automatizados |
 
 ## Cómo correrlo
 
