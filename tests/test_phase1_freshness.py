@@ -144,9 +144,33 @@ def test_run_skips_rs_checks_when_sso_fails(monkeypatch):
 def test_run_full_pass(fake_redshift_guard, monkeypatch):
     monkeypatch.setattr(subprocess, "run", lambda *a, **k: _FakeCompletedProcess(0))
     results = f1.run("2026-05")
-    # SSO + 5 checks de tabla
-    assert len(results) == 6
+    # SSO + 13 checks de tabla (F1.1-F1.13, ampliado 2026-07-08)
+    assert len(results) == 14
     assert results[0].id == "F1.0"
     ids = [r.id for r in results]
-    assert ids == ["F1.0", "F1.1", "F1.2", "F1.3", "F1.4", "F1.5"]
+    assert ids == ["F1.0", "F1.1", "F1.2", "F1.3", "F1.4", "F1.5", "F1.6", "F1.7",
+                   "F1.8", "F1.9", "F1.10", "F1.11", "F1.12", "F1.13"]
     assert all(r.status == "PASS" for r in results)
+
+
+def test_check_table_range_pass(fake_redshift_guard):
+    r = f1._check_table_range("F1.12", "tabla a nivel evento tiene el mes", "db", "cluster", "user",
+                               "close_date", "schema.tabla", "2026-05")
+    assert r.status == "PASS"
+
+
+def test_check_table_range_warn_when_no_rows_in_month(monkeypatch, fake_redshift_guard):
+    fake, calls = fake_redshift_guard
+    fake.fetch_results = lambda sid: [{"n": 0, "max_seen": "2026-04-15"}]
+    r = f1._check_table_range("F1.12", "tabla a nivel evento tiene el mes", "db", "cluster", "user",
+                               "close_date", "schema.tabla", "2026-05")
+    assert r.status == "WARN"
+
+
+def test_check_table_range_uses_date_trunc_not_exact_match(fake_redshift_guard):
+    """Diferencia real con _check_table: una fila del 15 del mes debe contar — si usara
+    igualdad exacta contra el día 1, nunca matchearía nada en una tabla a nivel de evento."""
+    fake, calls = fake_redshift_guard
+    f1._check_table_range("F1.12", "x", "db", "cluster", "user",
+                           "close_date", "schema.tabla", "2026-05")
+    assert "DATE_TRUNC" in calls["run_query"][-1]

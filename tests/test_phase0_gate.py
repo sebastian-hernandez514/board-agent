@@ -80,6 +80,43 @@ def test_ceo_yaml_empty_lowlights_warns(isolated_paths):
     assert results["F0.5"].status == "WARN"
 
 
+def test_ceo_yaml_warns_when_content_is_for_a_different_month(isolated_paths):
+    """Reproduce el falso PASS encontrado 2026-07-08 simulando el flujo de junio-26: el YAML
+    real tenía texto de mayo, no vacío, sin placeholders — y F0.5 pasaba igual. Con el campo
+    'updated_for_month' presente y distinto del mes objetivo, ahora debe dar WARN."""
+    _seed_all_pass(isolated_paths)
+    _write_yaml(isolated_paths / "ceo.yaml", {
+        "ceo_title": "CEO Highlights", "highlights": ["a"], "lowlights": ["b"],
+        "updated_for_month": "2026-04",
+    })
+    results = _by_id(phase0_gate.run(MONTH))  # MONTH = "2026-05"
+    r = results["F0.5"]
+    assert r.status == "WARN"
+    assert "2026-04" in r.detail and "2026-05" in r.detail
+
+
+def test_ceo_yaml_passes_when_updated_for_month_matches(isolated_paths):
+    _seed_all_pass(isolated_paths)
+    _write_yaml(isolated_paths / "ceo.yaml", {
+        "ceo_title": "CEO Highlights", "highlights": ["a"], "lowlights": ["b"],
+        "updated_for_month": MONTH,
+    })
+    results = _by_id(phase0_gate.run(MONTH))
+    assert results["F0.5"].status == "PASS"
+    assert "sin campo" not in results["F0.5"].detail
+
+
+def test_ceo_yaml_pass_notes_month_unverified_when_field_missing(isolated_paths):
+    """Comportamiento hacia atrás: el ceo.yaml real de hoy no tiene 'updated_for_month' — debe
+    seguir dando PASS (no romper nada existente), pero el detail debe decir honestamente que
+    no se pudo verificar el mes, no fingir certeza como antes."""
+    _seed_all_pass(isolated_paths)
+    results = _by_id(phase0_gate.run(MONTH))
+    r = results["F0.5"]
+    assert r.status == "PASS"
+    assert "sin campo 'updated_for_month'" in r.detail
+
+
 def test_discussion_topics_placeholder_warns(isolated_paths):
     _seed_all_pass(isolated_paths)
     _write_yaml(isolated_paths / "discussion_topics.yaml",

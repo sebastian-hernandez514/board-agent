@@ -97,7 +97,7 @@ FASE 0 — Human Inputs Gate            ← DEBE DESAPARECER      ✅ implementa
 FASE 1 — Data Freshness Check         ← fuentes automáticas   ✅ implementada (phase1_freshness.py)
 FASE 2 — Metrics Computation          ← fetch_metrics.py      ✅ implementada (phase2_metrics.py)
 FASE 3 — HTML Builder                 ← generate.py + merge + fixes  ✅ implementada (phase3_html_builder.py)
-FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 15/16 reglas activas (phase4_validator.py)
+FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 16/16 reglas activas (phase4_validator.py)
 FASE 5 — Diff Review                  ← vs board anterior     ✅ implementada, 7/7 reglas activas incl. D7 (phase5_diff.py)
 FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ implementada, gate manual a propósito (phase6_pdf.py)
 ```
@@ -148,19 +148,34 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 
 **Propósito:** Verificar que las fuentes automáticas (Redshift) están accesibles y tienen datos del mes actual.
 
-**Checks:**
+**Checks — 14 en total (`board_agent/phase1_freshness.py::run()`, ampliado 2026-07-08 tras simular
+el flujo de junio-26 desde cero y encontrar que solo se cubrían 5 de las ~15 tablas reales que
+usa `fetch_metrics.py`):**
 
-| Check | Cómo | Blocker |
-|---|---|---|
-| SSO activo (`aws sts get-caller-identity`) | Shell | ✅ |
-| cluster-2 responde | Query trivial `SELECT 1` | ✅ |
-| cluster-1 responde | Query trivial `SELECT 1` | ✅ |
-| `fact_customers_mrr` tiene el mes actual | `MAX(date_month)` | ✅ |
-| `dm_retention.bi_customer_monthly_status` tiene el mes actual | `MAX(date_month)` | ✅ |
-| `fact_cac_version_segments` tiene el mes actual | `MAX(cohortmonth)` | ⚠️ Warning (Finance a veces tarda) |
-| `bi_accountant.accountant_master_table` tiene el mes actual | `MAX(date_month)` | ✅ |
+| ID | Check | Columna | Blocker |
+|---|---|---|---|
+| F1.0 | Sesión SSO activa (perfil `alegra`) | — | ✅ FAIL |
+| F1.1 | `dwh_facts.fact_customers_mrr` tiene el mes | `date_month` | ✅ FAIL |
+| F1.2 | `dm_retention.bi_customer_monthly_status` tiene el mes (cluster-1) | `date_month` | ✅ FAIL |
+| F1.3 | `db_finance.fact_cac_version_segments` tiene el mes | `cohortmonth` | ⚠️ WARN (Finance a veces tarda) |
+| F1.4 | `bi_accountant.accountant_master_table` tiene el mes | `date_month` | ✅ FAIL |
+| F1.5 | `dwh_dimensions.tb_trm_banrep` (FX) tiene el mes | `month` | ✅ FAIL |
+| F1.6 | `bi_alanube.fact_alanube_arr_walk` tiene el mes | `month_date` | ⚠️ WARN |
+| F1.7 | `bi_strategic.payback_cohort_results` tiene el mes | `cohort_month` | ⚠️ WARN |
+| F1.8 | `bi_strategic_relationships.fact_headcount_eop` tiene el mes | `fecha` | ⚠️ WARN |
+| F1.9 | `bi_strategic_relationships.fact_headcount_forecast` tiene el mes | `fecha` | ⚠️ WARN |
+| F1.10 | `bi_strategic_relationships.fact_headcount_movements` tiene el mes | `fecha` | ⚠️ WARN |
+| F1.11 | `db_retention.bi_churn_retired` tiene el mes | `date_month` | ⚠️ WARN |
+| F1.12 | `bi_sales.fact_closed_deals` tiene el mes (rango, no día exacto) | `close_date` | ⚠️ WARN |
+| F1.13 | `bi_sales.sales_actions` tiene el mes (rango, no día exacto) | `fecha` | ⚠️ WARN |
 
-**Output:** Reporte de disponibilidad. Si `fact_customers_mrr` no tiene el mes → blocker total.
+**Por qué F1.1/F1.2/F1.4/F1.5 son FAIL duro y el resto WARN:** esas 4 alimentan directamente el ARR/MRR total del slide 1 (incluida la conversión FX). Las demás alimentan slides específicas (Alanube, Payback, Headcount, Churned by tenure, funnel GTM) — importantes, pero no tumban el número principal del board si faltan.
+
+**Validado en vivo contra junio-26 (2026-07-08):** F1.1/F1.2/F1.4/F1.7-F1.13 en PASS; **F1.3, F1.5 y F1.6 en FAIL/WARN reales — `fact_cac_version_segments`, `tb_trm_banrep` y `fact_alanube_arr_walk` no tenían junio todavía** (max_seen = mayo-26 en las 3). No es un bug del check — son fuentes que de verdad no se habían actualizado. RACI: `tb_trm_banrep` → Luis Caro (avisa/escala), `fact_cac_version_segments` → Santiago González. `fact_alanube_arr_walk` sin dueño identificado todavía — pendiente.
+
+**No cubiertas todavía, a propósito** (ver comentario en el código): `amplitude_ac_events` (tabla de eventos crudos, potencialmente costosa de chequear), `associations_accounting_entities_to_companies` de HubSpot (tabla de mapeo sin grano mensual), `dim_headcount_team_category` (dimensión estática, no aplica).
+
+**Output:** Reporte de disponibilidad. Si alguno de los 4 FAIL duros no tiene el mes → blocker total, no se avanza a Fase 2.
 
 ---
 

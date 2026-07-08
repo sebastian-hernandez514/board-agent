@@ -4,6 +4,8 @@ Sistema que automatiza la generación del board ejecutivo mensual de Alegra: cal
 
 **¿Primera vez acá?** Si no eres del equipo técnico, empieza por el **[Playbook del Board](https://wiki.alegra.com/doc/playbook-del-board-como-colaborar-sin-depender-de-sebastian-6s5Xu0UKD4)** en la wiki de Alegra — explica qué es esto, cómo pedir acceso, el RACI de quién entrega qué, y cómo proponer un cambio sin saber programar.
 
+**¿Vas a correr el pipeline tú mismo por primera vez?** Lee **[`docs/ONBOARDING.md`](docs/ONBOARDING.md)** antes de tocar nada — tiene el checklist de prerrequisitos y el comando de diagnóstico (`check_setup.py`) que hay que correr primero.
+
 ## Qué hay en este repo
 
 | Carpeta/archivo | Qué es |
@@ -12,8 +14,10 @@ Sistema que automatiza la generación del board ejecutivo mensual de Alegra: cal
 | `skills/discussion-topic/` | Skill de self-service para agregar una slide de "Discussion Topic" al board sin depender de Sebastián |
 | `docs/AGENT_ARCHITECTURE.md` | Arquitectura técnica completa: las 6 fases, las 16 reglas del Validator, y qué falta por automatizar |
 | `docs/BOARD_PLAYBOOK_DRAFT.md` | Borrador del Playbook (la versión publicada vive en la wiki, enlace arriba) |
+| `docs/ONBOARDING.md` | Checklist de prerrequisitos para alguien nuevo — leer antes de correr el pipeline por primera vez |
+| `check_setup.py` | Diagnóstico de arranque (solo lectura) — corre esto antes que `run.py` |
 | `run.py` | Punto de entrada — corre el pipeline completo |
-| `tests/` | 131 tests automatizados |
+| `tests/` | 145 tests automatizados |
 
 ## Cómo correrlo
 

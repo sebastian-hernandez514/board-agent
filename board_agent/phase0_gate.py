@@ -64,6 +64,13 @@ def _check_pnl_actual(month: str) -> CheckResult:
 
 
 def _check_ceo_yaml(month: str) -> CheckResult:
+    """F0.5 daba un falso PASS hasta 2026-07-08: solo revisaba que highlights/lowlights no
+    estuvieran vacíos, nunca que fueran del mes correcto — se descubrió simulando el flujo de
+    junio-26 desde cero (el YAML tenía texto de mayo y el check igual pasaba en verde).
+    Fix backward-compatible: si alguien agrega la clave opcional 'updated_for_month' al YAML
+    (ej. 'updated_for_month: \"2026-06\"'), el check la compara contra el mes objetivo. Si el
+    campo no existe todavía (el ceo.yaml real de hoy no lo tiene), el check sigue funcionando
+    como antes pero deja explícito en el detail que no pudo verificar el mes — no finge certeza."""
     with open(paths.CEO_YAML, encoding="utf-8") as f:
         data = yaml.safe_load(f)
     highlights = data.get("highlights") or []
@@ -73,11 +80,19 @@ def _check_ceo_yaml(month: str) -> CheckResult:
     text_blob = " ".join(highlights + lowlights).lower()
     has_placeholder = any(m in text_blob for m in PLACEHOLDER_MARKERS)
     empty = not highlights or not lowlights
+    updated_for_month = data.get("updated_for_month")
+
     if empty or has_placeholder:
         return CheckResult("F0.5", "editorial/ceo.yaml sin placeholders vacíos", "WARN",
                             f"highlights={len(highlights)} lowlights={len(lowlights)} placeholder_detectado={has_placeholder}")
+    if updated_for_month is not None and updated_for_month != month:
+        return CheckResult("F0.5", "editorial/ceo.yaml sin placeholders vacíos", "WARN",
+                            f"contenido marcado como de '{updated_for_month}', pero se está generando '{month}' "
+                            f"— revisar si ya se actualizó el CEO commentary de este mes")
+    unverified_note = ("" if updated_for_month is not None else
+                        " — sin campo 'updated_for_month': no se puede verificar que el contenido sea del mes correcto, solo que no está vacío")
     return CheckResult("F0.5", "editorial/ceo.yaml sin placeholders vacíos", "PASS",
-                        f"highlights={len(highlights)} lowlights={len(lowlights)} (título: '{data.get('ceo_title')}', esperado mes: {label})")
+                        f"highlights={len(highlights)} lowlights={len(lowlights)} (título: '{data.get('ceo_title')}', esperado mes: {label}){unverified_note}")
 
 
 def _check_discussion_topics() -> CheckResult:
