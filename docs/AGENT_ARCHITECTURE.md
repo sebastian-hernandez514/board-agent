@@ -292,10 +292,10 @@ ver `memory/project_board_collaboration_roadmap.md`):**
 |---|---|
 | R17 | Net Revenue / Gross Margin / EBITDA Margin (P&L) presentes y no vacíos — ✅ implementada 2026-07-08, junto con bajar F0.4 de FAIL a WARN (ver sección Fase 0). Es el freno real si Finance no ha mandado el P&L del mes: antes bloqueaba todo desde el inicio, ahora el board se arma completo y este check lo detiene acá, antes de aprobar. |
 
-Candidatos evaluados y **descartados** por ahora (riesgo real de falsos positivos, no solo teórico):
+Candidatos evaluados y **descartados** (riesgo real de falsos positivos, no solo teórico):
 - "Todo `.slide-header` debe traer `.title` y `.period`" — **falso**: `8_appendix.j2` tiene 3 slides de "Churned companies breakdown" con header solo-título, legítimo. Verificado con grep contra los 8 templates antes de escribir la regla.
-- Paleta de colores permitida (grep de hex codes) — alto riesgo de falsos positivos: hay colores semánticos legítimos fuera de los tokens de `base.css` (ej. verde/ámbar/rojo de NPS, morado de banners) que no son errores de diseño.
-- Detección real de overflow de texto — requeriría Playwright (mismo approach que `generate_pdf.py`) renderizando cada slide y midiendo `scrollHeight` vs `clientHeight`. Es el check que de verdad atraparía "el diseño se rompió", pero no se implementó esta sesión — mayor esfuerzo, decidido con el usuario 2026-07-06 quedarse con las reglas estructurales rápidas por ahora.
+- ~~Detección real de overflow de texto~~ — ✅ implementada 2026-07-08 como **R18** (ver tabla de arriba).
+- **Paleta de colores permitida** — evaluado a fondo 2026-07-08, no solo en teoría: se comparó la paleta oficial de Alegra (Design MCP, `color.*`) contra los colores reales de `styles/base.css` — solo 6/14 coinciden exactamente, el resto (`#0f172b`, `#14b8a6`, `#9ca3af`, `#c2410c`, `#e5e7eb`, `#ffedd5`) son elegidos a mano para este board, no vienen del design system de producto. Además cada template mete sus propios acentos (`#534AB7`/`#1D9E75` Core/Lite en `3_arr_walk.j2`) — el universo real es **169 colores hex distintos** entre `base.css` + los 8 `.j2`, sin curaduría central. Una regla "avisa si el color no está en la paleta X" dispararía con cualquier acento nuevo legítimo. Se le propuso al usuario una versión angosta de bajo ruido (detector de casi-duplicados/typos, ej. `#534ab6` vs `#534ab7`) — decidió explícitamente no construirla. Descartado, no solo pospuesto.
 
 **Output:** Reporte PASS/FAIL por regla con los valores que fallan. Si alguna regla dura falla → no avanzar a versión final sin revisión humana explícita.
 
