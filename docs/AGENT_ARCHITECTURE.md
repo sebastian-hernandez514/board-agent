@@ -97,7 +97,7 @@ FASE 0 — Human Inputs Gate            ← DEBE DESAPARECER      ✅ implementa
 FASE 1 — Data Freshness Check         ← fuentes automáticas   ✅ implementada (phase1_freshness.py)
 FASE 2 — Metrics Computation          ← fetch_metrics.py      ✅ implementada (phase2_metrics.py)
 FASE 3 — HTML Builder                 ← generate.py + merge + fixes  ✅ implementada (phase3_html_builder.py)
-FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 17/17 reglas activas (phase4_validator.py)
+FASE 4 — Business Rules Validator     ← las reglas duras      ✅ implementada, 18/18 reglas activas (phase4_validator.py)
 FASE 5 — Diff Review                  ← vs board anterior     ✅ implementada, 7/7 reglas activas incl. D7 (phase5_diff.py)
 FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ implementada, gate manual a propósito (phase6_pdf.py)
 ```
@@ -284,6 +284,7 @@ ver `memory/project_board_collaboration_roadmap.md`):**
 | # | Regla |
 |---|---|
 | R16 | Ningún slide-shell (`SLIDE_CLASS_TOKENS`) fuerza width/height en px vía inline style — protege el 960×540 que viene de `--slide-width`/`--slide-height` en `base.css` — ✅ implementada 2026-07-06, verificado 0 falsos positivos contra los 8 templates reales |
+| R18 | Ningún slide-shell recorta contenido en silencio por overflow — compara `scrollHeight`/`scrollWidth` (contenido real) contra `clientHeight`/`clientWidth` (espacio visible) con Playwright, sobre el HTML ya generado — ✅ implementada 2026-07-08 (Bloque 4 del roadmap de colaboración). Empieza en **WARN**, no FAIL (regla nueva, decisión del usuario). Requiere Playwright + Chromium instalados; si no están, SKIP explícito — no es una dependencia dura de `run.py`. Validado en vivo contra `board_standalone.html` real: encontró un hallazgo genuino de +3px en la slide "Acquisition Funnel" (probable redondeo de un canvas de Chart.js, no un bug visual perceptible) — evidencia de que la regla funciona, no solo teoría. `.board-slide` (Template 4) usa `min-height`, no `height` — nunca dispara esta regla, es un comportamiento distinto fuera de alcance. |
 
 **Regla de completitud de datos externos:**
 
@@ -406,7 +407,7 @@ uv run --with playwright --with pillow python scripts/generate_pdf.py
                                        │
                     ┌──────────────────▼──────────────────────┐
                     │         FASE 4: Validator               │
-                    │  17 reglas duras + consistencia         │
+                    │  18 reglas duras + consistencia         │
                     └──────────────────┬──────────────────────┘
                                        │
                     ┌──────────────────▼──────────────────────┐

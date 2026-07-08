@@ -19,9 +19,15 @@ existe (metrics.yaml viejo sin arr_walk_raw_buckets, o HTML no disponible), no p
 
 R16 (cumplimiento de diseño, agregada 2026-07-06) también cae a SKIP si no encuentra ningún
 elemento con clase de slide-shell en el HTML — ver docstring de _check_r16_slide_dimensions.
+
+R18 (overflow de texto, agregada 2026-07-08 — Bloque 4 del roadmap de colaboración, ver
+memory/project_board_collaboration_roadmap.md) requiere Playwright + Chromium instalados;
+si no están disponibles, SKIP — no es una dependencia dura del pipeline. Arranca en WARN por
+decisión explícita del usuario (regla nueva, sin historial de falsos positivos todavía).
 """
 
 import csv
+import json
 import re
 import sys
 from pathlib import Path
@@ -179,6 +185,84 @@ def _check_r16_slide_dimensions(html_path: Path) -> CheckResult:
                             f"{len(violations)}/{checked} slides con width/height px inline: {sample}")
     return CheckResult("R16", "Ningún slide-shell fuerza dimensión px inline", "PASS",
                         f"{checked} slides verificados, sin overrides de dimensión")
+
+
+_R18_TOLERANCE_PX = 2
+
+
+def _check_r18_slide_overflow(html_path: Path) -> CheckResult:
+    """R18 — primera regla de "overflow de texto" del Bloque 4 (ver docs/AGENT_ARCHITECTURE.md
+    sección 6 y memory/project_board_collaboration_roadmap.md). Los slide-shells con altura fija
+    (`.slide`, `.hc-slide`, `.dt-slide`, `.gtm-slide` — confirmado en Template Board/styles/base.css
+    y cada template) usan `overflow: hidden`: si el contenido real excede 960×540, el navegador lo
+    recorta EN SILENCIO, sin ningún aviso visual ni error — exactamente el riesgo ya documentado en
+    skills/ceo-highlights/SKILL.md (Regla de oro #1: "el contenido que se desborda se corta en
+    silencio — no hay scroll ni aviso"). Esta regla lo detecta comparando scrollHeight/scrollWidth
+    (contenido real) contra clientHeight/clientWidth (espacio visible) con Playwright.
+
+    `.board-slide` (Template 4) usa `min-height`, no `height` — crece en vez de recortar, así que
+    nunca dispara esta regla; es un comportamiento distinto, fuera de alcance aquí.
+
+    Requiere Playwright + Chromium instalados (`uv run --with playwright python -m playwright
+    install chromium`, una vez por entorno) — si no están disponibles, SKIP explícito. No es una
+    dependencia dura del pipeline: el flujo normal (`run.py` sin ese extra) sigue funcionando igual,
+    solo sin esta regla activa.
+
+    Arranca en WARN, no FAIL (decisión explícita del usuario, 2026-07-08) — es una regla nueva sin
+    historial de falsos positivos todavía, mismo criterio que se usó para F0.4→R17."""
+    label = "Ningún slide-shell recorta contenido en silencio (overflow)"
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        return CheckResult("R18", label, "SKIP",
+                            "playwright no está instalado — correr con "
+                            "'uv run --with playwright python run.py ...' para habilitar esta regla")
+
+    if not html_path.exists():
+        return CheckResult("R18", label, "SKIP", f"no existe {html_path}")
+
+    tokens_json = json.dumps(sorted(paths.SLIDE_CLASS_TOKENS))
+    js = """() => {
+        const tokens = __TOKENS__;
+        const out = [];
+        document.querySelectorAll('div').forEach(el => {
+            const classes = el.className.split(/\\s+/);
+            if (!classes.some(c => tokens.includes(c))) return;
+            out.push({
+                classes: el.className,
+                overflowY: el.scrollHeight - el.clientHeight,
+                overflowX: el.scrollWidth - el.clientWidth,
+                text: (el.innerText || '').trim().slice(0, 60),
+            });
+        });
+        return out;
+    }""".replace("__TOKENS__", tokens_json)
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page(viewport={"width": 1000, "height": 600})
+            page.goto(html_path.resolve().as_uri())
+            raw = page.evaluate(js)
+            browser.close()
+    except Exception as e:
+        return CheckResult("R18", label, "SKIP", f"error corriendo Playwright: {e}")
+
+    checked = len(raw)
+    if checked == 0:
+        return CheckResult("R18", label, "SKIP",
+                            "no se encontró ningún elemento con clase de slide-shell en el HTML")
+
+    violations = [r for r in raw if r["overflowY"] > _R18_TOLERANCE_PX or r["overflowX"] > _R18_TOLERANCE_PX]
+    if violations:
+        sample = "; ".join(
+            f'"{v["classes"]}" (+{max(v["overflowY"], 0)}px vert, +{max(v["overflowX"], 0)}px horiz) '
+            f'"{v["text"]}"'
+            for v in violations[:3]
+        )
+        return CheckResult("R18", label, "WARN",
+                            f"{len(violations)}/{checked} slides con contenido desbordado: {sample}")
+    return CheckResult("R18", label, "PASS", f"{checked} slides verificados, sin desbordes")
 
 
 def _count_slides(html_path: Path) -> int:
@@ -424,5 +508,6 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
 
     results.extend(_check_color_rules(html_path))
     results.append(_check_r16_slide_dimensions(html_path))
+    results.append(_check_r18_slide_overflow(html_path))
 
     return results

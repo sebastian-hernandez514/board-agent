@@ -53,7 +53,7 @@ def test_smoke_against_real_may_2026_data():
     # que R17 da FAIL acá por un hueco del fixture, no porque el board real de mayo no tuviera P&L.
     assert by_id["R17"].status == "FAIL"
 
-    for rid in ("R5", "R7", "R11", "R13", "R14", "R15"):
+    for rid in ("R5", "R7", "R11", "R13", "R14", "R15", "R18"):
         assert by_id[rid].status == "SKIP"
 
 
@@ -523,3 +523,152 @@ def test_r16_fails_when_attribute_is_interleaved_between_class_and_style(tmp_pat
     html_path = _write_raw_html(tmp_path, '<div class="dt-slide" id="foo" style="height:400px;">roto</div>')
     results = _run_with_html(tmp_path, html_path)
     assert _results_by_id(results)["R16"].status == "FAIL"
+
+
+class _FakePageR18:
+    def __init__(self, evaluate_result):
+        self._result = evaluate_result
+        self.goto_calls = []
+
+    def goto(self, uri):
+        self.goto_calls.append(uri)
+
+    def evaluate(self, js):
+        return self._result
+
+
+class _FakeBrowserR18:
+    def __init__(self, page):
+        self._page = page
+        self.closed = False
+
+    def new_page(self, viewport=None):
+        return self._page
+
+    def close(self):
+        self.closed = True
+
+
+class _FakeChromiumR18:
+    def __init__(self, browser):
+        self._browser = browser
+
+    def launch(self):
+        return self._browser
+
+
+class _FakePlaywrightContextR18:
+    def __init__(self, browser):
+        self.chromium = _FakeChromiumR18(browser)
+
+
+class _FakeSyncPlaywrightR18:
+    def __init__(self, browser):
+        self._browser = browser
+
+    def __enter__(self):
+        return _FakePlaywrightContextR18(self._browser)
+
+    def __exit__(self, *exc):
+        return False
+
+
+@pytest.fixture
+def fake_playwright_r18(monkeypatch):
+    """Inyecta un módulo playwright.sync_api falso en sys.modules — playwright no es
+    dependencia del proyecto (ver pyproject.toml), así que el import local dentro de
+    _check_r18_slide_overflow debe resolverse contra este doble, no contra el paquete real."""
+
+    def _install(evaluate_result):
+        page = _FakePageR18(evaluate_result)
+        browser = _FakeBrowserR18(page)
+        fake_module = types.ModuleType("playwright.sync_api")
+        fake_module.sync_playwright = lambda: _FakeSyncPlaywrightR18(browser)
+        monkeypatch.setitem(sys.modules, "playwright", types.ModuleType("playwright"))
+        monkeypatch.setitem(sys.modules, "playwright.sync_api", fake_module)
+        return page
+
+    return _install
+
+
+def test_r18_skip_when_playwright_not_installed(tmp_path):
+    """El entorno de test no declara playwright como dependencia (ver pyproject.toml) — R18
+    debe degradar a SKIP en vez de tumbar el resto del Validator."""
+    html_path = _write_raw_html(tmp_path, '<div class="dt-slide">contenido normal</div>')
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R18"]
+    assert r.status == "SKIP"
+    assert "playwright" in r.detail.lower()
+
+
+def test_r18_skip_when_html_missing(fake_playwright_r18):
+    fake_playwright_r18([])
+    results = phase4_validator.run(metrics_path=FIXTURE, html_path=MISSING_HTML)
+    r = _results_by_id(results)["R18"]
+    assert r.status == "SKIP"
+    assert "no existe" in r.detail
+
+
+def test_r18_skip_when_no_slide_shell_found(tmp_path, fake_playwright_r18):
+    fake_playwright_r18([])
+    html_path = _write_raw_html(tmp_path, '<div class="not-a-slide">x</div>')
+    results = _run_with_html(tmp_path, html_path)
+    assert _results_by_id(results)["R18"].status == "SKIP"
+
+
+def test_r18_pass_when_no_overflow(tmp_path, fake_playwright_r18):
+    fake_playwright_r18([{"classes": "dt-slide", "overflowY": 0, "overflowX": 0, "text": "todo bien"}])
+    html_path = _write_raw_html(tmp_path, '<div class="dt-slide">todo bien</div>')
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R18"]
+    assert r.status == "PASS"
+    assert "1 slides verificados" in r.detail
+
+
+def test_r18_warns_when_slide_content_overflows(tmp_path, fake_playwright_r18):
+    """Reproduce el riesgo real documentado en skills/ceo-highlights/SKILL.md: contenido que
+    excede el slide fijo de 960x540 y se recorta en silencio por overflow:hidden."""
+    fake_playwright_r18([
+        {"classes": "slide", "overflowY": 45, "overflowX": 0, "text": "CEO Highlights & Lowlights..."},
+    ])
+    html_path = _write_raw_html(tmp_path, '<div class="slide">mucho contenido</div>')
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R18"]
+    assert r.status == "WARN"
+    assert "1/1 slides" in r.detail
+
+
+def test_r18_ignores_overflow_within_tolerance(tmp_path, fake_playwright_r18):
+    """1px de diferencia es ruido de redondeo del navegador, no un desborde real."""
+    fake_playwright_r18([{"classes": "slide", "overflowY": 1, "overflowX": 0, "text": "x"}])
+    html_path = _write_raw_html(tmp_path, '<div class="slide">x</div>')
+    results = _run_with_html(tmp_path, html_path)
+    assert _results_by_id(results)["R18"].status == "PASS"
+
+
+def test_r18_skip_on_playwright_runtime_error(tmp_path, monkeypatch):
+    """Si Chromium no está instalado (browser.launch() revienta), R18 no debe tumbar el resto
+    del Validator — debe degradar a SKIP con el error, mismo criterio que R7 con Redshift."""
+
+    class _BoomChromium:
+        @staticmethod
+        def launch():
+            raise RuntimeError("Executable doesn't exist")
+
+    class _BoomContext:
+        def __enter__(self):
+            return types.SimpleNamespace(chromium=_BoomChromium())
+
+        def __exit__(self, *exc):
+            return False
+
+    fake_module = types.ModuleType("playwright.sync_api")
+    fake_module.sync_playwright = lambda: _BoomContext()
+    monkeypatch.setitem(sys.modules, "playwright", types.ModuleType("playwright"))
+    monkeypatch.setitem(sys.modules, "playwright.sync_api", fake_module)
+
+    html_path = _write_raw_html(tmp_path, '<div class="slide">x</div>')
+    results = _run_with_html(tmp_path, html_path)
+    r = _results_by_id(results)["R18"]
+    assert r.status == "SKIP"
+    assert "Executable" in r.detail

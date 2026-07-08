@@ -25,7 +25,7 @@ El sistema corre en 6 pasos (fases), uno después del otro:
 | 1 — Data Freshness | Revisa que Redshift tenga los datos del mes que se va a generar | "¿Ya está la información del mes cerrado?" |
 | 2 — Metrics Computation | Calcula todos los números (ARR, MRR, Churn, etc.) | "Hacer las cuentas" |
 | 3 — HTML Builder | Arma el HTML final del board con esos números | "Armar las slides" |
-| 4 — Validator | Revisa que los números cuadren entre sí (17 reglas hoy) — por ejemplo, que el ARR total sí incluya Alanube | "¿Esto tiene sentido matemáticamente?" |
+| 4 — Validator | Revisa que los números cuadren entre sí (18 reglas hoy) — por ejemplo, que el ARR total sí incluya Alanube | "¿Esto tiene sentido matemáticamente?" |
 | 5 — Diff Review | Compara este board contra el mes anterior y avisa si algo cambió mucho de golpe | "¿Hay algo raro que valga la pena revisar antes de mandarlo?" |
 | 6 — PDF | Genera el PDF final, solo cuando alguien lo aprueba a mano | "Ya quedó, generar el PDF" |
 
@@ -142,6 +142,7 @@ pedir una captura de la slide ya generada, sin abrir un HTML ni correr el flujo 
 | Un discussion topic tiene la imagen rota | Imagen no se embebió en base64 al crearla | Ver Regla de oro #4 de la skill de discussion topics |
 | No tengo acceso a GitHub | No te han invitado al repo todavía | Pedir a Sebastián que te agregue con tu usuario de GitHub |
 | Un número del board no cuadra con otro | El Validator (Fase 4) debería haberlo bloqueado | Avisar — puede ser una regla nueva que hace falta agregar |
+| Una slide se ve con texto o una tabla cortada | Demasiado contenido para el tamaño fijo de la slide (960×540) — el Validator lo avisa (regla R18) pero no lo bloquea todavía | Recortar el contenido (ej. un highlight de menos) y volver a generar |
 
 ---
 
