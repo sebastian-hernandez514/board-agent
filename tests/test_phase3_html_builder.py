@@ -323,9 +323,9 @@ def _write_nps_snapshot(tmp_path, months):
 
 _RD_WITH_NPS_SLIDE = '''<html><head></head><body>
   <!-- SLIDE 1 — Section Cover -->
-  <div class="slide section-cover">portada</div>
+  <div class="slide section-cover">portada, clase distinta a "slide", no se toca</div>
   <!-- SLIDE 2 — Product Performance -->
-  <div class="slide">product performance, no debe tocarse</div>
+  <div class="slide">product performance de mayo</div>
   <!-- SLIDE 3 — NPS Alegra -->
   <div class="slide">
     <div class="slide-header"><span class="title">NPS Alegra Accounting</span></div>
@@ -350,11 +350,13 @@ def test_flag_stale_nps_pass_when_month_present(tmp_path, isolated_dirs):
     assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
 
 
-def test_flag_stale_nps_warns_and_overlays_only_nps_slide(tmp_path, isolated_dirs):
-    """Reproduce el crash real: generate.py truena armando NPS para junio porque
-    nps_snapshot.yaml no tiene esa entrada, y output/6_rd.html se queda con mayo. Debe taparse
-    SOLO la slide de NPS — Product Performance (misma clase .slide, problema #4 distinto) debe
-    quedar intacta."""
+def test_flag_stale_nps_warns_and_overlays_whole_file(tmp_path, isolated_dirs):
+    """Reproduce el crash real, con el alcance correcto: generate.py truena armando NPS para
+    junio (nps_snapshot.yaml sin esa entrada) y, como Jinja2 renderiza el archivo entero de una
+    sola pasada, TODO output/6_rd.html queda sin regenerar — no solo NPS, también Product
+    Performance (que de otro modo sí tomaría el mes correcto). Ambas slides .slide deben
+    taparse; la portada (clase "slide section-cover", no coincide exacto con "slide") queda
+    fuera de alcance a propósito — solo muestra un título de sección + quarter_label, no datos."""
     data_dir, output_dir = isolated_dirs
     html_path = output_dir / "6_rd.html"
     html_path.write_text(_RD_WITH_NPS_SLIDE, encoding="utf-8")
@@ -363,17 +365,19 @@ def test_flag_stale_nps_warns_and_overlays_only_nps_slide(tmp_path, isolated_dir
     r = f3._flag_stale_nps("2026-06")
     assert r.status == "WARN"
     assert "2026-06" in r.detail
+    assert "Product Performance" in r.detail
 
     new_html = html_path.read_text(encoding="utf-8")
-    assert new_html.count('class="stale-overlay"') == 1
-    assert "product performance, no debe tocarse" in new_html
+    assert new_html.count('class="stale-overlay"') == 2
+    assert new_html.count('class="slide stale-slide"') == 2  # Product Performance + NPS
+    assert "product performance de mayo" in new_html  # conservado, solo tapado
     assert "contenido real de NPS de mayo" in new_html  # conservado, solo tapado
-    assert new_html.count('class="slide stale-slide"') == 1
+    assert 'class="slide section-cover"' in new_html  # portada NO tocada (clase distinta)
 
 
-def test_flag_stale_nps_skip_when_marker_not_found(tmp_path, isolated_dirs):
+def test_flag_stale_nps_skip_when_no_slide_found(tmp_path, isolated_dirs):
     data_dir, output_dir = isolated_dirs
-    (output_dir / "6_rd.html").write_text("<html><body>sin el marcador esperado</body></html>",
+    (output_dir / "6_rd.html").write_text("<html><body>sin ninguna slide</body></html>",
                                             encoding="utf-8")
     _write_nps_snapshot(tmp_path, ["2026-05"])
     r = f3._flag_stale_nps("2026-06")

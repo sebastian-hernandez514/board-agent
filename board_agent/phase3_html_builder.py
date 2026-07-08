@@ -219,13 +219,21 @@ def _flag_stale_ceo_highlights(month: str) -> CheckResult:
 
 def _flag_stale_nps(month: str) -> CheckResult:
     """F3.7 — ver F0.10 en phase0_gate.py para la causa raíz completa. Cuando
-    nps_snapshot.yaml no tiene el mes objetivo, generate.py truena armando esta slide
-    ('None' has no attribute 'costa_rica_trend') y output/6_rd.html se queda con la versión
-    del mes anterior sin avisar. 6_rd.j2 mezcla 3 slides distintas (portada, Product
-    Performance, NPS) bajo la misma clase genérica .slide — igual que CEO Highlights, se
-    ubica y tapa SOLO la slide de NPS por su comentario HTML, dejando Product Performance
-    intacta (esa es un problema distinto, ver hallazgo #4 pendiente). WARN, no FAIL."""
-    label = "NPS — ocultar visualmente si está desactualizado"
+    nps_snapshot.yaml no tiene el mes objetivo, generate.py truena armando la slide de NPS
+    ('None' has no attribute 'costa_rica_trend').
+
+    Alcance corregido 2026-07-08 (mismo día, segunda pasada): la primera versión de esta
+    función tapaba SOLO la slide de NPS, asumiendo que Product Performance (la otra slide de
+    contenido en el mismo archivo) seguía fresca. Falso — confirmado leyendo generate.py:
+    `html = tmpl.render(...)` se ejecuta ANTES de `out_f.write_text(html)`; si `render()` lanza
+    una excepción, ese `write_text` nunca se llama, así que `output/6_rd.html` queda
+    COMPLETO sin regenerar (Jinja2 renderiza el archivo entero de una sola pasada, no
+    slide por slide) — no es solo la slide de NPS la que queda vieja, es TODO el archivo,
+    incluida Product Performance (que si se regenerara sí tomaría el mes correcto, porque usa
+    `config.month_label` dinámico — confirmado, no es el hallazgo #4 un bug aparte, es un
+    síntoma de este mismo crash). Por eso ahora se tapa TODO el archivo (mismo mecanismo que
+    F3.4/F3.5), no solo la slide de NPS."""
+    label = "6_rd (Product Performance + NPS) — ocultar visualmente si está desactualizado"
     html_path = paths.OUTPUT_DIR / "6_rd.html"
     if not html_path.exists():
         return CheckResult("F3.7", label, "SKIP", f"no existe {html_path}")
@@ -240,15 +248,15 @@ def _flag_stale_nps(month: str) -> CheckResult:
         return CheckResult("F3.7", label, "PASS", f"snapshot de '{month}' presente, no se oculta nada")
 
     html = html_path.read_text(encoding="utf-8")
-    new_html, n = _overlay_single_slide_by_marker(
-        html, "SLIDE 3 — NPS Alegra", "slide", "NPS", "un mes anterior")
+    new_html, n = _overlay_stale_slides(html, "slide", "R&D — Product Performance & NPS", "un mes anterior")
     if n == 0:
-        return CheckResult("F3.7", label, "SKIP", "no se encontró la slide de NPS en el HTML")
+        return CheckResult("F3.7", label, "SKIP", "no se encontró ninguna slide en el HTML")
     html_path.write_text(new_html, encoding="utf-8")
 
     return CheckResult("F3.7", label, "WARN",
-                        f"1 slide de NPS oculta con overlay — nps_snapshot.yaml no tiene entrada '{month}', "
-                        f"generate.py no pudo armar esta slide con datos del mes correcto.")
+                        f"{n} slides de 6_rd.html ocultas con overlay — nps_snapshot.yaml no tiene entrada "
+                        f"'{month}', generate.py truena armando NPS y deja TODO el archivo sin regenerar "
+                        f"(incluida Product Performance, que de otro modo sí estaría al día).")
 
 
 def _flag_stale_financial_performance(month: str) -> CheckResult:
