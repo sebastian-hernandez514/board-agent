@@ -229,8 +229,9 @@ usa `fetch_metrics.py`):**
 **Pasos en orden:**
 
 1. `generate.py` → `output/1_inicio.html`, ..., `output/8_appendix.html`
-2. `merge_standalone.py` → `output/board_standalone.html`
-3. Re-embed imagen CRI (`cr-landing-icp.png` → base64) en `output/2_discussion_topic.html` y en el standalone ← **paso que hoy se hace manualmente y siempre se olvida**
+2. Re-embed imagen CRI (`cr-landing-icp.png` → base64) en `output/2_discussion_topic.html` ← paso que antes se hacía manualmente y siempre se olvidaba
+3. **F3.4 (agregada 2026-07-08):** si el `<title>` de `output/4_financial_performance.html` sigue en el mes anterior (mismo hallazgo real que F0.9), tapa visualmente cada `.board-slide` con un overlay "contenido pendiente" — en vez de publicar los números de Finance del mes pasado disfrazados de mes actual. Solo escribe en el `output/*.html` ya generado, nunca en el `.j2` fuente (mismo límite que el re-embed de imágenes). No borra ni reescribe el contenido existente (regex sobre HTML anidado es frágil) — inserta un `<div>` hermano con `position:absolute;inset:0` que lo cubre por completo. WARN, no FAIL. Validado en vivo con Playwright contra el `output/4_financial_performance.html` real de junio: las 6 slides quedaron en blanco con el mensaje, contenido original intacto debajo.
+4. `merge_standalone.py` → `output/board_standalone.html` (ya incluye el overlay de F3.4 si aplicó)
 
 **Templates y su fuente de datos:**
 

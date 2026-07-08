@@ -89,6 +89,63 @@ def test_reembed_cr_image_embeds_multiple_images_in_same_month(isolated_dirs):
     assert "data:image/jpeg;base64," in new_html
 
 
+def test_flag_stale_financial_performance_skips_when_html_missing(isolated_dirs):
+    r = f3._flag_stale_financial_performance("2026-06")
+    assert r.status == "SKIP"
+
+
+def test_flag_stale_financial_performance_skips_when_title_pattern_missing(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    (output_dir / "4_financial_performance.html").write_text("<title>Alegra Board</title>", encoding="utf-8")
+    r = f3._flag_stale_financial_performance("2026-06")
+    assert r.status == "SKIP"
+
+
+def test_flag_stale_financial_performance_pass_when_title_matches(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "4_financial_performance.html"
+    html_path.write_text(
+        '<html><head><title>Alegra Board — Financial Performance · June 2026</title></head>'
+        '<body><div class="board-slide">contenido real</div></body></html>', encoding="utf-8")
+    r = f3._flag_stale_financial_performance("2026-06")
+    assert r.status == "PASS"
+    assert html_path.read_text(encoding="utf-8").count("contenido real") == 1
+    assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
+
+
+def test_flag_stale_financial_performance_warns_and_overlays_when_title_is_old(isolated_dirs):
+    """Reproduce el bug real reportado por el usuario: generó el board de junio y Template 4
+    seguía diciendo 'May 2026'. Debe taparse visualmente, no reescribir/borrar el contenido."""
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "4_financial_performance.html"
+    html_path.write_text(
+        '<html><head><title>Alegra Board — Financial Performance · May 2026</title></head>'
+        '<body>'
+        '<div class="board-slide">slide 1 vieja</div>'
+        '<div class="board-slide">slide 2 vieja</div>'
+        '</body></html>', encoding="utf-8")
+
+    r = f3._flag_stale_financial_performance("2026-06")
+    assert r.status == "WARN"
+    assert "May 2026" in r.detail and "2026-06" in r.detail
+
+    new_html = html_path.read_text(encoding="utf-8")
+    assert new_html.count("stale-overlay") >= 2  # una por cada .board-slide (CSS + 2 overlays = 3, pero al menos 2)
+    assert "slide 1 vieja" in new_html  # el contenido original NO se borra, solo se tapa
+    assert "slide 2 vieja" in new_html
+    assert 'class="board-slide" style="position:relative"' in new_html
+
+
+def test_flag_stale_financial_performance_skip_when_no_board_slide_found(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "4_financial_performance.html"
+    html_path.write_text(
+        '<title>Alegra Board — Financial Performance · May 2026</title><body>sin slides</body>',
+        encoding="utf-8")
+    r = f3._flag_stale_financial_performance("2026-06")
+    assert r.status == "SKIP"
+
+
 def test_run_stops_early_if_generate_fails(monkeypatch, isolated_dirs):
     monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _FakeProc(1, stderr="boom"))
     results = f3.run("2026-05")
@@ -111,10 +168,11 @@ def test_run_stops_before_merge_reembed_still_runs(monkeypatch, isolated_dirs):
 
     results = f3.run("2026-05")
     ids = [r.id for r in results]
-    assert ids == ["F3.1", "F3.2", "F3.3"]
+    assert ids == ["F3.1", "F3.2", "F3.4", "F3.3"]
     assert results[0].status == "PASS"
     assert results[1].status == "WARN"  # imagen no existe en este test
-    assert results[2].status == "PASS"
+    assert results[2].status == "SKIP"  # no hay 4_financial_performance.html en este test
+    assert results[3].status == "PASS"
     assert calls["n"] == 2  # generate.py + merge_standalone.py
 
 

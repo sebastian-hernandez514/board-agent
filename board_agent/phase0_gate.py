@@ -158,6 +158,21 @@ def _check_config_month(month: str) -> CheckResult:
 _TEMPLATE4_TITLE_RE = re.compile(r"Financial Performance\s*·\s*(\w+)\s+(\d{4})", re.IGNORECASE)
 
 
+def extract_financial_performance_title_month(html: str):
+    """Extrae '{Mes} {Año}' y el mes en formato 'YYYY-MM' del <title> de Template 4 (convención
+    ya existente: "Financial Performance · May 2026"). Devuelve (label, 'YYYY-MM') o (None, None)
+    si no se pudo parsear. Compartida entre F0.9 (Fase 0, solo lectura del .j2 fuente) y F3.4
+    (Fase 3, post-procesa el output/*.html ya generado) — mismo parseo, un solo lugar."""
+    m = _TEMPLATE4_TITLE_RE.search(html)
+    if not m:
+        return None, None
+    month_name, year = m.group(1), m.group(2)
+    month_num = MESES_EN.get(month_name.lower())
+    if month_num is None:
+        return None, None
+    return f"{month_name} {year}", f"{year}-{month_num:02d}"
+
+
 def _check_financial_performance_month(month: str) -> CheckResult:
     """F0.9 — ver nota de módulo. Template 4 es HTML completo pegado a mano por Sofía Maldonado
     cada mes (ver RACI en docs/BOARD_PLAYBOOK_DRAFT.md) — no es YAML, no puede tener un campo
@@ -172,22 +187,16 @@ def _check_financial_performance_month(month: str) -> CheckResult:
     except Exception as e:
         return CheckResult("F0.9", label, "SKIP", f"error: {e}")
 
-    m = _TEMPLATE4_TITLE_RE.search(html)
-    if not m:
+    found_label, found_month = extract_financial_performance_title_month(html)
+    if found_month is None:
         return CheckResult("F0.9", label, "SKIP",
                             "no se encontró el patrón 'Financial Performance · Mes AAAA' en el <title>")
 
-    month_name, year = m.group(1).lower(), m.group(2)
-    month_num = MESES_EN.get(month_name)
-    if month_num is None:
-        return CheckResult("F0.9", label, "SKIP", f"mes '{m.group(1)}' del <title> no reconocido")
-
-    found_month = f"{year}-{month_num:02d}"
     if found_month != month:
         return CheckResult("F0.9", label, "WARN",
-                            f"el <title> dice '{m.group(1)} {year}' pero se está generando '{month}' — "
+                            f"el <title> dice '{found_label}' pero se está generando '{month}' — "
                             f"avisar a Sofía Maldonado si todavía no mandó el HTML de Financial Performance de este mes")
-    return CheckResult("F0.9", label, "PASS", f"<title> dice '{m.group(1)} {year}', coincide")
+    return CheckResult("F0.9", label, "PASS", f"<title> dice '{found_label}', coincide")
 
 
 def _check_arr_walk_yaml() -> CheckResult:
