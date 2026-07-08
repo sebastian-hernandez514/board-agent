@@ -35,6 +35,7 @@ def isolated_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, "ARR_WALK_YAML", tmp_path / "arr_walk.yaml")
     monkeypatch.setattr(paths, "CONFIG_YAML", tmp_path / "config.yaml")
     monkeypatch.setattr(paths, "FINANCIAL_PERFORMANCE_TEMPLATE", tmp_path / "4_financial_performance.j2")
+    monkeypatch.setattr(paths, "NPS_SNAPSHOT_YAML", tmp_path / "nps_snapshot.yaml")
     monkeypatch.setattr(paths, "DATA_DIR", tmp_path)  # _check_pnl_actual busca pnl_override.yaml acá
     return tmp_path
 
@@ -53,6 +54,7 @@ def _seed_all_pass(tmp_path, month=MONTH):
     (tmp_path / "4_financial_performance.j2").write_text(
         f"<title>Alegra Board — Financial Performance · {month_name_en} {y}</title>", encoding="utf-8"
     )
+    _write_yaml(tmp_path / "nps_snapshot.yaml", {month: {"score": 46.5}})
 
 
 def _by_id(results):
@@ -62,7 +64,7 @@ def _by_id(results):
 def test_gate_all_pass(isolated_paths):
     _seed_all_pass(isolated_paths)
     results = _by_id(phase0_gate.run(MONTH))
-    for rid in ("F0.4", "F0.5", "F0.6", "F0.7", "F0.8", "F0.9"):
+    for rid in ("F0.4", "F0.5", "F0.6", "F0.7", "F0.8", "F0.9", "F0.10"):
         assert results[rid].status == "PASS", f"{rid}: {results[rid].detail}"
 
 
@@ -217,3 +219,19 @@ def test_financial_performance_month_skips_when_file_missing(isolated_paths):
     (isolated_paths / "4_financial_performance.j2").unlink()
     results = _by_id(phase0_gate.run(MONTH))
     assert results["F0.9"].status == "SKIP"
+
+
+def test_nps_snapshot_warns_when_month_missing(isolated_paths):
+    """Reproduce el crash real encontrado generando junio: nps_snapshot.yaml no tenía junio,
+    _build_nps() devolvía None, y 6_rd.j2 (sin blindar metrics.nps) tronaba armando la slide."""
+    _seed_all_pass(isolated_paths, month="2026-05")
+    results = _by_id(phase0_gate.run("2026-06"))
+    r = results["F0.10"]
+    assert r.status == "WARN"
+    assert "2026-06" in r.detail
+
+
+def test_nps_snapshot_passes_when_month_present(isolated_paths):
+    _seed_all_pass(isolated_paths, month="2026-06")
+    results = _by_id(phase0_gate.run("2026-06"))
+    assert results["F0.10"].status == "PASS"

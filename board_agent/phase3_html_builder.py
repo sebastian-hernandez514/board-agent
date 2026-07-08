@@ -35,6 +35,15 @@ archivo" ocultaría también slides que sí están frescas. Se ubica la slide po
 mismo criterio que usa R19) y se tapa solo esa. Lee editorial/ceo.yaml directo — es un dato,
 no código fuente de Template Board — para el sentinel 'updated_for_month' (mismo campo que ya
 usa F0.5 desde 2026-07-06, nunca antes conectado a una acción real de Fase 3).
+
+F3.7 (agregada 2026-07-08, mismo día): NPS (slide 3 de 6_rd.j2) — ver F0.10 en phase0_gate.py
+para la causa raíz completa. `_build_nps()` en fetch_metrics.py devuelve `None` cuando
+nps_snapshot.yaml no tiene el mes objetivo, y 6_rd.j2 no lo blinda — generate.py truena
+armando esa slide y deja output/6_rd.html con la versión del mes anterior sin avisar. No se
+tocó 6_rd.j2 (blindar la plantilla es cambio de Template Board). Mismo criterio de marcador
+único que F3.6 — 6_rd.j2 mezcla 3 slides bajo la misma clase .slide (portada, Product
+Performance, NPS), así que se tapa solo la de NPS, dejando Product Performance intacta (esa
+es el hallazgo #4 pendiente, título con el mes escrito a mano, no relacionado).
 """
 
 import base64
@@ -208,6 +217,40 @@ def _flag_stale_ceo_highlights(month: str) -> CheckResult:
                         f"'{sentinel_month}' pero se está generando {month}. Avisar a Mayra Gutiérrez.")
 
 
+def _flag_stale_nps(month: str) -> CheckResult:
+    """F3.7 — ver F0.10 en phase0_gate.py para la causa raíz completa. Cuando
+    nps_snapshot.yaml no tiene el mes objetivo, generate.py truena armando esta slide
+    ('None' has no attribute 'costa_rica_trend') y output/6_rd.html se queda con la versión
+    del mes anterior sin avisar. 6_rd.j2 mezcla 3 slides distintas (portada, Product
+    Performance, NPS) bajo la misma clase genérica .slide — igual que CEO Highlights, se
+    ubica y tapa SOLO la slide de NPS por su comentario HTML, dejando Product Performance
+    intacta (esa es un problema distinto, ver hallazgo #4 pendiente). WARN, no FAIL."""
+    label = "NPS — ocultar visualmente si está desactualizado"
+    html_path = paths.OUTPUT_DIR / "6_rd.html"
+    if not html_path.exists():
+        return CheckResult("F3.7", label, "SKIP", f"no existe {html_path}")
+
+    try:
+        with open(paths.NPS_SNAPSHOT_YAML, encoding="utf-8") as f:
+            snap = yaml.safe_load(f) or {}
+    except Exception as e:
+        return CheckResult("F3.7", label, "SKIP", f"error leyendo nps_snapshot.yaml: {e}")
+
+    if month in snap:
+        return CheckResult("F3.7", label, "PASS", f"snapshot de '{month}' presente, no se oculta nada")
+
+    html = html_path.read_text(encoding="utf-8")
+    new_html, n = _overlay_single_slide_by_marker(
+        html, "SLIDE 3 — NPS Alegra", "slide", "NPS", "un mes anterior")
+    if n == 0:
+        return CheckResult("F3.7", label, "SKIP", "no se encontró la slide de NPS en el HTML")
+    html_path.write_text(new_html, encoding="utf-8")
+
+    return CheckResult("F3.7", label, "WARN",
+                        f"1 slide de NPS oculta con overlay — nps_snapshot.yaml no tiene entrada '{month}', "
+                        f"generate.py no pudo armar esta slide con datos del mes correcto.")
+
+
 def _flag_stale_financial_performance(month: str) -> CheckResult:
     """F3.4 — ver nota de módulo. Post-procesa output/4_financial_performance.html (ya generado
     por generate.py), nunca el .j2 fuente. WARN, no FAIL — mismo criterio que F0.9: es un
@@ -279,6 +322,7 @@ def run(month: str) -> list[CheckResult]:
     results.append(_flag_stale_ceo_highlights(month))
     results.append(_flag_stale_discussion_topics(month))
     results.append(_flag_stale_financial_performance(month))
+    results.append(_flag_stale_nps(month))
 
     proc2 = _run_script(paths.MERGE_SCRIPT, deps=())
     if proc2.stdout:

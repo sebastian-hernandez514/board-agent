@@ -233,6 +233,32 @@ def _check_arr_walk_yaml() -> CheckResult:
     return CheckResult("F0.7", "editorial/arr_walk.yaml comentarios llenos", "PASS", "")
 
 
+def _check_nps_snapshot(month: str) -> CheckResult:
+    """F0.10 — agregada 2026-07-08 (segunda revisión, tercer hallazgo del día): descubierto
+    generando junio real que `_build_nps()` en fetch_metrics.py devuelve `None` cuando
+    `nps_snapshot.yaml` no tiene el mes objetivo (comportamiento correcto y documentado ahí
+    mismo) — pero `6_rd.j2` no lo blinda (`metrics.nps.score`, `.costa_rica_trend`, etc. sin
+    ningún `{% if %}`), así que `generate.py` truena con `'None' has no attribute
+    'costa_rica_trend'` y ese template en particular se queda con el `output/6_rd.html` VIEJO,
+    sin avisar. No se tocó `6_rd.j2` (blindar esa plantilla es cambio de Template Board, fuera
+    de alcance) — este check avisa ANTES de correr generate.py, y F3.7 (Fase 3) tapa la slide
+    de NPS en el output si ya quedó vieja. WARN, no FAIL — mismo criterio que F0.4/F0.9:
+    insumo externo (sesión de Amplitude) que llega tarde, no debe bloquear el resto del flujo."""
+    label = "nps_snapshot.yaml tiene el mes objetivo"
+    try:
+        with open(paths.NPS_SNAPSHOT_YAML, encoding="utf-8") as f:
+            snap = yaml.safe_load(f) or {}
+    except Exception as e:
+        return CheckResult("F0.10", label, "WARN", f"error leyendo nps_snapshot.yaml: {e}")
+
+    if month not in snap:
+        return CheckResult("F0.10", label, "WARN",
+                            f"nps_snapshot.yaml no tiene entrada '{month}' — generate.py va a fallar al armar "
+                            f"la slide de NPS y va a dejar output/6_rd.html con el mes anterior; hace falta "
+                            f"una sesión de Claude + Amplitude para cargar el snapshot de este mes")
+    return CheckResult("F0.10", label, "PASS", f"snapshot de '{month}' presente")
+
+
 def run(month: str) -> list[CheckResult]:
     """month en formato 'YYYY-MM' (mes objetivo del próximo board).
 
@@ -249,4 +275,5 @@ def run(month: str) -> list[CheckResult]:
         _check_arr_walk_yaml(),
         _check_config_month(month),
         _check_financial_performance_month(month),
+        _check_nps_snapshot(month),
     ]

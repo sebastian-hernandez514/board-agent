@@ -112,7 +112,7 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 **Por qué existe:** Porque varias fuentes no están en ninguna base de datos todavía.
 **Estado objetivo:** Esta fase desaparece cuando todas las fuentes sean automatizadas.
 
-**Checks actuales — 6 en total (`board_agent/phase0_gate.py::run()`, ampliado 2026-07-08):**
+**Checks actuales — 7 en total (`board_agent/phase0_gate.py::run()`, ampliado 2026-07-08):**
 
 | ID | Check | Blocker |
 |---|---|---|
@@ -122,6 +122,7 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 | F0.7 | `editorial/arr_walk.yaml` con comentarios llenos | ⚠️ Warning |
 | F0.8 | `data/config.yaml` (`period`) coincide con el `--month` pedido | ❌ **FAIL** |
 | F0.9 | Template 4 (`4_financial_performance.j2`) — `<title>` coincide con el mes objetivo | ⚠️ Warning |
+| F0.10 | `data/nps_snapshot.yaml` tiene una entrada para el mes objetivo | ⚠️ Warning |
 
 **F0.4 bajó de FAIL a WARN el 2026-07-08** (encontrado corriendo el flujo real para junio-26 y viendo que un solo dato de Finance tapaba la revisión de todo lo demás): `merge_pnl()` en `fetch_metrics.py` ya maneja la ausencia de datos sin romperse — no setea `net_revenue`/`gross_margin`/`ebitda_margin`, y Jinja2 (`Environment(...)` sin `StrictUndefined`) los renderiza en blanco sin error. El freno real se movió a **R17 del Validator** (Fase 4): si esos 3 campos faltan o vienen vacíos, el Validator da FAIL ahí, con el board ya armado y visible para revisar, en vez de bloquear todo desde el minuto uno.
 
@@ -129,9 +130,10 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 
 **F0.6 reescrita 2026-07-08 (mismo día, corrección de una limitación detectada en el propio hallazgo de F0.8/F0.9):** antes revisaba `editorial/discussion_topics.yaml`, un scaffold **desconectado** del template real. Se agregó a `templates/2_discussion_topic.j2` el mismo sentinel que ya usa `ceo.yaml` (`updated_for_month`), pero como comentario HTML (`<!-- updated_for_month: YYYY-MM -->`, primera línea del archivo) ya que es HTML puro, no YAML — única línea del `.j2` fuente que Board Agent toca, no afecta el render. F0.6 ahora lee ese comentario y compara contra el mes objetivo, igual que F0.5/F0.9. Backward-compatible: si el sentinel no existe, WARN honesto en vez de fingir certeza.
 
-**2 checks que existían en versiones anteriores de esta tabla y ya NO corren en este gate** (tabla desactualizada hasta 2026-07-06, corregida tras revisión de código):
+**F0.10 agregada 2026-07-08 (mismo día, tercer hallazgo de la revisión del preview de junio):** `_build_nps()` en `fetch_metrics.py` devuelve `None` cuando `nps_snapshot.yaml` no tiene el mes objetivo (comportamiento correcto, documentado ahí mismo) — pero `6_rd.j2` no blinda `metrics.nps.score`/`.costa_rica_trend`/etc. con ningún `{% if %}`, así que `generate.py` truena armando esa slide específica (`'None' has no attribute 'costa_rica_trend'`) y deja `output/6_rd.html` con el mes anterior **sin avisar**. No se tocó `6_rd.j2` (blindar la plantilla es cambio de Template Board, fuera de alcance) — F0.10 avisa ANTES de correr `generate.py`, y **F3.7** (Fase 3) tapa la slide de NPS en el output si ya quedó vieja. WARN, no FAIL — mismo criterio que F0.4/F0.9.
+
+**1 check que existía en versiones anteriores de esta tabla y ya NO corre en este gate** (tabla desactualizada hasta 2026-07-06, corregida tras revisión de código):
 - `paises_fx.csv`, `chart_alanube.yaml`, `Payback.csv` — se automatizaron y se movieron a Fase 1/2 (ver sección "Camino para eliminarla" abajo, fechas 2026-07-03/06).
-- NPS screenshots — la lógica de NPS se movió a `_build_nps()` en Fase 2 (lee `data/nps_snapshot.yaml`), no vive en este gate.
 
 **Output:** Lista ✅/⚠️/❌. Si hay ❌ blocker: para y lista exactamente qué falta y quién lo provee.
 
@@ -233,7 +235,8 @@ usa `fetch_metrics.py`):**
 3. **F3.4 (agregada 2026-07-08):** si el `<title>` de `output/4_financial_performance.html` sigue en el mes anterior (mismo hallazgo real que F0.9), tapa visualmente cada `.board-slide` con un overlay "contenido pendiente" — en vez de publicar los números de Finance del mes pasado disfrazados de mes actual. Solo escribe en el `output/*.html` ya generado, nunca en el `.j2` fuente (mismo límite que el re-embed de imágenes). No borra ni reescribe el contenido existente (regex sobre HTML anidado es frágil) — inserta un `<div>` hermano con `position:absolute;inset:0` que lo cubre por completo. WARN, no FAIL. Validado en vivo con Playwright contra el `output/4_financial_performance.html` real de junio: las 6 slides quedaron en blanco con el mensaje, contenido original intacto debajo.
 4. **F3.5 (agregada 2026-07-08, mismo día):** mismo mecanismo para Discussion Topics — lee el sentinel `<!-- updated_for_month: YYYY-MM -->` (ver F0.6) del `output/2_discussion_topic.html` ya generado (el comentario pasa intacto a través de Jinja2) y tapa cada `.dt-slide` si no coincide con el mes objetivo. Comparte la función `_overlay_stale_slides()` con F3.4 — mismo mecanismo genérico, distinta clase de slide-shell. Validado en vivo: el `.j2` real se marcó con `updated_for_month: 2026-05` (fecha real de la última actualización) y, al regenerar pidiendo junio, las 4 slides de discussion topics (incluida la que tiene la imagen de Costa Rica embebida) quedaron correctamente en blanco.
 5. **F3.6 (agregada 2026-07-08, mismo día — tercera revisión con el usuario):** mismo problema pero para CEO Highlights, con una complicación distinta a F3.4/F3.5 — es UNA sola slide dentro de `output/1_inicio.html`, que comparte la clase genérica `.slide` con Monthly Performance, YTD Performance, ARR Walk GLO, etc. Tapar "toda la clase .slide del archivo" hubiera ocultado también slides frescas. Nueva función `_overlay_single_slide_by_marker()`: ubica la slide por el comentario `<!-- SLIDE 2 — CEO Highlights / Lowlights -->` (mismo criterio que R19 para anclar en HTML) y tapa solo la que aparece justo después. Lee `editorial/ceo.yaml` directo (dato, no código) para el sentinel `updated_for_month` — se agregó ese campo al archivo real (`"2026-05"`, fecha honesta de la última actualización), mismo campo que F0.5 ya usaba desde el 2026-07-06 pero nunca antes conectado a una acción real de Fase 3. Validado en vivo con Playwright: la slide de CEO Highlights quedó tapada, la slide siguiente (Table of Contents / Monthly Performance) quedó intacta sin overlay.
-6. `merge_standalone.py` → `output/board_standalone.html` (ya incluye los overlays de F3.4/F3.5/F3.6 si aplicaron)
+6. **F3.7 (agregada 2026-07-08, mismo día):** cierra el hallazgo #5 (crash silencioso de NPS, ver F0.10 arriba). `6_rd.j2` mezcla 3 slides bajo la misma clase `.slide` (portada, Product Performance, NPS) — mismo mecanismo de marcador único que F3.6, ancla en `<!-- SLIDE 3 — NPS Alegra -->` y tapa solo esa, dejando Product Performance intacta (esa es el hallazgo #4 pendiente, no relacionado). Lee `data/nps_snapshot.yaml` directo. Validado en vivo con Playwright contra el `output/6_rd.html` real (con el crash real de junio): NPS quedó tapado, Product Performance intacta (todavía con "May 2026" en su propio título — confirma que es un problema distinto, no tocado).
+7. `merge_standalone.py` → `output/board_standalone.html` (ya incluye los overlays de F3.4/F3.5/F3.6/F3.7 si aplicaron)
 
 **Templates y su fuente de datos:**
 

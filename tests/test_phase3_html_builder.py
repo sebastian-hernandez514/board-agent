@@ -23,6 +23,7 @@ def isolated_dirs(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, "DATA_DIR", data_dir)
     monkeypatch.setattr(paths, "OUTPUT_DIR", output_dir)
     monkeypatch.setattr(paths, "CEO_YAML", tmp_path / "ceo.yaml")
+    monkeypatch.setattr(paths, "NPS_SNAPSHOT_YAML", tmp_path / "nps_snapshot.yaml")
     return data_dir, output_dir
 
 
@@ -314,6 +315,71 @@ def test_flag_stale_ceo_highlights_skip_when_marker_not_found(tmp_path, isolated
     assert r.status == "SKIP"
 
 
+def _write_nps_snapshot(tmp_path, months):
+    data = {m: {"score": 46.5} for m in months}
+    with open(tmp_path / "nps_snapshot.yaml", "w", encoding="utf-8") as f:
+        yaml.safe_dump(data, f)
+
+
+_RD_WITH_NPS_SLIDE = '''<html><head></head><body>
+  <!-- SLIDE 1 — Section Cover -->
+  <div class="slide section-cover">portada</div>
+  <!-- SLIDE 2 — Product Performance -->
+  <div class="slide">product performance, no debe tocarse</div>
+  <!-- SLIDE 3 — NPS Alegra -->
+  <div class="slide">
+    <div class="slide-header"><span class="title">NPS Alegra Accounting</span></div>
+    contenido real de NPS de mayo
+  </div>
+</body></html>'''
+
+
+def test_flag_stale_nps_skip_when_html_missing(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    r = f3._flag_stale_nps("2026-06")
+    assert r.status == "SKIP"
+
+
+def test_flag_stale_nps_pass_when_month_present(tmp_path, isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "6_rd.html"
+    html_path.write_text(_RD_WITH_NPS_SLIDE, encoding="utf-8")
+    _write_nps_snapshot(tmp_path, ["2026-05", "2026-06"])
+    r = f3._flag_stale_nps("2026-06")
+    assert r.status == "PASS"
+    assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
+
+
+def test_flag_stale_nps_warns_and_overlays_only_nps_slide(tmp_path, isolated_dirs):
+    """Reproduce el crash real: generate.py truena armando NPS para junio porque
+    nps_snapshot.yaml no tiene esa entrada, y output/6_rd.html se queda con mayo. Debe taparse
+    SOLO la slide de NPS — Product Performance (misma clase .slide, problema #4 distinto) debe
+    quedar intacta."""
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "6_rd.html"
+    html_path.write_text(_RD_WITH_NPS_SLIDE, encoding="utf-8")
+    _write_nps_snapshot(tmp_path, ["2026-05"])  # sin junio
+
+    r = f3._flag_stale_nps("2026-06")
+    assert r.status == "WARN"
+    assert "2026-06" in r.detail
+
+    new_html = html_path.read_text(encoding="utf-8")
+    assert new_html.count('class="stale-overlay"') == 1
+    assert "product performance, no debe tocarse" in new_html
+    assert "contenido real de NPS de mayo" in new_html  # conservado, solo tapado
+    assert new_html.count('class="slide stale-slide"') == 1
+
+
+def test_flag_stale_nps_skip_when_marker_not_found(tmp_path, isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    (output_dir / "6_rd.html").write_text("<html><body>sin el marcador esperado</body></html>",
+                                            encoding="utf-8")
+    _write_nps_snapshot(tmp_path, ["2026-05"])
+    r = f3._flag_stale_nps("2026-06")
+    assert r.status == "SKIP"
+
+
 def test_run_stops_early_if_generate_fails(monkeypatch, isolated_dirs):
     monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _FakeProc(1, stderr="boom"))
     results = f3.run("2026-05")
@@ -336,13 +402,14 @@ def test_run_stops_before_merge_reembed_still_runs(monkeypatch, isolated_dirs):
 
     results = f3.run("2026-05")
     ids = [r.id for r in results]
-    assert ids == ["F3.1", "F3.2", "F3.6", "F3.5", "F3.4", "F3.3"]
+    assert ids == ["F3.1", "F3.2", "F3.6", "F3.5", "F3.4", "F3.7", "F3.3"]
     assert results[0].status == "PASS"
     assert results[1].status == "WARN"  # imagen no existe en este test
     assert results[2].status == "SKIP"  # no existe ceo.yaml en este test
     assert results[3].status == "SKIP"  # sin sentinel 'updated_for_month' en este test
     assert results[4].status == "SKIP"  # no hay 4_financial_performance.html en este test
-    assert results[5].status == "PASS"
+    assert results[5].status == "SKIP"  # no existe nps_snapshot.yaml en este test
+    assert results[6].status == "PASS"
     assert calls["n"] == 2  # generate.py + merge_standalone.py
 
 

@@ -13,6 +13,7 @@ EDITORIAL_DIR = DATA_DIR / "editorial"
 CEO_YAML = EDITORIAL_DIR / "ceo.yaml"
 DISCUSSION_TOPICS_YAML = EDITORIAL_DIR / "discussion_topics.yaml"
 ARR_WALK_YAML = EDITORIAL_DIR / "arr_walk.yaml"
+NPS_SNAPSHOT_YAML = DATA_DIR / "nps_snapshot.yaml"
 
 TEMPLATES_DIR = TEMPLATE_BOARD / "templates"
 FINANCIAL_PERFORMANCE_TEMPLATE = TEMPLATES_DIR / "4_financial_performance.j2"
