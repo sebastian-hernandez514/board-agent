@@ -25,12 +25,12 @@ El sistema corre en 6 pasos (fases), uno después del otro:
 | 1 — Data Freshness | Revisa que Redshift tenga los datos del mes que se va a generar | "¿Ya está la información del mes cerrado?" |
 | 2 — Metrics Computation | Calcula todos los números (ARR, MRR, Churn, etc.) | "Hacer las cuentas" |
 | 3 — HTML Builder | Arma el HTML final del board con esos números | "Armar las slides" |
-| 4 — Validator | Revisa que los números cuadren entre sí (14 reglas hoy) — por ejemplo, que el ARR total sí incluya Alanube | "¿Esto tiene sentido matemáticamente?" |
+| 4 — Validator | Revisa que los números cuadren entre sí (17 reglas hoy) — por ejemplo, que el ARR total sí incluya Alanube | "¿Esto tiene sentido matemáticamente?" |
 | 5 — Diff Review | Compara este board contra el mes anterior y avisa si algo cambió mucho de golpe | "¿Hay algo raro que valga la pena revisar antes de mandarlo?" |
 | 6 — PDF | Genera el PDF final, solo cuando alguien lo aprueba a mano | "Ya quedó, generar el PDF" |
 
-**Lo único que sigue siendo 100% humano:** el texto de highlights/lowlights del CEO, los discussion
-topics (contenido, no el diseño — para eso ya hay una skill, ver sección 5), y la aprobación final
+**Lo único que sigue siendo 100% humano:** el contenido en sí — qué decir, no cómo escribirlo en el
+archivo correcto, para eso ya hay 3 skills de self-service (ver sección 5) — y la aprobación final
 antes de publicar.
 
 ---
@@ -93,16 +93,44 @@ con Claude Code.
 
 ---
 
-## 5. Cómo usar la skill de Discussion Topics
+## 5. Skills de self-service — hacer el cambio tú mismo, sin depender de Sebastián
 
-Ya existe una skill (`Board Agent/skills/discussion-topic/SKILL.md`) que sabe el diseño exacto de las
-slides de discussion topics — no hace falta que Sebastián las escriba a mano.
+Hay 3 skills ya construidas. Cada una sabe el formato exacto del archivo que hay que tocar — solo
+hace falta explicarle a Claude Code, en lenguaje simple, qué se quiere decir.
+
+### 5.1 Discussion Topics
+
+Skill: `Board Agent/skills/discussion-topic/SKILL.md`. Sabe el diseño exacto de las slides de
+discussion topics — no hace falta que Sebastián las escriba a mano.
 
 **Para usarla:** decirle a Claude Code algo como *"quiero agregar un discussion topic sobre [tema],
-tengo estos bullets/esta imagen/estos datos"* — Claude te va a preguntar qué layout encaja mejor (hay
-5 disponibles) y arma el HTML solo, respetando el diseño de las slides existentes.
+tengo estos bullets/esta imagen/estos datos"* — Claude va a preguntar qué layout encaja mejor (hay 5
+disponibles) y arma el HTML solo, respetando el diseño de las slides existentes. No hace falta llenar
+ningún YAML ni tocar CSS.
 
-No hace falta llenar ningún YAML ni tocar CSS — la skill se encarga de eso.
+### 5.2 CEO Highlights / Lowlights (nueva — 2026-07-08)
+
+Skill: `Board Agent/skills/ceo-highlights/SKILL.md`. Permite escribir directo los Highlights,
+Lowlights y el Financial Update del CEO (`editorial/ceo.yaml`) sin pasar por Sebastián.
+
+**Para usarla:** decirle a Claude Code *"quiero actualizar los highlights/lowlights del CEO de este
+mes"* y traer las ideas — qué pasó bien, qué pasó mal, resumen financiero si hay uno. Claude escribe
+el archivo en el formato correcto y actualiza el mes.
+
+### 5.3 Comentarios en ARR Walk (nueva — 2026-07-08)
+
+Skill: `Board Agent/skills/slide-comments/SKILL.md`. Permite agregar un comentario o "ask" en las
+slides ARR Core y ARR Lite — por ejemplo, un pedido al equipo de Producto o contexto sobre un país.
+**Por ahora solo funciona en esas 2 slides**, no es un mecanismo genérico para cualquier slide todavía.
+
+**Para usarla:** decirle a Claude Code *"quiero agregar un comentario en ARR Core/Lite que diga..."*.
+
+### 5.4 Ver el resultado antes de correr el board completo (nueva — 2026-07-08)
+
+Herramienta: `Board Agent/preview.py`. Después de usar cualquiera de las 3 skills de arriba, se puede
+pedir una captura de la slide ya generada, sin abrir un HTML ni correr el flujo completo.
+
+**Para usarla:** decirle a Claude Code *"muéstrame cómo quedó la slide de [nombre de la slide]"*.
 
 ---
 
