@@ -26,11 +26,22 @@ output/2_discussion_topic.html ya generado sin tocar el .j2 fuente en esta fase.
 las slides de contenido (`.dt-slide`) como las portadas de cada topic (`.slide.section-divider`)
 — hallazgo del usuario 2026-07-08 (segunda revisión): la portada revelaba el título del tema
 viejo (ej. "ICP Split Costa Rica Update") aunque el contenido de abajo ya estuviera tapado.
+
+F3.6 (agregada 2026-07-08, mismo día): CEO Highlights es una única slide dentro de
+output/1_inicio.html que comparte la clase genérica `.slide` con Monthly Performance, YTD
+Performance, ARR Walk GLO, etc. — a diferencia de F3.4/F3.5, tapar "toda la clase .slide del
+archivo" ocultaría también slides que sí están frescas. Se ubica la slide por el comentario
+'<!-- SLIDE 2 — CEO Highlights / Lowlights -->' ya presente en el template (marcador estable,
+mismo criterio que usa R19) y se tapa solo esa. Lee editorial/ceo.yaml directo — es un dato,
+no código fuente de Template Board — para el sentinel 'updated_for_month' (mismo campo que ya
+usa F0.5 desde 2026-07-06, nunca antes conectado a una acción real de Fase 3).
 """
 
 import base64
 import re
 import subprocess
+
+import yaml
 
 from . import paths
 from .phase0_gate import extract_financial_performance_title_month, extract_updated_for_month_comment
@@ -135,6 +146,68 @@ def _overlay_stale_slides(html: str, slide_classes, section: str, old_label: str
     return html, total
 
 
+_MARKER_SEARCH_WINDOW = 2000
+
+
+def _overlay_single_slide_by_marker(html: str, marker_text: str, slide_class: str,
+                                     section: str, old_label: str) -> tuple[str, int]:
+    """Para slides SIN clase propia (comparten `slide_class` con otras slides del mismo
+    archivo, ej. CEO Highlights en 1_inicio.j2): ubica `marker_text` (un comentario HTML
+    estable, ej. '<!-- SLIDE 2 — ... -->') y tapa solo el PRÓXIMO `<div class="slide_class">`
+    que aparece después — no todas las ocurrencias del archivo. Devuelve
+    (html_modificado, 1 o 0)."""
+    idx = html.find(marker_text)
+    if idx == -1:
+        return html, 0
+
+    open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'"[^>]*>')
+    m = open_re.search(html, idx, idx + _MARKER_SEARCH_WINDOW)
+    if not m:
+        return html, 0
+
+    overlay = _STALE_OVERLAY_HTML.format(section=section, old_label=old_label)
+    tag = m.group(0).replace(f'class="{slide_class}"', f'class="{slide_class} stale-slide"', 1)
+    html = html[:m.start()] + tag + overlay + html[m.end():]
+    if "</head>" in html:
+        html = html.replace("</head>", _STALE_OVERLAY_STYLE + "</head>", 1)
+    else:
+        html = _STALE_OVERLAY_STYLE + html
+    return html, 1
+
+
+def _flag_stale_ceo_highlights(month: str) -> CheckResult:
+    """F3.6 — ver nota de módulo. WARN, no FAIL — mismo criterio que F3.4/F3.5."""
+    label = "CEO Highlights — ocultar visualmente si están desactualizados"
+    html_path = paths.OUTPUT_DIR / "1_inicio.html"
+    if not html_path.exists():
+        return CheckResult("F3.6", label, "SKIP", f"no existe {html_path}")
+
+    try:
+        with open(paths.CEO_YAML, encoding="utf-8") as f:
+            ceo_data = yaml.safe_load(f) or {}
+    except Exception as e:
+        return CheckResult("F3.6", label, "SKIP", f"error leyendo ceo.yaml: {e}")
+
+    sentinel_month = ceo_data.get("updated_for_month")
+    if sentinel_month is None:
+        return CheckResult("F3.6", label, "SKIP",
+                            "ceo.yaml no tiene 'updated_for_month' — no se puede verificar si el contenido "
+                            "es del mes correcto")
+    if sentinel_month == month:
+        return CheckResult("F3.6", label, "PASS", f"marcado como '{sentinel_month}', coincide con {month}")
+
+    html = html_path.read_text(encoding="utf-8")
+    new_html, n = _overlay_single_slide_by_marker(
+        html, "SLIDE 2 — CEO Highlights", "slide", "CEO Highlights", sentinel_month)
+    if n == 0:
+        return CheckResult("F3.6", label, "SKIP", "no se encontró la slide de CEO Highlights en el HTML")
+    html_path.write_text(new_html, encoding="utf-8")
+
+    return CheckResult("F3.6", label, "WARN",
+                        f"1 slide de CEO Highlights oculta con overlay — ceo.yaml está marcado como "
+                        f"'{sentinel_month}' pero se está generando {month}. Avisar a Mayra Gutiérrez.")
+
+
 def _flag_stale_financial_performance(month: str) -> CheckResult:
     """F3.4 — ver nota de módulo. Post-procesa output/4_financial_performance.html (ya generado
     por generate.py), nunca el .j2 fuente. WARN, no FAIL — mismo criterio que F0.9: es un
@@ -203,6 +276,7 @@ def run(month: str) -> list[CheckResult]:
     results.append(CheckResult("F3.1", "generate.py corrió sin errores", "PASS", ""))
 
     results.append(_reembed_cr_image(month))
+    results.append(_flag_stale_ceo_highlights(month))
     results.append(_flag_stale_discussion_topics(month))
     results.append(_flag_stale_financial_performance(month))
 

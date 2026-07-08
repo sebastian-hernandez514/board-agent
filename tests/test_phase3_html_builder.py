@@ -2,6 +2,7 @@ import base64
 import subprocess
 
 import pytest
+import yaml
 
 from board_agent import paths, phase3_html_builder as f3
 
@@ -21,6 +22,7 @@ def isolated_dirs(tmp_path, monkeypatch):
     output_dir.mkdir()
     monkeypatch.setattr(paths, "DATA_DIR", data_dir)
     monkeypatch.setattr(paths, "OUTPUT_DIR", output_dir)
+    monkeypatch.setattr(paths, "CEO_YAML", tmp_path / "ceo.yaml")
     return data_dir, output_dir
 
 
@@ -227,6 +229,91 @@ def test_flag_stale_discussion_topics_skip_when_no_dt_slide_found(isolated_dirs)
     assert r.status == "SKIP"
 
 
+def _write_ceo_yaml(tmp_path, updated_for_month=None):
+    data = {"ceo_title": "CEO Highlights & Lowlights", "highlights": ["a"], "lowlights": ["b"]}
+    if updated_for_month is not None:
+        data["updated_for_month"] = updated_for_month
+    with open(tmp_path / "ceo.yaml", "w", encoding="utf-8") as f:
+        yaml.safe_dump(data, f)
+
+
+_INICIO_WITH_CEO_SLIDE = '''<html><head></head><body>
+  <!-- SLIDE 1 — Cover -->
+  <div class="slide">portada</div>
+  <!-- SLIDE 2 — CEO Highlights / Lowlights -->
+  <div class="slide">
+    <div class="slide-header"><span class="title">CEO Highlights &amp; Lowlights</span></div>
+    <div class="hl-outer-grid">contenido real de highlights</div>
+  </div>
+  <!-- SLIDE 3 — Monthly Performance -->
+  <div class="slide">monthly performance fresco, no debe tocarse</div>
+</body></html>'''
+
+
+def test_flag_stale_ceo_highlights_skip_when_html_missing(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    r = f3._flag_stale_ceo_highlights("2026-06")
+    assert r.status == "SKIP"
+
+
+def test_flag_stale_ceo_highlights_skip_when_ceo_yaml_missing(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    (output_dir / "1_inicio.html").write_text(_INICIO_WITH_CEO_SLIDE, encoding="utf-8")
+    r = f3._flag_stale_ceo_highlights("2026-06")
+    assert r.status == "SKIP"
+
+
+def test_flag_stale_ceo_highlights_skip_when_sentinel_absent(tmp_path, isolated_dirs):
+    """Backward-compatible: si ceo.yaml no tiene 'updated_for_month' todavía, SKIP honesto —
+    no se puede verificar, y no se tapa contenido que podría estar perfectamente al día."""
+    data_dir, output_dir = isolated_dirs
+    (output_dir / "1_inicio.html").write_text(_INICIO_WITH_CEO_SLIDE, encoding="utf-8")
+    _write_ceo_yaml(tmp_path)
+    r = f3._flag_stale_ceo_highlights("2026-06")
+    assert r.status == "SKIP"
+    assert "updated_for_month" in r.detail
+
+
+def test_flag_stale_ceo_highlights_pass_when_sentinel_matches(tmp_path, isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "1_inicio.html"
+    html_path.write_text(_INICIO_WITH_CEO_SLIDE, encoding="utf-8")
+    _write_ceo_yaml(tmp_path, updated_for_month="2026-06")
+    r = f3._flag_stale_ceo_highlights("2026-06")
+    assert r.status == "PASS"
+    assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
+
+
+def test_flag_stale_ceo_highlights_warns_and_overlays_only_that_slide(tmp_path, isolated_dirs):
+    """Reproduce el hallazgo del usuario: CEO Highlights seguía mostrando contenido de mayo en
+    junio. Debe taparse SOLO esa slide — Monthly Performance (misma clase .slide) debe quedar
+    intacta, sin overlay."""
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "1_inicio.html"
+    html_path.write_text(_INICIO_WITH_CEO_SLIDE, encoding="utf-8")
+    _write_ceo_yaml(tmp_path, updated_for_month="2026-05")
+
+    r = f3._flag_stale_ceo_highlights("2026-06")
+    assert r.status == "WARN"
+    assert "2026-05" in r.detail and "2026-06" in r.detail
+
+    new_html = html_path.read_text(encoding="utf-8")
+    assert new_html.count('class="stale-overlay"') == 1  # (el selector CSS también contiene la palabra)
+    assert "contenido real de highlights" in new_html  # conservado, solo tapado
+    assert "monthly performance fresco, no debe tocarse" in new_html
+    # solo UNA slide .slide ganó la clase stale-slide — no todas las del archivo
+    assert new_html.count('class="slide stale-slide"') == 1
+
+
+def test_flag_stale_ceo_highlights_skip_when_marker_not_found(tmp_path, isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    (output_dir / "1_inicio.html").write_text("<html><body>sin el marcador esperado</body></html>",
+                                                encoding="utf-8")
+    _write_ceo_yaml(tmp_path, updated_for_month="2026-05")
+    r = f3._flag_stale_ceo_highlights("2026-06")
+    assert r.status == "SKIP"
+
+
 def test_run_stops_early_if_generate_fails(monkeypatch, isolated_dirs):
     monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _FakeProc(1, stderr="boom"))
     results = f3.run("2026-05")
@@ -249,12 +336,13 @@ def test_run_stops_before_merge_reembed_still_runs(monkeypatch, isolated_dirs):
 
     results = f3.run("2026-05")
     ids = [r.id for r in results]
-    assert ids == ["F3.1", "F3.2", "F3.5", "F3.4", "F3.3"]
+    assert ids == ["F3.1", "F3.2", "F3.6", "F3.5", "F3.4", "F3.3"]
     assert results[0].status == "PASS"
     assert results[1].status == "WARN"  # imagen no existe en este test
-    assert results[2].status == "SKIP"  # sin sentinel 'updated_for_month' en este test
-    assert results[3].status == "SKIP"  # no hay 4_financial_performance.html en este test
-    assert results[4].status == "PASS"
+    assert results[2].status == "SKIP"  # no existe ceo.yaml en este test
+    assert results[3].status == "SKIP"  # sin sentinel 'updated_for_month' en este test
+    assert results[4].status == "SKIP"  # no hay 4_financial_performance.html en este test
+    assert results[5].status == "PASS"
     assert calls["n"] == 2  # generate.py + merge_standalone.py
 
 
