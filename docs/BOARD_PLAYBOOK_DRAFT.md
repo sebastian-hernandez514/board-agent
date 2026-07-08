@@ -70,6 +70,7 @@ se **consulta** antes de hacerla, y a quién se le **avisa** cuando está lista.
 | NPS snapshot | Sebastián (vía sesión de Claude + Amplitude) | *a confirmar* | — | Mayra | Mensual, mes anterior completo |
 | Tasas de cambio (`tb_trm_banrep`, Redshift) | *(por confirmar)* | — | Luis Caro (avisa/escala si no está al día) | Sebastián | Antes de correr el flujo del mes |
 | Segmentos de CAC (`fact_cac_version_segments`, Redshift) | Santiago González | — | — | Sebastián | Antes de correr el flujo del mes |
+| ARR Walk Alanube (`fact_alanube_arr_walk`, Redshift) | Sebastián | — | — | Equipo Alanube | Antes de correr el flujo del mes |
 | Aprobación final del board (antes de publicar) | — | **Sin dueño único definido todavía — pendiente** | Luis Caro | Equipo Board | Antes de la fecha del board |
 
 **Pendiente de definir contigo:** quién es el Accountable (aprobador final) de cada fila, y confirmar
