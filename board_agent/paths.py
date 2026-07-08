@@ -16,6 +16,7 @@ ARR_WALK_YAML = EDITORIAL_DIR / "arr_walk.yaml"
 
 TEMPLATES_DIR = TEMPLATE_BOARD / "templates"
 FINANCIAL_PERFORMANCE_TEMPLATE = TEMPLATES_DIR / "4_financial_performance.j2"
+DISCUSSION_TOPIC_TEMPLATE = TEMPLATES_DIR / "2_discussion_topic.j2"
 
 # paises_fx.csv, chart_alanube.yaml y Payback.csv salieron de acá — fetch_metrics.py ahora
 # lee esas 3 fuentes directo de Redshift (ver phase0_gate.py y phase1_freshness.py).

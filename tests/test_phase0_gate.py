@@ -31,6 +31,7 @@ def isolated_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, "PNL_ACTUAL_CSV", tmp_path / "pnl_actual.csv")
     monkeypatch.setattr(paths, "CEO_YAML", tmp_path / "ceo.yaml")
     monkeypatch.setattr(paths, "DISCUSSION_TOPICS_YAML", tmp_path / "discussion_topics.yaml")
+    monkeypatch.setattr(paths, "DISCUSSION_TOPIC_TEMPLATE", tmp_path / "2_discussion_topic.j2")
     monkeypatch.setattr(paths, "ARR_WALK_YAML", tmp_path / "arr_walk.yaml")
     monkeypatch.setattr(paths, "CONFIG_YAML", tmp_path / "config.yaml")
     monkeypatch.setattr(paths, "FINANCIAL_PERFORMANCE_TEMPLATE", tmp_path / "4_financial_performance.j2")
@@ -42,7 +43,9 @@ def _seed_all_pass(tmp_path, month=MONTH):
     _write_csv(tmp_path / "pnl_actual.csv", ["Date", "Category", "Type", "Technical Team", "sum Amount USD"],
                [{"Date": "5/31/2026", "Category": "x", "Type": "y", "Technical Team": "z", "sum Amount USD": "100"}])
     _write_yaml(tmp_path / "ceo.yaml", {"ceo_title": "CEO Highlights", "highlights": ["a"], "lowlights": ["b"]})
-    _write_yaml(tmp_path / "discussion_topics.yaml", {"topics": [{"title_plain": "Topic real"}]})
+    (tmp_path / "2_discussion_topic.j2").write_text(
+        f"<!-- updated_for_month: {month} -->\n<html>...</html>", encoding="utf-8"
+    )
     _write_yaml(tmp_path / "arr_walk.yaml", {"products": [{"id": "core", "asks": ["x"]}], "alanube_insight": "algo"})
     y, m = month.split("-")
     month_name_en = calendar.month_name[int(m)]
@@ -128,12 +131,32 @@ def test_ceo_yaml_pass_notes_month_unverified_when_field_missing(isolated_paths)
     assert "sin campo 'updated_for_month'" in r.detail
 
 
-def test_discussion_topics_placeholder_warns(isolated_paths):
+def test_discussion_topics_warns_when_sentinel_is_for_a_different_month(isolated_paths):
+    """Reproduce el bug real: F0.6 reescrita 2026-07-08 para leer el sentinel
+    'updated_for_month' de 2_discussion_topic.j2 (antes revisaba un YAML desconectado del
+    template real, ver phase0_gate.py)."""
+    _seed_all_pass(isolated_paths, month="2026-05")
+    results = _by_id(phase0_gate.run("2026-06"))
+    r = results["F0.6"]
+    assert r.status == "WARN"
+    assert "2026-05" in r.detail and "2026-06" in r.detail
+
+
+def test_discussion_topics_passes_when_sentinel_matches(isolated_paths):
+    _seed_all_pass(isolated_paths, month="2026-06")
+    results = _by_id(phase0_gate.run("2026-06"))
+    assert results["F0.6"].status == "PASS"
+
+
+def test_discussion_topics_warns_when_sentinel_missing(isolated_paths):
+    """Backward-compatible: si el archivo real todavía no tiene el sentinel, WARN honesto en
+    vez de fingir certeza — mismo criterio que F0.5 antes de tener 'updated_for_month'."""
     _seed_all_pass(isolated_paths)
-    _write_yaml(isolated_paths / "discussion_topics.yaml",
-                {"topics": [{"title_plain": "Discussion Topic (Por definir)"}]})
+    (isolated_paths / "2_discussion_topic.j2").write_text("<html>sin sentinel</html>", encoding="utf-8")
     results = _by_id(phase0_gate.run(MONTH))
-    assert results["F0.6"].status == "WARN"
+    r = results["F0.6"]
+    assert r.status == "WARN"
+    assert "no se encontró el comentario" in r.detail
 
 
 def test_arr_walk_empty_asks_warns(isolated_paths):
@@ -142,16 +165,6 @@ def test_arr_walk_empty_asks_warns(isolated_paths):
                 {"products": [{"id": "core", "asks": []}], "alanube_insight": "algo"})
     results = _by_id(phase0_gate.run(MONTH))
     assert results["F0.7"].status == "WARN"
-
-
-def test_discussion_topics_pass_includes_dead_scaffold_caveat(isolated_paths):
-    """F0.6 solo revisa el scaffold desconectado — el PASS debe dejarlo explícito, no fingir
-    que valida el contenido real de 2_discussion_topic.j2."""
-    _seed_all_pass(isolated_paths)
-    results = _by_id(phase0_gate.run(MONTH))
-    r = results["F0.6"]
-    assert r.status == "PASS"
-    assert "desconectado" in r.detail
 
 
 def test_config_month_fails_when_config_still_has_previous_month(isolated_paths):

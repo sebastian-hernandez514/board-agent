@@ -118,23 +118,45 @@ def _check_ceo_yaml(month: str) -> CheckResult:
                         f"highlights={len(highlights)} lowlights={len(lowlights)} (título: '{data.get('ceo_title')}', esperado mes: {label}){unverified_note}")
 
 
-def _check_discussion_topics() -> CheckResult:
-    """⚠️ Limitación conocida (documentada 2026-07-08, no corregida esta pasada): este check
-    lee `discussion_topics.yaml`, que es un scaffold DESCONECTADO — el contenido real de la
-    slide vive escrito a mano en `templates/2_discussion_topic.j2` y no tiene ningún campo de
-    mes verificable (no es YAML). Un PASS acá NO garantiza que el contenido real sea del mes
-    correcto — solo que este archivo, que nadie usa para renderizar, no está vacío. Se deja el
-    detail explícito para no repetir el error de F0.5 (falsa confianza)."""
-    with open(paths.DISCUSSION_TOPICS_YAML, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-    topics = data.get("topics") or []
-    placeholders = [t for t in topics if "por definir" in (t.get("title_plain") or "").lower()]
-    caveat = (" — OJO: este archivo está desconectado del template real (2_discussion_topic.j2); "
-              "esto NO verifica si el contenido real de la slide es del mes correcto")
-    if not topics or placeholders:
-        return CheckResult("F0.6", "editorial/discussion_topics.yaml no vacío", "WARN",
-                            f"{len(placeholders)}/{len(topics)} topics aún placeholder{caveat}")
-    return CheckResult("F0.6", "editorial/discussion_topics.yaml no vacío", "PASS", f"{len(topics)} topics{caveat}")
+_UPDATED_FOR_MONTH_COMMENT_RE = re.compile(r"<!--\s*updated_for_month:\s*(\d{4}-\d{2})\s*-->")
+
+
+def extract_updated_for_month_comment(html: str):
+    """Busca el sentinel '<!-- updated_for_month: YYYY-MM -->' — mismo patrón que el campo
+    `updated_for_month` de ceo.yaml, pero para archivos que son HTML puro (no YAML) y por lo
+    tanto no pueden tener un campo estructurado. Devuelve 'YYYY-MM' o None si no existe.
+    Compartido entre F0.6 (Fase 0, lee el .j2 fuente) y F3.5 (Fase 3, post-procesa el
+    output/*.html ya generado — el comentario pasa intacto a través de Jinja2)."""
+    m = _UPDATED_FOR_MONTH_COMMENT_RE.search(html)
+    return m.group(1) if m else None
+
+
+def _check_discussion_topics(month: str) -> CheckResult:
+    """F0.6 — reescrita 2026-07-08 (antes revisaba `discussion_topics.yaml`, un scaffold
+    DESCONECTADO del template real — ver commit anterior el mismo día para el hallazgo
+    original). El contenido real de la slide vive escrito a mano en
+    `templates/2_discussion_topic.j2`, que no es YAML y no podía tener un campo verificable.
+    Se le agregó el mismo sentinel que ya usa `ceo.yaml` (`updated_for_month`), pero como
+    comentario HTML (`<!-- updated_for_month: YYYY-MM -->`) ya que el archivo es HTML puro.
+    Backward-compatible: si el sentinel no existe todavía, WARN honesto en vez de fingir
+    certeza — mismo criterio que F0.5."""
+    label = "2_discussion_topic.j2 marcado como actualizado para el mes objetivo"
+    try:
+        html = paths.DISCUSSION_TOPIC_TEMPLATE.read_text(encoding="utf-8")
+    except Exception as e:
+        return CheckResult("F0.6", label, "WARN", f"error leyendo el template: {e}")
+
+    sentinel_month = extract_updated_for_month_comment(html)
+    if sentinel_month is None:
+        return CheckResult("F0.6", label, "WARN",
+                            "no se encontró el comentario 'updated_for_month' en 2_discussion_topic.j2 — "
+                            "no se puede verificar si el contenido es del mes correcto "
+                            "(agregar '<!-- updated_for_month: YYYY-MM -->' al inicio del archivo)")
+    if sentinel_month != month:
+        return CheckResult("F0.6", label, "WARN",
+                            f"el archivo está marcado como de '{sentinel_month}' pero se está generando '{month}' "
+                            f"— revisar si ya se actualizaron los discussion topics de este mes")
+    return CheckResult("F0.6", label, "PASS", f"marcado como '{sentinel_month}', coincide")
 
 
 def _check_config_month(month: str) -> CheckResult:
@@ -223,7 +245,7 @@ def run(month: str) -> list[CheckResult]:
     return [
         _check_pnl_actual(month),
         _check_ceo_yaml(month),
-        _check_discussion_topics(),
+        _check_discussion_topics(month),
         _check_arr_walk_yaml(),
         _check_config_month(month),
         _check_financial_performance_month(month),

@@ -18,6 +18,11 @@ disfrazados como si fueran de este mes. Solo escribe en output/4_financial_perfo
 (el artefacto ya generado por generate.py), nunca en el .j2 fuente — mismo patrón que
 _reembed_cr_image(). No elimina ni reescribe el contenido existente (evita el riesgo de
 romper HTML anidado con regex) — inserta un overlay que lo cubre visualmente por completo.
+
+F3.5 (agregada 2026-07-08, mismo día): mismo mecanismo para Discussion Topics, usando el
+sentinel '<!-- updated_for_month: YYYY-MM -->' agregado a 2_discussion_topic.j2 (ver F0.6 en
+phase0_gate.py) — el comentario pasa intacto a través de Jinja2, así que se puede leer del
+output/2_discussion_topic.html ya generado sin tocar el .j2 fuente en esta fase.
 """
 
 import base64
@@ -25,7 +30,7 @@ import re
 import subprocess
 
 from . import paths
-from .phase0_gate import extract_financial_performance_title_month
+from .phase0_gate import extract_financial_performance_title_month, extract_updated_for_month_comment
 from .report import CheckResult
 
 
@@ -75,10 +80,9 @@ def _reembed_cr_image(month: str) -> CheckResult:
                         f"embebidas: {embedded}")
 
 
-_BOARD_SLIDE_OPEN_RE = re.compile(r'<div class="board-slide">')
-
 _STALE_OVERLAY_STYLE = (
-    "<style>.stale-overlay{position:absolute;inset:0;z-index:999;background:#f8fafc;"
+    "<style>.stale-slide{position:relative !important;}"
+    ".stale-overlay{position:absolute;inset:0;z-index:999;background:#f8fafc;"
     "display:flex;flex-direction:column;align-items:center;justify-content:center;"
     "gap:10px;text-align:center;padding:40px;box-sizing:border-box;}"
     ".stale-overlay .stale-icon{font-size:32px;}"
@@ -88,10 +92,35 @@ _STALE_OVERLAY_STYLE = (
 
 _STALE_OVERLAY_HTML = (
     '<div class="stale-overlay"><div class="stale-icon">⏳</div>'
-    '<div class="stale-title">Financial Performance — contenido pendiente</div>'
-    '<div class="stale-sub">Finance todavía no envía el reporte de este mes '
-    '(esta sección mostraba {old_label}) — se ocultó para no publicar el mes equivocado.</div></div>'
+    '<div class="stale-title">{section} — contenido pendiente</div>'
+    '<div class="stale-sub">Esta sección mostraba {old_label} — se ocultó para no publicar '
+    'el mes equivocado.</div></div>'
 )
+
+
+def _overlay_stale_slides(html: str, slide_class: str, section: str, old_label: str) -> tuple[str, int]:
+    """Cubre cada slide de `slide_class` con un overlay "contenido pendiente", sin borrar ni
+    reescribir el HTML anidado existente debajo (evita el riesgo de romper la estructura con
+    regex de reemplazo) — le agrega la clase marcadora `stale-slide` (position:relative, ver
+    _STALE_OVERLAY_STYLE) e inserta el overlay como hijo justo después del tag de apertura.
+    Devuelve (html_modificado, cantidad_de_slides_tapadas). 0 slides → no modifica nada."""
+    open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'"[^>]*>')
+    n = len(open_re.findall(html))
+    if n == 0:
+        return html, 0
+
+    overlay = _STALE_OVERLAY_HTML.format(section=section, old_label=old_label)
+
+    def _inject(m):
+        tag = m.group(0).replace(f'class="{slide_class}"', f'class="{slide_class} stale-slide"', 1)
+        return tag + overlay
+
+    html = open_re.sub(_inject, html)
+    if "</head>" in html:
+        html = html.replace("</head>", _STALE_OVERLAY_STYLE + "</head>", 1)
+    else:
+        html = _STALE_OVERLAY_STYLE + html
+    return html, n
 
 
 def _flag_stale_financial_performance(month: str) -> CheckResult:
@@ -111,21 +140,40 @@ def _flag_stale_financial_performance(month: str) -> CheckResult:
     if found_month == month:
         return CheckResult("F3.4", label, "PASS", f"'{found_label}' coincide con {month}, no se oculta nada")
 
-    n_slides = len(_BOARD_SLIDE_OPEN_RE.findall(html))
+    new_html, n_slides = _overlay_stale_slides(html, "board-slide", "Financial Performance", found_label)
     if n_slides == 0:
         return CheckResult("F3.4", label, "SKIP", "no se encontró ningún .board-slide en el HTML")
-
-    overlay = _STALE_OVERLAY_HTML.format(old_label=found_label)
-    html = _BOARD_SLIDE_OPEN_RE.sub(f'<div class="board-slide" style="position:relative">{overlay}', html)
-    if "</head>" in html:
-        html = html.replace("</head>", _STALE_OVERLAY_STYLE + "</head>", 1)
-    else:
-        html = _STALE_OVERLAY_STYLE + html
-    html_path.write_text(html, encoding="utf-8")
+    html_path.write_text(new_html, encoding="utf-8")
 
     return CheckResult("F3.4", label, "WARN",
                         f"{n_slides} slides de Financial Performance ocultas con overlay — el título decía "
                         f"'{found_label}' pero se está generando {month}. Avisar a Sofía Maldonado.")
+
+
+def _flag_stale_discussion_topics(month: str) -> CheckResult:
+    """F3.5 — ver nota de módulo. Post-procesa output/2_discussion_topic.html (ya generado por
+    generate.py), nunca el .j2 fuente. WARN, no FAIL — mismo criterio que F3.4/F0.6."""
+    label = "Discussion Topics — ocultar visualmente si están desactualizados"
+    html_path = paths.OUTPUT_DIR / "2_discussion_topic.html"
+    if not html_path.exists():
+        return CheckResult("F3.5", label, "SKIP", f"no existe {html_path}")
+
+    html = html_path.read_text(encoding="utf-8")
+    sentinel_month = extract_updated_for_month_comment(html)
+    if sentinel_month is None:
+        return CheckResult("F3.5", label, "SKIP",
+                            "no se encontró el comentario 'updated_for_month' en el HTML generado")
+    if sentinel_month == month:
+        return CheckResult("F3.5", label, "PASS", f"marcado como '{sentinel_month}', coincide con {month}")
+
+    new_html, n_slides = _overlay_stale_slides(html, "dt-slide", "Discussion Topics", sentinel_month)
+    if n_slides == 0:
+        return CheckResult("F3.5", label, "SKIP", "no se encontró ningún .dt-slide en el HTML")
+    html_path.write_text(new_html, encoding="utf-8")
+
+    return CheckResult("F3.5", label, "WARN",
+                        f"{n_slides} slides de Discussion Topics ocultas con overlay — el archivo está marcado "
+                        f"como '{sentinel_month}' pero se está generando {month}.")
 
 
 def run(month: str) -> list[CheckResult]:
@@ -142,6 +190,7 @@ def run(month: str) -> list[CheckResult]:
     results.append(CheckResult("F3.1", "generate.py corrió sin errores", "PASS", ""))
 
     results.append(_reembed_cr_image(month))
+    results.append(_flag_stale_discussion_topics(month))
     results.append(_flag_stale_financial_performance(month))
 
     proc2 = _run_script(paths.MERGE_SCRIPT, deps=())
