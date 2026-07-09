@@ -1,5 +1,17 @@
 # Board Agent — Instrucciones para Claude
 
+## Primera interacción — si el pedido es vago, ofrecer el menú
+
+Si quien escribe no especifica qué necesita (ej. "quiero editar el board", "ayúdame con
+esto", "no sé por dónde empezar"), o es evidentemente su primera vez en este repo sin un
+pedido concreto — invocar la skill `board-assistant` y ofrecer el menú guiado ahí definido
+(construir board nuevo / actualizar / agregar-corregir contenido / verificar un dato). No
+asumir que la persona conoce las skills, los templates, o cómo pedir las cosas "en el
+lenguaje correcto" — el equipo que usa este repo va desde muy técnico hasta cero técnico
+(pedido explícito del equipo, 2026-07-09). Si el pedido ya es específico, saltar el menú e ir
+directo a la skill que corresponda (`edit-slide-content`, `verify-data-point`,
+`ceo-highlights`, `slide-comments`, `discussion-topic`).
+
 ## Punto de entrada — leer primero
 
 Antes de cualquier tarea, leer: `docs/AGENT_ARCHITECTURE.md` — tiene el inventario completo de fuentes, las 6 fases, las 19 reglas del Validator, la deuda técnica priorizada y la visión final del sistema.

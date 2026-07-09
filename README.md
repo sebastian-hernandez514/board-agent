@@ -6,11 +6,16 @@ Sistema que automatiza la generación del board ejecutivo mensual de Alegra: cal
 
 **¿Vas a correr el pipeline tú mismo por primera vez?** Lee **[`docs/ONBOARDING.md`](docs/ONBOARDING.md)** antes de tocar nada — tiene el checklist de prerrequisitos y el comando de diagnóstico (`check_setup.py`) que hay que correr primero.
 
+**¿No sabes por dónde empezar?** No hace falta saber el nombre de ninguna skill — dile a Claude Code algo tan simple como *"quiero hacer un cambio al board"* o *"ayúdame con esto"* y la skill `board-assistant` te ofrece un menú simple (construir un board nuevo, actualizar uno existente, agregar/corregir contenido, o verificar un dato).
+
 ## Qué hay en este repo
 
 | Carpeta/archivo | Qué es |
 |---|---|
 | `board_agent/` | El código de las 6 fases del pipeline (freshness check, cálculo de métricas, armado de HTML, validador de reglas de negocio, diff contra el mes anterior, PDF) |
+| `skills/board-assistant/` | Punto de entrada guiado (menú) — úsalo si no sabes qué skill invocar |
+| `skills/edit-slide-content/` | Editor general de contenido — comentarios/títulos/slides nuevas en CUALQUIER slide del board, no solo las 3 de abajo |
+| `skills/verify-data-point/` | Verifica un número del board reconstruyéndolo independiente desde Redshift |
 | `skills/discussion-topic/` | Skill de self-service para agregar una slide de "Discussion Topic" al board sin depender de Sebastián |
 | `skills/ceo-highlights/` | Skill de self-service para editar Highlights/Lowlights/Financial Update del CEO |
 | `skills/slide-comments/` | Skill de self-service para agregar un comentario/ask a las slides ARR Core/Lite |

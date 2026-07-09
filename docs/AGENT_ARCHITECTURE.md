@@ -484,3 +484,40 @@ del código de Board Agent — no se repite este patrón hacia adelante.
 
 **Pendiente:** tests para `preview.py` (hecho, `tests/test_preview.py`), documentar ambas skills +
 `preview.py` en el Playbook de la wiki (pendiente — ver `memory/project_board_collaboration_roadmap.md`).
+
+---
+
+## 7. De "una skill por slide" a un self-service general (2026-07-09)
+
+**El problema que hizo repensar el enfoque:** al construir la sección 6, cada skill nueva
+(CEO Highlights, ARR Walk comments) requería enganchar a mano un campo YAML + un bloque
+Jinja2 para ESA slide específica. Revisando el board completo se confirmó que **NPS y
+Country Performance no tienen ningún mecanismo de comentario** — ni siquiera "fantasma" como
+tenía `arr_walk.yaml` antes de conectarse. Con 47 slides y solo 3 cubiertas, seguir
+construyendo "una skill por slide a medida que alguien la pide" no escala, y no cumple lo que
+el equipo pidió explícitamente: poder tocar **cualquier slide**, de forma muy fácil, en
+lenguaje natural, sin importar qué tan técnica sea la persona.
+
+**Reflexión (usuario, 2026-07-09):** las 3 skills construidas no fueron desperdicio — pero
+son el nivel de abstracción equivocado para lo que el equipo realmente pidió. En vez de
+recetas puntuales por campo/slide, hace falta una **capacidad general**: hablar con la IA
+sobre cualquier parte del board, con una experiencia guiada (comparada explícitamente con un
+"menú de videojuego") porque el público va desde muy técnico hasta cero técnico.
+
+**3 skills nuevas, construidas a partir de esa reflexión:**
+
+| Skill | Qué resuelve |
+|---|---|
+| `skills/board-assistant/` | Punto de entrada guiado — si el pedido es vago o es la primera vez de la persona, ofrece un menú de 4 opciones (construir board nuevo / actualizar / agregar-corregir contenido / verificar un dato) y deriva a la skill correcta. Referenciado también desde `CLAUDE.md` para que aparezca proactivamente. |
+| `skills/edit-slide-content/` | Generaliza `ceo-highlights`/`slide-comments`/`discussion-topic` — para CUALQUIER slide: detecta si el mecanismo de datos ya existe (y en ese caso usa la skill correspondiente) o construye el enganche nuevo (YAML + bloque Jinja2, reusando el patrón visual de `.aw-comments-panel` como referencia de diseño, conectado a `slide_registry.py` si el contenido es sensible al mes). Incluye guía para agregar una slide nueva (ej. al Appendix) con el checklist de Validator correspondiente (R12, R16, R18). |
+| `skills/verify-data-point/` | Formaliza el procedimiento real usado el 2026-07-09 para verificar el ARR de junio contra un dashboard externo (que resultó ser mock) — reconstruir el dato independiente desde Redshift (mismo criterio que R5/R7 del Validator) en vez de solo repetir lo que dice `metrics.yaml`, y comparar. |
+
+**Decisión de alcance explícita:** las 3 skills anteriores (`ceo-highlights`, `slide-comments`,
+`discussion-topic`) NO se descartan — quedan como los "casos ya resueltos" que
+`edit-slide-content` usa directamente en vez de reconstruir su lógica. El trabajo de esta
+sesión no se pierde, se generaliza.
+
+**Relación con la propuesta de Luis Caro (`deck.md`, sección anterior de esta misma
+conversación de diseño):** se mantiene la misma decisión de no migrar a un renderer genérico
+con specs de chart en JSON — el problema real que resolver era la experiencia de edición
+guiada para no-técnicos, no la estructura de los templates en sí.
