@@ -30,7 +30,7 @@ El sistema corre en 6 pasos (fases), uno después del otro:
 | 6 — PDF | Genera el PDF final, solo cuando alguien lo aprueba a mano | "Ya quedó, generar el PDF" |
 
 **Lo único que sigue siendo 100% humano:** el contenido en sí — qué decir, no cómo escribirlo en el
-archivo correcto, para eso ya hay 3 skills de self-service (ver sección 5) — y la aprobación final
+archivo correcto, para eso ya hay skills de self-service (ver sección 5) — y la aprobación final
 antes de publicar.
 
 ---
@@ -95,8 +95,16 @@ con Claude Code.
 
 ## 5. Skills de self-service — hacer el cambio tú mismo, sin depender de Sebastián
 
-Hay 3 skills ya construidas. Cada una sabe el formato exacto del archivo que hay que tocar — solo
+Hay 6 skills ya construidas. Cada una sabe el formato exacto del archivo que hay que tocar — solo
 hace falta explicarle a Claude Code, en lenguaje simple, qué se quiere decir.
+
+### 5.0 ¿No sabes por dónde empezar? (nueva — 2026-07-09)
+
+Skill: `Board Agent/skills/board-assistant/SKILL.md`. No hace falta saber el nombre de ninguna skill
+de las de abajo — si no tienes claro qué necesitas, dile a Claude Code algo tan simple como *"quiero
+hacer un cambio al board"* o *"ayúdame con esto"* y te ofrece un menú de 4 opciones (construir un
+board nuevo, actualizar uno existente, agregar/corregir contenido, o verificar un dato) que te lleva
+a la skill correcta.
 
 ### 5.1 Discussion Topics
 
@@ -121,16 +129,31 @@ el archivo en el formato correcto y actualiza el mes.
 
 Skill: `Board Agent/skills/slide-comments/SKILL.md`. Permite agregar un comentario o "ask" en las
 slides ARR Core y ARR Lite — por ejemplo, un pedido al equipo de Producto o contexto sobre un país.
-**Por ahora solo funciona en esas 2 slides**, no es un mecanismo genérico para cualquier slide todavía.
-
-**Para usarla:** decirle a Claude Code *"quiero agregar un comentario en ARR Core/Lite que diga..."*.
 
 ### 5.4 Ver el resultado antes de correr el board completo (nueva — 2026-07-08)
 
-Herramienta: `Board Agent/preview.py`. Después de usar cualquiera de las 3 skills de arriba, se puede
+Herramienta: `Board Agent/preview.py`. Después de usar cualquiera de las skills de arriba, se puede
 pedir una captura de la slide ya generada, sin abrir un HTML ni correr el flujo completo.
 
 **Para usarla:** decirle a Claude Code *"muéstrame cómo quedó la slide de [nombre de la slide]"*.
+
+### 5.5 Editar cualquier otra slide (nueva — 2026-07-09)
+
+Skill: `Board Agent/skills/edit-slide-content/SKILL.md`. Las skills 5.1-5.3 cubren 3 slides
+específicas — esta cubre **cualquier otra** (NPS, Country Performance, Headcount, Appendix, etc.):
+comentarios, títulos, o incluso slides nuevas. Si el mecanismo de datos para esa slide ya existe, la
+usa directo; si no existe todavía, lo construye (con tu aviso antes de tocar el diseño).
+
+**Para usarla:** decirle a Claude Code *"quiero agregar un comentario a la slide de [nombre]"* o
+*"quiero cambiar el título de..."* — no hace falta saber si esa slide ya tenía un mecanismo o no.
+
+### 5.6 Verificar un dato que no te cuadra (nueva — 2026-07-09)
+
+Skill: `Board Agent/skills/verify-data-point/SKILL.md`. Si un número del board (ARR, MRR, Churn,
+etc.) no coincide con lo que tenías en mente o en otro reporte, esta skill lo reconstruye
+independiente desde Redshift — sin confiar ciegamente en lo que ya dice el board — y compara.
+
+**Para usarla:** decirle a Claude Code *"este ARR/MRR no me cuadra, ¿de dónde sale?"*.
 
 ---
 
