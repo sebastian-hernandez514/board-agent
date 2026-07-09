@@ -11,50 +11,29 @@ sin embeber (ruta relativa rota si se abre el HTML fuera de Template Board/outpu
 busca cualquier <img src="...data/assets/{month}/..."> sin importar el nombre del archivo,
 así que un topic nuevo con una imagen de otro nombre queda cubierto automáticamente.
 
-F3.4 (agregada 2026-07-08): tapa visualmente las slides de Template 4 (Financial Performance)
-si el <title> del HTML ya generado sigue en el mes anterior (mismo hallazgo real que F0.9,
-ver phase0_gate.py) — en vez de publicar el board con los números de Finance del mes pasado
-disfrazados como si fueran de este mes. Solo escribe en output/4_financial_performance.html
-(el artefacto ya generado por generate.py), nunca en el .j2 fuente — mismo patrón que
-_reembed_cr_image(). No elimina ni reescribe el contenido existente (evita el riesgo de
-romper HTML anidado con regex) — inserta un overlay que lo cubre visualmente por completo.
+F3.4/F3.5/F3.6/F3.7/F3.8: tapan visualmente el contenido desactualizado de Template 4
+(Financial Performance), Discussion Topics, CEO Highlights, 6_rd (Product Performance + NPS)
+y Headcount respectivamente — cada uno con su propia fuente de frescura (título del HTML,
+sentinel en comentario, campo YAML, presencia de clave en snapshot). Solo escriben en
+output/*.html (el artefacto ya generado por generate.py), nunca en el .j2 fuente.
 
-F3.5 (agregada 2026-07-08, mismo día): mismo mecanismo para Discussion Topics, usando el
-sentinel '<!-- updated_for_month: YYYY-MM -->' agregado a 2_discussion_topic.j2 (ver F0.6 en
-phase0_gate.py) — el comentario pasa intacto a través de Jinja2, así que se puede leer del
-output/2_discussion_topic.html ya generado sin tocar el .j2 fuente en esta fase. Cubre tanto
-las slides de contenido (`.dt-slide`) como las portadas de cada topic (`.slide.section-divider`)
-— hallazgo del usuario 2026-07-08 (segunda revisión): la portada revelaba el título del tema
-viejo (ej. "ICP Split Costa Rica Update") aunque el contenido de abajo ya estuviera tapado.
-
-F3.6 (agregada 2026-07-08, mismo día): CEO Highlights es una única slide dentro de
-output/1_inicio.html que comparte la clase genérica `.slide` con Monthly Performance, YTD
-Performance, ARR Walk GLO, etc. — a diferencia de F3.4/F3.5, tapar "toda la clase .slide del
-archivo" ocultaría también slides que sí están frescas. Se ubica la slide por el comentario
-'<!-- SLIDE 2 — CEO Highlights / Lowlights -->' ya presente en el template (marcador estable,
-mismo criterio que usa R19) y se tapa solo esa. Lee editorial/ceo.yaml directo — es un dato,
-no código fuente de Template Board — para el sentinel 'updated_for_month' (mismo campo que ya
-usa F0.5 desde 2026-07-06, nunca antes conectado a una acción real de Fase 3).
-
-F3.7 (agregada 2026-07-08, mismo día): NPS (slide 3 de 6_rd.j2) — ver F0.10 en phase0_gate.py
-para la causa raíz completa. `_build_nps()` en fetch_metrics.py devuelve `None` cuando
-nps_snapshot.yaml no tiene el mes objetivo, y 6_rd.j2 no lo blinda — generate.py truena
-armando esa slide y deja output/6_rd.html con la versión del mes anterior sin avisar. No se
-tocó 6_rd.j2 (blindar la plantilla es cambio de Template Board). Mismo criterio de marcador
-único que F3.6 — 6_rd.j2 mezcla 3 slides bajo la misma clase .slide (portada, Product
-Performance, NPS), así que se tapa solo la de NPS, dejando Product Performance intacta (esa
-es el hallazgo #4 pendiente, título con el mes escrito a mano, no relacionado).
+Refactor 2026-07-09: las 4 funciones originales (F3.4-F3.7, agregadas 2026-07-08) eran casi
+idénticas — cada una con su archivo/marcador/sentinel hardcodeado a mano y repetido. A raíz de
+una propuesta de Luis Caro en tts-bi-data (formato `deck.md` con metadatos declarados por
+slide en vez de enterrados en código), se extrajo el patrón compartido a
+`slide_registry.py`: un registro declarativo (`SLIDE_SPECS`) + un motor genérico
+(`check_stale_slide`). Agregar Headcount (F3.8) fue agregar una entrada a la lista, no
+escribir 30 líneas nuevas — ver slide_registry.py para el detalle completo y la nota de
+crédito a la propuesta que lo motivó.
 """
 
 import base64
 import re
 import subprocess
 
-import yaml
-
 from . import paths
-from .phase0_gate import extract_financial_performance_title_month, extract_updated_for_month_comment
 from .report import CheckResult
+from .slide_registry import SLIDE_SPECS, check_stale_slide
 
 
 def _run_script(script_path, deps: tuple[str, ...], extra_args=None):
@@ -103,214 +82,34 @@ def _reembed_cr_image(month: str) -> CheckResult:
                         f"embebidas: {embedded}")
 
 
-_STALE_OVERLAY_STYLE = (
-    "<style>.stale-slide{position:relative !important;}"
-    ".stale-overlay{position:absolute;inset:0;z-index:999;background:#f8fafc;"
-    "display:flex;flex-direction:column;align-items:center;justify-content:center;"
-    "gap:10px;text-align:center;padding:40px;box-sizing:border-box;}"
-    ".stale-overlay .stale-icon{font-size:32px;}"
-    ".stale-overlay .stale-title{font-size:20px;font-weight:700;color:#475569;}"
-    ".stale-overlay .stale-sub{font-size:14px;color:#94a3b8;max-width:520px;}</style>"
-)
-
-_STALE_OVERLAY_HTML = (
-    '<div class="stale-overlay"><div class="stale-icon">⏳</div>'
-    '<div class="stale-title">{section} — contenido pendiente</div>'
-    '<div class="stale-sub">Esta sección mostraba {old_label} — se ocultó para no publicar '
-    'el mes equivocado.</div></div>'
-)
-
-
-def _overlay_stale_slides(html: str, slide_classes, section: str, old_label: str) -> tuple[str, int]:
-    """Cubre cada slide de `slide_classes` (un string o una lista de strings — ej. la portada
-    de un topic Y sus slides de contenido) con un overlay "contenido pendiente", sin borrar ni
-    reescribir el HTML anidado existente debajo (evita el riesgo de romper la estructura con
-    regex de reemplazo) — le agrega la clase marcadora `stale-slide` (position:relative, ver
-    _STALE_OVERLAY_STYLE) e inserta el overlay como hijo justo después del tag de apertura.
-    Devuelve (html_modificado, cantidad_de_slides_tapadas). 0 slides → no modifica nada."""
-    if isinstance(slide_classes, str):
-        slide_classes = [slide_classes]
-
-    overlay = _STALE_OVERLAY_HTML.format(section=section, old_label=old_label)
-    total = 0
-    for slide_class in slide_classes:
-        open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'"[^>]*>')
-        n = len(open_re.findall(html))
-        if n == 0:
-            continue
-        total += n
-
-        def _inject(m, _cls=slide_class):
-            tag = m.group(0).replace(f'class="{_cls}"', f'class="{_cls} stale-slide"', 1)
-            return tag + overlay
-
-        html = open_re.sub(_inject, html)
-
-    if total == 0:
-        return html, 0
-    if "</head>" in html:
-        html = html.replace("</head>", _STALE_OVERLAY_STYLE + "</head>", 1)
-    else:
-        html = _STALE_OVERLAY_STYLE + html
-    return html, total
-
-
-_MARKER_SEARCH_WINDOW = 2000
-
-
-def _overlay_single_slide_by_marker(html: str, marker_text: str, slide_class: str,
-                                     section: str, old_label: str) -> tuple[str, int]:
-    """Para slides SIN clase propia (comparten `slide_class` con otras slides del mismo
-    archivo, ej. CEO Highlights en 1_inicio.j2): ubica `marker_text` (un comentario HTML
-    estable, ej. '<!-- SLIDE 2 — ... -->') y tapa solo el PRÓXIMO `<div class="slide_class">`
-    que aparece después — no todas las ocurrencias del archivo. Devuelve
-    (html_modificado, 1 o 0)."""
-    idx = html.find(marker_text)
-    if idx == -1:
-        return html, 0
-
-    open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'"[^>]*>')
-    m = open_re.search(html, idx, idx + _MARKER_SEARCH_WINDOW)
-    if not m:
-        return html, 0
-
-    overlay = _STALE_OVERLAY_HTML.format(section=section, old_label=old_label)
-    tag = m.group(0).replace(f'class="{slide_class}"', f'class="{slide_class} stale-slide"', 1)
-    html = html[:m.start()] + tag + overlay + html[m.end():]
-    if "</head>" in html:
-        html = html.replace("</head>", _STALE_OVERLAY_STYLE + "</head>", 1)
-    else:
-        html = _STALE_OVERLAY_STYLE + html
-    return html, 1
+_SPEC_BY_ID = {spec.check_id: spec for spec in SLIDE_SPECS}
 
 
 def _flag_stale_ceo_highlights(month: str) -> CheckResult:
-    """F3.6 — ver nota de módulo. WARN, no FAIL — mismo criterio que F3.4/F3.5."""
-    label = "CEO Highlights — ocultar visualmente si están desactualizados"
-    html_path = paths.OUTPUT_DIR / "1_inicio.html"
-    if not html_path.exists():
-        return CheckResult("F3.6", label, "SKIP", f"no existe {html_path}")
-
-    try:
-        with open(paths.CEO_YAML, encoding="utf-8") as f:
-            ceo_data = yaml.safe_load(f) or {}
-    except Exception as e:
-        return CheckResult("F3.6", label, "SKIP", f"error leyendo ceo.yaml: {e}")
-
-    sentinel_month = ceo_data.get("updated_for_month")
-    if sentinel_month is None:
-        return CheckResult("F3.6", label, "SKIP",
-                            "ceo.yaml no tiene 'updated_for_month' — no se puede verificar si el contenido "
-                            "es del mes correcto")
-    if sentinel_month == month:
-        return CheckResult("F3.6", label, "PASS", f"marcado como '{sentinel_month}', coincide con {month}")
-
-    html = html_path.read_text(encoding="utf-8")
-    new_html, n = _overlay_single_slide_by_marker(
-        html, "SLIDE 2 — CEO Highlights", "slide", "CEO Highlights", sentinel_month)
-    if n == 0:
-        return CheckResult("F3.6", label, "SKIP", "no se encontró la slide de CEO Highlights en el HTML")
-    html_path.write_text(new_html, encoding="utf-8")
-
-    return CheckResult("F3.6", label, "WARN",
-                        f"1 slide de CEO Highlights oculta con overlay — ceo.yaml está marcado como "
-                        f"'{sentinel_month}' pero se está generando {month}. Avisar a Mayra Gutiérrez.")
-
-
-def _flag_stale_nps(month: str) -> CheckResult:
-    """F3.7 — ver F0.10 en phase0_gate.py para la causa raíz completa. Cuando
-    nps_snapshot.yaml no tiene el mes objetivo, generate.py truena armando la slide de NPS
-    ('None' has no attribute 'costa_rica_trend').
-
-    Alcance corregido 2026-07-08 (mismo día, segunda pasada): la primera versión de esta
-    función tapaba SOLO la slide de NPS, asumiendo que Product Performance (la otra slide de
-    contenido en el mismo archivo) seguía fresca. Falso — confirmado leyendo generate.py:
-    `html = tmpl.render(...)` se ejecuta ANTES de `out_f.write_text(html)`; si `render()` lanza
-    una excepción, ese `write_text` nunca se llama, así que `output/6_rd.html` queda
-    COMPLETO sin regenerar (Jinja2 renderiza el archivo entero de una sola pasada, no
-    slide por slide) — no es solo la slide de NPS la que queda vieja, es TODO el archivo,
-    incluida Product Performance (que si se regenerara sí tomaría el mes correcto, porque usa
-    `config.month_label` dinámico — confirmado, no es el hallazgo #4 un bug aparte, es un
-    síntoma de este mismo crash). Por eso ahora se tapa TODO el archivo (mismo mecanismo que
-    F3.4/F3.5), no solo la slide de NPS."""
-    label = "6_rd (Product Performance + NPS) — ocultar visualmente si está desactualizado"
-    html_path = paths.OUTPUT_DIR / "6_rd.html"
-    if not html_path.exists():
-        return CheckResult("F3.7", label, "SKIP", f"no existe {html_path}")
-
-    try:
-        with open(paths.NPS_SNAPSHOT_YAML, encoding="utf-8") as f:
-            snap = yaml.safe_load(f) or {}
-    except Exception as e:
-        return CheckResult("F3.7", label, "SKIP", f"error leyendo nps_snapshot.yaml: {e}")
-
-    if month in snap:
-        return CheckResult("F3.7", label, "PASS", f"snapshot de '{month}' presente, no se oculta nada")
-
-    html = html_path.read_text(encoding="utf-8")
-    new_html, n = _overlay_stale_slides(html, "slide", "R&D — Product Performance & NPS", "un mes anterior")
-    if n == 0:
-        return CheckResult("F3.7", label, "SKIP", "no se encontró ninguna slide en el HTML")
-    html_path.write_text(new_html, encoding="utf-8")
-
-    return CheckResult("F3.7", label, "WARN",
-                        f"{n} slides de 6_rd.html ocultas con overlay — nps_snapshot.yaml no tiene entrada "
-                        f"'{month}', generate.py truena armando NPS y deja TODO el archivo sin regenerar "
-                        f"(incluida Product Performance, que de otro modo sí estaría al día).")
-
-
-def _flag_stale_financial_performance(month: str) -> CheckResult:
-    """F3.4 — ver nota de módulo. Post-procesa output/4_financial_performance.html (ya generado
-    por generate.py), nunca el .j2 fuente. WARN, no FAIL — mismo criterio que F0.9: es un
-    insumo externo que llega tarde, no debe bloquear la generación del resto del board."""
-    label = "Template 4 — ocultar visualmente si está desactualizado"
-    html_path = paths.OUTPUT_DIR / "4_financial_performance.html"
-    if not html_path.exists():
-        return CheckResult("F3.4", label, "SKIP", f"no existe {html_path}")
-
-    html = html_path.read_text(encoding="utf-8")
-    found_label, found_month = extract_financial_performance_title_month(html)
-    if found_month is None:
-        return CheckResult("F3.4", label, "SKIP",
-                            "no se encontró el patrón 'Financial Performance · Mes AAAA' en el <title>")
-    if found_month == month:
-        return CheckResult("F3.4", label, "PASS", f"'{found_label}' coincide con {month}, no se oculta nada")
-
-    new_html, n_slides = _overlay_stale_slides(html, "board-slide", "Financial Performance", found_label)
-    if n_slides == 0:
-        return CheckResult("F3.4", label, "SKIP", "no se encontró ningún .board-slide en el HTML")
-    html_path.write_text(new_html, encoding="utf-8")
-
-    return CheckResult("F3.4", label, "WARN",
-                        f"{n_slides} slides de Financial Performance ocultas con overlay — el título decía "
-                        f"'{found_label}' pero se está generando {month}. Avisar a Sofía Maldonado.")
+    """F3.6 — ver slide_registry.py para la lógica completa (registro + motor genérico)."""
+    return check_stale_slide(_SPEC_BY_ID["F3.6"], month)
 
 
 def _flag_stale_discussion_topics(month: str) -> CheckResult:
-    """F3.5 — ver nota de módulo. Post-procesa output/2_discussion_topic.html (ya generado por
-    generate.py), nunca el .j2 fuente. WARN, no FAIL — mismo criterio que F3.4/F0.6."""
-    label = "Discussion Topics — ocultar visualmente si están desactualizados"
-    html_path = paths.OUTPUT_DIR / "2_discussion_topic.html"
-    if not html_path.exists():
-        return CheckResult("F3.5", label, "SKIP", f"no existe {html_path}")
+    """F3.5 — ver slide_registry.py."""
+    return check_stale_slide(_SPEC_BY_ID["F3.5"], month)
 
-    html = html_path.read_text(encoding="utf-8")
-    sentinel_month = extract_updated_for_month_comment(html)
-    if sentinel_month is None:
-        return CheckResult("F3.5", label, "SKIP",
-                            "no se encontró el comentario 'updated_for_month' en el HTML generado")
-    if sentinel_month == month:
-        return CheckResult("F3.5", label, "PASS", f"marcado como '{sentinel_month}', coincide con {month}")
 
-    new_html, n_slides = _overlay_stale_slides(
-        html, ["dt-slide", "slide section-divider"], "Discussion Topics", sentinel_month)
-    if n_slides == 0:
-        return CheckResult("F3.5", label, "SKIP", "no se encontró ningún .dt-slide/.section-divider en el HTML")
-    html_path.write_text(new_html, encoding="utf-8")
+def _flag_stale_financial_performance(month: str) -> CheckResult:
+    """F3.4 — ver slide_registry.py."""
+    return check_stale_slide(_SPEC_BY_ID["F3.4"], month)
 
-    return CheckResult("F3.5", label, "WARN",
-                        f"{n_slides} slides de Discussion Topics ocultas con overlay (incluida la portada del "
-                        f"tema) — el archivo está marcado como '{sentinel_month}' pero se está generando {month}.")
+
+def _flag_stale_nps(month: str) -> CheckResult:
+    """F3.7 — ver slide_registry.py."""
+    return check_stale_slide(_SPEC_BY_ID["F3.7"], month)
+
+
+def _flag_stale_headcount(month: str) -> CheckResult:
+    """F3.8 (agregada 2026-07-09) — Headcount tenía el mismo hueco que Discussion Topics antes
+    de su fix: comentarios de Highlights/Lowlights escritos a mano en 7_headcount.j2, sin
+    ningún YAML ni sentinel. Ver slide_registry.py para la lógica completa."""
+    return check_stale_slide(_SPEC_BY_ID["F3.8"], month)
 
 
 def run(month: str) -> list[CheckResult]:
@@ -331,6 +130,7 @@ def run(month: str) -> list[CheckResult]:
     results.append(_flag_stale_discussion_topics(month))
     results.append(_flag_stale_financial_performance(month))
     results.append(_flag_stale_nps(month))
+    results.append(_flag_stale_headcount(month))
 
     proc2 = _run_script(paths.MERGE_SCRIPT, deps=())
     if proc2.stdout:

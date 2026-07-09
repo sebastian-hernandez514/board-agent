@@ -159,6 +159,31 @@ def _check_discussion_topics(month: str) -> CheckResult:
     return CheckResult("F0.6", label, "PASS", f"marcado como '{sentinel_month}', coincide")
 
 
+def _check_headcount(month: str) -> CheckResult:
+    """F0.11 — agregada 2026-07-09 (mismo hueco que F0.6 pero en Headcount): los comentarios de
+    Highlights/Lowlights de `7_headcount.j2` (slides "Headcount by Team" y "People & Talent")
+    viven escritos a mano dentro del `.j2`, igual que Discussion Topics antes de su fix — sin
+    ningún YAML propio ni campo verificable. Mismo sentinel, mismo criterio: comentario HTML
+    `<!-- updated_for_month: YYYY-MM -->` al inicio del archivo."""
+    label = "7_headcount.j2 marcado como actualizado para el mes objetivo"
+    try:
+        html = paths.HEADCOUNT_TEMPLATE.read_text(encoding="utf-8")
+    except Exception as e:
+        return CheckResult("F0.11", label, "WARN", f"error leyendo el template: {e}")
+
+    sentinel_month = extract_updated_for_month_comment(html)
+    if sentinel_month is None:
+        return CheckResult("F0.11", label, "WARN",
+                            "no se encontró el comentario 'updated_for_month' en 7_headcount.j2 — "
+                            "no se puede verificar si los comentarios de Headcount son del mes correcto "
+                            "(agregar '<!-- updated_for_month: YYYY-MM -->' al inicio del archivo)")
+    if sentinel_month != month:
+        return CheckResult("F0.11", label, "WARN",
+                            f"el archivo está marcado como de '{sentinel_month}' pero se está generando '{month}' "
+                            f"— revisar si ya se actualizaron los comentarios de Headcount de este mes")
+    return CheckResult("F0.11", label, "PASS", f"marcado como '{sentinel_month}', coincide")
+
+
 def _check_config_month(month: str) -> CheckResult:
     """F0.8 — ver nota de módulo. config.yaml es el ÚNICO paso manual del checklist mensual de
     Template Board que no tenía ningún check en Fase 0, pese a que `config.period`/`month_label`
@@ -280,4 +305,5 @@ def run(month: str) -> list[CheckResult]:
         _check_config_month(month),
         _check_financial_performance_month(month),
         _check_nps_snapshot(month),
+        _check_headcount(month),
     ]

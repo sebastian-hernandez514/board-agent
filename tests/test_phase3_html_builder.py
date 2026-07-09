@@ -213,10 +213,10 @@ def test_flag_stale_discussion_topics_also_overlays_section_cover(isolated_dirs)
 
     r = f3._flag_stale_discussion_topics("2026-06")
     assert r.status == "WARN"
-    assert "portada" in r.detail
+    assert "4 slide(s)" in r.detail  # 2 portadas + 2 dt-slide, todas cuentan en el total
 
     new_html = html_path.read_text(encoding="utf-8")
-    assert new_html.count('class="slide section-divider stale-slide"') == 2
+    assert new_html.count('class="slide section-divider stale-slide"') == 2  # portadas tapadas
     assert new_html.count('class="dt-slide stale-slide"') == 2
     assert "Mexico Strategy" in new_html  # texto original conservado, solo tapado
     assert "ICP Split Costa Rica Update" in new_html
@@ -384,6 +384,60 @@ def test_flag_stale_nps_skip_when_no_slide_found(tmp_path, isolated_dirs):
     assert r.status == "SKIP"
 
 
+_HEADCOUNT_HTML = '''<html><head></head><body>
+  <div class="slide section-cover">portada, clase distinta a "hc-slide", no se toca</div>
+  <div class="hc-slide">Headcount by Team de mayo</div>
+  <div class="hc-slide">People &amp; Talent de mayo</div>
+</body></html>'''
+
+
+def test_flag_stale_headcount_skip_when_html_missing(isolated_dirs):
+    r = f3._flag_stale_headcount("2026-06")
+    assert r.status == "SKIP"
+
+
+def test_flag_stale_headcount_skip_when_sentinel_missing(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    (output_dir / "7_headcount.html").write_text("<html>sin sentinel</html>", encoding="utf-8")
+    r = f3._flag_stale_headcount("2026-06")
+    assert r.status == "SKIP"
+
+
+def test_flag_stale_headcount_pass_when_sentinel_matches(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "7_headcount.html"
+    html_path.write_text(f"<!-- updated_for_month: 2026-06 -->\n{_HEADCOUNT_HTML}", encoding="utf-8")
+    r = f3._flag_stale_headcount("2026-06")
+    assert r.status == "PASS"
+    assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
+
+
+def test_flag_stale_headcount_warns_and_overlays_both_slides(isolated_dirs):
+    """Mismo hueco que tenía Discussion Topics: comentarios de Headcount desactualizados deben
+    taparse — ambas slides (.hc-slide), no la portada (clase distinta)."""
+    data_dir, output_dir = isolated_dirs
+    html_path = output_dir / "7_headcount.html"
+    html_path.write_text(f"<!-- updated_for_month: 2026-05 -->\n{_HEADCOUNT_HTML}", encoding="utf-8")
+
+    r = f3._flag_stale_headcount("2026-06")
+    assert r.status == "WARN"
+    assert "2026-05" in r.detail and "2026-06" in r.detail
+
+    new_html = html_path.read_text(encoding="utf-8")
+    assert new_html.count('class="hc-slide stale-slide"') == 2
+    assert 'class="slide section-cover"' in new_html  # portada no tocada
+    assert "Headcount by Team de mayo" in new_html  # conservado, solo tapado
+    assert "People &amp; Talent de mayo" in new_html
+
+
+def test_flag_stale_headcount_skip_when_no_slide_found(isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    (output_dir / "7_headcount.html").write_text(
+        "<!-- updated_for_month: 2026-05 --><html><body>sin hc-slide</body></html>", encoding="utf-8")
+    r = f3._flag_stale_headcount("2026-06")
+    assert r.status == "SKIP"
+
+
 def test_run_stops_early_if_generate_fails(monkeypatch, isolated_dirs):
     monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _FakeProc(1, stderr="boom"))
     results = f3.run("2026-05")
@@ -406,14 +460,15 @@ def test_run_stops_before_merge_reembed_still_runs(monkeypatch, isolated_dirs):
 
     results = f3.run("2026-05")
     ids = [r.id for r in results]
-    assert ids == ["F3.1", "F3.2", "F3.6", "F3.5", "F3.4", "F3.7", "F3.3"]
+    assert ids == ["F3.1", "F3.2", "F3.6", "F3.5", "F3.4", "F3.7", "F3.8", "F3.3"]
     assert results[0].status == "PASS"
     assert results[1].status == "WARN"  # imagen no existe en este test
     assert results[2].status == "SKIP"  # no existe ceo.yaml en este test
     assert results[3].status == "SKIP"  # sin sentinel 'updated_for_month' en este test
     assert results[4].status == "SKIP"  # no hay 4_financial_performance.html en este test
-    assert results[5].status == "SKIP"  # no existe nps_snapshot.yaml en este test
-    assert results[6].status == "PASS"
+    assert results[5].status == "SKIP"  # no hay 6_rd.html en este test
+    assert results[6].status == "SKIP"  # no hay 7_headcount.html en este test
+    assert results[7].status == "PASS"
     assert calls["n"] == 2  # generate.py + merge_standalone.py
 
 

@@ -36,6 +36,7 @@ def isolated_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, "CONFIG_YAML", tmp_path / "config.yaml")
     monkeypatch.setattr(paths, "FINANCIAL_PERFORMANCE_TEMPLATE", tmp_path / "4_financial_performance.j2")
     monkeypatch.setattr(paths, "NPS_SNAPSHOT_YAML", tmp_path / "nps_snapshot.yaml")
+    monkeypatch.setattr(paths, "HEADCOUNT_TEMPLATE", tmp_path / "7_headcount.j2")
     monkeypatch.setattr(paths, "DATA_DIR", tmp_path)  # _check_pnl_actual busca pnl_override.yaml acá
     return tmp_path
 
@@ -55,6 +56,9 @@ def _seed_all_pass(tmp_path, month=MONTH):
         f"<title>Alegra Board — Financial Performance · {month_name_en} {y}</title>", encoding="utf-8"
     )
     _write_yaml(tmp_path / "nps_snapshot.yaml", {month: {"score": 46.5}})
+    (tmp_path / "7_headcount.j2").write_text(
+        f"<!-- updated_for_month: {month} -->\n<html>...</html>", encoding="utf-8"
+    )
 
 
 def _by_id(results):
@@ -64,7 +68,7 @@ def _by_id(results):
 def test_gate_all_pass(isolated_paths):
     _seed_all_pass(isolated_paths)
     results = _by_id(phase0_gate.run(MONTH))
-    for rid in ("F0.4", "F0.5", "F0.6", "F0.7", "F0.8", "F0.9", "F0.10"):
+    for rid in ("F0.4", "F0.5", "F0.6", "F0.7", "F0.8", "F0.9", "F0.10", "F0.11"):
         assert results[rid].status == "PASS", f"{rid}: {results[rid].detail}"
 
 
@@ -235,3 +239,28 @@ def test_nps_snapshot_passes_when_month_present(isolated_paths):
     _seed_all_pass(isolated_paths, month="2026-06")
     results = _by_id(phase0_gate.run("2026-06"))
     assert results["F0.10"].status == "PASS"
+
+
+def test_headcount_warns_when_sentinel_is_for_a_different_month(isolated_paths):
+    """Mismo hueco que tenía Discussion Topics: los comentarios de Headcount viven escritos a
+    mano en 7_headcount.j2, sin YAML propio — mismo sentinel, mismo criterio."""
+    _seed_all_pass(isolated_paths, month="2026-05")
+    results = _by_id(phase0_gate.run("2026-06"))
+    r = results["F0.11"]
+    assert r.status == "WARN"
+    assert "2026-05" in r.detail and "2026-06" in r.detail
+
+
+def test_headcount_passes_when_sentinel_matches(isolated_paths):
+    _seed_all_pass(isolated_paths, month="2026-06")
+    results = _by_id(phase0_gate.run("2026-06"))
+    assert results["F0.11"].status == "PASS"
+
+
+def test_headcount_warns_when_sentinel_missing(isolated_paths):
+    _seed_all_pass(isolated_paths)
+    (isolated_paths / "7_headcount.j2").write_text("<html>sin sentinel</html>", encoding="utf-8")
+    results = _by_id(phase0_gate.run(MONTH))
+    r = results["F0.11"]
+    assert r.status == "WARN"
+    assert "no se encontró el comentario" in r.detail
