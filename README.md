@@ -8,6 +8,8 @@ Sistema que automatiza la generación del board ejecutivo mensual de Alegra: cal
 
 **¿No sabes por dónde empezar?** No hace falta saber el nombre de ninguna skill — dile a Claude Code algo tan simple como *"quiero hacer un cambio al board"* o *"ayúdame con esto"* y la skill `board-assistant` te ofrece un menú simple (construir un board nuevo, actualizar uno existente, agregar/corregir contenido, o verificar un dato).
 
+**¿No usas Claude Code?** Este repo también funciona con Cursor, Codex, OpenCode (con DeepSeek u otro modelo), o cualquier herramienta que lea `AGENTS.md` — es el mismo contenido que las skills, en el formato abierto que la mayoría de estas herramientas cargan automáticamente. El pipeline en sí (`run.py` y los scripts de `board_agent/`) es Python plano, sin ninguna dependencia de una IA en particular.
+
 ## Qué hay en este repo
 
 | Carpeta/archivo | Qué es |

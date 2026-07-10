@@ -521,3 +521,21 @@ sesión no se pierde, se generaliza.
 conversación de diseño):** se mantiene la misma decisión de no migrar a un renderer genérico
 con specs de chart en JSON — el problema real que resolver era la experiencia de edición
 guiada para no-técnicos, no la estructura de los templates en sí.
+
+## 7.1 AGENTS.md — Board Agent no depende de una sola herramienta de IA (2026-07-10)
+
+**El problema:** los `SKILL.md` (y `CLAUDE.md`) son convenciones propias de Claude Code — el
+"auto-trigger" por `description` solo lo interpreta su harness. El equipo de datos usa Claude
+Code para tareas pesadas, pero la mayoría del resto del equipo corre otras herramientas de IA
+(OpenCode con DeepSeek, por ejemplo) — si Board Agent solo funcionara bien en Claude Code,
+gran parte del equipo quedaría fuera del self-service que se construyó en la sección 7.
+
+**Solución (inspirada directamente en el propio repo de Luis Caro,
+`Alegra-Data/alegra-slides`, que mantiene un `AGENTS.md` junto a su `CLAUDE.md`):** se agregó
+`Board Agent/AGENTS.md` — el mismo contenido esencial de las 3 skills nuevas y las reglas de
+oro (no tocar Template Board sin avisar, nunca editar `output/*.html` a mano, usar
+`redshift_guard.py`, confirmar visualmente), pero en el formato abierto (`AGENTS.md`) que
+Cursor, Codex, OpenCode y otras herramientas cargan automáticamente. No requirió tocar el
+pipeline: `run.py` y los scripts de `board_agent/` ya eran Python plano sin ninguna
+dependencia de una IA específica — el único punto de bloqueo real era la capa de experiencia
+guiada (skills), y esa capa ahora tiene una versión tool-agnostic.
