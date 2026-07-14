@@ -1447,7 +1447,7 @@
       }
     };
 
-    // Entities — desde RS (dwh_facts + db_hubspot)
+    // Entities — desde Metabase (dm_strategic.fact_customers_mrr + dm_sales.companies_relation_ids)
     const entNewAdds = {{ metrics.gtm.flywheel.ent_new_adds | tojson | safe }};
     const entChurn   = {{ metrics.gtm.flywheel.ent_churn    | tojson | safe }};
     const entStock   = {{ metrics.gtm.flywheel.ent_stock    | tojson | safe }};
@@ -1486,7 +1486,7 @@
       }
     });
 
-    // Logos — desde RS (dwh_facts + db_hubspot)
+    // Logos — desde Metabase (dm_strategic.fact_customers_mrr + dm_sales.companies_relation_ids)
     const lgNewAdds = {{ metrics.gtm.flywheel.lg_new_adds | tojson | safe }};
     const lgChurn   = {{ metrics.gtm.flywheel.lg_churn    | tojson | safe }};
     const lgStock   = {{ metrics.gtm.flywheel.lg_stock    | tojson | safe }};
@@ -1716,7 +1716,7 @@
     <div class="insight-box"><span class="so-what">So what</span>
       Linked stock grows healthy, but <strong>the flywheel driver is the client of the accountant</strong> (+37% YoY vs flat own accounts). The mix is just starting to tilt toward clients — that's where the upside is. <strong>Penetration ≈25%</strong> of the paid universe (validated 25.1% at April cut, 4 sources).</div>
   </div>
-  <div class="slide-footer"><span class="footer-brand">Alegra · Data · Confidential</span><span class="footer-source">Source: bi_accountant.accountant_master_table · Metabase cards 1477/1485/1487</span><span class="footer-page">7</span></div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Data · Confidential</span><span class="footer-source">Source: dm_accountant.accountant_master_table · Metabase cards 1477/1485/1487</span><span class="footer-page">7</span></div>
 </div>
 <div class="slide-divider">↓</div>
 

@@ -707,7 +707,7 @@
   <script>
     /* ── Slide 3 — People & Talent charts ── */
     (function() {
-      // M-12 → cutoff (13 meses). People EoP + New Hires + Attrition desde bi_strategic_relationships (RS).
+      // M-12 → cutoff (13 meses). People EoP + New Hires + Attrition desde Metabase (dm_strategic.fact_headcount_*).
       const months     = {{ metrics.pt.months | tojson }};
       const newHires   = {{ metrics.pt.hires | tojson }};
       const attrition  = {{ metrics.pt.attrition | tojson }};
