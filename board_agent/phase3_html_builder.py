@@ -41,7 +41,7 @@ def _run_script(script_path, deps: tuple[str, ...], extra_args=None):
     for d in deps:
         cmd += ["--with", d]
     cmd += ["python3", str(script_path)] + (extra_args or [])
-    return subprocess.run(cmd, cwd=paths.TEMPLATE_BOARD, capture_output=True, text=True, timeout=300)
+    return subprocess.run(cmd, cwd=paths.BOARD_AGENT_ROOT, capture_output=True, text=True, timeout=300)
 
 
 _EXT_TO_MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}

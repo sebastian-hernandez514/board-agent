@@ -37,7 +37,7 @@ Cuando aplique, preguntá (en este orden, en español simple):
 ```
 ¿Qué quieres hacer con el Board?
 
-1. Construir el board de un mes nuevo (desde cero, con datos frescos de Redshift)
+1. Construir el board de un mes nuevo (desde cero, con datos frescos de Metabase)
 2. Actualizar o revisar el board del mes actual (ya generado, quieres verlo o corregirlo)
 3. Agregar o corregir contenido — un comentario, un título, o una slide nueva
 4. Verificar un dato que no te cuadra (un número que parece raro)
@@ -46,12 +46,12 @@ Cuando aplique, preguntá (en este orden, en español simple):
 ## Cómo derivar cada opción
 
 ### 1. Construir el board de un mes nuevo
-Requiere sesión de AWS SSO activa (perfil `alegra`) — verificarla primero
-(`~/aws-cli-v2/aws-cli/aws sts get-caller-identity --profile alegra`, y si expiró, correr `sso
-login` sin preguntar, según `CLAUDE.md` raíz). Preguntar el mes (`YYYY-MM`). Correr:
+Antes de correr `run.py`, poblar `data/.metabase_cache.json` para el mes objetivo: leer
+`board_agent/metabase_fetch_spec.py` y correr cada query MBQL vía el MCP de Metabase
+(`mcp__metabase__*`) — este pipeline ya no usa Redshift ni AWS SSO. Preguntar el mes (`YYYY-MM`). Correr:
 ```bash
 cd "Board Agent"
-uv run --with boto3 --with pyyaml python run.py --month YYYY-MM --refresh
+uv run --with pyyaml python run.py --month YYYY-MM --refresh
 ```
 Si Fase 0/1 bloquean (FAIL), explicar exactamente qué falta y quién lo provee (el reporte ya
 lo dice) — no forzar el flujo sin que la persona entienda que los números pueden no ser
@@ -76,9 +76,9 @@ Derivar a la skill **`verify-data-point`**.
    mejor una pregunta de más que una edición equivocada.
 2. **No muestres el menú si ya sabés qué hacer.** Es una guía para cuando hace falta, no un
    ritual obligatorio en cada mensaje.
-3. **Recordar el límite de siempre:** este repo (Board Agent) no modifica el código fuente de
-   `../Template Board/` salvo excepciones puntuales ya documentadas (sentinels de mes) — si el
-   pedido requiere tocar un `.j2`, avisar antes de hacerlo (ver `edit-slide-content`).
+3. **Recordar el límite de siempre:** los `.j2` de `templates/` son el diseño del board, no
+   contenido editorial — si el pedido requiere tocar uno, avisar antes de hacerlo (ver
+   `edit-slide-content`).
 
 ## Limitantes
 

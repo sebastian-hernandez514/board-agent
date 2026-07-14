@@ -4,16 +4,26 @@
 > **Fecha:** 2026-06-19
 > **Propósito:** Punto de partida para diseñar el sistema multi-agente que automatice la generación del board. Este doc captura lo que tenemos hoy y la dirección a donde queremos llegar. Contrastar contra versiones futuras.
 
+> **⚠️ Actualización 2026-07-10 — migración a Metabase:** este repo ya NO se conecta a Redshift
+> ni tiene credenciales/usuarios de AWS en ningún archivo (mandato de Arquitectura, ver
+> `memory/project_board_agent.md`). Todo lo que en este documento dice "Redshift" / `cluster-1`
+> / `cluster-2` / `redshift_guard.py` describe la arquitectura **histórica** (hasta esa fecha) —
+> se conserva así porque documenta decisiones y hallazgos reales de esa época, no porque siga
+> siendo el mecanismo actual. El mecanismo actual: Claude Code corre cada query como MBQL vía el
+> MCP de Metabase (OAuth) y escribe los resultados en `data/.metabase_cache.json` antes de correr
+> el pipeline — ver `board_agent/metabase_fetch_spec.py` para el mapeo completo tabla-por-tabla
+> y el estado de cada query, y `CLAUDE.md` para el flujo operativo.
+
 ---
 
-## 1. Estado Actual del Pipeline
+## 1. Estado Actual del Pipeline (histórico — ver banner de arriba para el estado real de acceso a datos)
 
-### Stack técnico
-- **Lenguaje:** Python (`uv run --with boto3 --with pyyaml --with jinja2`)
-- **Datos principales:** Redshift (cluster-2: `redshift-cluster-2` / cluster-1: `data-redshift-cluster`)
-- **Seguridad:** `redshift_guard.py` para todas las queries
+### Stack técnico (histórico)
+- **Lenguaje:** Python (`uv run --with pyyaml --with jinja2`)
+- **Datos principales (hasta 2026-07-10):** Redshift (cluster-2: `redshift-cluster-2` / cluster-1: `data-redshift-cluster`) — **desde 2026-07-10: Metabase, vía MCP**
+- **Seguridad (hasta 2026-07-10):** `redshift_guard.py` para todas las queries — ya no existe en este repo
 - **Renderizado:** Jinja2 templates → HTML → PDF (Playwright)
-- **Autenticación RS:** AWS SSO perfil `alegra`
+- **Autenticación (hasta 2026-07-10):** AWS SSO perfil `alegra` — ya no aplica, el MCP de Metabase usa OAuth
 
 ### Flujo de generación hoy
 
@@ -24,9 +34,16 @@ fetch_metrics.py  →  data/metrics.yaml  →  generate.py  →  output/*.html
                                                          →  generate_pdf.py → .pdf
 ```
 
-### Fuentes de datos — inventario completo
+### Fuentes de datos — inventario completo (histórico, columna "Cluster" ya no aplica)
 
-| Fuente | Tipo | Cluster | Actualización | Estado hoy |
+Esta tabla documenta el inventario y la cadencia de cada fuente tal como se investigó en su
+momento — sigue siendo correcta en QUÉ tabla y con qué frecuencia se actualiza cada dato. La
+columna "Cluster" es histórica (acceso vía Redshift hasta 2026-07-10); hoy cada una de estas
+tablas se lee desde Metabase — ver `board_agent/metabase_fetch_spec.py` para el nombre de
+schema equivalente en Metabase (`dm_strategic`, `dm_sales`, `dm_retention`, `dm_accountant`,
+`dm_alanube`) y el estado de migración de cada query.
+
+| Fuente | Tipo | Cluster (histórico) | Actualización | Estado hoy |
 |---|---|---|---|---|
 | `dwh_facts.fact_customers_mrr` | Redshift | cluster-2 | Automático | ✅ |
 | `db_finance.fact_cac_version_segments` | Redshift | cluster-2 | Automático | ✅ |
@@ -112,7 +129,7 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 **Por qué existe:** Porque varias fuentes no están en ninguna base de datos todavía.
 **Estado objetivo:** Esta fase desaparece cuando todas las fuentes sean automatizadas.
 
-**Checks actuales — 8 en total (`board_agent/phase0_gate.py::run()`, ampliado 2026-07-09):**
+**Checks actuales — 9 en total (`board_agent/phase0_gate.py::run()`, ampliado 2026-07-10):**
 
 | ID | Check | Blocker |
 |---|---|---|
@@ -124,6 +141,7 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 | F0.9 | Template 4 (`4_financial_performance.j2`) — `<title>` coincide con el mes objetivo | ⚠️ Warning |
 | F0.10 | `data/nps_snapshot.yaml` tiene una entrada para el mes objetivo | ⚠️ Warning |
 | F0.11 | `7_headcount.j2` — sentinel `<!-- updated_for_month: YYYY-MM -->` coincide con el mes objetivo | ⚠️ Warning |
+| F0.12 | Ningún `output/*.html` fue editado a mano después de la última generación (`board_agent/output_integrity.py`) | ❌ **FAIL** |
 
 **F0.4 bajó de FAIL a WARN el 2026-07-08** (encontrado corriendo el flujo real para junio-26 y viendo que un solo dato de Finance tapaba la revisión de todo lo demás): `merge_pnl()` en `fetch_metrics.py` ya maneja la ausencia de datos sin romperse — no setea `net_revenue`/`gross_margin`/`ebitda_margin`, y Jinja2 (`Environment(...)` sin `StrictUndefined`) los renderiza en blanco sin error. El freno real se movió a **R17 del Validator** (Fase 4): si esos 3 campos faltan o vienen vacíos, el Validator da FAIL ahí, con el board ya armado y visible para revisar, en vez de bloquear todo desde el minuto uno.
 
@@ -134,6 +152,12 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 **F0.10 agregada 2026-07-08 (mismo día, tercer hallazgo de la revisión del preview de junio):** `_build_nps()` en `fetch_metrics.py` devuelve `None` cuando `nps_snapshot.yaml` no tiene el mes objetivo (comportamiento correcto, documentado ahí mismo) — pero `6_rd.j2` no blinda `metrics.nps.score`/`.costa_rica_trend`/etc. con ningún `{% if %}`, así que `generate.py` truena armando esa slide específica (`'None' has no attribute 'costa_rica_trend'`) y deja `output/6_rd.html` con el mes anterior **sin avisar**. No se tocó `6_rd.j2` (blindar la plantilla es cambio de Template Board, fuera de alcance) — F0.10 avisa ANTES de correr `generate.py`, y **F3.7** (Fase 3) tapa la slide de NPS en el output si ya quedó vieja. WARN, no FAIL — mismo criterio que F0.4/F0.9.
 
 **F0.11 agregada 2026-07-09** — mismo hueco que tenía F0.6 (Discussion Topics) antes de su fix: los comentarios de Highlights/Lowlights de `7_headcount.j2` (slides "Headcount by Team" y "People & Talent") viven escritos a mano dentro del `.j2`, sin ningún YAML propio ni campo verificable. Se le agregó el mismo sentinel (`<!-- updated_for_month: YYYY-MM -->`). Encontrado al construir el registro declarativo de slides (ver Fase 3 abajo) a partir de una propuesta de Luis Caro en tts-bi-data — al catalogar todas las slides propensas a quedar desactualizadas, Headcount fue el único caso real sin cubrir.
+
+**F0.12 agregada 2026-07-10** — el usuario preguntó qué pasa si alguien (ej. May) edita a mano un título o agrega un comentario directo en un `output/*.html` ya generado, en vez de pasar por una skill de self-service. Investigado: `Template Board/output/` está en `.gitignore` — no hay ningún historial ahí, y el único versionado real (`versioning.py`) recién copia a `boards/YYYY-MM/` al final de una corrida COMPLETA, que empieza corriendo `generate.py` y sobrescribiendo `output/` de nuevo. O sea: una edición manual entre dos corridas se pierde sin dejar rastro en ningún lado. Calificado como "muy grave" por el usuario — se pidió arreglarlo, no solo documentarlo.
+
+**Mecanismo (`board_agent/output_integrity.py`):** al final de una Fase 3 exitosa, `record_generated_state()` guarda un hash SHA-256 de cada `output/*.html` en `Board Agent/.state/output_hashes.json` (estado local, gitignored — vive en Board Agent porque es quien lo escribe, no en Template Board). En la SIGUIENTE corrida, F0.12 corre en Fase 0 (antes de que Fase 2/3 toquen nada) y compara el hash actual de cada archivo contra el guardado. Si no coincide, hace backup del archivo a `output/.manual-edits-backup/<nombre>.<timestamp>.html` y **FAIL duro** — no deja avanzar a `generate.py` (que lo sobrescribiría en silencio) hasta que la persona mueva ese contenido a la capa correcta (YAML editorial / skill) o confirme explícitamente que se puede perder (borrando el archivo de estado). Sin baseline todavía (primera corrida del repo) → PASS, no hay nada contra qué comparar. Decisión de severidad (FAIL vs WARN) confirmada explícitamente con el usuario — eligió FAIL duro dado lo "grave" del caso.
+
+**Nota de implementación:** en la primera versión de este check, `run.py` llamaba a `record_generated_state()` sin que los tests lo mockearan — la suite completa terminó escribiendo un archivo de estado real contra el `Template Board/output/` de la máquina de desarrollo (efecto secundario detectado y corregido en la misma sesión, ver `tests/test_run.py`). Si se toca este wiring de nuevo, confirmar que los tests de `test_run.py` que llegan a Fase 3 con `F3.1 PASS` mockean `run.output_integrity.record_generated_state`.
 
 **1 check que existía en versiones anteriores de esta tabla y ya NO corre en este gate** (tabla desactualizada hasta 2026-07-06, corregida tras revisión de código):
 - `paises_fx.csv`, `chart_alanube.yaml`, `Payback.csv` — se automatizaron y se movieron a Fase 1/2 (ver sección "Camino para eliminarla" abajo, fechas 2026-07-03/06).
@@ -158,7 +182,10 @@ FASE 6 — PDF Generation (opcional)    ← trigger manual del usuario  ✅ impl
 
 ### FASE 1 — Data Freshness Check
 
-**Propósito:** Verificar que las fuentes automáticas (Redshift) están accesibles y tienen datos del mes actual.
+**Propósito:** Verificar que las fuentes automáticas tienen datos del mes actual. (Histórico: hasta
+2026-07-10 esto corría queries en vivo contra Redshift; hoy lee el bloque `freshness` que Claude
+Code ya escribió en `data/.metabase_cache.json` vía el MCP de Metabase — ver
+`board_agent/metabase_fetch_spec.py`.)
 
 **Checks — 14 en total (`board_agent/phase1_freshness.py::run()`, ampliado 2026-07-08 tras simular
 el flujo de junio-26 desde cero y encontrar que solo se cubrían 5 de las ~15 tablas reales que
@@ -466,9 +493,9 @@ Contexto, Auto-pilot, Reglas de oro, Ejecución) más un prototipo de vista prev
 
 | Skill/herramienta | Qué hace | Alcance |
 |---|---|---|
-| `skills/ceo-highlights/` | Edita `Template Board/data/editorial/ceo.yaml` (Highlights, Lowlights, Financial Update, `updated_for_month`) | Slide "CEO Highlights & Lowlights" (`1_inicio.j2`) |
+| `skills/ceo-highlights/` | Edita `data/editorial/ceo.yaml` (Highlights, Lowlights, Financial Update, `updated_for_month`) — en 2026-07 vivía en `Template Board/data/editorial/ceo.yaml`, absorbido a este repo el 2026-07-10 | Slide "CEO Highlights & Lowlights" (`1_inicio.j2`) |
 | `skills/slide-comments/` | Agrega/edita un comentario (`asks`) en `arr_walk.yaml` | Solo slides ARR Core y ARR Lite (`3_arr_walk.j2`) — **no** es un mecanismo genérico para cualquier slide todavía, ver limitantes en la skill |
-| `preview.py` | CLI que screenshotea una slide ya generada (Playwright, lectura de `Template Board/output/*.html`) para que alguien no técnico vea el resultado sin abrir un HTML | Cualquier template ya generado — busca por texto visible de la slide |
+| `preview.py` | CLI que screenshotea una slide ya generada (Playwright, lectura de `output/*.html`) para que alguien no técnico vea el resultado sin abrir un HTML — en 2026-07 leía `Template Board/output/*.html`, absorbido a este repo el 2026-07-10 | Cualquier template ya generado — busca por texto visible de la slide |
 
 **Bug real encontrado y corregido en el camino:** `arr_walk.yaml` tenía los campos `asks`/`alanube_insight`
 con CSS ya definido en `3_arr_walk.j2`, pero el template nunca los renderizaba — un panel fantasma

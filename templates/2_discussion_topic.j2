@@ -1,0 +1,594 @@
+<!-- updated_for_month: 2026-05 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alegra Board — Discussion Topics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/base.css">
+  <style>
+    /* ── Section cover ── */
+    .section-divider {
+      background: var(--color-navy);
+      justify-content: center;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+    }
+    .section-divider .eyebrow {
+      font-size: 11px; font-weight: 600; color: var(--color-teal);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-divider .section-title {
+      font-size: 38px; font-weight: 700; color: #ffffff;
+      letter-spacing: -1.2px; line-height: 1.1; margin-bottom: 14px; max-width: 640px;
+    }
+    .section-divider .topic-label {
+      font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.40);
+    }
+    .section-divider .slide-num {
+      position: absolute; bottom: 24px; right: var(--slide-pad-x);
+      font-size: 10px; color: rgba(255,255,255,0.15);
+    }
+
+    /* ── Shared slide shell ── */
+    .dt-slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .dt-body {
+      flex: 1;
+      padding: 18px 28px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .dt-subtitle {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-top: -4px;
+    }
+    .dt-subtitle strong { color: var(--color-text-primary); font-weight: 600; }
+
+    /* ── Field Insights ── */
+    .insights-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .insight-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 10px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+    .insight-num {
+      min-width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--color-teal-light);
+      border: 1.5px solid rgba(20,184,166,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--color-teal);
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .insight-content { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+    .insight-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--color-text-primary); line-height: 1.3;
+    }
+    .insight-desc {
+      font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.45;
+    }
+    .insight-hl {
+      font-size: 11px; font-weight: 500;
+      color: var(--color-teal); line-height: 1.4;
+      margin-top: 1px; padding-left: 8px;
+      border-left: 2px solid var(--color-teal);
+    }
+
+    /* ── Pricing Strategy ── */
+    .pricing-cols {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .left-col {
+      display: flex; flex-direction: column; gap: 8px; min-height: 0;
+    }
+    .col-label {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--color-text-secondary);
+    }
+    .moves-list {
+      display: flex; flex-direction: column; gap: 6px;
+      flex: 1; min-height: 0; overflow: hidden;
+    }
+    .move-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 12px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+    .move-num {
+      min-width: 22px; height: 22px; border-radius: 5px;
+      background: var(--color-teal-light);
+      border: 1px solid rgba(20,184,166,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--color-teal);
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .move-text { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+    .move-title { font-size: 12px; font-weight: 700; color: var(--color-text-primary); line-height: 1.3; }
+    .move-desc { font-size: 11px; color: var(--color-text-secondary); line-height: 1.35; }
+    .move-desc .accent { color: var(--color-teal); font-weight: 600; }
+    .bottom-boxes {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0;
+    }
+    .info-box {
+      padding: 10px 12px; border-radius: 8px;
+      border: 1px solid var(--color-border);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .info-box.neutral { background: var(--color-surface); }
+    .info-box.accent  { background: var(--color-teal-light); border-color: rgba(20,184,166,0.2); }
+    .info-box .box-label {
+      font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--color-text-secondary);
+    }
+    .info-box.accent .box-label { color: #0f766e; }
+    .info-box .box-title { font-size: 11px; font-weight: 700; color: var(--color-text-primary); line-height: 1.3; }
+    .info-box .box-desc { font-size: 10.5px; color: var(--color-text-secondary); line-height: 1.35; }
+    .info-box .box-desc strong { color: var(--color-text-primary); font-weight: 600; }
+
+    /* ── Browser mockup ── */
+    .right-col { display: flex; flex-direction: column; min-height: 0; }
+    .browser-wrap {
+      flex: 1;
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .browser-bar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .b-dots { display: flex; gap: 4px; }
+    .b-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-border); }
+    .b-url {
+      flex: 1; font-size: 9.5px; color: var(--color-text-secondary);
+      background: #fff; border: 1px solid var(--color-border);
+      border-radius: 4px; padding: 2px 8px; margin-left: 4px;
+    }
+    .mockup-body {
+      flex: 1; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 10px; overflow: hidden;
+    }
+    .m-title { font-size: 15px; font-weight: 700; color: var(--color-text-primary); }
+    .m-sub { font-size: 10.5px; color: var(--color-text-secondary); margin-top: -6px; }
+    .m-tabs { display: flex; gap: 4px; }
+    .m-tab {
+      font-size: 10px; font-weight: 600; padding: 4px 10px;
+      border-radius: 5px; background: var(--color-surface);
+      color: var(--color-text-secondary); border: 1px solid var(--color-border);
+    }
+    .m-tab.active { background: var(--color-navy); color: #fff; border-color: var(--color-navy); }
+    .plans-row {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 8px;
+      flex: 1; min-height: 0;
+    }
+    .plan-card {
+      border: 1px solid var(--color-border); border-radius: 8px;
+      padding: 10px 8px; display: flex; flex-direction: column; gap: 6px;
+      background: #fff;
+    }
+    .plan-card.rec {
+      border-color: var(--color-teal);
+      box-shadow: 0 0 0 1.5px var(--color-teal);
+    }
+    .plan-badge {
+      font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      color: #fff; background: var(--color-teal);
+      padding: 2px 6px; border-radius: 10px; width: fit-content;
+    }
+    .plan-name { font-size: 11px; font-weight: 600; color: var(--color-text-primary); }
+    .plan-rfc {
+      font-size: 9px; font-weight: 500; color: var(--color-teal);
+      background: var(--color-teal-light); padding: 2px 6px;
+      border-radius: 4px; width: fit-content;
+    }
+    .plan-price {
+      font-size: 19px; font-weight: 800; color: var(--color-text-primary);
+      margin-top: auto; display: flex; align-items: baseline; gap: 2px;
+    }
+    .plan-price span { font-size: 10px; font-weight: 500; color: var(--color-text-secondary); }
+    .plan-price.custom { font-size: 15px; }
+    .plan-check {
+      font-size: 9.5px; color: var(--color-text-secondary);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .plan-check::before { content: '✓'; color: var(--color-teal); font-weight: 700; font-size: 10px; }
+    .m-note {
+      font-size: 10px; color: var(--color-text-secondary);
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 8px; background: var(--color-surface);
+      border-radius: 6px; border: 1px solid var(--color-border);
+    }
+    .m-banner {
+      font-size: 10px; font-weight: 600;
+      color: #5b21b6; background: #ede9fe;
+      padding: 7px 10px; border-radius: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .m-footer {
+      font-size: 9px; color: var(--color-text-secondary); text-align: center; margin-top: 2px;
+    }
+    .m-footer a { color: var(--color-teal); font-weight: 600; text-decoration: none; }
+
+    /* ── Costa Rica ICP slides ── */
+    .icp-img-stage {
+      flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: 12px; padding: 16px; overflow: hidden;
+    }
+    .icp-img-stage img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px;
+      box-shadow: 0 6px 24px rgba(15,23,42,0.10); border: 1px solid var(--color-border); }
+    .icp-chip-row { display: flex; gap: 10px; margin-top: 12px; flex-shrink: 0; }
+    .icp-chip {
+      flex: 1; background: var(--color-teal-light); border: 1px solid rgba(20,184,166,0.18);
+      border-radius: 10px; padding: 10px 14px;
+    }
+    .icp-chip .c-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0f766e; }
+    .icp-chip .c-txt { font-size: 11.5px; color: var(--color-text-secondary); font-weight: 500; margin-top: 3px; line-height: 1.35; }
+    .icp-chip .c-txt b { color: var(--color-text-primary); font-weight: 700; }
+
+    /* ── CR Result slide ── */
+    .cr-body { flex: 1; min-height: 0; display: flex; gap: 14px; }
+    .cr-chart {
+      flex: 0 0 56%; display: flex; flex-direction: column;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: 12px; padding: 14px 16px; overflow: hidden; gap: 6px;
+    }
+    .cr-chart .chart-label { font-size: 12px; font-weight: 700; color: var(--color-text-primary); }
+    .cr-chart .chart-label span { color: var(--color-text-secondary); font-weight: 500; font-size: 11px; }
+    .cr-chart .cr-svg { flex: 1; min-height: 0; width: 100%; }
+    .cr-chart .chart-note { font-size: 10px; color: var(--color-text-secondary); flex-shrink: 0; }
+    .cr-funnel { flex: 1; display: flex; flex-direction: column; gap: 10px; justify-content: center; min-width: 0; }
+    .ft-block { display: flex; flex-direction: column; gap: 5px; }
+    .ft-cap {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: #0f766e; display: flex; align-items: center; gap: 6px;
+    }
+    .ft-cap::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--color-teal); flex-shrink: 0; }
+    .cr-ft {
+      width: 100%; border-collapse: collapse; font-size: 11px;
+      background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden;
+    }
+    .cr-ft thead th {
+      background: var(--color-navy); color: #fff;
+      font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em;
+      padding: 6px 10px; text-align: right; white-space: nowrap;
+    }
+    .cr-ft thead th:first-child { text-align: left; }
+    .cr-ft tbody tr { border-top: 1px solid var(--color-border); }
+    .cr-ft tbody td { padding: 5px 10px; text-align: right; color: var(--color-text-secondary); font-weight: 600; white-space: nowrap; }
+    .cr-ft tbody td:first-child { text-align: left; color: var(--color-text-primary); font-weight: 600; }
+    .cr-ft tbody td.post { color: var(--color-text-primary); font-weight: 700; }
+    .cr-ft .pos { color: #0f766e; font-weight: 800; }
+    .cr-ft .neg { color: var(--color-text-secondary); font-weight: 600; }
+    .cr-ft tr.total td { background: var(--color-teal-light); border-top: 1.5px solid rgba(20,184,166,0.3); }
+    .cr-ft tr.total td:first-child { color: #0f766e; font-weight: 800; }
+    .cr-ft tr.cr-hero td { background: rgba(20,184,166,0.07); }
+    .cr-ft tr.cr-hero td:first-child { color: #0f766e; font-weight: 800; }
+    .ft-note { font-size: 9.5px; color: var(--color-text-secondary); font-style: italic; line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================
+       SLIDE 1 — Cover
+       ================================================================ -->
+  <div class="slide section-divider">
+    <div class="eyebrow">Discussion Topic</div>
+    <div class="section-title">Mexico Strategy:<br>Learnings &amp; Next Steps</div>
+    <div class="topic-label">{{ config.month_label }}</div>
+    <div class="slide-num">1</div>
+  </div>
+
+  <div class="slide-divider">↓ &nbsp; 2 / 3</div>
+
+  <!-- ================================================================
+       SLIDE 2 — Field Insights
+       ================================================================ -->
+  <div class="dt-slide">
+    <div class="slide-header">
+      <span class="title">Mexico — Field Insights: Key Learnings</span>
+      <span class="period">Alegra Talks · Jun 2026</span>
+    </div>
+    <div class="dt-body">
+      <div class="dt-subtitle">In-person sessions with accountants in Mexico City · Alegra Talks · Jun 2026</div>
+      <div class="insights-list">
+        <div class="insight-row">
+          <div class="insight-num">1</div>
+          <div class="insight-content">
+            <div class="insight-title">Migration is the biggest barrier — and it's about trust, not capability</div>
+            <div class="insight-desc">Accountants accept Alegra's product advantage but are reluctant to move decades of client portfolios off legacy software.</div>
+            <div class="insight-hl">The ask: Alegra's own team runs the migration — led by accountants, not sales reps, who carry the credibility the process requires.</div>
+          </div>
+        </div>
+        <div class="insight-row">
+          <div class="insight-num">2</div>
+          <div class="insight-content">
+            <div class="insight-title">Peer validation is the primary engine of adoption</div>
+            <div class="insight-desc">Accountants trust a fellow accountant far more than a sales contact, and in-person, peer-to-peer settings build confidence a sales call cannot.</div>
+            <div class="insight-hl">Growth in the segment is driven by word of mouth and by demos grounded in real client cases.</div>
+          </div>
+        </div>
+        <div class="insight-row">
+          <div class="insight-num">3</div>
+          <div class="insight-content">
+            <div class="insight-title">A persistent trust gap around Alegra's local identity</div>
+            <div class="insight-desc">Prospects question whether Alegra is genuinely Mexican, established at scale, and whether Mexico is a true strategic priority.</div>
+            <div class="insight-hl">A matter of perception, not product — closing it is a positioning and communications challenge.</div>
+          </div>
+        </div>
+        <div class="insight-row">
+          <div class="insight-num">4</div>
+          <div class="insight-content">
+            <div class="insight-title">The accountant's role is in transition — and AI is the draw</div>
+            <div class="insight-desc">Reduced to "tax-return filers" — and the SAT will eventually pre-populate filings. Many come to Alegra for its AI and the chance to return to an advisory role.</div>
+            <div class="insight-hl">A major positioning opportunity — but activation breaks at onboarding, where thin guidance stalls setup before the value lands.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓ &nbsp; 3 / 3</div>
+
+  <!-- ================================================================
+       SLIDE 3 — Pricing Strategy
+       ================================================================ -->
+  <div class="dt-slide">
+    <div class="slide-header">
+      <span class="title">Mexico Pricing: Aligning Price to Value by ICP</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div class="dt-body">
+      <div class="dt-subtitle">Each customer pays for the variable that reflects their value — <strong>accountants by portfolio scale</strong>, <strong>SMBs by capabilities</strong> — with <strong>e-invoicing as a baseline</strong>.</div>
+      <div class="pricing-cols">
+        <div class="left-col">
+          <div class="col-label">What is changing — 4 moves</div>
+          <div class="moves-list">
+            <div class="move-item">
+              <div class="move-num">1</div>
+              <div class="move-text">
+                <div class="move-title">Tiered accountant plan</div>
+                <div class="move-desc">Replace the flat $990 unlimited plan with a 4-tier scale priced on <span class="accent">active RFCs (clients) managed</span>.</div>
+              </div>
+            </div>
+            <div class="move-item">
+              <div class="move-num">2</div>
+              <div class="move-text">
+                <div class="move-title">E-invoicing as baseline</div>
+                <div class="move-desc">Make e-invoicing an RFC-level baseline covered by the plan — removing it as a billing lever across all three ICPs.</div>
+              </div>
+            </div>
+            <div class="move-item">
+              <div class="move-num">3</div>
+              <div class="move-text">
+                <div class="move-title">Invited SMB lane</div>
+                <div class="move-desc">Open a free entry lane for clients an accountant brings onto the platform.</div>
+              </div>
+            </div>
+            <div class="move-item">
+              <div class="move-num">4</div>
+              <div class="move-text">
+                <div class="move-title">Unified pricing page</div>
+                <div class="move-desc">Consolidate SMB / ERP / Accountant into one differentiated page — modeled on Costa Rica's live version.</div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-boxes">
+            <div class="info-box neutral">
+              <div class="box-label">↔ What is not changing</div>
+              <div class="box-title">Pyme/Empresa catalog stays intact.</div>
+              <div class="box-desc">Facturación, Gestión (ERP) and POS keep current prices — a packaging change, <strong>not a catalog reprice</strong>.</div>
+            </div>
+            <div class="info-box accent">
+              <div class="box-label">🔓 Why now — Expansion unlock</div>
+              <div class="box-desc">Today an accountant pays the same for <strong>2 or 200 companies</strong>. Tiering adds the scale lever the portfolio needs to compound NRR.</div>
+            </div>
+          </div>
+        </div>
+        <div class="right-col">
+          <div class="browser-wrap">
+            <div class="browser-bar">
+              <div class="b-dots">
+                <div class="b-dot"></div><div class="b-dot"></div><div class="b-dot"></div>
+              </div>
+              <div class="b-url">alegra.com/mx/precios/contadores</div>
+            </div>
+            <div class="mockup-body">
+              <div class="m-title">Planes para contadores</div>
+              <div class="m-sub">Paga por el tamaño de tu portafolio — RFCs activos que gestionas.</div>
+              <div class="m-tabs">
+                <div class="m-tab active">Contador</div>
+                <div class="m-tab">Pyme</div>
+                <div class="m-tab">ERP · Gestión</div>
+              </div>
+              <div class="plans-row">
+                <div class="plan-card">
+                  <div class="plan-name">Independiente</div>
+                  <div class="plan-rfc">Hasta 10 RFC</div>
+                  <div class="plan-price">$590<span>/mes</span></div>
+                  <div class="plan-check">Facturación incluida</div>
+                </div>
+                <div class="plan-card rec">
+                  <div class="plan-badge">Recomendado</div>
+                  <div class="plan-name">Despacho</div>
+                  <div class="plan-rfc">Hasta 25 RFC</div>
+                  <div class="plan-price">$990<span>/mes</span></div>
+                  <div class="plan-check">Facturación incluida</div>
+                </div>
+                <div class="plan-card">
+                  <div class="plan-name">Firma</div>
+                  <div class="plan-rfc">Hasta 50 RFC</div>
+                  <div class="plan-price">$1,490<span>/mes</span></div>
+                  <div class="plan-check">Facturación incluida</div>
+                </div>
+                <div class="plan-card">
+                  <div class="plan-name">Firma Enterprise</div>
+                  <div class="plan-rfc">+50 RFC · bloques</div>
+                  <div class="plan-price custom">A medida</div>
+                  <div class="plan-check">Facturación incluida</div>
+                </div>
+              </div>
+              <div class="m-note">
+                <span>i</span>
+                <span><strong>Facturación electrónica incluida</strong> en todos los planes · baseline por RFC, no es un cargo aparte.</span>
+              </div>
+              <div class="m-banner">
+                <span>+</span>
+                <span><strong>Invita a tus clientes Pyme gratis</strong> — entran a la plataforma sin costo.</span>
+              </div>
+            </div>
+          </div>
+          <div class="m-footer">
+            Mockup · Mexico pricing page · <a href="https://dashboards-hub-615292003679.northamerica-northeast1.run.app/view/1f6d7098-9698-4eac-b7c5-30b94377133c?back=%2Fmy-projects" target="_blank">View full pricing mockup →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ================================================================
+       SLIDE — ICP Split Costa Rica Update (section cover)
+       ================================================================ -->
+  <div class="slide section-divider">
+    <div class="eyebrow">Discussion Topic</div>
+    <div class="section-title">ICP Split Costa Rica Update</div>
+    <div class="topic-label">{{ config.month_label }}</div>
+  </div>
+
+  <div class="slide-divider">↓ &nbsp; 4 / 5</div>
+
+  <!-- ================================================================
+       SLIDE 4 — Costa Rica: ICP Split
+       ================================================================ -->
+  <div class="dt-slide" style="padding:0;">
+    <img src="../data/assets/2026-05/image-2.png" alt="Costa Rica ICP" style="width:100%;height:100%;object-fit:cover;display:block;">
+  </div>
+
+  <div class="slide-divider">↓ &nbsp; 5 / 5</div>
+
+  <!-- ================================================================
+       SLIDE 5 — Costa Rica: The Result
+       ================================================================ -->
+  <div class="dt-slide">
+    <div class="slide-header">
+      <span class="title">Costa Rica · Results: Visitor-to-signup conversion tripled after June 1</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div class="dt-body" style="gap:6px;">
+      <div class="dt-subtitle">New MRR pacing to a record — the <strong>June 1 landing turns far more visitors into signups</strong>, lifting paying logos <strong>+58%</strong> in the same 17-day window, with traffic essentially flat.</div>
+      <div class="cr-body">
+        <div class="cr-chart">
+          <div class="chart-label">Daily cumulative New MRR <span>(Real · USD)</span></div>
+          <svg class="cr-svg" viewBox="0 0 620 300" preserveAspectRatio="xMidYMid meet">
+            <g stroke="#EEF2F6" stroke-width="1">
+              <line x1="52" y1="275" x2="580" y2="275"/><line x1="52" y1="214" x2="580" y2="214"/>
+              <line x1="52" y1="153" x2="580" y2="153"/><line x1="52" y1="92" x2="580" y2="92"/>
+              <line x1="52" y1="32" x2="580" y2="32"/>
+            </g>
+            <g fill="#94A3B8" font-size="11" font-weight="600" text-anchor="end">
+              <text x="44" y="279">$0</text><text x="44" y="218">$1K</text>
+              <text x="44" y="157">$2K</text><text x="44" y="96">$3K</text><text x="44" y="36">$4K</text>
+            </g>
+            <g fill="#94A3B8" font-size="11" font-weight="600" text-anchor="middle">
+              <text x="52" y="291">1</text><text x="122" y="291">5</text><text x="210" y="291">10</text>
+              <text x="298" y="291">15</text><text x="386" y="291">20</text><text x="474" y="291">25</text>
+              <text x="580" y="291">31</text>
+            </g>
+            <line x1="333.6" y1="32" x2="333.6" y2="275" stroke="#0F172A" stroke-width="1" stroke-dasharray="3 3" opacity="0.35"/>
+            <text x="337" y="44" fill="#64748B" font-size="9.5" font-weight="700">day 17</text>
+            <polyline fill="none" stroke="#D9E0E8" stroke-width="1.6" stroke-linejoin="round" points="52,275 69.6,272 87.2,271.4 104.8,259 122.4,255.6 140,241.4 157.6,234.8 175.2,231.9 192.8,222.9 210.4,209.1 228,177.3 245.6,175.1 263.2,167 280.8,165.3 298.4,165.3 316,155.3 333.6,146.6 351.2,140.7 368.8,131.7 386.4,124.7 404,124.7 421.6,124.7 439.2,111.3 456.8,101.7 474.4,95.6 492,91 509.6,89 527.2,84.8 544.8,83.8 562.4,61.5 580,52.3"/>
+            <polyline fill="none" stroke="#BCC7D4" stroke-width="1.6" stroke-linejoin="round" points="52,267.1 69.6,267.1 87.2,262.9 104.8,262.4 122.4,260.5 140,254.3 157.6,246.3 175.2,234.3 192.8,227.7 210.4,212.5 228,210.4 245.6,210.4 263.2,187 280.8,183 298.4,171.9 316,156 333.6,146.3 351.2,143.7 368.8,143.7 386.4,139.6 404,126.3 421.6,121.5 439.2,110.5 456.8,98.6 474.4,98.6 492,93.3 509.6,83.8 527.2,75.2 544.8,43.5 562.4,33"/>
+            <polyline fill="none" stroke="#8595A8" stroke-width="1.8" stroke-linejoin="round" points="52,274 69.6,270.3 87.2,270.3 104.8,254.7 122.4,251.4 140,237.6 157.6,229.3 175.2,224.8 192.8,218.2 210.4,218.2 228,217.9 245.6,210.5 263.2,207.2 280.8,207.2 298.4,202.3 316,199.2 333.6,199 351.2,175.3 368.8,162.1 386.4,148.4 404,135.7 421.6,133.4 439.2,131.8 456.8,130 474.4,114 492,98.4 509.6,73 527.2,61 544.8,32.4 562.4,25.7 580,22.7"/>
+            <polyline fill="none" stroke="#14B8A6" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round" points="52,258 69.6,249.3 87.2,240 104.8,234.4 122.4,194.3 140,191.3 157.6,191.3 175.2,179.4 192.8,172.8 210.4,165.2 228,138.5 245.6,130 263.2,122.4 280.8,118.2 298.4,113 316,92.5 333.6,87"/>
+            <circle cx="333.6" cy="87" r="4.5" fill="#14B8A6"/>
+            <text x="345" y="84" fill="#0F766E" font-size="13" font-weight="800">June</text>
+            <text x="345" y="99" fill="#0F766E" font-size="10.5" font-weight="700">$2,806 · day 17</text>
+            <text x="566" y="38" fill="#64748B" font-size="11.5" font-weight="700">May</text>
+            <text x="566" y="56" fill="#9AA7B6" font-size="11.5" font-weight="700">Apr</text>
+            <text x="566" y="76" fill="#B6C0CD" font-size="11.5" font-weight="700">Mar</text>
+          </svg>
+          <div class="chart-note">June already near May's full-month total ($3,793) by day 17.</div>
+        </div>
+        <div class="cr-funnel">
+          <div class="ft-block">
+            <div class="ft-cap">Funnel volume · May 1–17 vs Jun 1–17</div>
+            <table class="cr-ft">
+              <thead>
+                <tr><th>Stage</th><th>May 1–17</th><th>Jun 1–17</th><th>Δ vol</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>New Users (web)</td><td>26,582</td><td class="post">28,961</td><td class="pos">+9%</td></tr>
+                <tr><td>Signups</td><td>498</td><td class="post">1,743</td><td class="pos">+250%</td></tr>
+                <tr><td>MQLs</td><td>362</td><td class="post">1,066</td><td class="pos">+194%</td></tr>
+                <tr><td>SQLs</td><td>50</td><td class="post">65</td><td class="pos">+30%</td></tr>
+                <tr class="total"><td>Paying Logos</td><td>38</td><td>60</td><td class="pos">+58%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ft-block">
+            <div class="ft-cap">Step conversion</div>
+            <table class="cr-ft">
+              <thead>
+                <tr><th>Step</th><th>May 1–17</th><th>Jun 1–17</th><th>Δ</th></tr>
+              </thead>
+              <tbody>
+                <tr class="cr-hero"><td>New User → Signup</td><td>1.9%</td><td class="post">6.0%</td><td class="pos">▲ 3.2×</td></tr>
+                <tr><td>Signup → MQL</td><td>72.7%</td><td class="post">61.2%</td><td class="neg">−11.5 pp</td></tr>
+                <tr><td>MQL → SQL</td><td>13.8%</td><td class="post">6.1%</td><td class="neg">−7.7 pp</td></tr>
+                <tr><td>SQL → Logo</td><td>76.0%</td><td class="post">92.3%</td><td class="pos">▲ +16.3 pp</td></tr>
+                <tr class="total"><td>Signup → Logo</td><td>7.6%</td><td>3.4%</td><td class="neg">▼ still closing</td></tr>
+              </tbody>
+            </table>
+            <div class="ft-note">MQL→SQL dilutes as signups scale 3.5×; June logos are still closing — end-of-month picture should strengthen.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

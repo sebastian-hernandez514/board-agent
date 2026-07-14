@@ -1,0 +1,865 @@
+<!-- updated_for_month: 2026-05 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alegra Board — Headcount Summary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <link rel="stylesheet" href="../styles/base.css">
+  <style>
+
+    /* ── Section cover ── */
+    .section-cover {
+      background: var(--color-navy);
+      justify-content: center;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+    }
+    .section-cover .eyebrow {
+      font-size: 11px; font-weight: 600; color: var(--color-teal);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-cover .section-title {
+      font-size: 42px; font-weight: 700; color: #ffffff;
+      letter-spacing: -1.5px; line-height: 1.05; margin-bottom: 14px;
+    }
+    .section-cover .section-sub {
+      font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.40);
+    }
+    .section-cover .slide-num {
+      position: absolute; bottom: 24px; right: var(--slide-pad-x);
+      font-size: 10px; color: rgba(255,255,255,0.15);
+    }
+
+    /* ── Slide shell ── */
+    .hc-slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      overflow: hidden;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════════════
+       SLIDE 2 — Headcount Summary
+    ══════════════════════════════════════════════ */
+    .hc-inner {
+      padding: 20px 26px 16px;
+      font-family: 'DM Sans', sans-serif;
+      color: #1A1A18;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .hc-inner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .hc-eyebrow {
+      font-size: 9px; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #A8A8A3;
+      font-family: 'DM Mono', monospace;
+    }
+    .hc-headline {
+      font-size: 18px; font-weight: 400; color: #1A1A18; line-height: 1.25;
+    }
+    .hc-subline {
+      font-size: 11px; color: #6B6B67; font-weight: 300;
+    }
+    .hc-subline .alert { color: #D85A30; font-weight: 500; }
+
+    /* KPI strip */
+    .hc-kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .hc-kc {
+      background: #F8F7F4;
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 0.5px solid rgba(0,0,0,0.13);
+    }
+    .hc-kc-label {
+      font-size: 9px; font-weight: 500; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #A8A8A3;
+      margin-bottom: 4px; font-family: 'DM Mono', monospace;
+    }
+    .hc-kc-val {
+      font-size: 22px; font-weight: 400; color: #1A1A18; line-height: 1;
+    }
+    .hc-kc-val.red { color: #D85A30; }
+    .hc-kc-sub {
+      font-size: 10px; color: #A8A8A3; margin-top: 3px; font-weight: 300;
+    }
+
+    /* Section label */
+    .hc-section-label {
+      font-size: 9px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #A8A8A3;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Col headers */
+    .hc-col-heads {
+      display: grid;
+      grid-template-columns: 170px 44px 44px 52px 52px 110px minmax(0,1fr);
+      gap: 8px;
+      padding: 0 14px;
+    }
+    .hc-ch {
+      font-size: 8.5px; font-weight: 500; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #A8A8A3;
+      text-align: right; font-family: 'DM Mono', monospace;
+    }
+    .hc-ch:first-child { text-align: left; }
+    .hc-ch.center { text-align: center; }
+
+    /* Team rows */
+    .hc-team-grid { display: flex; flex-direction: column; gap: 6px; }
+    .hc-team-row {
+      border: 0.5px solid rgba(0,0,0,0.13);
+      border-radius: 9px;
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 170px 44px 44px 52px 52px 110px minmax(0,1fr);
+      align-items: center;
+      gap: 8px;
+    }
+    .hc-team-row.invest { border-color: #1D9E75; border-width: 1px; }
+    .hc-team-row.risk   { border-color: #D85A30; border-width: 1px; }
+
+    .hc-t-name { font-size: 12px; font-weight: 500; color: #1A1A18; }
+    .hc-t-sub  { font-size: 9px; color: #A8A8A3; margin-top: 1px; }
+    .hc-t-num  {
+      font-size: 14px; font-weight: 500; color: #1A1A18;
+      text-align: right;
+    }
+    .hc-t-share {
+      font-size: 11px; color: #A8A8A3; text-align: right;
+      font-family: 'DM Mono', monospace;
+    }
+    .hc-t-delta {
+      font-size: 11px; font-weight: 500; text-align: right;
+      font-family: 'DM Mono', monospace;
+    }
+    .hc-t-delta.neg { color: #D85A30; }
+    .hc-t-delta.pos { color: #1D9E75; }
+    .hc-t-delta.neu { color: #A8A8A3; }
+
+    .hc-spark-cell { height: 36px; position: relative; }
+
+    .hc-bar-bg {
+      height: 4px; background: rgba(0,0,0,0.08);
+      border-radius: 3px; overflow: hidden; margin-bottom: 3px;
+    }
+    .hc-bar-fill { height: 100%; border-radius: 3px; }
+    .hc-bar-pct {
+      font-size: 9px; color: #A8A8A3; font-family: 'DM Mono', monospace;
+    }
+    .hc-bar-pct.bad { color: #D85A30; }
+
+    .hc-tag {
+      display: inline-block; font-size: 8px; font-weight: 500;
+      padding: 2px 5px; border-radius: 3px;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      margin-left: 4px; font-family: 'DM Mono', monospace;
+      vertical-align: middle;
+    }
+    .tag-g    { background: #E1F5EE; color: #0F6E56; }
+    .tag-r    { background: #FAECE7; color: #993C1D; }
+    .tag-gray { background: #F1EFE8; color: #5F5E5A; }
+
+    /* Total row */
+    .hc-total-row {
+      border-top: 1.5px solid rgba(0,0,0,0.13);
+      display: grid;
+      grid-template-columns: 170px 44px 44px 52px 52px 110px minmax(0,1fr);
+      gap: 8px;
+      padding: 10px 14px 0;
+    }
+    .hc-tot-label { font-size: 12px; font-weight: 500; color: #1A1A18; }
+    .hc-tot-val {
+      font-size: 13px; font-weight: 500; color: #1A1A18;
+      text-align: right;
+    }
+    .hc-tot-val.neg { color: #D85A30; }
+    .hc-tot-val.neu { color: #A8A8A3; font-size: 11px; }
+
+    /* Insights */
+    .hc-ins-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 9px;
+    }
+    .hc-ins-card {
+      border: 0.5px solid rgba(0,0,0,0.13);
+      border-radius: 9px;
+      padding: 12px 14px;
+    }
+    .hc-ins-card.green-b { border-top: 3px solid #1D9E75; }
+    .hc-ins-card.red-b   { border-top: 3px solid #D85A30; }
+    .hc-ins-card.amber-b { border-top: 3px solid #BA7517; }
+
+    .hc-ins-dot {
+      width: 7px; height: 7px; border-radius: 50%; margin-bottom: 8px;
+    }
+    .dot-g { background: #1D9E75; }
+    .dot-r { background: #D85A30; }
+    .dot-a { background: #BA7517; }
+
+    .hc-ins-headline {
+      font-size: 12px; font-weight: 500; color: #1A1A18;
+      line-height: 1.35; margin-bottom: 5px;
+    }
+    .hc-ins-body {
+      font-size: 10.5px; color: #6B6B67; line-height: 1.55; font-weight: 300;
+    }
+
+    /* Note bar */
+    .hc-note {
+      padding: 9px 13px;
+      background: #F8F7F4;
+      border-radius: 7px;
+      border-left: 3px solid rgba(0,0,0,0.13);
+      font-size: 10px; color: #A8A8A3; line-height: 1.5;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Legend / footer line */
+    .hc-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 10px;
+      border-top: 0.5px solid rgba(0,0,0,0.08);
+    }
+    .hc-legend { display: flex; gap: 16px; }
+    .hc-leg-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 10px; color: #A8A8A3; font-family: 'DM Mono', monospace;
+    }
+    .hc-leg-line { width: 14px; height: 3px; border-radius: 2px; }
+    .hc-period { font-size: 10px; color: #A8A8A3; font-family: 'DM Mono', monospace; }
+
+    /* ══════════════════════════════════════════════
+       SLIDE 3 — People & Talent
+    ══════════════════════════════════════════════ */
+    .pt-inner {
+      padding: 20px 26px 18px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #1a1a18;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .pt-inner .pt-title { font-size: 18px; font-weight: 500; color: #1a1a18; }
+    .pt-inner .pt-meta  { font-size: 10px; color: #9c9a92; letter-spacing: .02em; }
+
+    .pt-charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .pt-chart-block { display: flex; flex-direction: column; gap: 8px; }
+    .pt-chart-top {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pt-chart-label {
+      font-size: 10px; font-weight: 500; color: #73726c;
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+    .pt-legend { display: flex; gap: 12px; }
+    .pt-leg-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: #9c9a92; }
+    .pt-leg-dot { width: 18px; height: 2px; border-radius: 1px; }
+    .pt-leg-sq  { width: 7px; height: 7px; border-radius: 2px; }
+    .pt-chart-wrap { position: relative; width: 100%; height: 180px; }
+
+    .pt-divider { height: 0.5px; background: rgba(0,0,0,0.08); }
+
+    .pt-bullets-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 32px;
+    }
+    .pt-bullet-row {
+      display: flex; gap: 10px;
+      padding: 8px 0;
+      border-bottom: 0.5px solid rgba(0,0,0,0.07);
+      align-items: baseline;
+    }
+    .pt-bullet-row:nth-child(5),
+    .pt-bullet-row:nth-child(6) { border-bottom: none; }
+
+    .pt-bkey {
+      font-size: 9px; font-weight: 500; color: #9c9a92;
+      white-space: nowrap; min-width: 108px;
+      text-transform: uppercase; letter-spacing: .05em;
+      padding-top: 2px; flex-shrink: 0;
+    }
+    .pt-bval { font-size: 11.5px; color: #2c2c2a; line-height: 1.5; }
+
+    .pt-tag {
+      display: inline-block; font-size: 9px; font-weight: 500;
+      padding: 1px 6px; border-radius: 10px;
+      margin-left: 4px; vertical-align: middle; white-space: nowrap;
+    }
+    .pt-tag-red  { background: #FFEDD5; color: #9A3412; }
+    .pt-tag-blue { background: #E6F1FB; color: #185FA5; }
+
+    /* ══════════════════════════════════════════════
+       SLIDE 3 — People & Talent new layout (pt2 prefix)
+    ══════════════════════════════════════════════ */
+    .pt2-inner {
+      flex: 1; overflow: hidden;
+      padding: 10px 20px 8px;
+      display: flex; flex-direction: column; gap: 7px;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .pt2-charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .pt2-card {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 8px 10px 4px;
+      display: flex; flex-direction: column;
+    }
+    .pt2-card-title {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: #64748B; margin: 0 0 2px;
+    }
+    .pt2-legend {
+      display: flex; gap: 10px;
+      font-size: 9.5px; color: #475569; margin-bottom: 2px;
+    }
+    .pt2-sw {
+      display: inline-block;
+      width: 10px; height: 2px; border-radius: 1px;
+      margin-right: 4px; vertical-align: middle;
+    }
+    .pt2-sw-hires { background: #30ABA9; }
+    .pt2-sw-attr  { background: #F43F5E; }
+    .pt2-sw-bar   { background: #1E293B; height: 8px; border-radius: 2px; }
+    .pt2-panel-top    { position: relative; width: 100%; height: 82px;  margin-bottom: 2px; }
+    .pt2-panel-bottom { position: relative; width: 100%; height: 152px; }
+    .pt2-comments {
+      background: #E9FAFA; border: 1px solid #CFF2F1;
+      border-radius: 8px; padding: 4px 10px; flex: 0 0 auto;
+    }
+    .pt2-comments-title {
+      font-size: 7.5px; font-weight: 700; color: #0F172A;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px;
+    }
+    .pt2-ctext { font-size: 7.8px; color: #475569; line-height: 1.25; font-style: italic; margin: 0; }
+
+    /* ══════════════════════════════════════════════
+       SLIDE 2 — Headcount Summary Table (hcs prefix)
+    ══════════════════════════════════════════════ */
+    .hcs-wrap {
+      flex: 1; overflow: hidden;
+      padding: 12px 18px 10px;
+      display: flex; flex-direction: column; gap: 8px;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .hcs-layout {
+      display: grid;
+      grid-template-columns: 1fr 208px;
+      gap: 16px;
+      align-items: start;
+    }
+    .hcs-table-wrap {
+      border: 1px solid #E2E8F0;
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    table.hcs-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.5px;
+      color: #334155;
+    }
+    table.hcs-tbl thead tr.hcs-sup th {
+      font-size: 8px; font-weight: 700;
+      color: #334155; background: #F1F5F9;
+      padding: 4px 3px;
+      border-bottom: 1px solid #E2E8F0;
+      text-align: center;
+    }
+    table.hcs-tbl thead tr.hcs-sup th.hcs-teal {
+      background: #CFF2F1; color: #1A7E7F;
+    }
+    table.hcs-tbl thead tr.hcs-main th {
+      font-size: 8px; font-weight: 700;
+      padding: 5px 3px; text-align: center;
+      color: #334155;
+      border-right: 1px solid #E2E8F0;
+    }
+    table.hcs-tbl thead tr.hcs-main th:last-child { border-right: none; }
+    table.hcs-tbl thead tr.hcs-main th.hcs-lbl {
+      text-align: left; padding-left: 8px;
+      color: #1E293B; background: #F8FAFC;
+      font-weight: 700; width: 126px;
+    }
+    table.hcs-tbl thead tr.hcs-main th.hcs-teal {
+      background: #E9FAFA; color: #1A7E7F;
+    }
+    table.hcs-tbl tbody td {
+      padding: 3px 3px; text-align: center;
+      border-bottom: 1px solid #F1F5F9;
+      border-right: 1px solid #F1F5F9;
+      font-variant-numeric: tabular-nums;
+    }
+    table.hcs-tbl tbody td:last-child { border-right: none; }
+    table.hcs-tbl tbody td.hcs-lbl {
+      text-align: left; padding-left: 8px;
+      color: #334155; font-weight: 500;
+    }
+    tr.hcs-cat td {
+      background: #1E293B; color: #fff;
+      font-weight: 700; padding: 5px 3px;
+      border-bottom: 1px solid #0F172A;
+      border-right-color: rgba(255,255,255,0.08);
+    }
+    table.hcs-tbl tr.hcs-cat td.hcs-lbl { padding-left: 8px; color: #fff !important; }
+    td.hcs-hl, th.hcs-hl { background: #E9FAFA; }
+    tr.hcs-cat td.hcs-hl { background: #208080; color: #fff; }
+    tr.hcs-active td {
+      background: #0F172A; color: #fff;
+      font-weight: 700; padding: 5px 3px;
+    }
+    tr.hcs-active td.hcs-hl { background: #1A7E7F; color: #fff; }
+    table.hcs-tbl tr.hcs-active td.hcs-lbl { padding-left: 8px; color: #fff !important; }
+    tr.hcs-spacer td {
+      padding: 0; height: 3px;
+      background: #fff; border: none;
+    }
+    .hcs-pos { color: #15803D; font-weight: 600; }
+    .hcs-neg { color: #BE123C; font-weight: 600; }
+    .hcs-neu { color: #64748B; }
+    .hcs-col-int { background: #F8FAFC; }
+    tr.hcs-cat .hcs-col-int { background: #334155; }
+    tr.hcs-active .hcs-col-int { background: #1E293B; }
+
+    /* KPI sidebar */
+    .hcs-kpis { display: flex; flex-direction: column; gap: 7px; }
+    .hcs-kpi {
+      background: #fff; border: 1px solid #E2E8F0;
+      border-radius: 7px; padding: 9px 11px 9px 13px;
+      position: relative;
+    }
+    .hcs-kpi::before {
+      content: ""; position: absolute;
+      left: 0; top: 7px; bottom: 7px;
+      width: 3px; border-radius: 2px;
+      background: #30ABA9;
+    }
+    .hcs-kpi-lbl {
+      font-size: 9px; font-weight: 700; color: #1E293B;
+      margin-bottom: 2px; letter-spacing: 0.02em;
+    }
+    .hcs-kpi-val {
+      font-size: 20px; font-weight: 700; color: #0F172A; line-height: 1;
+    }
+    .hcs-kpi-chip {
+      display: inline-block; margin-left: 4px;
+      font-size: 8px; font-weight: 600;
+      padding: 1px 5px; border-radius: 999px;
+      background: #CFF2F1; color: #1A7E7F; vertical-align: middle;
+    }
+    .hcs-kpi-sub {
+      font-size: 9px; color: #64748B; margin-top: 2px; line-height: 1.3;
+    }
+
+    /* Comments */
+    .hcs-comments {
+      background: #F8FAFC; border: 1px solid #CBD5E1;
+      border-radius: 7px; padding: 9px 14px;
+      display: grid; grid-template-columns: auto 1fr 1fr; gap: 0 20px;
+      align-items: start;
+    }
+    .hcs-comments-title {
+      font-size: 9px; font-weight: 700; color: #0F172A;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding-top: 1px;
+    }
+    .hcs-cblock { }
+    .hcs-ctag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 9px; font-weight: 700; color: #1E293B;
+      margin-bottom: 3px; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .hcs-ctag-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .hcs-dot-high { background: #22C55E; }
+    .hcs-dot-low  { background: #F59E08; }
+    .hcs-ctext { font-size: 10px; line-height: 1.45; color: #334155; }
+
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       SLIDE 1 — Section Cover
+       ============================================================ -->
+  <div class="slide section-cover">
+    <div class="eyebrow">Section 07</div>
+    <div class="section-title">Headcount<br>Summary</div>
+    <div class="section-sub">Team · Attrition · People &amp; Talent</div>
+    <div class="slide-num">1</div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 2 — Headcount by Team
+       ============================================================ -->
+  <div class="hc-slide">
+    <div class="slide-header">
+      <span class="title">{{ metrics.hc.slide2_title }}</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+
+    <div class="hcs-wrap">
+
+      <div class="hcs-layout">
+
+        <!-- Table -->
+        <div class="hcs-table-wrap">
+          <table class="hcs-tbl">
+            <thead>
+              <tr class="hcs-sup">
+                <th></th>
+                <th colspan="3">Historical</th>
+                <th class="hcs-teal" colspan="5">{{ metrics.hc.closing_label }}</th>
+                <th colspan="3">Forecast view</th>
+              </tr>
+              <tr class="hcs-main">
+                <th class="hcs-lbl">Headcount by Technical<br/>Team and P&amp;L Category</th>
+                <th>{{ metrics.hc.dec_label }}</th>
+                <th>{{ metrics.hc.m1_label }}</th>
+                <th>{{ metrics.hc.m12_label }}</th>
+                <th class="hcs-teal">Closing</th>
+                <th class="hcs-teal">Share</th>
+                <th class="hcs-teal">MoM%</th>
+                <th class="hcs-teal">YoY%</th>
+                <th class="hcs-teal">Var HC<br/>vs LY</th>
+                <th>Fcst<br/>{{ metrics.hc.closing_label }}</th>
+                <th>Actual vs<br/>Fcst</th>
+                <th>% Pred</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for category in metrics.hc.categories %}
+              {% if category.row.dec25 or category.row.m1 or category.row.m12 or category.row.closing or category.row.fcst %}
+              <tr class="hcs-cat">
+                <td class="hcs-lbl">{{ category.name }}</td>
+                <td>{{ category.row.dec25 }}</td><td>{{ category.row.m1 }}</td><td>{{ category.row.m12 }}</td>
+                <td class="hcs-hl">{{ category.row.closing }}</td><td class="hcs-hl">{{ category.row.share }}</td><td class="hcs-hl {{ category.row.mom_class }}">{{ category.row.mom_pct }}</td><td class="hcs-hl {{ category.row.yoy_class }}">{{ category.row.yoy_pct }}</td><td class="hcs-hl {{ category.row.var_ly_class }}">{{ category.row.var_ly }}</td>
+                <td>{{ category.row.fcst }}</td><td class="{{ category.row.actual_vs_fcst_class }}">{{ category.row.actual_vs_fcst }}</td><td>{{ category.row.pct_pred }}</td>
+              </tr>
+              {% if not (category.teams | length == 1 and category.teams[0].name == category.name) %}
+              {% for team in category.teams %}
+              <tr>
+                <td class="hcs-lbl">{{ team.name }}</td>
+                <td>{{ team.dec25 }}</td><td>{{ team.m1 }}</td><td>{{ team.m12 }}</td>
+                <td class="hcs-hl">{{ team.closing }}</td><td class="hcs-hl">{{ team.share }}</td><td class="hcs-hl {{ team.mom_class }}">{{ team.mom_pct }}</td><td class="hcs-hl {{ team.yoy_class }}">{{ team.yoy_pct }}</td><td class="hcs-hl {{ team.var_ly_class }}">{{ team.var_ly }}</td>
+                <td>{{ team.fcst }}</td><td class="{{ team.actual_vs_fcst_class }}">{{ team.actual_vs_fcst }}</td><td>{{ team.pct_pred }}</td>
+              </tr>
+              {% endfor %}
+              {% endif %}
+              <tr class="hcs-spacer"><td colspan="12"></td></tr>
+              {% endif %}
+              {% endfor %}
+
+              <!-- Active team -->
+              <tr class="hcs-active">
+                <td class="hcs-lbl">Active team</td>
+                <td>{{ metrics.hc.active_team_row.dec25 }}</td><td>{{ metrics.hc.active_team_row.m1 }}</td><td>{{ metrics.hc.active_team_row.m12 }}</td>
+                <td class="hcs-hl">{{ metrics.hc.active_team_row.closing }}</td><td class="hcs-hl">{{ metrics.hc.active_team_row.share }}</td><td class="hcs-hl {{ metrics.hc.active_team_row.mom_class }}">{{ metrics.hc.active_team_row.mom_pct }}</td><td class="hcs-hl {{ metrics.hc.active_team_row.yoy_class }}">{{ metrics.hc.active_team_row.yoy_pct }}</td><td class="hcs-hl {{ metrics.hc.active_team_row.var_ly_class }}">{{ metrics.hc.active_team_row.var_ly }}</td>
+                <td>{{ metrics.hc.active_team_row.fcst }}</td><td class="{{ metrics.hc.active_team_row.actual_vs_fcst_class }}">{{ metrics.hc.active_team_row.actual_vs_fcst }}</td><td>{{ metrics.hc.active_team_row.pct_pred }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div><!-- /hcs-table-wrap -->
+
+        <!-- KPI sidebar -->
+        <aside class="hcs-kpis">
+          <div class="hcs-kpi">
+            <div class="hcs-kpi-lbl">Total Headcount</div>
+            <div class="hcs-kpi-val">{{ metrics.hc.total }}</div>
+          </div>
+          <div class="hcs-kpi">
+            <div class="hcs-kpi-lbl">New Hires</div>
+            <div class="hcs-kpi-val">{{ metrics.hc.new_hires }}</div>
+            <div class="hcs-kpi-sub">{{ metrics.hc.new_hires_sub }}</div>
+          </div>
+          <div class="hcs-kpi">
+            <div class="hcs-kpi-lbl">Total Attrition</div>
+            <div class="hcs-kpi-val">{{ metrics.hc.attrition }}</div>
+          </div>
+          <div class="hcs-kpi">
+            <div class="hcs-kpi-lbl">Staff Turnover Rate</div>
+            <div class="hcs-kpi-val">{{ metrics.hc.turnover_rate }}</div>
+            <div class="hcs-kpi-sub">{{ metrics.hc.turnover_rate_sub }}</div>
+          </div>
+        </aside>
+
+      </div><!-- /hcs-layout -->
+
+      <!-- Comments -->
+      <section class="hcs-comments">
+        <div class="hcs-comments-title">Comments</div>
+        <div class="hcs-cblock">
+          <div class="hcs-ctag"><span class="hcs-ctag-dot hcs-dot-high"></span>Highlights</div>
+          <div class="hcs-ctext">Sales +5.0% MoM (60→63). New Hires (11) exceed Attrition (7) — net headcount gain. Finance on-plan vs Fcst (96%). Turnover 1.42%, lowest in 12 months.</div>
+        </div>
+        <div class="hcs-cblock">
+          <div class="hcs-ctag"><span class="hcs-ctag-dot hcs-dot-low"></span>Lowlights</div>
+          <div class="hcs-ctext">Active team -4.9% YoY (535→509). CAC -11.7% YoY (145→128), Growth -27.1% YoY. P&amp;D -1.4% MoM (208→205). Active team -64 vs Fcst (573).</div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">2</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 3 — People & Talent
+       ============================================================ -->
+  <div class="hc-slide">
+    <div class="slide-header">
+      <span class="title">{{ editorial.pt_action_title }}</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+
+    <div class="pt2-inner">
+
+      <div class="pt2-charts">
+
+        <!-- LEFT: New Hires & Attrition (line) + People EoP (bars) -->
+        <div class="pt2-card">
+          <div class="pt2-card-title">New Hires &amp; Attrition &nbsp;·&nbsp; People EoP</div>
+          <div class="pt2-legend">
+            <span><span class="pt2-sw pt2-sw-hires"></span>New Hires</span>
+            <span><span class="pt2-sw pt2-sw-attr"></span>Attrition</span>
+            <span><span class="pt2-sw pt2-sw-bar"></span>People EoP</span>
+          </div>
+          <div class="pt2-panel-top"><canvas id="pt2LeftTop"></canvas></div>
+          <div class="pt2-panel-bottom"><canvas id="pt2LeftBot"></canvas></div>
+        </div>
+
+        <!-- RIGHT: Staff Turnover Rate (line) + Attrition % (bars) -->
+        <div class="pt2-card">
+          <div class="pt2-card-title">Staff Turnover Rate &nbsp;·&nbsp; Attrition %</div>
+          <div class="pt2-legend">
+            <span><span class="pt2-sw pt2-sw-attr"></span>Turnover Rate</span>
+            <span><span class="pt2-sw pt2-sw-bar"></span>Attrition %</span>
+          </div>
+          <div class="pt2-panel-top"><canvas id="pt2RightTop"></canvas></div>
+          <div class="pt2-panel-bottom"><canvas id="pt2RightBot"></canvas></div>
+        </div>
+
+      </div>
+
+      <section class="pt2-comments">
+        <div class="pt2-comments-title">Comments</div>
+        <ul class="pt2-ctext" style="margin: 0; padding-left: 12px; display: flex; flex-direction: column; gap: 2px;">
+          <li>People EoP: 509 at close of May 2026 (+0.2% MoM · -4.9% YoY vs 535 May-25).</li>
+          <li>New Hires: 11 · Attrition: 7 · Turnover Rate: 1.42% — data sourced from Sheets movimientos por TT.</li>
+        </ul>
+      </section>
+
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">3</span>
+    </div>
+  </div>
+
+  <script>
+    /* ── Slide 3 — People & Talent charts ── */
+    (function() {
+      // M-12 → cutoff (13 meses). People EoP + New Hires + Attrition desde bi_strategic_relationships (RS).
+      const months     = {{ metrics.pt.months | tojson }};
+      const newHires   = {{ metrics.pt.hires | tojson }};
+      const attrition  = {{ metrics.pt.attrition | tojson }};
+      const peopleEoP  = {{ metrics.pt.hc_eop | tojson }};
+      const turnover   = {{ metrics.pt.turnover_pct | tojson }};
+      const attrPct    = {{ metrics.pt.attrition_pct | tojson }};
+
+      Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+      Chart.defaults.font.size   = 9;
+      Chart.defaults.color       = '#64748B';
+
+      const commonLine = (max, title) => ({
+        responsive: true, maintainAspectRatio: false, animation: false,
+        layout: { padding: { top: 14, right: 12, left: 4, bottom: 2 } },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { display: false, grid: { display: false } },
+          y: {
+            beginAtZero: true, max,
+            ticks: { color: '#94A3B8', stepSize: Math.ceil(max / 4) },
+            grid: { color: '#F1F5F9' }, border: { display: false },
+            title: { display: true, text: title, color: '#64748B', font: { size: 8.5, weight: '600' } }
+          }
+        }
+      });
+
+      const commonBars = (max, title, pctAxis) => ({
+        responsive: true, maintainAspectRatio: false, animation: false,
+        layout: { padding: { top: 6, right: 12, left: 4, bottom: 2 } },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#64748B', font: { size: 7.5 } }, border: { color: '#E2E8F0' } },
+          y: {
+            beginAtZero: true, max,
+            ticks: { color: '#94A3B8', stepSize: pctAxis ? 1 : Math.ceil(max / 6), callback: v => pctAxis ? v + '%' : v },
+            grid: { color: '#F1F5F9' }, border: { display: false },
+            title: { display: true, text: title, color: '#64748B', font: { size: 8.5, weight: '600' } }
+          }
+        }
+      });
+
+      // LEFT TOP: New Hires + Attrition lines
+      new Chart(document.getElementById('pt2LeftTop'), {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [
+            { label: 'New Hires', data: newHires, borderColor: '#30ABA9', backgroundColor: '#30ABA9', tension: 0.25, pointRadius: 2, borderWidth: 2 },
+            { label: 'Attrition', data: attrition, borderColor: '#F43F5E', backgroundColor: '#F43F5E', tension: 0.25, pointRadius: 2, borderWidth: 2 }
+          ]
+        },
+        options: commonLine(30, 'New Hires & Attrition'),
+        plugins: [{
+          id: 'pt2LblLT',
+          afterDatasetsDraw(chart) {
+            const {ctx} = chart;
+            ctx.save(); ctx.font = '600 7.5px Inter';
+            const hires = chart.getDatasetMeta(0).data;
+            const attr  = chart.getDatasetMeta(1).data;
+            [10,11,12].forEach(i => {
+              const p = hires[i]; if (!p) return;
+              if (newHires[i] == null) return;
+              ctx.fillStyle = '#1A7E7F'; ctx.textAlign = 'center';
+              ctx.fillText(newHires[i], p.x, p.y + 12);
+            });
+            [10,11,12].forEach(i => {
+              const p = attr[i]; if (!p) return;
+              if (attrition[i] == null) return;
+              ctx.fillStyle = '#E11D48'; ctx.textAlign = 'center';
+              ctx.fillText(attrition[i], p.x, p.y - 6);
+            });
+            ctx.restore();
+          }
+        }]
+      });
+
+      // LEFT BOTTOM: People EoP bars
+      new Chart(document.getElementById('pt2LeftBot'), {
+        type: 'bar',
+        data: {
+          labels: months,
+          datasets: [{ label: 'People EoP', data: peopleEoP, backgroundColor: '#1E293B', borderRadius: 2, maxBarThickness: 22 }]
+        },
+        options: commonBars(600, 'People EoP', false),
+        plugins: [{
+          id: 'pt2LblLB',
+          afterDatasetsDraw(chart) {
+            const {ctx} = chart;
+            ctx.save(); ctx.font = '600 7px Inter';
+            const bars = chart.getDatasetMeta(0).data;
+            [10,11,12].forEach(i => {
+              const b = bars[i]; if (!b) return;
+              ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center';
+              ctx.fillText(peopleEoP[i], b.x, b.y + 14);
+            });
+            ctx.restore();
+          }
+        }]
+      });
+
+      // RIGHT TOP: Turnover rate line
+      new Chart(document.getElementById('pt2RightTop'), {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [{ label: 'Turnover Rate', data: turnover, borderColor: '#F43F5E', backgroundColor: '#F43F5E', tension: 0.25, pointRadius: 2, borderWidth: 2 }]
+        },
+        options: commonLine(5, 'Staff Turnover Rate'),
+        plugins: [{
+          id: 'pt2LblRT',
+          afterDatasetsDraw(chart) {
+            const {ctx} = chart;
+            ctx.save(); ctx.font = '600 7.5px Inter';
+            const pts = chart.getDatasetMeta(0).data;
+            [10,11,12].forEach(i => {
+              const p = pts[i]; if (!p) return;
+              if (turnover[i] == null) return;
+              ctx.fillStyle = '#E11D48'; ctx.textAlign = 'center';
+              const dy = (i === 12) ? -7 : 12;
+              ctx.fillText(turnover[i].toFixed(2).replace('.', ','), p.x, p.y + dy);
+            });
+            ctx.restore();
+          }
+        }]
+      });
+
+      // RIGHT BOTTOM: Attrition % bars
+      new Chart(document.getElementById('pt2RightBot'), {
+        type: 'bar',
+        data: {
+          labels: months,
+          datasets: [{ label: 'Attrition %', data: attrPct, backgroundColor: '#1E293B', borderRadius: 2, maxBarThickness: 22 }]
+        },
+        options: commonBars(6, 'Attrition %', true),
+        plugins: [{
+          id: 'pt2LblRB',
+          afterDatasetsDraw(chart) {
+            const {ctx} = chart;
+            ctx.save(); ctx.font = '600 7px Inter';
+            const bars = chart.getDatasetMeta(0).data;
+            [10,11,12].forEach(i => {
+              const b = bars[i]; if (!b) return;
+              if (attrPct[i] == null) return;
+              ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center';
+              ctx.fillText(attrPct[i].toFixed(2).replace('.', ',') + '%', b.x, b.y + 14);
+            });
+            ctx.restore();
+          }
+        }]
+      });
+    })();
+  </script>
+
+</body>
+</html>

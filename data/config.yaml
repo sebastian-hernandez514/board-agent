@@ -1,0 +1,7 @@
+# Board configuration — update each month
+period:            "2026-06"       # YYYY-MM del período activo
+month_label:       "June 2026"     # Mes en inglés, largo
+prev_month_label:  "May 2026"      # Mes anterior (para comparaciones MoM)
+quarter_label:     "2Q26"          # Quarter del período activo
+prev_year:         "2025"          # Año anterior (para comparaciones YoY)
+year:              2026            # Año actual

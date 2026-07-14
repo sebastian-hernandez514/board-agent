@@ -1,9 +1,9 @@
-"""Tests del script de arranque check_setup.py — mockea todo, nunca toca AWS/Redshift reales."""
+"""Tests del script de arranque check_setup.py — mockea todo, nunca toca Metabase real."""
 
 import shutil
-import subprocess
 
 import check_setup
+from board_agent import paths
 from board_agent.report import CheckResult
 
 
@@ -24,27 +24,24 @@ def test_check_uv_fail_when_missing(monkeypatch):
     assert "instalar" in r.detail
 
 
-def test_check_aws_cli_pass(monkeypatch):
-    class _Proc:
-        returncode = 0
-        stdout = "aws-cli/2.15.0"
-        stderr = ""
-    monkeypatch.setattr(subprocess, "run", lambda *a, **k: _Proc())
-    r = check_setup._check_aws_cli()
+def test_check_metabase_cache_pass_when_present(tmp_path, monkeypatch):
+    cache_file = tmp_path / ".metabase_cache.json"
+    cache_file.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(paths, "METABASE_CACHE_FILE", cache_file)
+    r = check_setup._check_metabase_cache_exists()
     assert r.status == "PASS"
 
 
-def test_check_aws_cli_fail_when_not_installed(monkeypatch):
-    def _raise(*a, **k):
-        raise FileNotFoundError()
-    monkeypatch.setattr(subprocess, "run", _raise)
-    r = check_setup._check_aws_cli()
+def test_check_metabase_cache_fail_when_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(paths, "METABASE_CACHE_FILE", tmp_path / "no-existe.json")
+    r = check_setup._check_metabase_cache_exists()
     assert r.status == "FAIL"
+    assert "metabase_fetch_spec" in r.detail
 
 
-def test_main_stops_early_if_tooling_missing(monkeypatch, capsys):
+def test_main_stops_early_if_tooling_missing(monkeypatch):
     monkeypatch.setattr(check_setup, "_check_uv", lambda: _r("S.1", "FAIL"))
-    monkeypatch.setattr(check_setup, "_check_aws_cli", lambda: _r("S.2", "PASS"))
+    monkeypatch.setattr(check_setup, "_check_metabase_cache_exists", lambda: _r("S.2", "PASS"))
     called = {"gate": False}
     monkeypatch.setattr(check_setup.phase0_gate, "run", lambda month: called.update(gate=True) or [])
     monkeypatch.setattr("sys.argv", ["check_setup.py", "--month", "2026-06"])
@@ -55,7 +52,7 @@ def test_main_stops_early_if_tooling_missing(monkeypatch, capsys):
 
 def test_main_reports_fail_exit_code_when_source_blocks(monkeypatch):
     monkeypatch.setattr(check_setup, "_check_uv", lambda: _r("S.1", "PASS"))
-    monkeypatch.setattr(check_setup, "_check_aws_cli", lambda: _r("S.2", "PASS"))
+    monkeypatch.setattr(check_setup, "_check_metabase_cache_exists", lambda: _r("S.2", "PASS"))
     monkeypatch.setattr(check_setup.phase0_gate, "run", lambda month: [_r("F0.4", "FAIL")])
     monkeypatch.setattr(check_setup.phase1_freshness, "run", lambda month: [_r("F1.1", "PASS")])
     monkeypatch.setattr("sys.argv", ["check_setup.py", "--month", "2026-06"])
@@ -65,7 +62,7 @@ def test_main_reports_fail_exit_code_when_source_blocks(monkeypatch):
 
 def test_main_exit_0_when_everything_ready(monkeypatch):
     monkeypatch.setattr(check_setup, "_check_uv", lambda: _r("S.1", "PASS"))
-    monkeypatch.setattr(check_setup, "_check_aws_cli", lambda: _r("S.2", "PASS"))
+    monkeypatch.setattr(check_setup, "_check_metabase_cache_exists", lambda: _r("S.2", "PASS"))
     monkeypatch.setattr(check_setup.phase0_gate, "run", lambda month: [_r("F0.4", "PASS")])
     monkeypatch.setattr(check_setup.phase1_freshness, "run", lambda month: [_r("F1.1", "PASS")])
     monkeypatch.setattr("sys.argv", ["check_setup.py", "--month", "2026-06"])
@@ -76,7 +73,7 @@ def test_main_exit_0_when_everything_ready(monkeypatch):
 def test_main_exit_0_on_warn_only(monkeypatch):
     """WARN no debe bloquear el exit code — solo FAIL."""
     monkeypatch.setattr(check_setup, "_check_uv", lambda: _r("S.1", "PASS"))
-    monkeypatch.setattr(check_setup, "_check_aws_cli", lambda: _r("S.2", "PASS"))
+    monkeypatch.setattr(check_setup, "_check_metabase_cache_exists", lambda: _r("S.2", "PASS"))
     monkeypatch.setattr(check_setup.phase0_gate, "run", lambda month: [_r("F0.6", "WARN")])
     monkeypatch.setattr(check_setup.phase1_freshness, "run", lambda month: [_r("F1.3", "WARN")])
     monkeypatch.setattr("sys.argv", ["check_setup.py", "--month", "2026-06"])

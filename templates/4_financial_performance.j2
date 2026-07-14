@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Alegra Board — Financial Performance · May 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',sans-serif;background:#dde3ea;
+  min-height:100vh;color:#0f172b;
+  margin:0;padding:24px 16px;
+  display:flex;flex-direction:column;align-items:center;gap:28px;
+}
+.board-slide{
+  width:960px;min-height:540px;background:#fff;border-radius:10px;
+  box-shadow:0 2px 16px rgba(0,0,0,.10);
+  display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;
+}
+.slide-header{
+  background:#0f172b;padding:13px 40px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.sh-title{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#fff;line-height:1.3;max-width:680px}
+.sh-right{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.sh-period{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:#14b8a6;white-space:nowrap}
+.sh-num{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:rgba(255,255,255,.35);white-space:nowrap}
+.slide-body{padding:12px 40px 10px;height:460px;overflow:hidden;display:flex;flex-direction:column;gap:8px}
+.slide-footer{background:#f8fafc;border-top:1px solid #e2e8f0;padding:7px 40px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.footer-brand{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;color:#cbd5e1}
+.footer-page{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;color:#94a3b8}
+.dt{width:100%;border-collapse:collapse}
+.dt thead tr{background:#0f172b}
+.dt thead th{padding:5px 7px;text-align:right;font-family:'Inter',sans-serif;font-size:8px;font-weight:700;color:#94a3b8;white-space:nowrap;letter-spacing:.4px;text-transform:uppercase}
+.dt thead th:first-child{text-align:left;padding-left:10px;color:#fff;min-width:140px}
+.dt thead th.tha{color:#e2e8f0}
+.dt thead th.thh{background:#1e3a5f;color:#7dd3fc}
+.dt thead th.thb{background:#1e3060;color:#c7d2fe}
+.dt tr.rs td{padding:4px 7px 2px;font-size:8px;font-weight:700;color:#14b8a6;text-transform:uppercase;letter-spacing:1.2px;background:#f8fafc;border-top:2px solid #e2e8f0}
+.dt tr.rs td:first-child{padding-left:10px}
+.dt tr.rb td{padding:4px 7px;font-weight:700;background:#fff;font-size:9.5px;border-top:1px solid #e2e8f0;color:#0f172b}
+.dt tr.rb td:first-child{padding-left:10px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px}
+.dt tr.rb td:not(:first-child){font-family:'DM Mono',monospace;text-align:right}
+.dt tr.rv td{padding:3px 7px;background:#fff;font-size:9.5px;border-top:1px solid #e2e8f0;color:#334155}
+.dt tr.rv td:first-child{padding-left:18px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px}
+.dt tr.rv td:not(:first-child){font-family:'DM Mono',monospace;text-align:right}
+.dt tr.rp td{padding:1px 7px 2px;background:#fff;font-size:8.5px;border-top:none;color:#64748b;font-style:italic}
+.dt tr.rp td:first-child{padding-left:22px}
+.dt tr.rp td:not(:first-child){font-family:'DM Mono',monospace;text-align:right}
+.dt tr.rt td{padding:3px 7px;background:#f1f5f9;font-size:8.5px;font-weight:600;border-top:1px solid #e2e8f0;color:#334155}
+.dt tr.rt td:first-child{padding-left:10px}
+.dt tr.rt td:not(:first-child){font-family:'DM Mono',monospace;text-align:right}
+.dt tr.re td{padding:4px 7px;font-weight:700;background:#1e293b;color:#e2e8f0;font-size:9.5px;border-top:2px solid #334155}
+.dt tr.re td:first-child{padding-left:10px;font-family:'DM Sans',sans-serif}
+.dt tr.re td:not(:first-child){font-family:'DM Mono',monospace;text-align:right}
+.dt tr.rem td{padding:1px 7px 3px;background:#1e293b;font-size:8.5px;font-style:italic;border-top:none;color:#94a3b8}
+.dt tr.rem td:first-child{padding-left:22px;color:#94a3b8}
+.dt tr.rem td:not(:first-child){font-family:'DM Mono',monospace;text-align:right}
+.dt tr.rsp td{height:4px;background:#fff;border:none}
+.dt tr.rca td{padding:3px 7px;font-weight:600;background:#f8fafc;font-size:9.5px;border-top:1px solid #e2e8f0;color:#334155}
+.dt tr.rca td:first-child{padding-left:10px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px}
+.dt tr.rca td:not(:first-child){font-family:'DM Mono',monospace;text-align:right}
+.bud-col{background:#f1f5f9 !important;color:#64748b !important}
+.act-col{background:#fff !important;color:#0f172b !important}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dot-teal{background:#14b8a6}.dot-green{background:#1D9E75}.dot-gray{background:#94a3b8}.dot-navy{background:#334155}
+.db{display:inline-flex;align-items:center;gap:2px;font-family:'DM Mono',monospace;font-size:8.5px;font-weight:600;padding:1px 5px;border-radius:99px}
+.db.p{color:#166534;background:#dcfce7}
+.db.n{color:#9a3412;background:#ffedd5}
+.db.z{color:#64748b;background:#f1f5f9}
+.db.pp{color:#1e40af;background:#dbeafe}
+.db.np{color:#9a3412;background:#ffedd5}
+.sec-label{font-family:'Inter',sans-serif;font-size:8.5px;font-weight:700;color:#14b8a6;text-transform:uppercase;letter-spacing:1.5px}
+.comments-box{background:#f8fafc;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.comment-item{display:flex;gap:7px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:10.5px;line-height:1.55;color:#334155}
+.comment-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.comment-item b{color:#0f172b}
+.chart-wrap{position:relative;width:100%;overflow:hidden}
+.chart-wrap canvas{display:block;width:100%!important}
+.cf-table{width:100%;border-collapse:collapse}
+.cf-table thead th{background:#0f172b;color:#94a3b8;padding:4px 7px;text-align:right;font-family:'Inter',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.cf-table thead th:first-child{text-align:left;padding-left:10px;color:#e2e8f0}
+.cf-table thead th.tha{color:#e2e8f0}
+.cf-table td{padding:2.5px 7px;text-align:right;font-family:'DM Mono',monospace;font-size:9.5px;border-top:1px solid #e2e8f0;color:#334155}
+.cf-table td:first-child{text-align:left;padding-left:10px;font-family:'Inter',sans-serif;white-space:nowrap;font-size:9.5px}
+.cf-table tr.tot td{font-weight:700;background:#fff;color:#0f172b}
+.cf-table tr.sub td{font-weight:700;background:#f8fafc;color:#0f172b}
+.cf-table tr.ind td{color:#64748b}
+.cf-table tr.ind td:first-child{padding-left:20px}
+.cf-table tr.closing td{font-weight:700;background:#0f172b;color:#fff}
+.cf-table tr.closing td:first-child{font-family:'Inter',sans-serif}
+@media print{
+  body{background:#fff;padding:0;gap:0}
+  .board-slide{box-shadow:none;border-radius:0;page-break-after:always;break-after:always}
+}
+</style></head>
+<body>
+
+<!-- SLIDE 1 — Recent Performance Monthly -->
+<div class="board-slide">
+  <div class="slide-header">
+    <div class="sh-title">EBITDA margin improved from −12.2% in YTD May 2025 to +9.8% in YTD May 2026 — +22.0pp expansion</div>
+    <div class="sh-right">
+      <div class="sh-period">P&amp;L Monthly · vs Prior Year</div>
+      <div class="sh-num">01 / 06</div>
+    </div>
+  </div>
+  <div class="slide-body">
+    <table class="dt">
+      <thead>
+        <tr>
+          <th style="min-width:148px">(kUSD)</th>
+          <th class="thh">Apr/2025</th><th class="thh">May/2025</th>
+          <th class="thb">Apr/2026</th><th class="thb">May/2026</th>
+          <th class="tha">YTD 2025A</th><th class="tha">YTD 2026A</th>
+          <th class="tha">YoY Δ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="rs"><td colspan="8">ARR &amp; FX</td></tr>
+        <tr class="rca"><td><span class="dot dot-teal"></span>ARR EoP ($M)</td><td>$22.3</td><td>$22.9</td><td style="color:#0f172b">$29.21</td><td style="color:#0f172b">$29.2</td><td>$22.9</td><td style="color:#0f172b">$29.2</td><td><span class="db p">+27.2%</span></td></tr>
+        <tr class="rp"><td>Y-o-Y Growth</td><td>+35%</td><td>+33%</td><td style="color:#0f172b">+31.1%</td><td style="color:#0f172b">+27%</td><td>+33%</td><td style="color:#0f172b">+27%</td><td>—</td></tr>
+        <tr class="rsp"><td colspan="8"></td></tr>
+        <tr class="rs"><td colspan="8">P&amp;L</td></tr>
+        <tr class="rb">
+          <td><span class="dot dot-teal"></span><b>Revenue</b></td>
+          <td>1,848</td><td>1,889</td>
+          <td><b>2,430</b></td><td style="color:#0f172b"><b>2,391</b></td>
+          <td>8,994</td><td style="color:#0f172b"><b>11,741</b></td>
+          <td><span class="db p">+30.5%</span></td>
+        </tr>
+        <tr class="rp"><td>Y-o-Y Growth</td><td>+38%</td><td>+34.6%</td><td style="color:#0f172b">+31.5%</td><td style="color:#0f172b">+26.6%</td><td>+38%</td><td style="color:#0f172b">+30.5%</td><td>—</td></tr>
+        <tr class="rb">
+          <td><span class="dot dot-teal"></span><b>Gross Profit</b></td>
+          <td>1,514</td><td>1,541</td>
+          <td><b>1,976</b></td><td style="color:#0f172b"><b>1,934</b></td>
+          <td>7,308</td><td style="color:#0f172b"><b>9,575</b></td>
+          <td><span class="db p">+31.0%</span></td>
+        </tr>
+        <tr class="rp"><td>Gross Margin %</td><td>81.9%</td><td>81.6%</td><td style="color:#0f172b">81.3%</td><td style="color:#0f172b">80.9%</td><td>81.3%</td><td style="color:#0f172b">81.6%</td><td><span class="db pp">+0.3pp</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td>786</td><td>887</td><td style="color:#0f172b">736</td><td style="color:#0f172b">744</td><td>4,268</td><td style="color:#0f172b">3,508</td><td><span class="db p">−17.8%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td>509</td><td>524</td><td style="color:#0f172b">671</td><td style="color:#0f172b">646</td><td>2,497</td><td style="color:#0f172b">3,181</td><td><span class="db n">+27.4%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td>345</td><td>324</td><td style="color:#0f172b">308</td><td style="color:#0f172b">361</td><td>1,639</td><td style="color:#0f172b">1,733</td><td><span class="db n">+5.7%</span></td></tr>
+        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td>1,640</td><td>1,735</td><td><b>1,716</b></td><td style="color:#0f172b"><b>1,751</b></td><td>8,405</td><td style="color:#0f172b"><b>8,422</b></td><td><span class="db z">+0.2%</span></td></tr>
+        <tr class="rp"><td>S&amp;M % Rev</td><td>42.5%</td><td>47.0%</td><td style="color:#0f172b">30.3%</td><td style="color:#0f172b">31.1%</td><td>47.5%</td><td style="color:#0f172b">29.9%</td><td><span class="db pp">−17.6pp</span></td></tr>
+        <tr class="rp"><td>R&amp;D % Rev</td><td>27.5%</td><td>27.7%</td><td style="color:#0f172b">27.6%</td><td style="color:#0f172b">27.0%</td><td>27.8%</td><td style="color:#0f172b">27.1%</td><td><span class="db pp">−0.7pp</span></td></tr>
+        <tr class="rp"><td>G&amp;A % Rev</td><td>18.7%</td><td>17.1%</td><td style="color:#0f172b">12.7%</td><td style="color:#0f172b">15.1%</td><td>18.2%</td><td style="color:#0f172b">14.8%</td><td><span class="db pp">−3.4pp</span></td></tr>
+        <tr class="rt"><td>Total OpEx % Rev</td><td>88.7%</td><td>91.9%</td><td style="color:#0f172b">70.6%</td><td style="color:#0f172b">73.2%</td><td>93.5%</td><td style="color:#0f172b">71.7%</td><td><span class="db pp">−21.8pp</span></td></tr>
+        <tr class="re">
+          <td><b>EBITDA</b></td>
+          <td style="color:#E87722">−126</td><td style="color:#E87722">−194</td>
+          <td style="color:#4ade80;font-weight:700">+260</td><td style="color:#4ade80;font-weight:700">+184</td>
+          <td style="color:#f97316">−1,096</td><td style="color:#4ade80;font-weight:700">+1,153</td>
+          <td><span class="db p">n/m</span></td>
+        </tr>
+        <tr class="rem">
+          <td>EBITDA Margin %</td>
+          <td style="color:#E87722">−6.8%</td><td style="color:#E87722">−10.3%</td>
+          <td style="color:#4ade80">+10.7%</td><td style="color:#4ade80">+7.7%</td>
+          <td style="color:#f97316">−12.2%</td><td style="color:#4ade80">+9.8%</td>
+          <td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+22.0pp</td>
+        </tr>
+        <tr class="rca"><td><b>R-40</b></td><td>28%</td><td>22.7%</td><td style="color:#0f172b">41.8%</td><td style="color:#0f172b">36.7%</td><td>20.8%</td><td style="color:#0f172b">38.8%</td><td><span class="db p">+18.0pp</span></td></tr>
+        <tr class="rsp"><td colspan="8"></td></tr>
+        <tr class="rca"><td><span class="dot dot-teal"></span>Cash Balance ($K)</td><td>5,253</td><td>5,289</td><td style="color:#0f172b">4,321</td><td style="color:#0f172b">4,414</td><td>5,289</td><td style="color:#0f172b">4,414</td><td><span class="db n">−16.5%</span></td></tr>
+        <tr class="rca"><td>Delta MoM</td><td style="color:#E87722">−181</td><td style="color:#14b8a6">+36</td><td style="color:#14b8a6">+224</td><td style="color:#14b8a6">+93</td><td style="color:#E87722">−$1,198K</td><td style="color:#14b8a6">+$191K</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">1</span></div>
+</div>
+
+<!-- SLIDE 2 — Budget -->
+<div class="board-slide">
+  <div class="slide-header">
+    <div class="sh-title">May 2026 beats Budget — EBITDA +$184K vs budget $66K (+$117K), YTD OpEx −7.6% vs Budget</div>
+    <div class="sh-right">
+      <div class="sh-period">P&amp;L Monthly · vs Budget 2026</div>
+      <div class="sh-num">02 / 06</div>
+    </div>
+  </div>
+  <div class="slide-body">
+    <table class="dt">
+      <thead>
+        <tr>
+          <th style="min-width:148px">(kUSD)</th>
+          <th class="thb">Apr/26A</th><th class="thb">May/26A</th>
+          <th class="thh">Apr/26B</th><th class="thh">May/26B</th>
+          <th class="tha">YTD 26A</th><th class="tha">YTD 26B</th>
+          <th class="tha">Var Bud</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="rs"><td colspan="8">P&amp;L</td></tr>
+        <tr class="rb">
+          <td><span class="dot dot-teal"></span><b>Revenue</b></td>
+          <td><b>2,430</b></td><td><b>2,391</b></td>
+          <td style="background:#f1f5f9;color:#64748b">2,250</td><td style="background:#f1f5f9;color:#64748b">2,311</td>
+          <td><b>11,741</b></td><td style="background:#f1f5f9;color:#64748b">11,034</td>
+          <td><span class="db p">+6.4%</span></td>
+        </tr>
+        <tr class="rb">
+          <td><span class="dot dot-teal"></span><b>Gross Profit</b></td>
+          <td><b>1,976</b></td><td><b>1,934</b></td>
+          <td style="background:#f1f5f9;color:#64748b">1,817</td><td style="background:#f1f5f9;color:#64748b">1,877</td>
+          <td><b>9,575</b></td><td style="background:#f1f5f9;color:#64748b">8,929</td>
+          <td><span class="db p">+7.2%</span></td>
+        </tr>
+        <tr class="rp"><td>Gross Margin %</td><td style="color:#0f172b">81.3%</td><td style="color:#0f172b">80.9%</td><td style="background:#f1f5f9">80.8%</td><td style="background:#f1f5f9">81.2%</td><td style="color:#0f172b">81.6%</td><td style="background:#f1f5f9">80.9%</td><td><span class="db pp">+0.7pp</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td style="color:#0f172b">736</td><td style="color:#0f172b">744</td><td style="background:#f1f5f9;color:#64748b">829</td><td style="background:#f1f5f9;color:#64748b">780</td><td style="color:#0f172b">3,508</td><td style="background:#f1f5f9;color:#64748b">4,047</td><td><span class="db p">−13.3%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td style="color:#0f172b">671</td><td style="color:#0f172b">646</td><td style="background:#f1f5f9;color:#64748b">664</td><td style="background:#f1f5f9;color:#64748b">675</td><td style="color:#0f172b">3,181</td><td style="background:#f1f5f9;color:#64748b">3,255</td><td><span class="db p">−2.3%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td style="color:#0f172b">308</td><td style="color:#0f172b">361</td><td style="background:#f1f5f9;color:#64748b">355</td><td style="background:#f1f5f9;color:#64748b">356</td><td style="color:#0f172b">1,733</td><td style="background:#f1f5f9;color:#64748b">1,813</td><td><span class="db p">−4.4%</span></td></tr>
+        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td><b>1,716</b></td><td><b>1,751</b></td><td style="background:#f1f5f9;color:#64748b">1,848</td><td style="background:#f1f5f9;color:#64748b">1,811</td><td><b>8,422</b></td><td style="background:#f1f5f9;color:#64748b">9,115</td><td><span class="db p">−7.6%</span></td></tr>
+        <tr class="rp"><td>S&amp;M % Rev</td><td style="color:#0f172b">30.3%</td><td style="color:#0f172b">31.1%</td><td style="background:#f1f5f9">36.8%</td><td style="background:#f1f5f9">33.7%</td><td style="color:#0f172b">29.9%</td><td style="background:#f1f5f9">36.7%</td><td><span class="db pp">−6.8pp</span></td></tr>
+        <tr class="rp"><td>R&amp;D % Rev</td><td style="color:#0f172b">27.6%</td><td style="color:#0f172b">27.0%</td><td style="background:#f1f5f9">29.5%</td><td style="background:#f1f5f9">29.2%</td><td style="color:#0f172b">27.1%</td><td style="background:#f1f5f9">29.5%</td><td><span class="db pp">−2.4pp</span></td></tr>
+        <tr class="rp"><td>G&amp;A % Rev</td><td style="color:#0f172b">12.7%</td><td style="color:#0f172b">15.1%</td><td style="background:#f1f5f9">15.8%</td><td style="background:#f1f5f9">15.4%</td><td style="color:#0f172b">14.8%</td><td style="background:#f1f5f9">16.4%</td><td><span class="db pp">−1.6pp</span></td></tr>
+        <tr class="rt"><td>Total OpEx % Rev</td><td style="color:#0f172b">70.6%</td><td style="color:#0f172b">73.2%</td><td style="background:#f1f5f9">82.1%</td><td style="background:#f1f5f9">78.4%</td><td style="color:#0f172b">71.7%</td><td style="background:#f1f5f9">82.6%</td><td><span class="db pp">−10.9pp</span></td></tr>
+        <tr class="re"><td><b>EBITDA</b></td><td style="color:#4ade80;font-weight:700">+260</td><td style="color:#4ade80;font-weight:700">+184</td><td style="color:#f97316">−31</td><td style="color:#4ade80">+66</td><td style="color:#4ade80;font-weight:700">+1,153</td><td style="color:#f97316">−185</td><td><span class="db p">n/m</span></td></tr>
+        <tr class="rem"><td>EBITDA Margin %</td><td style="color:#4ade80">+10.7%</td><td style="color:#4ade80">+7.7%</td><td style="color:#f97316">−1.4%</td><td style="color:#4ade80">+2.9%</td><td style="color:#4ade80">+9.8%</td><td style="color:#f97316">−1.7%</td><td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+11.5pp</td></tr>
+        <tr class="rsp"><td colspan="8"></td></tr>
+        <tr class="rca"><td><span class="dot dot-teal"></span>Cash Balance ($K)</td><td style="color:#0f172b">4,321</td><td style="color:#0f172b">4,414</td><td style="background:#f1f5f9;color:#64748b">2,000</td><td style="background:#f1f5f9;color:#64748b">2,018</td><td style="color:#0f172b">4,414</td><td style="background:#f1f5f9;color:#64748b">2,018</td><td><span class="db p">+118.7%</span></td></tr>
+        <tr class="rsp"><td colspan="8"></td></tr>
+        <tr class="rs"><td colspan="8">ARR &amp; FX</td></tr>
+        <tr class="rca"><td><span class="dot dot-teal"></span>ARR EoP ($M)</td><td style="color:#334155">$29.21</td><td style="color:#334155">$29.2</td><td style="background:#f1f5f9;color:#64748b">$27.40</td><td style="background:#f1f5f9;color:#64748b">$28.58</td><td style="color:#334155">$29.2</td><td style="background:#f1f5f9;color:#64748b">$28.58</td><td><span class="db p">+2.2%</span></td></tr>
+        <tr class="rca"><td>FX COP/USD EoP</td><td style="color:#0f172b">3,618</td><td style="color:#0f172b">3,714</td><td style="background:#f1f5f9;color:#64748b">4,016</td><td style="background:#f1f5f9;color:#64748b">4,016</td><td style="color:#0f172b">3,714</td><td style="background:#f1f5f9;color:#64748b">4,016</td><td><span class="db p">−7.5%</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">2</span></div>
+</div>
+
+<!-- SLIDE 3 — OpEx YTD May -->
+<div class="board-slide">
+  <div class="slide-header">
+    <div class="sh-title">S&amp;M tracking 13.3% below budget YTD — Paid Media and hiring efficiencies release $539K of OpEx</div>
+    <div class="sh-right">
+      <div class="sh-period">OpEx YTD May 2026 · S&amp;M · R&amp;D · G&amp;A</div>
+      <div class="sh-num">03 / 06</div>
+    </div>
+  </div>
+  <div class="slide-body" style="gap:8px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;height:420px;overflow:hidden">
+      <div style="display:flex;flex-direction:column;gap:6px;overflow:hidden;height:100%">
+        <div class="sec-label">Actuals · Budget · Y-1 ($K YTD May)</div>
+        <div class="chart-wrap" style="height:320px;width:100%"><canvas id="bd-opex-stacked" width="420" height="320" style="display:block"></canvas></div>
+        <div style="display:flex;gap:12px">
+          <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:8px;height:8px;background:#1D9E75;border-radius:2px;display:inline-block"></span>S&amp;M</span>
+          <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:8px;height:8px;background:#94a3b8;border-radius:2px;display:inline-block"></span>R&amp;D</span>
+          <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:8px;height:8px;background:#14b8a6;border-radius:2px;display:inline-block"></span>G&amp;A</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding-top:20px;overflow:hidden">
+        <div class="sec-label">Comments</div>
+        <div class="comments-box">
+          <div class="comment-item"><span class="comment-dot" style="background:#1D9E75"></span><span><b>S&amp;M represents 29.9% of Revenue YTD</b> — a 17.6pp reduction vs YTD May 2025 (47.5%). Spend declined 17.8% YoY while Revenue grew 30.5%, driven by Paid Media efficiencies.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#94a3b8"></span><span><b>R&amp;D represents 27.1% of Revenue</b>, tracking closely to budget (−2.3%) with YoY growth of 27.4% reflecting sustained product investment.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#14b8a6"></span><span><b>G&amp;A represents 14.8% of Revenue</b>, below budget (−4.4%) and down 3.4pp YoY. Operating leverage visible: G&amp;A grew only 5.7% while business grew 30.5%.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#334155"></span><span><b>Total OpEx % of Revenue dropped from 93.5% to 71.7%</b> YoY — a 21.8pp improvement driving EBITDA expansion from −12.2% to +9.8%.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">3</span></div>
+</div>
+
+<!-- SLIDE 4 — Revenue Bridge May -->
+<div class="board-slide">
+  <div class="slide-header">
+    <div class="sh-title">New Logos (+$160K) and Recovered P-1 (+$87K) partially offset by Opened Cycles −$127K, Churn −$112K and Subscription Plans −$63K</div>
+    <div class="sh-right">
+      <div class="sh-period">GLO Revenue Bridge · May 2026</div>
+      <div class="sh-num">04 / 06</div>
+    </div>
+  </div>
+  <div class="slide-body">
+    <div class="chart-wrap" style="height:388px"><canvas id="bd-bridge" width="860" height="370"></canvas></div>
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:2px">
+      <span style="display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;font-size:9px;color:#64748b"><span style="width:10px;height:10px;background:#1D9E75;border-radius:2px;display:inline-block"></span>Positive drivers</span>
+      <span style="display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;font-size:9px;color:#64748b"><span style="width:10px;height:10px;background:#dc2626;border-radius:2px;display:inline-block"></span>Negative drivers</span>
+      <span style="display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;font-size:9px;color:#64748b"><span style="width:10px;height:10px;background:#14b8a6;border-radius:2px;display:inline-block"></span>Closing balances</span>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">4</span></div>
+</div>
+
+<!-- SLIDE 5 — Cash Flow May -->
+<div class="board-slide">
+  <div class="slide-header">
+    <div class="sh-title">Cash Balance closes May at $4,414K — +119% vs Budget, Net Operating CF +$208K (4th consecutive positive month)</div>
+    <div class="sh-right">
+      <div class="sh-period">May 2026 · Cash Flow · Actual vs Budget</div>
+      <div class="sh-num">05 / 06</div>
+    </div>
+  </div>
+  <div class="slide-body" style="gap:8px">
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:14px;height:400px;overflow:hidden">
+      <div style="overflow:hidden">
+        <div class="sec-label" style="margin-bottom:3px">May 2026 · ($K USD)</div>
+        <table class="cf-table">
+          <thead><tr><th style="width:46%">Category</th><th class="tha">May Act</th><th class="tha">May Bud</th><th class="tha">Var $</th><th class="tha">Var %</th></tr></thead>
+          <tbody>
+            <tr class="sub"><td>(+) Inflows</td><td>2,437</td><td style="color:#64748b">2,322</td><td><span class="db p">+115</span></td><td><span class="db p">+5.0%</span></td></tr>
+            <tr class="ind"><td>Subscriptions</td><td>2,425</td><td style="color:#64748b">2,310</td><td><span class="db p">+115</span></td><td><span class="db p">+5.0%</span></td></tr>
+            <tr class="ind"><td>Interest / Others</td><td>12</td><td style="color:#64748b">12</td><td><span class="db z">0</span></td><td><span class="db z">0.0%</span></td></tr>
+            <tr class="sub"><td>(−) Outflows</td><td>2,229</td><td style="color:#64748b">2,308</td><td><span class="db p">−79</span></td><td><span class="db p">−3.4%</span></td></tr>
+            <tr class="ind"><td>Payroll</td><td>1,114</td><td style="color:#64748b">1,130</td><td><span class="db p">−16</span></td><td><span class="db p">−1.4%</span></td></tr>
+            <tr class="ind"><td>Taxes</td><td>196</td><td style="color:#64748b">39</td><td><span class="db n">+157</span></td><td><span class="db n">+402.6%</span></td></tr>
+            <tr class="ind"><td>Computing Services</td><td>140</td><td style="color:#64748b">140</td><td><span class="db z">0</span></td><td><span class="db z">0.0%</span></td></tr>
+            <tr class="ind"><td>Paid Media</td><td>244</td><td style="color:#64748b">346</td><td><span class="db p">−102</span></td><td><span class="db p">−29.5%</span></td></tr>
+            <tr class="ind"><td>Freelance</td><td>85</td><td style="color:#64748b">57</td><td><span class="db n">+28</span></td><td><span class="db n">+49.1%</span></td></tr>
+            <tr class="ind"><td>Software &amp; Tools</td><td>52</td><td style="color:#64748b">159</td><td><span class="db p">−107</span></td><td><span class="db p">−67.3%</span></td></tr>
+            <tr class="ind"><td>Credit Card (pending reclass.)</td><td>149</td><td style="color:#64748b">0</td><td><span class="db z">—</span></td><td><span class="db z">n/a</span></td></tr>
+            <tr class="ind"><td>Other outflows</td><td>249</td><td style="color:#64748b">437</td><td><span class="db p">−188</span></td><td><span class="db p">−43.0%</span></td></tr>
+            <tr class="tot"><td>Net Operating CF</td><td>208</td><td style="color:#64748b">3</td><td><span class="db p">+205</span></td><td><span class="db p">+6,833%</span></td></tr>
+            <tr class="ind"><td>Debt Service / Loans</td><td>−115</td><td style="color:#64748b">−90</td><td><span class="db n">−25</span></td><td><span class="db n">−27.8%</span></td></tr>
+            <tr class="sub"><td>Net Increase in Cash</td><td>93</td><td style="color:#64748b">−87</td><td><span class="db p">+180</span></td><td><span class="db z">n/a</span></td></tr>
+            <tr class="closing"><td><b>Closing Balance</b></td><td><b>4,414</b></td><td style="color:#93c5fd">2,018</td><td><span class="db p" style="color:#7dd3fc;background:#1e3a5f">+2,396</span></td><td><span class="db p" style="color:#7dd3fc;background:#1e3a5f">+118.7%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding-top:20px;overflow:hidden">
+        <div class="sec-label">Comments</div>
+        <div class="comments-box">
+          <div class="comment-item"><span class="comment-dot" style="background:#14b8a6"></span><span>Cash balance closed May at <b>$4,414K</b>, exceeding Budget by <b>+$2,396K (+119%)</b>. Highest balance of 2026 — 4th consecutive month above budget.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#1D9E75"></span><span><b>Net Operating CF +$208K</b> — 4th consecutive positive month. Outflows $79K below plan: Paid Media −$102K, Software −$107K, Payroll −$16K.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#E87722"></span><span><b>Taxes +$157K above budget</b> ($196K vs $39K) concentrated in MEX $47K, COL $34K, ARG $21K. Colombia disbursed <b>$150K loan to Holdings</b> to capitalize Mexico entity.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#94a3b8"></span><span><b>Credit Card $149K pending reclassification</b>: Paid Media $104K, Software $54K, Travel $30K. Post-reclass Paid Media → $326K vs $335K budget — on track.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">5</span></div>
+</div>
+
+<!-- SLIDE 6 — Cash Balance 13M -->
+<div class="board-slide">
+  <div class="slide-header">
+    <div class="sh-title">Cash recovery consolidates — 4 consecutive positive months of Net CF: Feb +$455K → Mar +$363K → Apr +$224K → May +$93K, closing at $4,414K</div>
+    <div class="sh-right">
+      <div class="sh-period">Cash Balance &amp; Net CF · Monthly 13M</div>
+      <div class="sh-num">06 / 06</div>
+    </div>
+  </div>
+  <div class="slide-body" style="gap:8px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;height:380px;overflow:hidden">
+      <div style="display:flex;flex-direction:column;gap:6px;overflow:hidden;height:100%">
+        <div class="sec-label">Cash Balance — Monthly May 2025–May 2026 ($K)</div>
+        <div class="chart-wrap" style="height:195px;width:100%"><canvas id="bd-saldo" width="420" height="185"></canvas></div>
+        <div style="display:flex;gap:12px">
+          <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:14px;height:2px;background:#14b8a6;display:inline-block;border-radius:1px"></span>Actual</span>
+          <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="display:inline-block;width:14px;border-top:2px dashed #534AB7"></span>Budget 2026</span>
+        </div>
+        <div class="comments-box" style="margin-top:2px">
+          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#14b8a6"></span><span>May 26 closes at <b>$4,414K</b>, <b>+$2,396K above budget ($2,018K, +119%)</b>. Highest balance of 2026 — actual exceeds entire Budget 2026 peak forecast.</span></div>
+          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#E87722"></span><span><b>Recovery from Jan 26 low of $3,279K</b>: Feb +$455K → Mar +$363K → Apr +$224K → May +$93K — 4 months of positive cash generation.</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;overflow:hidden;height:100%">
+        <div class="sec-label">Net CF MoM — Monthly May 2025–May 2026 ($K)</div>
+        <div class="chart-wrap" style="height:195px;width:100%"><canvas id="bd-burn" width="420" height="185"></canvas></div>
+        <div style="display:flex;gap:12px">
+          <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:8px;height:8px;background:#1D9E75;border-radius:2px;display:inline-block"></span>Net accumulation</span>
+          <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:8px;height:8px;background:#E87722;border-radius:2px;display:inline-block"></span>Net burn</span>
+        </div>
+        <div class="comments-box" style="margin-top:2px">
+          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#1D9E75"></span><span><b>4 consecutive positive months</b>: Feb +$455K → Mar +$363K → Apr +$224K → May +$93K. Strong reversal from Jan −$944K tax payments.</span></div>
+          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#14b8a6"></span><span><b>YTD May Net CF: +$191K</b> vs Budget −$412K — +$603K ahead of plan. Operational cash efficiency consistently exceeding targets.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">6</span></div>
+</div>
+
+<script>const BD={"opex": {"sam": [3507840.83, 4046890.0, 4268407.8], "rnd": [3181123.3, 3254616.0, 2497137.91], "gna": [1732865.64, 1813441.0, 1639269.77]}, "cashLabels": ["May 25", "Jun 25", "Jul 25", "Ago 25", "Sep 25", "Oct 25", "Nov 25", "Dic 25", "Ene 26", "Feb 26", "Mar 26", "Abr 26", "May 26"], "cashAct": [5289, 5086, 4587, 4776, 4811, 4741, 4914, 4223, 3279, 3734, 4097, 4321, 4414], "cashBud": [null, null, null, null, null, null, null, null, 2430, 2145, 2100, 2000, 2018], "burnLabels": ["May 25", "Jun 25", "Jul 25", "Ago 25", "Sep 25", "Oct 25", "Nov 25", "Dic 25", "Ene 26", "Feb 26", "Mar 26", "Abr 26", "May 26"], "burnDelta": [36, -203, -499, 189, 35, -70, 173, -690, -944, 455, 363, 224, 93]};
+
+function initBoardCharts(){
+  if(window._boardInit) return;
+  if(typeof Chart==='undefined') return;
+  window._boardInit=true;
+  const kf=v=>'$'+Math.round(v/1000).toLocaleString()+'k';
+  var e1=document.getElementById('bd-opex-stacked');
+  if(e1) new Chart(e1,{type:'bar',data:{labels:['Actuals','Budget','Y-1 (2025)'],datasets:[
+    {label:'S&M',data:BD.opex.sam,backgroundColor:'#1D9E75',stack:'s'},
+    {label:'R&D',data:BD.opex.rnd,backgroundColor:'#94a3b8',stack:'s'},
+    {label:'G&A',data:BD.opex.gna,backgroundColor:'#14b8a6',stack:'s'}]},
+    options:{responsive:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}},
+      tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+kf(c.raw)},
+        footer:items=>'Total: '+kf(items.reduce((s,i)=>s+(i.raw||0),0))}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10,weight:'600'}}},
+              y:{stacked:true,ticks:{font:{size:9},callback:v=>kf(v)},grid:{color:'rgba(0,0,0,.05)'}}}}});
+  (function(){
+    var steps=[
+      {l:'Net Rev -1',v:2419,t:'base'},{l:'Rec. P-1',v:87,t:'pos'},{l:'Pricing',v:0,t:'pos'},
+      {l:'New Logos',v:160,t:'pos'},{l:'Reactivated',v:46,t:'pos'},{l:'Recovered',v:20,t:'pos'},
+      {l:'Upgrades',v:41,t:'pos'},{l:'Efficiencies',v:15,t:'pos'},{l:'Churn',v:-112,t:'neg'},
+      {l:'Down+Mora',v:-110,t:'neg'},{l:'Opened cycles',v:-127,t:'neg'},
+      {l:'FX Rate',v:-36,t:'neg'},{l:'Subs. plans',v:-63,t:'neg'},{l:'Closing May',v:2341,t:'close'}
+    ];
+    var run=0,fd=[],colors=[],labels=steps.map(function(s){return s.l;});
+    steps.forEach(function(s){
+      if(s.t==='base'){fd.push([0,s.v]);colors.push('#14b8a6');run=s.v;}
+      else if(s.t==='close'){fd.push([0,s.v]);colors.push('#14b8a6');}
+      else{var st=run,en=run+s.v;fd.push([Math.min(st,en),Math.max(st,en)]);colors.push(s.t==='pos'?'#1D9E75':'#C2410C');run=en;}
+    });
+    var e4=document.getElementById('bd-bridge');
+    if(e4) new Chart(e4,{
+      type:'bar',
+      data:{labels:labels,datasets:[{data:fd,backgroundColor:colors,borderRadius:3,barPercentage:.55}]},
+      options:{
+        responsive:false,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#0f172b',titleColor:'#fff',bodyColor:'#94a3b8',padding:8,cornerRadius:6,
+          callbacks:{label:function(ctx){var s=steps[ctx.dataIndex];return(s.v>=0?'+':'')+s.v+'K';}}}},
+        scales:{
+          x:{grid:{display:false},border:{display:false},ticks:{font:{size:7.5},color:'#94a3b8',maxRotation:40}},
+          y:{grid:{color:'rgba(0,0,0,.05)'},border:{display:false},ticks:{font:{size:8,family:'monospace'},color:'#94a3b8',callback:function(v){return'$'+v+'K';}},min:2150,max:2850}
+        }
+      }
+    });
+  })();
+  var e2=document.getElementById('bd-saldo');
+  if(e2) new Chart(e2,{type:'line',data:{labels:BD.cashLabels,datasets:[
+    {label:'Actual',data:BD.cashAct,borderColor:'#14b8a6',backgroundColor:'rgba(20,184,166,.08)',borderWidth:2.5,tension:.3,fill:true,pointRadius:2.5},
+    {label:'Budget',data:BD.cashBud,borderColor:'#534AB7',borderDash:[5,4],borderWidth:2,tension:.3,fill:false,pointRadius:2,spanGaps:true}]},
+    options:{responsive:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45,minRotation:30}},
+              y:{ticks:{font:{size:8},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(0,0,0,.05)'}}}}});
+  var e3=document.getElementById('bd-burn');
+  if(e3) new Chart(e3,{type:'bar',data:{labels:BD.burnLabels,datasets:[
+    {label:'Net CF',data:BD.burnDelta,backgroundColor:BD.burnDelta.map(v=>v>=0?'#1D9E75':'#E87722')}]},
+    options:{responsive:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:8},maxRotation:45,minRotation:30}},
+              y:{ticks:{font:{size:8},callback:v=>'$'+v},grid:{color:'rgba(0,0,0,.05)'}}}}});
+}
+
+window.addEventListener('load',function(){setTimeout(initBoardCharts,60);});
+</script>
+</body></html>

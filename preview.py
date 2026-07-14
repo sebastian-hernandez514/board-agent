@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Vista previa (screenshot) de una slide ya generada — sin tocar Template Board.
+"""Vista previa (screenshot) de una slide ya generada.
 
 Pedido del equipo en el workshop del 2026-07-08: que después de un cambio (un highlight, un
 comentario, un discussion topic) se pueda "ver" el resultado sin abrir un HTML ni entender qué
-es un DOM. Esto lee un archivo que Template Board ya generó en su propia carpeta output/ (nunca
-lo escribe, solo lo lee) y guarda un PNG de la slide que coincida con el texto buscado.
+es un DOM. Esto lee un archivo que `generate.py` ya generó en `output/` (nunca lo escribe, solo
+lo lee) y guarda un PNG de la slide que coincida con el texto buscado.
 
-Requiere que ya se haya corrido `generate.py --template X` en Template Board — este script no
-lo corre por su cuenta.
+Requiere que ya se haya corrido `generate.py --template X` — este script no lo corre por su
+cuenta.
 
 Uso:
     uv run --with playwright python preview.py --template 3_arr_walk --slide "ARR Core"
@@ -35,7 +35,7 @@ def screenshot_slide(template: str, needle: str, out_path: Path) -> Path:
     html_path = paths.OUTPUT_DIR / f"{template}.html"
     if not html_path.exists():
         raise FileNotFoundError(
-            f"no existe {html_path} — corré 'generate.py --template {template}' en Template Board primero"
+            f"no existe {html_path} — corré 'generate.py --template {template}' primero"
         )
 
     from playwright.sync_api import sync_playwright

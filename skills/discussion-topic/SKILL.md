@@ -37,7 +37,7 @@ El contenido (qué decir, qué datos mostrar) lo trae la persona que pide el top
 
 ## Contexto — cómo funciona hoy (importante, no es lo que parece)
 
-`Template Board/templates/2_discussion_topic.j2` **NO es un template genérico que lee un YAML** —
+`templates/2_discussion_topic.j2` **NO es un template genérico que lee un YAML** —
 son slides de HTML escritas a mano, una por una, cada mes. `data/editorial/discussion_topics.yaml`
 existe pero está **desconectado**: tiene un schema propio que el `.j2` nunca lee. Es un scaffold
 abandonado — **no pierdas tiempo llenándolo**, no hace nada.
@@ -113,7 +113,7 @@ Snippets copy-paste completos de los 5 → `references/layouts.md`.
 ## Ejecución
 
 ```bash
-cd "/Users/sebastian_alegra/Alegra IA/Template Board"
+cd "/Users/sebastian_alegra/Alegra IA/Board Agent"
 # después de editar 2_discussion_topic.j2:
 uv run --with jinja2 --with pyyaml python3 scripts/generate.py --template 2_discussion_topic
 # abrir output/2_discussion_topic.html en el navegador para revisar

@@ -39,7 +39,7 @@ def run(confirmed: bool = False) -> CheckResult:
         )
 
     cmd = ["uv", "run", "--with", "playwright", "--with", "pillow", "python3", str(paths.PDF_SCRIPT)]
-    proc = subprocess.run(cmd, cwd=paths.TEMPLATE_BOARD, capture_output=True, text=True, timeout=900)
+    proc = subprocess.run(cmd, cwd=paths.BOARD_AGENT_ROOT, capture_output=True, text=True, timeout=900)
     if proc.stdout:
         print(proc.stdout)
     if proc.returncode != 0:

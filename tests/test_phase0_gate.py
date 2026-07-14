@@ -4,7 +4,7 @@ import csv
 import pytest
 import yaml
 
-from board_agent import paths, phase0_gate
+from board_agent import output_integrity, paths, phase0_gate
 
 MONTH = "2026-05"
 
@@ -38,6 +38,9 @@ def isolated_paths(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, "NPS_SNAPSHOT_YAML", tmp_path / "nps_snapshot.yaml")
     monkeypatch.setattr(paths, "HEADCOUNT_TEMPLATE", tmp_path / "7_headcount.j2")
     monkeypatch.setattr(paths, "DATA_DIR", tmp_path)  # _check_pnl_actual busca pnl_override.yaml acá
+    monkeypatch.setattr(paths, "OUTPUT_DIR", tmp_path / "output")
+    monkeypatch.setattr(paths, "HASH_STATE_FILE", tmp_path / ".state" / "output_hashes.json")
+    monkeypatch.setattr(paths, "MANUAL_EDITS_BACKUP_DIR", tmp_path / "output" / ".manual-edits-backup")
     return tmp_path
 
 
@@ -68,7 +71,7 @@ def _by_id(results):
 def test_gate_all_pass(isolated_paths):
     _seed_all_pass(isolated_paths)
     results = _by_id(phase0_gate.run(MONTH))
-    for rid in ("F0.4", "F0.5", "F0.6", "F0.7", "F0.8", "F0.9", "F0.10", "F0.11"):
+    for rid in ("F0.4", "F0.5", "F0.6", "F0.7", "F0.8", "F0.9", "F0.10", "F0.11", "F0.12"):
         assert results[rid].status == "PASS", f"{rid}: {results[rid].detail}"
 
 
@@ -264,3 +267,22 @@ def test_headcount_warns_when_sentinel_missing(isolated_paths):
     r = results["F0.11"]
     assert r.status == "WARN"
     assert "no se encontró el comentario" in r.detail
+
+
+def test_output_integrity_fails_gate_when_output_html_was_hand_edited(isolated_paths):
+    """Reproduce el caso reportado por el usuario 2026-07-10: alguien edita a mano un HTML ya
+    generado (título, comentario) — la próxima corrida debe bloquear en Fase 0, ANTES de que
+    generate.py lo sobrescriba en silencio."""
+    _seed_all_pass(isolated_paths)
+    (isolated_paths / "output").mkdir()
+    (isolated_paths / "output" / "3_arr_walk.html").write_text("<html>generado</html>", encoding="utf-8")
+    output_integrity.record_generated_state()
+
+    (isolated_paths / "output" / "3_arr_walk.html").write_text(
+        "<html>generado + editado a mano por May</html>", encoding="utf-8"
+    )
+
+    results = _by_id(phase0_gate.run(MONTH))
+    r = results["F0.12"]
+    assert r.status == "FAIL"
+    assert "3_arr_walk.html" in r.detail

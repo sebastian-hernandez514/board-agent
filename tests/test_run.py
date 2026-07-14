@@ -88,6 +88,7 @@ def test_full_flow_happy_path_saves_version_and_exits_0(monkeypatch):
     monkeypatch.setattr(run.phase3_html_builder, "run", lambda month: [_r("F3.1", "PASS")])
     monkeypatch.setattr(run.phase4_validator, "run", lambda: [_r("R1", "PASS")])
     monkeypatch.setattr(run.phase5_diff, "run", lambda: [_r("D1", "PASS")])
+    monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: None)
     calls = []
     _fake_versioning(monkeypatch, calls)
     monkeypatch.setattr("sys.argv", ["run.py", "--month", "2026-05"])
@@ -142,12 +143,29 @@ def test_full_flow_validator_fail_still_saves_version(monkeypatch):
     monkeypatch.setattr(run.phase3_html_builder, "run", lambda month: [_r("F3.1", "PASS")])
     monkeypatch.setattr(run.phase4_validator, "run", lambda: [_r("R1", "FAIL")])
     monkeypatch.setattr(run.phase5_diff, "run", lambda: [_r("D1", "PASS")])
+    monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: None)
     calls = []
     _fake_versioning(monkeypatch, calls)
     monkeypatch.setattr("sys.argv", ["run.py", "--month", "2026-05"])
 
     assert run.main() == 1
     assert len(calls) == 1  # se guardó igual
+
+
+def test_full_flow_records_output_state_only_when_html_builder_succeeds(monkeypatch):
+    """record_generated_state() (F0.12 de la próxima corrida compara contra esto) solo debe
+    grabarse cuando Fase 3 terminó OK — si generate.py falló a medio camino, output/ puede
+    quedar en un estado inconsistente y no debe aprenderse como baseline válida."""
+    monkeypatch.setattr(run.phase0_gate, "run", lambda month: [_r("F0.4", "PASS")])
+    monkeypatch.setattr(run.phase1_freshness, "run", lambda month: [_r("F1.1", "PASS")])
+    monkeypatch.setattr(run.phase2_metrics, "run", lambda month, refresh=False: _r("F2.1", "PASS"))
+    monkeypatch.setattr(run.phase3_html_builder, "run", lambda month: [_r("F3.1", "FAIL")])
+    recorded = {"called": False}
+    monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: recorded.update(called=True))
+    monkeypatch.setattr("sys.argv", ["run.py", "--month", "2026-05"])
+
+    assert run.main() == 1
+    assert recorded["called"] is False
 
 
 def test_full_flow_passes_refresh_flag_to_phase2(monkeypatch):

@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alegra Board — Go to Market</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <link rel="stylesheet" href="../styles/base.css">
+  <style>
+    :root {
+      --purple:   #534AB7;
+      --purple-l: #AFA9EC;
+      --green:    #1D9E75;
+      --teal-l:   #9FE1CB;
+      --coral:    #D85A30;
+      --c-border: #e5e5e5;
+      --c-bg2:    #f5f5f3;
+      --c-dim:    #999;
+      --c-muted:  #666;
+    }
+
+    /* ── Section cover ── */
+    .section-cover {
+      background: var(--color-navy);
+      justify-content: center;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+    }
+    .section-cover .eyebrow {
+      font-size: 11px; font-weight: 600; color: var(--color-teal);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-cover .section-title {
+      font-size: 42px; font-weight: 700; color: #fff;
+      letter-spacing: -1.5px; line-height: 1.05; margin-bottom: 14px;
+    }
+    .section-cover .section-sub {
+      font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.40);
+    }
+    .section-cover .slide-num {
+      position: absolute; bottom: 24px; right: var(--slide-pad-x);
+      font-size: 10px; color: rgba(255,255,255,0.15);
+    }
+
+    /* ── GTM slide shell ── */
+    .gtm-slide {
+      width: var(--slide-width, 960px);
+      height: var(--slide-height, 540px);
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SLIDE 2 — New Logos
+    ═══════════════════════════════════════════════════ */
+    .gtm-inner {
+      padding: 16px 28px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .gtm-slide .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .gtm-slide .dot.c { background: var(--purple); }
+    .gtm-slide .dot.l { background: var(--green); }
+
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card {
+      border: 0.5px solid var(--c-border); border-radius: 10px; padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sc-left { display: flex; flex-direction: column; gap: 2px; }
+    .sc-head { display: flex; align-items: center; gap: 6px; }
+    .sc-seg { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; }
+    .sc-seg.c { color: var(--purple); }
+    .sc-seg.l { color: var(--green); }
+    .sc-val { font-size: 26px; font-weight: 500; color: #111; line-height: 1; }
+    .sc-deltas { display: flex; gap: 18px; }
+    .sc-deltas .delta { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; }
+    .sc-deltas .dl { font-size: 9px; color: var(--c-dim); text-transform: uppercase; letter-spacing: .04em; }
+    .sc-deltas .dv { font-size: 13px; font-weight: 600; }
+
+    .sm-mini-row {
+      border: 0.5px solid var(--c-border); border-radius: 10px; padding: 7px 14px 6px;
+      flex-shrink: 0; height: 90px; display: flex; flex-direction: column;
+    }
+    .sm-mini-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; flex-shrink: 0; }
+    .sm-mini-label { font-size: 9px; font-weight: 600; color: var(--c-dim); text-transform: uppercase; letter-spacing: .05em; }
+    .sm-mini-legend { display: flex; gap: 10px; font-size: 9px; color: var(--c-dim); }
+    .sm-mini-sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
+    .sm-mini-chart { position: relative; flex: 1; min-height: 0; }
+    .gtm-slide .pos { color: var(--green); }
+    .gtm-slide .neg { color: var(--coral); }
+
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; min-height: 0; }
+    .chart-card {
+      border: 0.5px solid var(--c-border); border-radius: 10px; padding: 12px 14px;
+      display: flex; flex-direction: column; min-height: 0;
+    }
+    .cc-head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-shrink: 0; }
+    .cc-label { font-size: 10px; font-weight: 600; color: var(--c-dim); text-transform: uppercase; letter-spacing: .05em; }
+    .chart-wrap { position: relative; flex: 1; min-height: 0; }
+
+    .sm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .sm-card {
+      border: 0.5px solid var(--c-border); border-radius: 10px; padding: 12px 14px;
+    }
+    .sm-top {
+      display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;
+    }
+    .sm-title { display: flex; align-items: center; gap: 6px; }
+    .sm-lbl { font-size: 10px; font-weight: 600; color: var(--c-dim); text-transform: uppercase; letter-spacing: .05em; }
+    .sm-total { font-size: 13px; font-weight: 600; color: #111; }
+    .sm-var { font-size: 10px; margin-left: 6px; font-weight: 500; }
+
+    table.sm { width: 100%; border-collapse: collapse; font-size: 11px; }
+    table.sm th {
+      font-size: 9px; color: var(--c-dim); font-weight: 500; padding: 0 0 5px;
+      text-align: right; letter-spacing: .03em;
+    }
+    table.sm th:first-child { text-align: left; }
+    table.sm td {
+      padding: 4px 0; border-top: 0.5px solid var(--c-border);
+      color: var(--c-muted); text-align: right; font-size: 11px;
+    }
+    table.sm td:first-child { text-align: left; color: #111; }
+    table.sm tr.tot td { font-weight: 600; color: #111; border-top: 1px solid var(--c-border); }
+
+    .insight-gtm {
+      background: var(--c-bg2); border-radius: 10px;
+      padding: 10px 16px; display: flex; gap: 20px;
+    }
+    .ins-label-col {
+      flex: 0 0 auto; padding-right: 16px;
+      border-right: 0.5px solid var(--c-border);
+      display: flex; align-items: center;
+    }
+    .ins-label {
+      font-size: 9px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--c-dim);
+    }
+    .ins-item { flex: 1; display: flex; gap: 8px; align-items: flex-start; }
+    .ins-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+    .ins-dot.c { background: var(--purple); }
+    .ins-dot.l { background: var(--green); }
+    .ins-text { font-size: 11px; color: #111; line-height: 1.5; }
+    .ins-text b { font-weight: 600; }
+
+    #tt {
+      position: fixed; background: #fff; border: 0.5px solid var(--c-border);
+      border-radius: 8px; padding: 8px 12px; font-size: 11px;
+      pointer-events: none; opacity: 0; transition: opacity .12s; z-index: 100; min-width: 140px;
+      font-family: 'Inter', sans-serif;
+    }
+    #tt .ttt { font-size: 9px; font-weight: 600; color: var(--c-dim); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+    #tt .ttr { display: flex; justify-content: space-between; gap: 14px; padding: 1px 0; color: var(--c-muted); }
+    #tt .ttr b { font-weight: 600; color: #111; }
+    #tt .ttd { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+    #tt .tttot { border-top: 0.5px solid var(--c-border); margin-top: 4px; padding-top: 4px; font-weight: 600; color: #111; }
+
+    /* ═══════════════════════════════════════════════════
+       SLIDE 3 — Summary Customer Acquisition
+    ═══════════════════════════════════════════════════ */
+    .acq-inner {
+      padding: 20px 36px 20px;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+    /* Two-column layout: Core | Lite */
+    .acq-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+      min-height: 0;
+    }
+    .acq-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+    /* KPI card */
+    .acq-kpi {
+      background: #f8f8f6;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .acq-kpi-left { display: flex; flex-direction: column; gap: 3px; }
+    .acq-kpi-seg {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+    }
+    .acq-kpi-seg.core { color: #185FA5; }
+    .acq-kpi-seg.lite { color: #1D9E75; }
+    .acq-kpi-total {
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: -0.8px;
+      color: #141413;
+      line-height: 1;
+    }
+    .acq-kpi-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .acq-kpi-var {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .acq-kpi-var.pos { color: #185FA5; background: rgba(24,95,165,0.09); }
+    .acq-kpi-var.neg { color: #C04828; background: rgba(192,72,40,0.09); }
+    .acq-kpi-mix {
+      font-size: 9px;
+      font-family: 'DM Mono', monospace;
+      color: #a09e98;
+      text-align: right;
+      line-height: 1.5;
+    }
+    /* Chart panel */
+    .acq-chart-panel {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+    .acq-legend {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .acq-leg {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      color: #6b6a64;
+      font-family: 'DM Mono', monospace;
+    }
+    .acq-leg-dot {
+      width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+    }
+    .acq-chart-box {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SLIDE 4 — Acquisition Funnel
+    ═══════════════════════════════════════════════════ */
+    .cv-body {
+      flex: 1; padding: 16px 56px 14px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .cv-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 14px; flex: 1;
+    }
+    .cv-card {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+      padding: 12px 16px 10px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .cv-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .cv-card-title {
+      font-size: 11px; font-weight: 600; color: #64748b;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .cv-legend { display: flex; gap: 12px; font-size: 10px; color: #64748b; }
+    .cv-leg-item { display: flex; align-items: center; gap: 4px; }
+    .cv-leg-sw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+    .cv-chart-wrap { position: relative; flex: 1; min-height: 160px; }
+
+    /* ═══════════════════════════════════════════════════
+       SLIDE 5 — Accountant Flywheel
+    ═══════════════════════════════════════════════════ */
+    .fly-inner {
+      padding: 20px 28px 18px;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .fly-inner .fly-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .fly-inner .fly-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1a1a2e;
+      letter-spacing: -0.2px;
+    }
+    .fly-inner .fly-date {
+      font-size: 10px;
+      color: #7a7870;
+      margin-top: 3px;
+      font-family: 'DM Mono', monospace;
+    }
+    .fly-inner .fly-alert {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fdf0eb;
+      color: #c94f28;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 100px;
+      border: 1px solid rgba(201,79,40,0.2);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .fly-inner .fly-alert-dot { width: 6px; height: 6px; background: #c94f28; border-radius: 50%; }
+    .fly-inner .fly-chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .fly-inner .fly-legend {
+      display: flex;
+      gap: 16px;
+    }
+    .fly-inner .fly-leg-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: #7a7870;
+    }
+    .fly-inner .fly-leg-line {
+      width: 20px;
+      height: 2.5px;
+      border-radius: 2px;
+    }
+    .fly-inner .fly-leg-area {
+      width: 16px;
+      height: 9px;
+      border-radius: 3px;
+      opacity: 0.35;
+    }
+    .fly-inner .fly-gap-target {
+      font-size: 9px;
+      color: #1d9e75;
+      background: rgba(29,158,117,0.08);
+      border: 1px solid rgba(29,158,117,0.2);
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+    .fly-inner .fly-chart-wrap {
+      background: #faf9f7;
+      border: 1px solid rgba(0,0,0,0.09);
+      border-radius: 10px;
+      padding: 12px 14px 8px;
+      overflow: hidden;
+    }
+    .fly-inner .fly-chart-label {
+      font-size: 9px;
+      font-weight: 500;
+      color: #7a7870;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 8px;
+    }
+    .fly-inner .fly-insight-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 4px;
+    }
+    .fly-inner .fly-icard {
+      border-radius: 10px;
+      padding: 10px 13px;
+      border-left: 3px solid transparent;
+    }
+    .fly-inner .fly-icard.insight { background: #eef6ff; border-color: #1a6dcc; }
+    .fly-inner .fly-icard.risk    { background: #fdf0eb; border-color: #c94f28; }
+    .fly-inner .fly-icard.action  { background: #edf7f3; border-color: #1d9e75; }
+    .fly-inner .fly-icard-tag {
+      font-size: 9px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .fly-inner .fly-icard.insight .fly-icard-tag { color: #1a6dcc; }
+    .fly-inner .fly-icard.risk    .fly-icard-tag { color: #c94f28; }
+    .fly-inner .fly-icard.action  .fly-icard-tag { color: #1d9e75; }
+    .fly-inner .fly-icard-text {
+      font-size: 10.5px;
+      color: #1a1a2e;
+      line-height: 1.55;
+    }
+    .fly-inner .fly-icard-text strong { font-weight: 500; }
+
+    /* ═══════════════════════════════════════════════════
+       SLIDE 6 — Placeholder
+    ═══════════════════════════════════════════════════ */
+    .placeholder-inner {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      padding: 40px;
+      min-height: 380px;
+    }
+    .placeholder-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    .placeholder-note {
+      font-size: 12px;
+      color: #cbd5e1;
+      text-align: center;
+      max-width: 340px;
+    }
+
+    /* ── Contadores index-3 (1/3) ── */
+    .cp-header {
+      background: #0f172b; height: 40px; flex: 0 0 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; color: #ffffff;
+    }
+    .cp-header .title { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; }
+    .cp-header .sub { font-size: 10.5px; color: #94a3b8; font-weight: 500; }
+    .cp-pill { background: #14b8a6; color: #0f172b; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
+    .cp-insight { flex: 0 0 30px; background: #f0fdfa; border-left: 3px solid #14b8a6; display: flex; align-items: center; padding: 0 16px; font-size: 11px; color: #334155; font-weight: 500; }
+    .cp-insight strong { color: #0f172b; font-weight: 700; margin-right: 4px; }
+    .cp-body { flex: 1 1 auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; gap: 8px; padding: 10px; min-height: 0; }
+    .cp-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px 6px; display: flex; flex-direction: column; min-height: 0; }
+    .cp-card-title { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; color: #0f172b; line-height: 1.2; }
+    .cp-card-sub { font-size: 9px; color: #64748b; margin-top: 2px; font-weight: 500; }
+    .cp-kpi { display: flex; align-items: baseline; gap: 6px; margin-top: 3px; }
+    .cp-kpi .val { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; color: #0f172b; }
+    .cp-kpi .delta { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
+    .cp-kpi .delta.pos { background: #dcfce7; color: #16a34a; }
+    .cp-kpi .delta.neg { background: #ffedd5; color: #C2410C; }
+    .cp-kpi .delta.neutral { background: #f1f5f9; color: #64748b; }
+    .cp-chart-wrap { flex: 1 1 auto; position: relative; min-height: 0; margin-top: 4px; }
+    .cp-legend { display: flex; gap: 8px; font-size: 9px; color: #64748b; margin-top: 2px; }
+    .cp-legend .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
+    .cp-footer { flex: 0 0 22px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 9.5px; color: #64748b; }
+
+    /* ── Contadores index-1 (2/3) ── */
+    .cp2-header { background: #0f172b; height: 40px; flex: 0 0 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #ffffff; }
+    .cp2-header .title { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; }
+    .cp2-header .sub { font-size: 10.5px; color: #94a3b8; font-weight: 500; }
+    .cp2-pill { background: #14b8a6; color: #0f172b; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
+    .cp2-insight { flex: 0 0 30px; background: #f0fdfa; border-left: 3px solid #14b8a6; display: flex; align-items: center; padding: 0 16px; font-size: 11px; color: #334155; font-weight: 500; }
+    .cp2-insight strong { color: #0f172b; font-weight: 700; margin-right: 4px; }
+    .cp2-body { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1.2fr 1fr; gap: 8px; padding: 10px; min-height: 0; }
+    .cp2-body .wide { grid-column: 1 / span 2; }
+    .cp2-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px 6px; display: flex; flex-direction: column; min-height: 0; }
+    .cp2-card-title { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; color: #0f172b; line-height: 1.2; }
+    .cp2-card-sub { font-size: 9px; color: #64748b; margin-top: 2px; font-weight: 500; }
+    .cp2-chart-wrap { flex: 1 1 auto; position: relative; min-height: 0; margin-top: 4px; }
+    .cp2-legend { display: flex; gap: 10px; font-size: 9px; color: #64748b; margin-top: 2px; }
+    .cp2-legend .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
+    .cp2-footer { flex: 0 0 22px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 9.5px; color: #64748b; }
+
+    /* ── Contadores index-2 (3/3) ── */
+    .cp3-header { background: #0f172b; height: 40px; flex: 0 0 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #ffffff; }
+    .cp3-header .title { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; }
+    .cp3-header .sub { font-size: 10.5px; color: #94a3b8; font-weight: 500; }
+    .cp3-pill { background: #14b8a6; color: #0f172b; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
+    .cp3-insight { flex: 0 0 30px; background: #f0fdfa; border-left: 3px solid #14b8a6; display: flex; align-items: center; padding: 0 16px; font-size: 11px; color: #334155; font-weight: 500; }
+    .cp3-insight strong { color: #0f172b; font-weight: 700; margin-right: 4px; }
+    .cp3-body { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px 18px; min-height: 0; }
+    .cp3-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; min-height: 0; }
+    .cp3-card-title { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; color: #0f172b; line-height: 1.2; }
+    .cp3-kpi-row { display: flex; gap: 18px; margin: 6px 0 8px; }
+    .cp3-kpi { display: flex; flex-direction: column; }
+    .cp3-kpi .lbl { font-size: 9px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .4px; }
+    .cp3-kpi .val { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; color: #0f172b; line-height: 1; }
+    .cp3-kpi .val.teal { color: #1A7E7F; }
+    .cp3-kpi .val.violet { color: #6366F1; }
+    .cp3-kpi .delta { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; align-self: flex-start; margin-top: 4px; }
+    .cp3-kpi .delta.pos { background: #dcfce7; color: #16a34a; }
+    .cp3-chart-wrap { flex: 1 1 auto; position: relative; min-height: 0; }
+    .cp3-legend { display: flex; gap: 12px; font-size: 10px; color: #64748b; margin-top: 6px; }
+    .cp3-legend .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+    .cp3-footer { flex: 0 0 22px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 9.5px; color: #64748b; }
+  </style>
+</head>
+<body>
+
+  <div id="tt"><div class="ttt" id="tt-title"></div><div id="tt-body"></div></div>
+
+  <!-- ============================================================
+       SLIDE 1 — Section Cover
+       ============================================================ -->
+  <div class="slide section-cover">
+    <div class="eyebrow">Section 05</div>
+    <div class="section-title">Go to Market</div>
+    <div class="section-sub">New Logos · CAC · Funnel · S&amp;M Investment</div>
+    <div class="slide-num">1</div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 2 — New Logos
+       ============================================================ -->
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">{{ editorial.gtm_new_logos_title | safe }}</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+
+    <div class="gtm-inner">
+
+      <!-- ROW 1: stat cards -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="sc-left">
+            <div class="sc-head"><div class="dot c"></div><span class="sc-seg c">Core</span></div>
+            <div class="sc-val">{{ metrics.gtm.new_logos_core }}</div>
+          </div>
+          <div class="sc-deltas">
+            <div class="delta"><span class="dl">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="dv {{ 'pos' if metrics.gtm.new_logos_core_mom_positive else 'neg' }}">{{ metrics.gtm.new_logos_core_mom }}</span></div>
+            <div class="delta"><span class="dl">YoY</span><span class="dv {{ 'pos' if metrics.gtm.new_logos_core_yoy_positive else 'neg' }}">{{ metrics.gtm.new_logos_core_yoy }}</span></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-left">
+            <div class="sc-head"><div class="dot l"></div><span class="sc-seg l">Lite</span></div>
+            <div class="sc-val">{{ metrics.gtm.new_logos_lite }}</div>
+          </div>
+          <div class="sc-deltas">
+            <div class="delta"><span class="dl">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="dv {{ 'pos' if metrics.gtm.new_logos_lite_mom_positive else 'neg' }}">{{ metrics.gtm.new_logos_lite_mom }}</span></div>
+            <div class="delta"><span class="dl">YoY</span><span class="dv {{ 'pos' if metrics.gtm.new_logos_lite_yoy_positive else 'neg' }}">{{ metrics.gtm.new_logos_lite_yoy }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2: charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="cc-head"><div class="dot c"></div><span class="cc-label">Core · last 13 months</span></div>
+          <div class="chart-wrap"><canvas id="cCore"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="cc-head"><div class="dot l"></div><span class="cc-label">Lite · last 13 months</span></div>
+          <div class="chart-wrap"><canvas id="cLite"></canvas></div>
+        </div>
+      </div>
+
+    </div><!-- /gtm-inner -->
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">2</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 3 — Summary Customer Acquisition
+       ============================================================ -->
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">{{ editorial.gtm_acq_title | safe }}</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+
+    <div class="acq-inner">
+      <div class="acq-cols">
+
+        <!-- CORE column -->
+        <div class="acq-col">
+          <div class="acq-kpi">
+            <div class="acq-kpi-left">
+              <span class="acq-kpi-seg core">Core · S&amp;M Investment</span>
+              <span class="acq-kpi-total">{{ metrics.gtm.sm_core_total }}</span>
+            </div>
+            <div class="acq-kpi-right">
+              <span class="acq-kpi-var {% if metrics.gtm.sm_core_var_positive %}pos{% else %}neg{% endif %}">{{ metrics.gtm.sm_core_var }} {% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span>
+              <span class="acq-kpi-mix">People {{ metrics.gtm.sm_core_people }} · Paid {{ metrics.gtm.sm_core_paid }} · Other {{ metrics.gtm.sm_core_other }}</span>
+            </div>
+          </div>
+          <div class="acq-chart-panel">
+            <div class="acq-legend">
+              <div class="acq-leg"><div class="acq-leg-dot" style="background:#534AB7"></div>People</div>
+              <div class="acq-leg"><div class="acq-leg-dot" style="background:#C04828"></div>Paid Media</div>
+              <div class="acq-leg"><div class="acq-leg-dot" style="background:#d4d2cc"></div>Other</div>
+            </div>
+            <div class="acq-chart-box"><canvas id="acqCoreChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- LITE column -->
+        <div class="acq-col">
+          <div class="acq-kpi">
+            <div class="acq-kpi-left">
+              <span class="acq-kpi-seg lite">Lite · S&amp;M Investment</span>
+              <span class="acq-kpi-total">{{ metrics.gtm.sm_lite_total }}</span>
+            </div>
+            <div class="acq-kpi-right">
+              <span class="acq-kpi-var {% if metrics.gtm.sm_lite_var_positive %}pos{% else %}neg{% endif %}">{{ metrics.gtm.sm_lite_var }} {% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span>
+              <span class="acq-kpi-mix">People {{ metrics.gtm.sm_lite_people }} · Paid {{ metrics.gtm.sm_lite_paid }} · Other {{ metrics.gtm.sm_lite_other }}</span>
+            </div>
+          </div>
+          <div class="acq-chart-panel">
+            <div class="acq-legend">
+              <div class="acq-leg"><div class="acq-leg-dot" style="background:#534AB7"></div>People</div>
+              <div class="acq-leg"><div class="acq-leg-dot" style="background:#C04828"></div>Paid Media</div>
+              <div class="acq-leg"><div class="acq-leg-dot" style="background:#d4d2cc"></div>Other</div>
+            </div>
+            <div class="acq-chart-box"><canvas id="acqLiteChart"></canvas></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">3</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 4 — Acquisition Funnel
+       ============================================================ -->
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">{{ editorial.gtm_funnel_title | safe }}</span>
+      <span class="period">{{ editorial.gtm_funnel_period | safe }}</span>
+    </div>
+
+    <div class="cv-body">
+      <div class="cv-grid">
+        <div class="cv-card">
+          <div class="cv-card-header">
+            <span class="cv-card-title">Colombia</span>
+            <div class="cv-legend">
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:#14b8a6"></span>CVR %</span>
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:rgba(51,65,85,0.35)"></span>Sign ups</span>
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:rgba(24,95,165,0.65)"></span>New Logos</span>
+            </div>
+          </div>
+          <div class="cv-chart-wrap"><canvas id="cvCol"></canvas></div>
+        </div>
+        <div class="cv-card">
+          <div class="cv-card-header">
+            <span class="cv-card-title">México</span>
+            <div class="cv-legend">
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:#14b8a6"></span>CVR %</span>
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:rgba(51,65,85,0.35)"></span>Sign ups</span>
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:rgba(24,95,165,0.65)"></span>New Logos</span>
+            </div>
+          </div>
+          <div class="cv-chart-wrap"><canvas id="cvMex"></canvas></div>
+        </div>
+        <div class="cv-card">
+          <div class="cv-card-header">
+            <span class="cv-card-title">República Dominicana</span>
+            <div class="cv-legend">
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:#14b8a6"></span>CVR %</span>
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:rgba(51,65,85,0.35)"></span>Sign ups</span>
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:rgba(24,95,165,0.65)"></span>New Logos</span>
+            </div>
+          </div>
+          <div class="cv-chart-wrap"><canvas id="cvRd"></canvas></div>
+        </div>
+        <div class="cv-card">
+          <div class="cv-card-header">
+            <span class="cv-card-title">Costa Rica</span>
+            <div class="cv-legend">
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:#14b8a6"></span>CVR %</span>
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:rgba(51,65,85,0.35)"></span>Sign ups</span>
+              <span class="cv-leg-item"><span class="cv-leg-sw" style="background:rgba(24,95,165,0.65)"></span>New Logos</span>
+            </div>
+          </div>
+          <div class="cv-chart-wrap"><canvas id="cvCr"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">4</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 4b — Flywheel Combined: Entities + Logos (Quarterly)
+       ============================================================ -->
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">Entities &amp; Logos Flywheel — Quarterly</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;flex:1;overflow:hidden;">
+      <!-- LEFT: Entities -->
+      <div style="padding:8px 20px 6px;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;">
+        <div style="font-size:11px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Entities</div>
+        <div style="font-size:10px;font-weight:700;color:#1a1a2e;margin-bottom:1px;">New Adds <span style="font-weight:400;color:#888;font-size:9px;">(New+Recovered)</span></div>
+        <div style="font-size:10px;font-weight:700;color:#c0392b;margin-bottom:3px;">Net Churn <span style="font-weight:400;color:#888;font-size:9px;">(Churn-React)</span></div>
+        <div style="position:relative;height:155px;"><canvas id="fw2_entLine"></canvas></div>
+        <div style="height:1px;background:#e8e8e8;margin:5px 0;"></div>
+        <div style="font-size:10px;font-weight:700;color:#1a1a2e;margin-bottom:3px;">Stock Entities</div>
+        <div style="position:relative;flex:1;min-height:90px;"><canvas id="fw2_entBar"></canvas></div>
+      </div>
+      <!-- RIGHT: Logos -->
+      <div style="padding:8px 20px 6px;display:flex;flex-direction:column;">
+        <div style="font-size:11px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Logos with Accountant</div>
+        <div style="font-size:10px;font-weight:700;color:#1a1a2e;margin-bottom:1px;">New Adds <span style="font-weight:400;color:#888;font-size:9px;">(New+Recovered)</span></div>
+        <div style="font-size:10px;font-weight:700;color:#c0392b;margin-bottom:3px;">Net Churn <span style="font-weight:400;color:#888;font-size:9px;">(Churn-React)</span></div>
+        <div style="position:relative;height:155px;"><canvas id="fw2_lgLine"></canvas></div>
+        <div style="height:1px;background:#e8e8e8;margin:5px 0;"></div>
+        <div style="font-size:10px;font-weight:700;color:#1a1a2e;margin-bottom:3px;">Stock Logos</div>
+        <div style="position:relative;flex:1;min-height:90px;"><canvas id="fw2_lgBar"></canvas></div>
+      </div>
+    </div>
+    <p style="font-size:7.5px;color:#94a3b8;margin:2px 20px 0 0;text-align:right;">
+      <span style="display:inline-block;width:8px;height:8px;background:#aab8c8;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Own accounts&nbsp;&nbsp;
+      <span style="display:inline-block;width:8px;height:8px;background:#1a1a2e;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Client logos&nbsp;&nbsp;
+      * Split based on {{ metrics.gtm.own_ratio_label }} ratio ({{ metrics.gtm.own_pct }}% own · {{ metrics.gtm.client_pct }}% client)
+    </p>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">4b</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 4c — Value Events Funnel (area chart) + Stock 12m + Donut
+       ============================================================ -->
+  <style>
+  .s4c-wip { display:inline-block; font-size:8.5px; font-weight:700; background:#fff7ed; color:#C2410C; border:1px solid #fed7aa; border-radius:4px; padding:1px 6px; letter-spacing:.5px; text-transform:uppercase; margin-left:8px; vertical-align:middle; }
+  .s4c-ev-leg { display:flex; align-items:center; gap:5px; font-size:8.5px; color:#475569; }
+  .s4c-ev-dot { width:9px; height:9px; border-radius:2px; flex-shrink:0; }
+  </style>
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">Accountant-linked SMBs — Depth of product adoption</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;flex:1;overflow:hidden;">
+      <!-- LEFT: Value Events Area Chart + Band Definitions -->
+      <div style="padding:10px 20px 8px;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;">
+        <div style="font-size:8px;color:#94a3b8;margin-bottom:4px;">% of active accountant-linked SMBs by adoption stage · rolling 90-day window</div>
+        <div style="position:relative;flex:1;min-height:0;"><canvas id="s4c_area"></canvas></div>
+        <!-- Band definitions -->
+        <div style="margin-top:7px;flex-shrink:0;display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="width:9px;height:9px;border-radius:2px;background:#14b8a6;flex-shrink:0;display:inline-block;"></span>
+            <span style="font-size:8.5px;font-weight:700;color:#0f172a;">Bookkeeping +</span><span style="font-size:8px;color:#64748b;"> — recorded journal entries or more · using Alegra for real accounting</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="width:9px;height:9px;border-radius:2px;background:#aab8c8;flex-shrink:0;display:inline-block;"></span>
+            <span style="font-size:8.5px;font-weight:700;color:#0f172a;">Invoicing only</span><span style="font-size:8px;color:#64748b;"> — submitted invoices, no bookkeeping yet · core feature adopted</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="width:9px;height:9px;border-radius:2px;background:#dde5ef;border:1px solid #cbd5e1;flex-shrink:0;display:inline-block;"></span>
+            <span style="font-size:8.5px;font-weight:700;color:#0f172a;">Not yet active</span><span style="font-size:8px;color:#64748b;"> — linked to accountant but no value action in the last 90 days</span>
+          </div>
+        </div>
+      </div>
+      <!-- RIGHT: top-20 SoW table -->
+      <div style="padding:10px 14px 8px;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;flex-shrink:0;">
+          Top 20 accountants · Share of wallet
+        </div>
+        <div style="flex:1;overflow:auto;" id="s4c_sow_wrap">
+          <table id="s4c_sow_tbl" style="width:100%;border-collapse:collapse;"></table>
+        </div>
+        <div style="font-size:7px;color:#94a3b8;margin-top:4px;flex-shrink:0;">* % capturado = logos pagando / logos asociados en HubSpot · deltas en pp vs mismo denominador</div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">4c</span>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const TEAL='#14b8a6', SLATE='#aab8c8', NAVY='#1a1a2e', GRID='#f1f5f9', MUTED='#94a3b8';
+    const fmtN = v => Number(Math.round(v)).toLocaleString('es-CO');
+
+    /* ── LEFT: value events area chart (últimos 7 meses, 90d rolling) ── */
+    const funnelHist = {{ metrics.gtm.value_events | tojson | safe }};
+    // 3 bands bottom→top, cumulative thresholds, fill:'-1'
+    // Bookkeeping+ (asiento+) / Invoicing only / Not yet active
+    const funnelBands = [
+      { cum: d=>d.asiento, label:'Bookkeeping +',   color:TEAL,      bg:'rgba(20,184,166,0.80)',  lightText:true  },
+      { cum: d=>d.factura, label:'Invoicing only',  color:SLATE,     bg:'rgba(170,184,200,0.78)', lightText:false },
+      { cum: d=>100,       label:'Not yet active',  color:'#dde5ef', bg:'rgba(221,229,239,0.60)', lightText:false }
+    ];
+    const areaChart = new Chart(document.getElementById('s4c_area'), {
+      type: 'line',
+      data: {
+        labels: funnelHist.map(r => r.m),
+        datasets: funnelBands.map((b,i) => ({
+          label: b.label,
+          data: funnelHist.map(r => b.cum(r)),
+          borderColor: b.color,
+          backgroundColor: b.bg,
+          borderWidth: 1,
+          pointRadius: 0,
+          tension: 0.3,
+          fill: i === 0 ? 'origin' : '-1'
+        }))
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            mode: 'index', intersect: false,
+            backgroundColor: '#fff', borderColor: 'rgba(0,0,0,.1)', borderWidth: 1,
+            titleColor: '#111', bodyColor: '#555', titleFont:{size:9}, bodyFont:{size:9}, padding:6,
+            filter: item => item.datasetIndex < 3,
+            callbacks: {
+              label: c => {
+                const prev = c.datasetIndex === 0 ? 0 : areaChart.data.datasets[c.datasetIndex-1].data[c.dataIndex];
+                return '  '+c.dataset.label+': '+(c.raw-prev).toFixed(1)+'%';
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid:{display:false}, border:{display:false}, ticks:{font:{size:8.5},color:MUTED,maxRotation:0} },
+          y: { min:0, max:100, grid:{color:GRID}, border:{display:false},
+               ticks:{font:{size:8.5},color:MUTED,callback:v=>v+'%',stepSize:20} }
+        }
+      },
+      plugins: [{
+        id:'bandLabels',
+        afterDraw(chart) {
+          const {ctx} = chart;
+          funnelHist.forEach((row, xi) => {
+            const xPx = chart.scales.x.getPixelForValue(xi);
+            funnelBands.forEach((b, i) => {
+              const cumVal = b.cum(row);
+              const prevVal = i === 0 ? 0 : funnelBands[i-1].cum(row);
+              const band = cumVal - prevVal;
+              if (band < 6) return;
+              const midY = chart.scales.y.getPixelForValue(prevVal + band/2);
+              ctx.save();
+              ctx.font = '600 7.5px Inter,sans-serif';
+              ctx.fillStyle = b.lightText ? 'rgba(255,255,255,0.92)' : '#334155';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(band.toFixed(1)+'%', xPx, midY);
+              ctx.restore();
+            });
+          });
+        }
+      }]
+    });
+    /* ── RIGHT: top-20 SoW table ── */
+    const sow    = {{ metrics.gtm.supercontadores.sow     | tojson | safe }};
+    const sowTot = {{ metrics.gtm.supercontadores.sow_tot | tojson | safe }};
+
+    function fmtDelta(v) {
+      if (v == null) return '<span style="color:#94a3b8">—</span>';
+      const sign  = v > 0 ? '+' : '';
+      const color = v > 0 ? '#16a34a' : v < 0 ? '#dc2626' : '#94a3b8';
+      const arrow = v > 0 ? '↑ ' : v < 0 ? '↓ ' : '→ ';
+      return `<span style="color:${color}">${arrow}${sign}${v.toFixed(1)}pp</span>`;
+    }
+    function sowBar(pct, color) {
+      const w = Math.min(pct || 0, 100);
+      return `<div style="display:flex;align-items:center;gap:5px;">
+        <div style="flex:1;height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
+          <div style="width:${w}%;height:100%;background:${color};border-radius:3px;"></div>
+        </div>
+        <span style="font-size:8.5px;font-weight:700;color:${color};min-width:32px;text-align:right;">${w.toFixed(0)}%</span>
+      </div>`;
+    }
+
+    const tbl = document.getElementById('s4c_sow_tbl');
+    tbl.innerHTML = `<thead><tr style="border-bottom:2px solid #e2e8f0;">
+      <th style="text-align:left;font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 4px 3px 2px;text-transform:uppercase;letter-spacing:.06em;">Contador</th>
+      <th style="font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 8px 3px 4px;text-transform:uppercase;letter-spacing:.06em;">% Capturado</th>
+      <th style="text-align:right;font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 4px;text-transform:uppercase;letter-spacing:.06em;">Cartera</th>
+      <th style="text-align:right;font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 4px;text-transform:uppercase;letter-spacing:.06em;">vs Mes Ant</th>
+      <th style="text-align:right;font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 2px 3px 4px;text-transform:uppercase;letter-spacing:.06em;">vs Año Ant</th>
+    </tr></thead>`;
+
+    const tbody = document.createElement('tbody');
+
+    /* total row */
+    const totTr = document.createElement('tr');
+    totTr.style.cssText = 'border-bottom:2px solid #e2e8f0;background:#f8fafc;';
+    totTr.innerHTML = `
+      <td style="font-size:8.5px;font-weight:700;color:#334155;padding:3px 4px 3px 2px;">Total top 20</td>
+      <td style="padding:3px 8px 3px 4px;">${sowBar(sowTot.sow_asoc, NAVY)}</td>
+      <td style="text-align:right;font-size:8.5px;font-weight:700;color:#334155;padding:3px 4px;">${sowTot.real}</td>
+      <td style="text-align:right;font-size:8px;padding:3px 4px;">${fmtDelta(sowTot.delta_mom)}</td>
+      <td style="text-align:right;font-size:8px;padding:3px 2px 3px 4px;">${fmtDelta(sowTot.delta_yoy)}</td>`;
+    tbody.appendChild(totTr);
+
+    sow.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.style.cssText = 'border-bottom:1px solid #f1f5f9;' + (i % 2 === 1 ? 'background:#fafbfc;' : '');
+      tr.innerHTML = `
+        <td style="font-size:8px;font-weight:600;color:#334155;padding:2px 4px 2px 2px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.contador}</td>
+        <td style="padding:2px 8px 2px 4px;">${sowBar(r.sow_asoc, NAVY)}</td>
+        <td style="text-align:right;font-size:8.5px;font-weight:600;color:#334155;padding:2px 4px;">${r.real}</td>
+        <td style="text-align:right;font-size:8px;padding:2px 4px;">${fmtDelta(r.delta_mom)}</td>
+        <td style="text-align:right;font-size:8px;padding:2px 2px 2px 4px;">${fmtDelta(r.delta_yoy)}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    tbl.appendChild(tbody);
+
+  })();
+  </script>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 4d — Accountant vs Non-Accountant SMBs
+       ============================================================ -->
+  <style>
+  .s4d-seg  { font-size:13px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+  .s4d-arr  { font-size:32px; font-weight:800; color:#1a1a2e; line-height:1.1; margin:2px 0; }
+  .s4d-sub  { font-size:9.5px; color:#64748b; margin-top:1px; }
+  .s4d-pos  { color:#16a34a; font-weight:600; }
+  .s4d-neg  { color:#dc2626; font-weight:600; }
+  .s4d-neu  { color:#94a3b8; }
+  .s4d-tbl  { width:100%; border-collapse:collapse; }
+  .s4d-tbl thead th { font-size:8px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; padding:4px 6px; }
+  .s4d-tbl tbody td { font-size:11px; padding:6px 6px; vertical-align:middle; }
+  .s4d-tbl tbody tr:nth-child(odd) { background:#f8fafc; }
+  .s4d-tbl .td-val  { font-size:13px; font-weight:700; color:#1a1a2e; }
+  .s4d-tbl .td-mtr  { font-size:10px; font-weight:700; color:#334155; text-align:center; white-space:nowrap; }
+  .s4d-tbl .td-dot  { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .s4d-tbl .td-chg  { font-size:9.5px; font-weight:600; text-align:right; }
+  .s4d-tbl .td-chs  { font-size:9px; color:#94a3b8; text-align:center; }
+  </style>
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">SMBs with accountant vs. without accountant</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <!-- ARR Hero section -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e8e8e8;padding:10px 0 10px;">
+      <div style="text-align:center;border-right:1px solid #e8e8e8;padding:4px 24px 6px;">
+        <div class="s4d-seg">With accountant</div>
+        <div class="s4d-arr">$4.2M</div>
+        <div class="s4d-sub">ARR &nbsp;<span class="s4d-pos">+7.6%</span> MoM &nbsp;<span class="s4d-pos">+86.8%</span> YoY</div>
+        <div style="font-size:9px;color:#94a3b8;margin-top:3px;">7,892 logos · +8.2% MoM · +82.7% YoY</div>
+      </div>
+      <div style="text-align:center;padding:4px 24px 6px;">
+        <div class="s4d-seg">Without accountant</div>
+        <div class="s4d-arr">$22.3M</div>
+        <div class="s4d-sub">ARR &nbsp;<span class="s4d-pos">+0.1%</span> MoM &nbsp;<span class="s4d-pos">+6.6%</span> YoY</div>
+        <div style="font-size:9px;color:#94a3b8;margin-top:3px;">51,828 logos · +0.2% MoM · +3.4% YoY</div>
+      </div>
+    </div>
+    <!-- Metrics comparison table -->
+    <div style="flex:1;padding:0 16px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;">
+      <table class="s4d-tbl">
+        <thead>
+          <tr>
+            <th style="text-align:right;width:10%;">YoY</th>
+            <th style="text-align:right;width:10%;">MoM</th>
+            <th style="text-align:right;width:12%;">VALUE</th>
+            <th style="text-align:center;width:24%;">METRIC</th>
+            <th style="text-align:left;width:12%;">VALUE</th>
+            <th style="text-align:left;width:10%;">MoM</th>
+            <th style="text-align:left;width:10%;">YoY</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ARPA -->
+          <tr>
+            <td class="td-chg s4d-pos" style="text-align:right;">+2.2%</td>
+            <td class="td-chg s4d-neg" style="text-align:right;">-0.6%</td>
+            <td class="td-val" style="text-align:right;">$44.7</td>
+            <td class="td-mtr"><span class="td-dot" style="background:#1a1a2e;"></span>ARPA</td>
+            <td class="td-val">$35.8</td>
+            <td class="td-chg s4d-neg">-0.1%</td>
+            <td class="td-chg s4d-pos">+3.1%</td>
+          </tr>
+          <!-- New ARPA -->
+          <tr>
+            <td class="td-chg s4d-pos" style="text-align:right;">+14.2%</td>
+            <td class="td-chg s4d-neg" style="text-align:right;">-20.9%</td>
+            <td class="td-val" style="text-align:right;">$35.0</td>
+            <td class="td-mtr"><span class="td-dot" style="background:#aab8c8;"></span>New ARPA</td>
+            <td class="td-val">$27.7</td>
+            <td class="td-chg s4d-neg">-10.3%</td>
+            <td class="td-chg s4d-pos">+5.7%</td>
+          </tr>
+          <!-- Churn Rate -->
+          <tr>
+            <td class="td-chg s4d-neg" style="text-align:right;">+30.1%</td>
+            <td class="td-chg s4d-pos" style="text-align:right;">-3.3%</td>
+            <td class="td-val" style="text-align:right;">3.8%</td>
+            <td class="td-mtr"><span class="td-dot" style="background:#f97316;"></span>Churn Rate</td>
+            <td class="td-val">4.2%</td>
+            <td class="td-chg s4d-neg">+3.9%</td>
+            <td class="td-chg s4d-pos">-2.5%</td>
+          </tr>
+          <!-- CHS -->
+          <tr>
+            <td class="td-chs" style="text-align:right;">—</td>
+            <td class="td-chs" style="text-align:right;">—</td>
+            <td class="td-val" style="text-align:right;">61</td>
+            <td class="td-mtr"><span class="td-dot" style="background:#14b8a6;"></span>CHS Score</td>
+            <td class="td-val">56</td>
+            <td class="td-chs">—</td>
+            <td class="td-chs">—</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:7.5px;color:#94a3b8;margin-top:8px;text-align:center;">
+        * Churn Rate May 2026 · ARPA monthly USD · New ARPA = new logo MRR / new logos · CHS current snapshot (no historical)
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">4d</span>
+    </div>
+  </div>
+
+  <script>
+    /* ── Slide 2: New Logos charts ── */
+    const months13 = {{ metrics.gtm.chart_months | tojson }};
+    const tt = document.getElementById('tt');
+
+    const coreD = {
+      col: {{ metrics.gtm.new_logos_core_co | tojson }},
+      mex: {{ metrics.gtm.new_logos_core_mx | tojson }},
+      rd:  {{ metrics.gtm.new_logos_core_dr | tojson }},
+      cr:  {{ metrics.gtm.new_logos_core_cr | tojson }}
+    };
+    const liteD = {
+      col: {{ metrics.gtm.new_logos_lite_co | tojson }},
+      mex: {{ metrics.gtm.new_logos_lite_mx | tojson }},
+      rd:  {{ metrics.gtm.new_logos_lite_dr | tojson }},
+      cr:  {{ metrics.gtm.new_logos_lite_cr | tojson }}
+    };
+
+    function extTT({ chart, tooltip }) {
+      if (tooltip.opacity === 0) { tt.style.opacity = 0; return; }
+      const r = chart.canvas.getBoundingClientRect();
+      tt.style.left = (r.x + tooltip.caretX + 14) + 'px';
+      tt.style.top  = (r.y + tooltip.caretY + window.scrollY - 10) + 'px';
+      tt.style.opacity = 1;
+      const i = tooltip.dataPoints[0].dataIndex;
+      document.getElementById('tt-title').textContent = months13[i] + (i < 12 ? ' {{ config.year }}' : ' {{ config.year + 1 }}');
+      const tot = tooltip.dataPoints.reduce((s, p) => s + p.raw, 0);
+      document.getElementById('tt-body').innerHTML =
+        tooltip.dataPoints.map(p =>
+          `<div class="ttr"><span><span class="ttd" style="background:${p.dataset.backgroundColor}"></span>${p.dataset.label}</span><b>${p.raw.toLocaleString()}</b></div>`
+        ).join('') +
+        `<div class="ttr tttot"><span>Total</span><b>${tot.toLocaleString()}</b></div>`;
+    }
+
+    const nM = months13.length;
+    let maxStacked = 0;
+    for (let i = 0; i < nM; i++) {
+      maxStacked = Math.max(maxStacked,
+        (coreD.col[i]||0)+(coreD.mex[i]||0)+(coreD.rd[i]||0)+(coreD.cr[i]||0),
+        (liteD.col[i]||0)+(liteD.mex[i]||0)+(liteD.rd[i]||0)+(liteD.cr[i]||0));
+    }
+    const sharedLogoMax = Math.ceil(maxStacked / 100) * 100 + 100;
+
+    function mkChart(id, data, main, sec) {
+      new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+          labels: months13,
+          datasets: [
+            { label: 'Colombia',   data: data.col, backgroundColor: main,       stack: 's' },
+            { label: 'México',     data: data.mex, backgroundColor: main + 'bb',stack: 's' },
+            { label: 'Rep. Dom.',  data: data.rd,  backgroundColor: sec,        stack: 's' },
+            { label: 'Costa Rica', data: data.cr,  backgroundColor: sec + 'bb', stack: 's' },
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true, position: 'bottom',
+              labels: { font: { size: 9, family: 'Inter' }, color: '#999', boxWidth: 8, boxHeight: 8, padding: 8 }
+            },
+            tooltip: { enabled: false, external: extTT }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 9, family: 'Inter' }, color: '#999', maxRotation: 0 }, border: { display: false } },
+            y: { min: 0, max: sharedLogoMax, grid: { color: 'rgba(128,128,128,.07)' }, ticks: { font: { size: 9, family: 'Inter' }, color: '#999' }, border: { display: false } }
+          }
+        }
+      });
+    }
+
+    mkChart('cCore', coreD, '#185FA5', '#E87722');
+    mkChart('cLite', liteD, '#185FA5', '#E87722');
+    document.addEventListener('mouseleave', () => { tt.style.opacity = 0; });
+
+    /* ── Slide 3: Investment stacked bar charts (Core & Lite) ── */
+    const acqMonths = {{ metrics.gtm.inv_chart_months | tojson }};
+    const acqFmt = v => v >= 1000 ? '$' + (v/1000).toFixed(0) + 'K' : '$' + v;
+    const acqOpts = (maxVal, minVal) => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          mode: 'index', intersect: false,
+          backgroundColor: '#fff', borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1,
+          titleColor: '#141413', bodyColor: '#6b6a64',
+          titleFont: { family: "'DM Mono',monospace", size: 9 },
+          bodyFont:  { family: "'DM Mono',monospace", size: 10 },
+          padding: 8,
+          callbacks: { label: ctx => '  ' + ctx.dataset.label + ': ' + acqFmt(ctx.parsed.y) }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: '#b4b2a9', font: { family: "'DM Mono',monospace", size: 9 },
+                   maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }
+        },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.05)', lineWidth: 0.5 },
+          border: { display: false },
+          ticks: { color: '#b4b2a9', font: { family: "'DM Mono',monospace", size: 9 },
+                   callback: v => acqFmt(v), maxTicksLimit: 5 },
+          min: minVal,
+          max: maxVal
+        }
+      }
+    });
+
+    const acqDs = (label, data, color) => ({
+      label, data,
+      borderColor: color, backgroundColor: color.replace(')', ',0.08)').replace('rgb','rgba'),
+      borderWidth: 2, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, fill: false
+    });
+
+    const corePeople = {{ metrics.gtm.sm_core_people_series | tojson }};
+    const corePaid   = {{ metrics.gtm.sm_core_paid_series   | tojson }};
+    const coreOther  = {{ metrics.gtm.sm_core_other_series  | tojson }};
+    const litePeople = {{ metrics.gtm.sm_lite_people_series | tojson }};
+    const litePaid   = {{ metrics.gtm.sm_lite_paid_series   | tojson }};
+    const liteOther  = {{ metrics.gtm.sm_lite_other_series  | tojson }};
+
+    const allVals = [...corePeople, ...corePaid, ...coreOther, ...litePeople, ...litePaid, ...liteOther].filter(v => v != null);
+    const sharedMax = Math.ceil(Math.max(...allVals) / 25000) * 25000 + 25000;
+    const sharedMin = Math.max(0, Math.floor(Math.min(...allVals) / 25000) * 25000 - 25000);
+
+    new Chart(document.getElementById('acqCoreChart'), {
+      type: 'line',
+      data: { labels: acqMonths, datasets: [
+        acqDs('People',     corePeople, '#534AB7'),
+        acqDs('Paid Media', corePaid,   '#C04828'),
+        acqDs('Other',      coreOther,  '#a09e98'),
+      ]},
+      options: acqOpts(sharedMax, sharedMin)
+    });
+
+    new Chart(document.getElementById('acqLiteChart'), {
+      type: 'line',
+      data: { labels: acqMonths, datasets: [
+        acqDs('People',     litePeople, '#534AB7'),
+        acqDs('Paid Media', litePaid,   '#C04828'),
+        acqDs('Other',      liteOther,  '#a09e98'),
+      ]},
+      options: acqOpts(sharedMax, sharedMin)
+    });
+
+    /* ── Slide 4: Conversion Sign up → Logo ── */
+    const cvLabels = {{ metrics.gtm.funnel_countries.months | tojson | safe }};
+    const CV_TEAL    = '#14b8a6';
+    const CV_TEAL_BG = 'rgba(20,184,166,0.12)';
+    const CV_NAVY    = 'rgba(51,65,85,0.35)';
+    const CV_BLUE    = 'rgba(24,95,165,0.65)';
+
+    function cvMakeChart(id, cvr, signups, logos) {
+      new Chart(document.getElementById(id), {
+        data: {
+          labels: cvLabels,
+          datasets: [
+            { type: 'line', label: 'CVR %', data: cvr, yAxisID: 'yCVR',
+              borderColor: CV_TEAL, backgroundColor: CV_TEAL_BG, fill: true,
+              tension: 0.3, pointRadius: 3, pointBackgroundColor: CV_TEAL,
+              borderWidth: 2, order: 1 },
+            { type: 'bar', label: 'Sign ups', data: signups, yAxisID: 'ySU',
+              backgroundColor: CV_NAVY, borderWidth: 0, order: 3 },
+            { type: 'bar', label: 'New Logos', data: logos, yAxisID: 'yL',
+              backgroundColor: CV_BLUE, borderWidth: 0, order: 2 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => {
+              if (c.dataset.label === 'CVR %') return 'CVR: ' + c.parsed.y.toFixed(1) + '%';
+              return c.dataset.label + ': ' + c.parsed.y.toLocaleString('es-CO');
+            }}}
+          },
+          scales: {
+            x: { ticks: { font: { family: 'DM Mono', size: 9 }, color: '#64748b', maxRotation: 45, autoSkip: false },
+                 grid: { display: false }, border: { color: '#e2e8f0' } },
+            yCVR: { type: 'linear', position: 'left',
+              ticks: { font: { family: 'DM Mono', size: 9 }, color: '#14b8a6', callback: v => v.toFixed(0) + '%' },
+              grid: { color: '#e2e8f0', lineWidth: 0.5 }, border: { color: '#e2e8f0' } },
+            ySU: { type: 'linear', position: 'right',
+              ticks: { font: { family: 'DM Mono', size: 9 }, color: '#64748b',
+                       callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'K' : v },
+              grid: { display: false }, border: { display: false } },
+            yL: { type: 'linear', display: false }
+          }
+        }
+      });
+    }
+
+    cvMakeChart('cvCol',
+      {{ metrics.gtm.funnel_countries.colombia.cvr     | tojson | safe }},
+      {{ metrics.gtm.funnel_countries.colombia.signups | tojson | safe }},
+      {{ metrics.gtm.funnel_countries.colombia.logos   | tojson | safe }}
+    );
+    cvMakeChart('cvMex',
+      {{ metrics.gtm.funnel_countries.mexico.cvr     | tojson | safe }},
+      {{ metrics.gtm.funnel_countries.mexico.signups | tojson | safe }},
+      {{ metrics.gtm.funnel_countries.mexico.logos   | tojson | safe }}
+    );
+    cvMakeChart('cvRd',
+      {{ metrics.gtm.funnel_countries.republicaDominicana.cvr     | tojson | safe }},
+      {{ metrics.gtm.funnel_countries.republicaDominicana.signups | tojson | safe }},
+      {{ metrics.gtm.funnel_countries.republicaDominicana.logos   | tojson | safe }}
+    );
+    cvMakeChart('cvCr',
+      {{ metrics.gtm.funnel_countries.costaRica.cvr     | tojson | safe }},
+      {{ metrics.gtm.funnel_countries.costaRica.signups | tojson | safe }},
+      {{ metrics.gtm.funnel_countries.costaRica.logos   | tojson | safe }}
+    );
+
+    /* ── (fml functions below kept for JS parsing, body replaced above) ──
+    const fmlMo = [];
+    const fmlCountries = [];
+
+    const fmlFmt = n => n >= 1000 ? (n/1000).toFixed(1).replace(/\.0$/,'') + 'K' : String(n);
+    const fmlSign = n => (n > 0 ? '+' : '') + n;
+
+    function fmlDelta(cur, prev, isPct) {
+      if (prev == null) return { txt: '—', cls: 'flat' };
+      if (isPct) {
+        const d = Math.round((cur - prev) * 10) / 10;
+        return { txt: fmlSign(d) + 'pp vs mes ant.', cls: d > 0 ? 'up' : d < 0 ? 'down' : 'flat' };
+      } else {
+        const d = Math.round(((cur - prev) / prev) * 100);
+        return { txt: fmlSign(d) + '% vs mes ant.', cls: d > 0 ? 'up' : d < 0 ? 'down' : 'flat' };
+      }
+    }
+
+    function fmlBuildKPI(id, d) {
+      const n = d.cvr.length;
+      const avg = Math.round(d.cvr.reduce((a,b)=>a+b,0)/n*10)/10;
+      const lastCVR = d.cvr[n-1], prevCVR = d.cvr[n-2];
+      const lastSU  = d.signups[n-1] ?? d.signups[n-2], prevSU = d.signups[n-2];
+      const lastL   = d.logos[n-1] ?? d.logos[n-2], prevL = d.logos[n-2];
+      const dCVR = fmlDelta(lastCVR, prevCVR, true);
+      const dSU  = fmlDelta(lastSU, prevSU, false);
+      const dL   = fmlDelta(lastL, prevL, false);
+      document.getElementById(id).innerHTML = `
+        <div class="fml-kpi"><div class="fml-kpi-val cvr">${lastCVR}%</div><div class="fml-kpi-lbl">CVR último mes</div><div class="fml-kpi-delta ${dCVR.cls}">${dCVR.txt}</div></div>
+        <div class="fml-kpi"><div class="fml-kpi-val cvr">${avg}%</div><div class="fml-kpi-lbl">CVR promedio</div><div class="fml-kpi-delta flat">período completo</div></div>
+        <div class="fml-kpi"><div class="fml-kpi-val">${fmlFmt(lastSU)}</div><div class="fml-kpi-lbl">signups último mes</div><div class="fml-kpi-delta ${dSU.cls}">${dSU.txt}</div></div>
+        <div class="fml-kpi"><div class="fml-kpi-val logo">${fmlFmt(lastL)}</div><div class="fml-kpi-lbl">logos último mes</div><div class="fml-kpi-delta ${dL.cls}">${dL.txt}</div></div>
+      `;
+    }
+
+    function fmlBuildCVR(id, d) {
+      const n = d.cvr.length;
+      const avg = Math.round(d.cvr.reduce((a,b)=>a+b,0)/n*10)/10;
+      const minI = d.cvr.indexOf(Math.min(...d.cvr));
+      const maxI = d.cvr.indexOf(Math.max(...d.cvr));
+      const show = [...new Set([0, n-1, minI, maxI])];
+      const ptR  = d.cvr.map((_,i) => show.includes(i) ? 3 : 0);
+      const ptBg = d.cvr.map((_,i) => show.includes(i) ? '#1a3d6e' : 'transparent');
+      new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {
+          labels: fmlMo.slice(0,n),
+          datasets: [
+            { data: d.cvr, borderColor: '#1a3d6e', borderWidth: 2, tension: 0.35,
+              pointRadius: ptR, pointBackgroundColor: ptBg, pointBorderColor: ptBg, pointBorderWidth: 2, fill: false },
+            { data: Array(n).fill(avg), borderColor: 'rgba(0,0,0,0.15)', borderWidth: 1,
+              borderDash: [5,3], pointRadius: 0, fill: false }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: {
+            x: { display: false },
+            y: { grid: { color: fmlGridC, lineWidth: 0.5 }, border: { display: false },
+                 ticks: { color: fmlTickC, font: { size: 9, family: fmlMono }, callback: v => v + '%', maxTicksLimit: 4 } }
+          }
+        },
+        plugins: [{
+          id: 'cvrLbl',
+          afterDatasetsDraw(chart) {
+            const { ctx, scales: { x, y } } = chart;
+            ctx.save();
+            ctx.font = `500 8.5px ${fmlMono}`;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#1a3d6e';
+            show.forEach(i => {
+              const xp = x.getPixelForValue(i);
+              const yp = y.getPixelForValue(d.cvr[i]);
+              const off = (i === minI) ? 13 : -9;
+              ctx.fillText(d.cvr[i] + '%', xp, yp + off);
+            });
+            ctx.restore();
+          }
+        }]
+      });
+    }
+
+    function fmlBuildBars(id, d) {
+      const n = Math.min(d.signups.length, d.logos.length);
+      const logos = d.logos.slice(0, n);
+      const su    = d.signups.slice(0, n);
+      const nonC  = su.map((s,j) => Math.max(0, s - logos[j]));
+      const midI  = Math.floor(n/2);
+      const show  = [...new Set([0, midI, n-1])];
+      new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+          labels: fmlMo.slice(0,n),
+          datasets: [
+            { label: 'Logos',  data: logos, backgroundColor: 'rgba(29,158,117,0.65)', borderWidth: 0,
+              borderRadius: { topLeft:0, topRight:0, bottomLeft:2, bottomRight:2 }, stack:'v' },
+            { label: 'No conv.', data: nonC, backgroundColor: 'rgba(180,178,169,0.38)', borderWidth: 0,
+              borderRadius: { topLeft:2, topRight:2, bottomLeft:0, bottomRight:0 }, stack:'v' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: {
+            x: { stacked: true, grid: { display: false }, border: { display: false },
+                 ticks: { color: fmlTickC, font: { size: 8.5, family: fmlMono }, maxRotation: 0 } },
+            y: { stacked: true, display: false }
+          }
+        },
+        plugins: [{
+          id: 'barLbl',
+          afterDatasetsDraw(chart) {
+            const { ctx, scales: { x, y } } = chart;
+            ctx.save();
+            show.forEach(i => {
+              const xp = x.getPixelForValue(i);
+              const total = su[i];
+              const logo  = logos[i];
+              const topY  = y.getPixelForValue(total);
+              ctx.textAlign = 'center';
+              ctx.font = `400 8px ${fmlMono}`;
+              ctx.fillStyle = '#888780';
+              ctx.fillText(fmlFmt(total), xp, topY - 3);
+            });
+            ctx.restore();
+          }
+        }]
+      });
+    }
+
+    // fmlCountries.forEach removed — slide 4 uses cvMakeChart instead
+    */
+  </script>
+
+  <script>
+  (function() {
+    const months = {{ metrics.gtm.flywheel.months | tojson | safe }};
+
+    const linePlugin = {
+      id: 'fwLineLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        chart.data.datasets.forEach((ds, di) => {
+          chart.getDatasetMeta(di).data.forEach((pt, i) => {
+            const val = ds.data[i];
+            if (val == null) return;
+            ctx.save();
+            ctx.font = 'bold 9px Segoe UI';
+            ctx.fillStyle = ds.borderColor;
+            ctx.textAlign = 'center';
+            ctx.fillText(val, pt.x, pt.y + (di === 0 ? -10 : 12));
+            ctx.restore();
+          });
+        });
+      }
+    };
+
+    const barPlugin = {
+      id: 'fwBarLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+          const val = chart.data.datasets[0].data[i];
+          if (val == null) return;
+          ctx.save();
+          ctx.font = 'bold 8.5px Segoe UI';
+          ctx.fillStyle = '#555';
+          ctx.textAlign = 'center';
+          ctx.fillText(val.toLocaleString(), bar.x, bar.y - 4);
+          ctx.restore();
+        });
+      }
+    };
+
+    // Entities — desde RS (dwh_facts + db_hubspot)
+    const entNewAdds = {{ metrics.gtm.flywheel.ent_new_adds | tojson | safe }};
+    const entChurn   = {{ metrics.gtm.flywheel.ent_churn    | tojson | safe }};
+    const entStock   = {{ metrics.gtm.flywheel.ent_stock    | tojson | safe }};
+
+    if (document.getElementById('fw_entitiesLine')) new Chart(document.getElementById('fw_entitiesLine'), {
+      type: 'line',
+      data: {
+        labels: months,
+        datasets: [
+          { label: 'New Adds', data: entNewAdds, borderColor: '#1a1a2e', backgroundColor: '#1a1a2e', borderWidth: 2, pointRadius: 4, tension: 0.1 },
+          { label: 'Net Churn', data: entChurn, borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2, pointRadius: 4, tension: 0.1 }
+        ]
+      },
+      plugins: [linePlugin],
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#555', maxRotation: 0, callback: (v, i) => months[i].split('\n') } },
+          y: { min: 0, max: 600, grid: { color: '#f0f0f0' }, ticks: { font: { size: 9 }, color: '#555', stepSize: 150 } }
+        }
+      }
+    });
+
+    if (document.getElementById('fw_entitiesBar')) new Chart(document.getElementById('fw_entitiesBar'), {
+      type: 'bar',
+      data: { labels: months, datasets: [{ data: entStock, backgroundColor: '#778899', borderRadius: 2, barPercentage: 0.85 }] },
+      plugins: [barPlugin],
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#555', maxRotation: 0, callback: (v, i) => months[i].split('\n') } },
+          y: { min: 0, max: 10000, grid: { color: '#f0f0f0' }, ticks: { font: { size: 9 }, color: '#555' } }
+        }
+      }
+    });
+
+    // Logos — desde RS (dwh_facts + db_hubspot)
+    const lgNewAdds = {{ metrics.gtm.flywheel.lg_new_adds | tojson | safe }};
+    const lgChurn   = {{ metrics.gtm.flywheel.lg_churn    | tojson | safe }};
+    const lgStock   = {{ metrics.gtm.flywheel.lg_stock    | tojson | safe }};
+
+    if (document.getElementById('fw_logosLine')) new Chart(document.getElementById('fw_logosLine'), {
+      type: 'line',
+      data: {
+        labels: months,
+        datasets: [
+          { label: 'New Adds', data: lgNewAdds, borderColor: '#1a1a2e', backgroundColor: '#1a1a2e', borderWidth: 2, pointRadius: 4, tension: 0.1 },
+          { label: 'Net Churn', data: lgChurn, borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2, pointRadius: 4, tension: 0.1 }
+        ]
+      },
+      plugins: [linePlugin],
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#555', maxRotation: 0, callback: (v, i) => months[i].split('\n') } },
+          y: { min: 0, max: 1000, grid: { color: '#f0f0f0' }, ticks: { font: { size: 9 }, color: '#555', stepSize: 250 } }
+        }
+      }
+    });
+
+    if (document.getElementById('fw_logosBar')) new Chart(document.getElementById('fw_logosBar'), {
+      type: 'bar',
+      data: { labels: months, datasets: [{ data: lgStock, backgroundColor: '#778899', borderRadius: 2, barPercentage: 0.85 }] },
+      plugins: [barPlugin],
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#555', maxRotation: 0, callback: (v, i) => months[i].split('\n') } },
+          y: { min: 0, max: 16000, grid: { color: '#f0f0f0' }, ticks: { font: { size: 9 }, color: '#555' } }
+        }
+      }
+    });
+
+    // ── Slide 4b: Combined Flywheel Quarterly ──
+    (function(){
+      const qIdx    = {{ metrics.gtm.flywheel.q_idx | tojson | safe }};
+      const qLabels = {{ metrics.gtm.flywheel.q_labels | tojson | safe }};
+      const qFilter = arr => qIdx.map(i => (arr && arr[i] !== undefined) ? arr[i] : null);
+
+      const entNewAddsQ = qFilter(entNewAdds);
+      const entChurnQ   = qFilter(entChurn);
+      const entStockQ   = qFilter(entStock);
+      const lgNewAddsQ  = qFilter(lgNewAdds);
+      const lgChurnQ    = qFilter(lgChurn);
+      const lgStockQ    = qFilter(lgStock);
+
+      // Stock Logos split: propia/eop ratio from supercontadores
+      const ownRatio = {{ metrics.gtm.supercontadores.propia | default(0) }} / ({{ metrics.gtm.supercontadores.eop | default(1) }} || 1);
+      const lgStockOwnQ = lgStockQ.map(v => v != null ? Math.round(v * ownRatio) : null);
+      const lgStockCliQ = lgStockQ.map(v => v != null ? Math.round(v * (1 - ownRatio)) : null);
+
+      const mkLineOpts = (maxY, step) => ({
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { display: false },
+          tooltip: { mode: 'index', intersect: false, backgroundColor: '#fff', borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1, titleColor: '#111', bodyColor: '#555', titleFont: { size: 9 }, bodyFont: { size: 9 }, padding: 6 }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 8.5 }, color: '#777', maxRotation: 0 }, border: { display: false } },
+          y: { min: 0, max: maxY, grid: { color: '#f0f0f0' }, ticks: { font: { size: 8.5 }, color: '#777', stepSize: step }, border: { display: false } }
+        }
+      });
+
+      const mkBarOpts = (maxY, stacked) => ({
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { display: false },
+          tooltip: { mode: 'index', intersect: false, backgroundColor: '#fff', borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1, titleColor: '#111', bodyColor: '#555', titleFont: { size: 9 }, bodyFont: { size: 9 }, padding: 6,
+            callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}` }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, stacked: !!stacked, ticks: { font: { size: 8.5 }, color: '#777', maxRotation: 0 }, border: { display: false } },
+          y: { min: 0, max: maxY, stacked: !!stacked, grid: { color: '#f0f0f0' }, ticks: { font: { size: 8.5 }, color: '#777' }, border: { display: false } }
+        }
+      });
+
+      new Chart(document.getElementById('fw2_entLine'), {
+        type: 'line',
+        data: { labels: qLabels, datasets: [
+          { label: 'New Adds',  data: entNewAddsQ, borderColor: '#1a1a2e', backgroundColor: '#1a1a2e', borderWidth: 2, pointRadius: 3, tension: 0.1 },
+          { label: 'Net Churn', data: entChurnQ,   borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2, pointRadius: 3, tension: 0.1 }
+        ]},
+        options: mkLineOpts(600, 150)
+      });
+
+      new Chart(document.getElementById('fw2_entBar'), {
+        type: 'bar',
+        data: { labels: qLabels, datasets: [{ label: 'Stock', data: entStockQ, backgroundColor: '#778899', borderRadius: 2, barPercentage: 0.8 }] },
+        plugins: [barPlugin],
+        options: mkBarOpts(10000, false)
+      });
+
+      new Chart(document.getElementById('fw2_lgLine'), {
+        type: 'line',
+        data: { labels: qLabels, datasets: [
+          { label: 'New Adds',  data: lgNewAddsQ, borderColor: '#1a1a2e', backgroundColor: '#1a1a2e', borderWidth: 2, pointRadius: 3, tension: 0.1 },
+          { label: 'Net Churn', data: lgChurnQ,   borderColor: '#c0392b', backgroundColor: '#c0392b', borderWidth: 2, pointRadius: 3, tension: 0.1 }
+        ]},
+        options: mkLineOpts(1000, 250)
+      });
+
+      new Chart(document.getElementById('fw2_lgBar'), {
+        type: 'bar',
+        data: { labels: qLabels, datasets: [
+          { label: 'Own accounts', data: lgStockOwnQ, backgroundColor: '#aab8c8', borderRadius: 0, barPercentage: 0.8, stack: 'lg' },
+          { label: 'Client logos',  data: lgStockCliQ, backgroundColor: '#1a1a2e', borderRadius: 2, barPercentage: 0.8, stack: 'lg' }
+        ]},
+        options: mkBarOpts(16000, true)
+      });
+    })();
+
+  })();
+  </script>
+
+  {%- if false %}{# SLIDES 5+ HIDDEN — preserve but exclude from render #}
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 5 — Flywheel: Entities
+       ============================================================ -->
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">Entities: New Adds vs Net Churn</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div style="padding: 8px 40px 6px;">
+      <div style="font-size:11px;font-weight:700;color:#1a1a2e;margin-bottom:1px;">New Adds <span style="font-weight:400;color:#888;font-size:10px;">(New+Recovered)</span></div>
+      <div style="font-size:11px;font-weight:700;color:#c0392b;margin-bottom:4px;">Net Churn <span style="font-weight:400;color:#888;font-size:10px;">(Churn-React)</span></div>
+      <div style="position:relative;height:195px;"><canvas id="fw_entitiesLine"></canvas></div>
+    </div>
+    <div style="height:1px;background:#e8e8e8;margin:0 40px;"></div>
+    <div style="padding:8px 40px 6px;">
+      <div style="font-size:11px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">Stock Entities</div>
+      <div style="position:relative;height:160px;"><canvas id="fw_entitiesBar"></canvas></div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">5</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 6 — Flywheel: Logos
+       ============================================================ -->
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">Logos partner with accountants: New Adds vs Net Churn</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div style="padding: 8px 40px 6px;">
+      <div style="font-size:11px;font-weight:700;color:#1a1a2e;margin-bottom:1px;">New Adds <span style="font-weight:400;color:#888;font-size:10px;">(New+Recovered)</span></div>
+      <div style="font-size:11px;font-weight:700;color:#c0392b;margin-bottom:4px;">Net Churn <span style="font-weight:400;color:#888;font-size:10px;">(Churn-React)</span></div>
+      <div style="position:relative;height:195px;"><canvas id="fw_logosLine"></canvas></div>
+    </div>
+    <div style="height:1px;background:#e8e8e8;margin:0 40px;"></div>
+    <div style="padding:8px 40px 6px;">
+      <div style="font-size:11px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">Stock Logos</div>
+      <div style="position:relative;height:160px;"><canvas id="fw_logosBar"></canvas></div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">6</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SLIDES 7-9 — Contadores: Propios/Clientes · Full-cycle · Share of Wallet
+       ============================================================ -->
+  <style>
+  /* ── Contadores slides (from Jhon's deck) ── */
+  .block-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#14b8a6;padding-bottom:8px;border-bottom:1px solid #e2e8f0;margin-bottom:12px;flex-shrink:0}
+  .insight-box{background:#f0fdfa;border-left:3px solid #14b8a6;border-radius:0 6px 6px 0;padding:10px 16px;font-size:11.5px;color:#64748b;line-height:1.55;flex-shrink:0}
+  .insight-box strong{color:#0f172b;font-weight:600}
+  .insight-box .so-what{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#14b8a6;margin-right:8px}
+  .insight-box.warn{background:#fff7ed;border-left-color:#C2410C}
+  .insight-box.warn .so-what{color:#C2410C}
+  .kpi-stack{display:flex;flex-direction:column;gap:15px}
+  .kpi-stack .kpi-item{padding-top:13px;border-top:1px solid #e2e8f0}
+  .kpi-stack .kpi-item:first-child{border-top:none;padding-top:0}
+  .kpi-stack .k-label{font-size:9.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:#64748b;margin-bottom:5px}
+  .kpi-stack .k-val{font-size:28px;font-weight:700;letter-spacing:-.8px;line-height:1;color:#0f172b;margin-bottom:4px}
+  .kpi-stack .k-val.teal{color:#14b8a6} .kpi-stack .k-val.red{color:#C2410C} .kpi-stack .k-val.sm{font-size:21px}
+  .kpi-stack .k-note{font-size:10.5px;color:#64748b;line-height:1.45}
+  .kpi-stack .k-note strong{color:#0f172b;font-weight:600}
+  .hbar-set{display:flex;flex-direction:column;gap:11px}
+  .hbar-row{display:grid;grid-template-columns:140px 1fr 92px;align-items:center;gap:12px}
+  .hbar-name{font-size:11.5px;color:#64748b;font-weight:500;line-height:1.25}
+  .hbar-track{height:9px;background:#f1f5f9;border-radius:2px;overflow:hidden}
+  .hbar-fill{height:100%;background:#0f172b;border-radius:2px}
+  .hbar-fill.teal{background:#14b8a6} .hbar-fill.red{background:#C2410C} .hbar-fill.gray{background:#94a3b8}
+  .hbar-val{font-size:11.5px;font-weight:700;color:#0f172b;text-align:right;font-variant-numeric:tabular-nums}
+  .hbar-row.em .hbar-name{color:#0f172b;font-weight:600}
+  .pill{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;vertical-align:middle;margin-left:5px}
+  .pill.t{background:#f0fdfa;color:#14b8a6} .pill.a{background:#ffedd5;color:#C2410C}
+  </style>
+
+  <div class="slide-divider">↓</div>
+
+<div class="slide">
+  <div class="slide-header">
+    <span class="title">14,906 logos pay through an accountant (≈25% of the universe) — but nearly half (47%) are accountants' own accounts, not their clients</span>
+    <span class="period">1 · Own accounts vs clients · last 12m</span>
+  </div>
+  <div class="slide-body" style="gap:16px">
+    <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:32px;flex:1;min-height:0">
+      <div style="display:flex;flex-direction:column;min-height:0">
+        <div class="block-label">Accountant logo stock · EoP · clients of accountant vs own accounts · last 12 months</div>
+        <div class="chart-wrap"><canvas id="histChart"></canvas></div>
+      </div>
+      <div>
+        <div class="block-label">Composition · {{ config.month_label }}</div>
+        <div class="kpi-stack">
+          <div class="kpi-item"><div class="k-label">Accountant Logos · EoP</div><div class="k-val teal" id="k_eop">14,906</div><div class="k-note">Official card 1477 · April 14,714 · <strong>+192/month</strong></div></div>
+          <div class="kpi-item"><div class="k-label">Clients of accountant</div><div class="k-val sm" id="k_cli">7,889</div><div class="k-note"><strong id="k_cli_pct">53%</strong> · from 5,757 (may'25) to 7,889 → <strong>+37% YoY</strong></div></div>
+          <div class="kpi-item"><div class="k-label">Own accounts</div><div class="k-val sm" id="k_pro">7,017</div><div class="k-note"><strong id="k_pro_pct">47%</strong> · practically flat (~7K) for the last 18 months</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="insight-box"><span class="so-what">So what</span>
+      Linked stock grows healthy, but <strong>the flywheel driver is the client of the accountant</strong> (+37% YoY vs flat own accounts). The mix is just starting to tilt toward clients — that's where the upside is. <strong>Penetration ≈25%</strong> of the paid universe (validated 25.1% at April cut, 4 sources).</div>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Data · Confidential</span><span class="footer-source">Source: bi_accountant.accountant_master_table · Metabase cards 1477/1485/1487</span><span class="footer-page">7</span></div>
+</div>
+<div class="slide-divider">↓</div>
+
+<div class="slide">
+  <div class="slide-header">
+    <span class="title">Accountants actively work ~3 in 10 of their SMB accounts (90d); in ~1 in 8 (12.6%) bookkeeping is demonstrably attributed</span>
+    <span class="period">2 · Full-cycle · 90d</span>
+  </div>
+  <div class="slide-body" style="gap:14px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;flex:1;min-height:0">
+      <div style="display:flex;flex-direction:column;min-height:0">
+        <div class="block-label">Accountant activity funnel · % of 7,888 SMBs with an accountant</div>
+        <div class="hbar-set" id="funnel"></div>
+        <div class="block-label" style="margin-top:18px">Value events in the account · % of SMBs (90d)</div>
+        <div class="hbar-set" id="events"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;min-height:0">
+        <div class="block-label">Monthly trend · % that bookkeeps (attributable)</div>
+        <div class="chart-wrap"><canvas id="fcTrend"></canvas></div>
+        <div style="margin-top:10px;font-size:10.5px;color:var(--color-text-secondary);line-height:1.5">
+          <span class="pill t">teal</span> = attributable to the accountant (infiltrated flag) · <span class="pill a">gray</span> = no flag (unknown if accountant or SMB)</div>
+      </div>
+    </div>
+    <div class="insight-box warn"><span class="so-what">So what</span>
+      The <strong>76.9% account-level</strong> is inflated by invoicing — done by the SMB, not the accountant. <strong>Tracking gap:</strong> 4 of 6 value events (invoice, balances, chart of accounts) don't send the infiltrated flag → 12.6% is a <strong>demonstrable floor</strong>, not the real rate. The flag on journal entries only populated from Dec-2025. <strong>Action:</strong> request Product to instrument it.</div>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Data · Confidential</span><span class="footer-source">Source: amplitude_events_gold × AMT · ACCOUNTANT value events · ep_id_accountant_infiltrated</span><span class="footer-page">8</span></div>
+</div>
+<div class="slide-divider">↓</div>
+
+
+<div class="slide">
+  <div class="slide-header">
+    <span class="title">The top 20 accountants by MRR already have 56.6% of their associated portfolio paying in Alegra — 447 companies left to convert</span>
+    <span class="period">3 · Share of wallet</span>
+  </div>
+  <div class="slide-body" style="gap:14px">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:30px;flex:1;min-height:0">
+      <div style="display:flex;flex-direction:column;min-height:0">
+        <div class="block-label">Paying portfolio vs gap to convert · by accountant, sorted by MRR</div>
+        <div class="chart-wrap"><canvas id="sowChart"></canvas></div>
+      </div>
+      <div>
+        <div class="block-label">Top 20 · aggregate</div>
+        <div class="kpi-stack">
+          <div class="kpi-item"><div class="k-label">MRR top 20 · USD/month</div><div class="k-val teal" id="k_mrr">$29,838</div><div class="k-note">Highest MRR in the program, concentrated in 20 entities</div></div>
+          <div class="kpi-item"><div class="k-label">Share of wallet · paying / HubSpot associated</div><div class="k-val sm" id="k_sow">56.6%</div><div class="k-note"><strong id="k_sow_d">583</strong> paying out of 1,030 associated companies</div></div>
+          <div class="kpi-item"><div class="k-label">Gap to convert</div><div class="k-val sm red" id="k_gap">447</div><div class="k-note"><strong>associated companies not yet paying</strong> — the direct upside of the top 20</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="insight-box"><span class="so-what">So what</span>
+      Even the best accountants have <strong>~43% of their associated portfolio unconverted</strong>. SoW is measured vs HubSpot-associated companies (the "declared potential" at signup is noisy: several already pay more than declared). <strong>447 companies across 20 accounts</strong> is the shortest path to incremental MRR.</div>
+  </div>
+  <div class="slide-footer"><span class="footer-brand">Alegra · Data · Confidential</span><span class="footer-source">Source: Supercontadores — Real vs Potential Portfolio (2026-04-10, refresh 2026-06-11)</span><span class="footer-page">9</span></div>
+</div>
+<div class="slide-divider">↓</div>
+
+
+  <script>window.DATA = {{ metrics.gtm.supercontadores | tojson | safe }};</script>
+  <script>
+const D=window.DATA;
+const NAVY='#0f172b',TEAL='#14b8a6',SLATE='#94a3b8',ORANGE='#C2410C',GRID='#f1f5f9',MUTED='#94a3b8';
+const fmtN=v=>Number(Math.round(v)).toLocaleString('es-CO');
+const TIP={enabled:true,backgroundColor:NAVY,padding:12,titleFont:{size:12,weight:'600'},titleColor:'#fff',
+  bodyFont:{size:11},bodyColor:'#fff',displayColors:true,boxPadding:4,cornerRadius:6,borderColor:'rgba(255,255,255,.1)',borderWidth:1};
+Chart.defaults.font.family='Inter, sans-serif';
+
+// chips / kpis
+const pct=(a,b)=>Math.round(100*a/b)+'%';
+
+k_eop.textContent=fmtN(D.eop); k_cli.textContent=fmtN(D.clientes); k_pro.textContent=fmtN(D.propia);
+k_cli_pct.textContent=pct(D.clientes,D.eop); k_pro_pct.textContent=pct(D.propia,D.eop);
+k_mrr.textContent='$'+fmtN(D.sow_tot.mrr); k_sow.textContent=D.sow_tot.sow_asoc+'%';
+k_sow_d.textContent=fmtN(D.sow_tot.real); k_gap.textContent=fmtN(D.sow_tot.gap);
+
+// ── Slide 2: histórico stacked bar · últimos 12 meses ──
+(function(){
+  const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const lab=m=>MES[+m.slice(5,7)-1]+"'"+m.slice(2,4);
+  const h=D.hist.slice(-12), labels=h.map(r=>lab(r.m));
+  new Chart(histChart,{type:'bar',
+    data:{labels,datasets:[
+      {label:'Clients of accountant',data:h.map(r=>r.clientes),backgroundColor:TEAL,hoverBackgroundColor:'#0d9488',borderRadius:2,stack:'a',barPercentage:.82,categoryPercentage:.9},
+      {label:'Own accounts',data:h.map(r=>r.propia),backgroundColor:SLATE,hoverBackgroundColor:'#64748b',borderRadius:2,stack:'a',barPercentage:.82,categoryPercentage:.9}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:6,right:4}},interaction:{mode:'index',intersect:false,axis:'x'},
+      plugins:{legend:{display:true,position:'top',align:'end',labels:{font:{size:10},boxWidth:10,boxHeight:10,padding:10,color:'#64748b'}},
+        tooltip:{...TIP,callbacks:{label:c=>'  '+c.dataset.label+': '+fmtN(c.raw),
+          footer:i=>'  Total: '+fmtN(h[i[0].dataIndex].total)},footerFont:{size:11,weight:'600'},footerColor:TEAL,footerMarginTop:6}},
+      scales:{y:{stacked:true,beginAtZero:true,grid:{color:GRID,drawBorder:false},border:{display:false},ticks:{callback:v=>fmtN(v),font:{size:10},color:MUTED,maxTicksLimit:6}},
+        x:{stacked:true,grid:{display:false},border:{display:false},ticks:{font:{size:9.5},color:MUTED,maxRotation:0}}}}});
+})();
+
+// ── Slide 3: funnel hbars ──
+(function(){
+  const f=D.fc;
+  const rows=[['Account · ≥1 value event',f.acct_ge1_pct,f.acct_ge1,'gray'],
+              ['Accountant works the account',f.trabaja_pct,f.trabaja,'teal'],
+              ['Accountant bookkeeps (attributable)',f.contabiliza_pct,f.contabiliza,'teal']];
+  funnel.innerHTML=rows.map((r,i)=>`<div class="hbar-row${i==2?' em':''}"><div class="hbar-name">${r[0]}</div><div class="hbar-track"><div class="hbar-fill ${r[3]}" style="width:${r[1]}%"></div></div><div class="hbar-val">${r[1]}% · ${fmtN(r[2])}</div></div>`).join('');
+  const e=D.fc.eventos, mx=Math.max(...e.map(x=>x.pct));
+  events.innerHTML=e.map(x=>`<div class="hbar-row" style="grid-template-columns:140px 1fr 92px"><div class="hbar-name">${x.k.split(' (')[0]}</div><div class="hbar-track"><div class="hbar-fill ${x.attr?'teal':'gray'}" style="width:${Math.round(100*x.pct/mx)}%"></div></div><div class="hbar-val">${x.pct}% · ${fmtN(x.n)}</div></div>`).join('');
+})();
+
+// ── Slide 3: trend ──
+(function(){
+  const t=D.fc_hist.filter(r=>r.tracked);
+  new Chart(fcTrend,{type:'line',data:{labels:t.map(r=>r.m.slice(2)),datasets:[
+    {label:'% bookkeeps',data:t.map(r=>r.pct),borderColor:TEAL,backgroundColor:'rgba(20,184,166,.14)',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:TEAL,pointBorderColor:'#fff',pointBorderWidth:1.5,tension:.3,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:6,right:4}},interaction:{mode:'index',intersect:false,axis:'x'},
+      plugins:{legend:{display:false},tooltip:{...TIP,callbacks:{title:i=>i[0].label,label:c=>'  '+c.raw+'% · '+fmtN(t[c.dataIndex].contabiliza)+'/'+fmtN(t[c.dataIndex].clientes)+' PyMEs'}}},
+      scales:{y:{beginAtZero:true,suggestedMax:12,grid:{color:GRID,drawBorder:false},border:{display:false},ticks:{callback:v=>v+'%',font:{size:10},color:MUTED,stepSize:3}},
+        x:{grid:{display:false},border:{display:false},ticks:{font:{size:9.5},color:MUTED,maxRotation:0}}}}});
+})();
+
+// ── Slide 4: SoW stacked horizontal ──
+(function(){
+  const s=D.sow, short=n=>{n=n.replace(/\s*\(.*\)/,'').replace(/\s*-\s*.*/,'');return n.length>20?n.slice(0,19)+'…':n;};
+  new Chart(sowChart,{type:'bar',data:{labels:s.map(r=>short(r.contador)),datasets:[
+      {label:'Paying portfolio',data:s.map(r=>r.real),backgroundColor:TEAL,hoverBackgroundColor:'#0d9488',borderRadius:2,stack:'a',barPercentage:.9,categoryPercentage:.86},
+      {label:'Gap to convert',data:s.map(r=>Math.max(0,r.asoc-r.real)),backgroundColor:'#e2e8f0',hoverBackgroundColor:SLATE,borderRadius:2,stack:'a',barPercentage:.9,categoryPercentage:.86}
+    ]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{top:4,right:8}},interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:true,position:'top',align:'end',labels:{font:{size:10},boxWidth:10,boxHeight:10,padding:10,color:'#64748b'}},
+        tooltip:{...TIP,callbacks:{label:c=>'  '+c.dataset.label+': '+fmtN(c.raw),
+          footer:i=>{const r=s[i[0].dataIndex];return '  SoW '+r.sow_asoc+'% · MRR $'+fmtN(r.mrr)+' · '+r.pais;}},footerFont:{size:10,weight:'600'},footerColor:TEAL,footerMarginTop:6}},
+      scales:{x:{stacked:true,beginAtZero:true,grid:{color:GRID,drawBorder:false},border:{display:false},ticks:{font:{size:9.5},color:MUTED,maxTicksLimit:6}},
+        y:{stacked:true,grid:{display:false},border:{display:false},ticks:{font:{size:9},color:'#475569',autoSkip:false},afterFit:sc=>{sc.width=118;}}}}});
+})();
+</script>
+
+</body>
+</html>
+  </script>
+  {%- endif %}{# /SLIDES 5+ HIDDEN #}
+
+
+
+  <!-- ============================================================
+       Accountant Flywheel · The Growth Play
+       ============================================================ -->
+  <style>
+    .acfw-slide { overflow:hidden; }
+    .acfw-slide .acfw-header {
+      background:#0F172A;padding:16px var(--slide-pad-x);display:flex;justify-content:space-between;align-items:center;height:52px;flex-shrink:0;
+    }
+    .acfw-slide .acfw-header-title {
+      font-size:15px;font-weight:700;color:#FFFFFF;line-height:1.2;
+    }
+    .acfw-slide .acfw-header-date {
+      font-size:12px;font-weight:500;color:#30BBB7;
+    }
+    .acfw-slide .acfw-content {
+      padding:12px var(--slide-pad-x) 8px;flex:1;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden;
+    }
+    .acfw-slide .acfw-headline {
+      font-size:14px;font-weight:700;color:#0F172A;line-height:1.3;flex-shrink:0;
+    }
+    .acfw-slide .acfw-headline .acfw-teal { color:#30BBB7; }
+    .acfw-slide .acfw-subheadline {
+      font-size:10px;color:#64748B;line-height:1.4;flex-shrink:0;
+    }
+    .acfw-slide .acfw-bottom-area {
+      display:flex;flex:1;gap:14px;min-height:0;overflow:hidden;
+    }
+    .acfw-slide .acfw-left-col {
+      flex:1.15;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;
+    }
+    .acfw-slide .acfw-right-col {
+      flex:0.85;background:#FFFFFF;border-radius:10px;border:1px solid #E2E8F0;padding:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden;
+    }
+    .acfw-slide .acfw-play-label {
+      font-size:8.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#64748B;margin-bottom:3px;flex-shrink:0;
+    }
+    .acfw-slide .acfw-play-card {
+      background:#FFFFFF;border-radius:7px;border:1px solid #E2E8F0;padding:6px 10px;display:flex;gap:8px;align-items:flex-start;
+    }
+    .acfw-slide .acfw-play-num {
+      flex-shrink:0;width:20px;height:20px;background:#30BBB7;color:#fff;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;
+    }
+    .acfw-slide .acfw-play-title {
+      font-size:10px;font-weight:700;color:#0F172A;margin-bottom:1px;
+    }
+    .acfw-slide .acfw-play-desc {
+      font-size:9px;color:#64748B;line-height:1.4;
+    }
+    .acfw-slide .acfw-measure-box {
+      background:#D6F3F2;border-radius:7px;padding:6px 10px;margin-top:2px;border:1px solid #AEEAE8;
+    }
+    .acfw-slide .acfw-measure-label {
+      font-size:8.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#27918F;margin-bottom:3px;display:flex;align-items:center;gap:4px;
+    }
+    .acfw-slide .acfw-measure-text {
+      font-size:9.5px;color:#0F172A;line-height:1.4;
+    }
+    .acfw-slide .acfw-measure-text strong { font-weight:700; }
+    .acfw-slide .acfw-loop-title {
+      font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0F172A;margin-bottom:2px;text-align:center;flex-shrink:0;
+    }
+    .acfw-slide .acfw-loop-sub {
+      font-size:9px;color:#64748B;margin-bottom:6px;text-align:center;flex-shrink:0;
+    }
+    .acfw-slide .acfw-diagram-wrap {
+      flex:1;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;
+    }
+    .acfw-slide .acfw-diagram-svg { width:200px;height:200px; }
+    .acfw-slide .acfw-legend {
+      display:flex;gap:10px;justify-content:center;margin-top:4px;flex-shrink:0;
+    }
+    .acfw-slide .acfw-legend-item {
+      display:flex;align-items:center;gap:4px;font-size:8.5px;color:#64748B;
+    }
+    .acfw-slide .acfw-legend-dot { width:8px;height:8px;border-radius:2px; }
+    .acfw-slide .acfw-footer {
+      display:flex;gap:10px;align-items:center;padding:6px var(--slide-pad-x);font-size:9px;color:#64748B;border-top:1px solid #E2E8F0;flex-shrink:0;
+    }
+    .acfw-slide .acfw-footer strong { color:#30BBB7;font-weight:600; }
+    .acfw-slide .acfw-footer-note { color:#94A3B8; }
+  </style>
+  <div class="slide-divider">↓ &nbsp; Accountant Flywheel</div>
+<div class="slide acfw-slide">
+  <div class="acfw-header">
+    <div class="acfw-header-title">Accountant Flywheel · The Growth Play</div>
+    <div class="acfw-header-date">{{ config.month_label }}</div>
+  </div>
+
+  <div class="acfw-content">
+    <div class="acfw-headline">To accelerate the flywheel, we'll turn <span class="acfw-teal">unlinked SMBs into the<br>channel that recruits their own accountant</span> onto Alegra.</div>
+    <div class="acfw-subheadline">A warm, owned channel that compounds the linked-base advantage shown above — without paying to acquire accountants cold.</div>
+
+    <div class="acfw-bottom-area">
+      <div class="acfw-left-col">
+        <div class="acfw-play-label">The Play — "SMB as a Referral Channel"</div>
+
+        <div class="acfw-play-card">
+          <div class="acfw-play-num">1</div>
+          <div>
+            <div class="acfw-play-title">Warm referral, not cold acquisition</div>
+            <div class="acfw-play-desc">Each SMB introduces the accountant they already work with — a channel we don't pay agencies to source.</div>
+          </div>
+        </div>
+
+        <div class="acfw-play-card">
+          <div class="acfw-play-num">2</div>
+          <div>
+            <div class="acfw-play-title">Aligned incentives, capped cost</div>
+            <div class="acfw-play-desc">The SMB earns a capped reward only when their accountant adopts Alegra and onboards their portfolio. Zero conflict, predictable spend.</div>
+          </div>
+        </div>
+
+        <div class="acfw-play-card">
+          <div class="acfw-play-num">3</div>
+          <div>
+            <div class="acfw-play-title">Leverages the existing engine</div>
+            <div class="acfw-play-desc">Referred accountants enter today's accountant sales motion — no new team, no new playbook.</div>
+          </div>
+        </div>
+
+        <div class="acfw-measure-box">
+          <div class="acfw-measure-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            What We'll Measure
+          </div>
+          <div class="acfw-measure-text"><strong>Net-new accountant-linked SMBs and accountants recruited — not leads.</strong> The target reverses the linking-rate decline shown earlier.</div>
+        </div>
+      </div>
+
+      <div class="acfw-right-col">
+        <div class="acfw-loop-title">The Compounding Loop</div>
+        <div class="acfw-loop-sub">Each turn recruits the next accountant — and their portfolio.</div>
+        <div class="acfw-diagram-wrap">
+          <svg class="acfw-diagram-svg" viewBox="0 0 320 320">
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#30BBB7" opacity="0.6"/>
+              </marker>
+            </defs>
+
+            <!-- Outer orbit circle -->
+            <circle cx="160" cy="160" r="105" fill="none" stroke="#30BBB7" stroke-width="2.5" opacity="0.35"/>
+
+            <!-- Curved arrows between nodes using quadratic bezier -->
+            <!-- SMB (top) → Accountant (right-bottom) -->
+            <path d="M 160,75 Q 235,75 235,140" fill="none" stroke="#30BBB7" stroke-width="2.5" opacity="0.5" marker-end="url(#arrowhead)"/>
+            <!-- Accountant (right-bottom) → Portfolio (left) -->
+            <path d="M 235,180 Q 160,255 85,180" fill="none" stroke="#30BBB7" stroke-width="2.5" opacity="0.5" marker-end="url(#arrowhead)"/>
+            <!-- Portfolio (left) → SMB (top) -->
+            <path d="M 85,140 Q 85,75 160,75" fill="none" stroke="#30BBB7" stroke-width="2.5" opacity="0.5" marker-end="url(#arrowhead)"/>
+
+            <!-- Center circle: Alegra flywheel -->
+            <circle cx="160" cy="160" r="42" fill="#27918F"/>
+            <text x="160" y="155" text-anchor="middle" fill="white" font-size="15" font-weight="700" font-family="Inter, sans-serif">Alegra</text>
+            <text x="160" y="173" text-anchor="middle" fill="white" font-size="11" font-weight="500" opacity="0.9" font-family="Inter, sans-serif">flywheel</text>
+
+            <!-- Top node: SMB refers -->
+            <circle cx="160" cy="55" r="32" fill="#EAF9F9" stroke="#30BBB7" stroke-width="2"/>
+            <text x="160" y="52" text-anchor="middle" fill="#0F172A" font-size="14" font-weight="700" font-family="Inter, sans-serif">SMB</text>
+            <text x="160" y="68" text-anchor="middle" fill="#64748B" font-size="10" font-weight="500" font-family="Inter, sans-serif">refers</text>
+
+            <!-- Right node: Accountant adopts -->
+            <circle cx="235" cy="160" r="32" fill="#EAF9F9" stroke="#30BBB7" stroke-width="2"/>
+            <text x="235" y="157" text-anchor="middle" fill="#0F172A" font-size="11" font-weight="700" font-family="Inter, sans-serif">Accountant</text>
+            <text x="235" y="171" text-anchor="middle" fill="#64748B" font-size="10" font-weight="500" font-family="Inter, sans-serif">adopts</text>
+
+            <!-- Left node: Portfolio onboards -->
+            <circle cx="85" cy="160" r="32" fill="#EAF9F9" stroke="#30BBB7" stroke-width="2"/>
+            <text x="85" y="157" text-anchor="middle" fill="#0F172A" font-size="12" font-weight="700" font-family="Inter, sans-serif">Portfolio</text>
+            <text x="85" y="171" text-anchor="middle" fill="#64748B" font-size="10" font-weight="500" font-family="Inter, sans-serif">onboards</text>
+          </svg>
+        </div>
+        <div class="acfw-legend">
+          <div class="acfw-legend-item"><div class="acfw-legend-dot" style="background:#AEEAE8;"></div>Warm, owned channel</div>
+          <div class="acfw-legend-item"><div class="acfw-legend-dot" style="background:#27918F;"></div>Compounding NRR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="acfw-footer">
+    <div><strong>Front 2 of 2</strong></div>
+    <div class="acfw-footer-note">Front 1 activates accountants already linked but not yet working their clients' accounts.</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -4,3 +4,30 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 previews/
+.state/
+
+# Generado por el pipeline — se regenera en cada corrida, nunca a mano. output/ además
+# depende de NO tener historial de git: F0.12 (board_agent/output_integrity.py) detecta
+# ediciones manuales comparando contra un hash local, precisamente porque git no puede
+# hacerlo acá. Hallazgo 2026-07-14: esto no estaba en .gitignore desde que output/, data/,
+# csv/ y boards/ se movieron a este repo (antes vivían en Template Board, que sí los
+# ignoraba) — output/board_May_2026_v44.html quedó commiteado por error (ya destrackeado,
+# el archivo sigue en disco local).
+output/
+data/metrics.yaml
+data/.metabase_cache.json
+data/.cache_metrics.json
+data/.raw_cache.yaml
+
+# boards/ (versiones publicadas) es salida derivada igual que output/ — versioning.py y
+# phase5_diff.py leen del disco local, no de git, así que no le aporta nada a la
+# herramienta. Ponerlo en git sí tiene costo real: HTML de varios MB por versión, cifras
+# financieras reales, para siempre en el historial. El archivo histórico compartido para
+# el equipo va a vivir en Drive (pendiente de integrar), no acá.
+boards/
+
+# csv/ SÍ se versiona a propósito (decisión 2026-07-14): es el insumo real que Finance
+# entrega vía PR (P&L, y Budget hasta que se migre a Metabase) — mismo criterio que
+# data/editorial/*.yaml. Payback.csv y paises_fx.csv NO están acá porque son basura muerta
+# (reemplazados por Metabase, ver load_fx()/load_payback()) — se borraron directamente en
+# vez de ignorarlos, no tiene sentido "ignorar" un archivo que ya no debería existir.

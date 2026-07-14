@@ -197,49 +197,89 @@ def test_r6_passes_when_fx_impact_is_within_limit(tmp_path):
     assert _results_by_id(results)["R6"].status == "PASS"
 
 
-# ── R7 — dedup de logos vía query RS independiente (mockeada, nunca contra RS real) ─────────
+# ── R7 — dedup de logos vía query MBQL independiente (leída del cache de Metabase) ───────────
 
 @pytest.fixture
-def fake_redshift_guard(monkeypatch):
-    """Mismo patrón que tests/test_phase1_freshness.py — phase4_validator importa
-    redshift_guard de forma diferida dentro de _check_r7_logos_dedup."""
-    fake = types.ModuleType("redshift_guard")
+def fake_metabase_cache(tmp_path, monkeypatch):
+    """Migración 2026-07-10: _check_r7_logos_dedup ya no corre nada en vivo — lee
+    cache["validator"]["R7"]["logos_eop"] de METABASE_CACHE_FILE (poblado por Claude Code
+    vía el MCP de Metabase antes de correr el pipeline)."""
+    import json
+    cache_file = tmp_path / ".metabase_cache.json"
+    monkeypatch.setattr(paths, "METABASE_CACHE_FILE", cache_file)
 
-    def run_query(**kwargs):
-        return {"status": "executed", "statement_id": "fake-id"}
-
-    fake.run_query = run_query
-    fake.fetch_results = lambda sid: [{"logos_eop": 58974}]
-    monkeypatch.setitem(sys.modules, "redshift_guard", fake)
-    return fake
+    def _write(logos_eop=58974, month="2026-05"):
+        cache_file.write_text(json.dumps({"month": month, "validator": {"R7": {"logos_eop": logos_eop}}}),
+                               encoding="utf-8")
+    return _write
 
 
-def test_r7_passes_when_independent_query_matches_reported(tmp_path, fake_redshift_guard):
+def test_r7_passes_when_independent_query_matches_reported(tmp_path, fake_metabase_cache):
+    fake_metabase_cache(logos_eop=58974)
     metrics = _load_fixture()
-    metrics["smb_logos_eop"] = 58974  # coincide con el fake_redshift_guard de arriba
+    metrics["smb_logos_eop"] = 58974  # coincide con el cache de arriba
     results = _write_and_run(tmp_path, metrics)
     r = _results_by_id(results)["R7"]
     assert r.status == "PASS"
     assert "58,974" in r.detail
 
 
-def test_r7_fails_when_independent_query_diverges(tmp_path, fake_redshift_guard):
+def test_r7_fails_when_independent_query_diverges(tmp_path, fake_metabase_cache):
     """Reproduce el caso real validado 2026-07-03 (match exacto 58,974) pero forzando un
     divergencia — ej. metrics.yaml quedó con un valor viejo de una corrida anterior."""
+    fake_metabase_cache(logos_eop=58974)
     metrics = _load_fixture()
-    metrics["smb_logos_eop"] = 59000  # diverge del fake (58974)
+    metrics["smb_logos_eop"] = 59000  # diverge del cache (58974)
     results = _write_and_run(tmp_path, metrics)
     r = _results_by_id(results)["R7"]
     assert r.status == "FAIL"
     assert "diff=" in r.detail
 
 
-def test_r7_skip_when_smb_logos_eop_field_missing(tmp_path):
-    """Sin mockear redshift_guard: el fixture real no tiene smb_logos_eop, así que ni
-    siquiera llega a intentar la query — cae directo a SKIP por KeyError."""
+def test_r7_skip_when_smb_logos_eop_field_missing(tmp_path, fake_metabase_cache):
+    """El fixture real no tiene smb_logos_eop, así que ni siquiera llega a leer el cache —
+    cae directo a SKIP por KeyError."""
+    fake_metabase_cache(logos_eop=58974)
     metrics = _load_fixture()
     results = _write_and_run(tmp_path, metrics)
     assert _results_by_id(results)["R7"].status == "SKIP"
+
+
+def test_r7_skip_when_cache_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(paths, "METABASE_CACHE_FILE", tmp_path / "no-existe.json")
+    metrics = _load_fixture()
+    metrics["smb_logos_eop"] = 58974
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R7"].status == "SKIP"
+
+
+def test_r7_fails_when_cache_is_stale_month(tmp_path, fake_metabase_cache):
+    """Bug corregido 2026-07-14: el cache SÍ existe (no es un 'no aplica'), pero es de otro
+    mes — antes esto caía en el except genérico y daba SKIP; ahora es FAIL, porque es un
+    error real (alguien no refrescó el cache), no una condición de 'no corrió el check'."""
+    fake_metabase_cache(logos_eop=58974, month="2026-04")  # cache viejo, cutoff real es 2026-05
+    metrics = _load_fixture()
+    metrics["smb_logos_eop"] = 58974
+    results = _write_and_run(tmp_path, metrics)
+    r = _results_by_id(results)["R7"]
+    assert r.status == "FAIL"
+    assert "2026-04" in r.detail and "2026-05" in r.detail
+
+
+def test_r7_fails_when_validator_block_missing_from_cache(tmp_path, monkeypatch):
+    """Bug corregido 2026-07-14: cache existe y es del mes correcto, pero nadie corrió la
+    query independiente y pobló cache['validator']['R7'] — antes esto también caía en SKIP
+    (KeyError silencioso); ahora es FAIL, porque el freno de seguridad no se puede saltar."""
+    import json
+    cache_file = tmp_path / ".metabase_cache.json"
+    cache_file.write_text(json.dumps({"month": "2026-05", "queries": {}}), encoding="utf-8")
+    monkeypatch.setattr(paths, "METABASE_CACHE_FILE", cache_file)
+    metrics = _load_fixture()
+    metrics["smb_logos_eop"] = 58974
+    results = _write_and_run(tmp_path, metrics)
+    r = _results_by_id(results)["R7"]
+    assert r.status == "FAIL"
+    assert "validator" in r.detail
 
 
 # ── R11 — completitud del budget CSV en cierre de quarter ────────────────────────────────

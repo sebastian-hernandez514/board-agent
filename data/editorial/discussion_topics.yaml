@@ -1,0 +1,35 @@
+# Discussion Topics — Board {{ config.month_label }}
+# Llenar antes del board. Máximo 3 temas.
+# layout: "two_col" (contexto + propuesta) o "table" (benchmark/comparativa)
+
+topics:
+
+  - title_plain: "Discussion Topic (Por definir)"
+    title: "Discussion Topic<br>(Por definir)"
+    action_title: ""
+    layout: two_col
+    col1_label: ""
+    col1_bullets: []
+    col2_label: ""
+    col2_bullets: []
+    asks: []
+
+  - title_plain: "Discussion Topic 1"
+    title: "Discussion Topic 1"
+    action_title: ""
+    layout: two_col
+    col1_label: ""
+    col1_bullets: []
+    col2_label: ""
+    col2_bullets: []
+    asks: []
+
+  - title_plain: "Discussion Topic 2"
+    title: "Discussion Topic 2"
+    action_title: ""
+    layout: two_col
+    col1_label: ""
+    col1_bullets: []
+    col2_label: ""
+    col2_bullets: []
+    asks: []

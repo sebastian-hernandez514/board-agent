@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alegra Board — Appendix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/base.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+  <style>
+    .section-cover {
+      background: var(--color-navy);
+      justify-content: center;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+    }
+    .section-cover .eyebrow {
+      font-size: 11px; font-weight: 600; color: var(--color-teal);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-cover .section-title {
+      font-size: 42px; font-weight: 700; color: #ffffff;
+      letter-spacing: -1.5px; line-height: 1.05; margin-bottom: 14px;
+    }
+    .section-cover .section-sub {
+      font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.40);
+    }
+    .section-cover .slide-num {
+      position: absolute; bottom: 24px; right: var(--slide-pad-x);
+      font-size: 10px; color: rgba(255,255,255,0.15);
+    }
+
+    /* ── Cohort slides ── */
+    .country-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 12px 36px;
+      flex: 1; min-height: 0;
+    }
+    .country-card {
+      display: flex; flex-direction: column; min-height: 0;
+    }
+    .country-card .c-head {
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 6px;
+    }
+    .country-card .c-title {
+      font-size: 13px; font-weight: 700; color: var(--color-navy);
+      letter-spacing: 1.2px; text-transform: uppercase;
+    }
+    .country-card .chart-wrap { position: relative; flex: 1; min-height: 0; }
+
+    .legend-strip {
+      display: flex; gap: 28px; justify-content: center; align-items: center;
+      padding: 0 0 4px;
+      font-size: 11px; color: var(--color-text-secondary); font-weight: 500;
+      flex-shrink: 0;
+    }
+    .legend-strip .li { display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.3px; }
+    .legend-strip .sw {
+      width: 24px; height: 2.5px; border-radius: 1px; background: var(--color-gold);
+    }
+    .legend-strip .sw.dashed {
+      background: transparent;
+      border-top: 2px dashed #94a3b8;
+      height: 0;
+    }
+
+    .delta-chip {
+      display: inline-flex; align-items: center; padding: 1px 7px;
+      border-radius: 99px; font-size: 9.5px; font-weight: 700;
+      letter-spacing: 0.2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .delta-chip.up   { background: #dcfce7; color: #16a34a; }
+    .delta-chip.down { background: #ffedd5; color: #C2410C; }
+    .delta-chip.flat { background: #f1f5f9; color: #64748b; }
+
+    .insight-box {
+      background: #f0fdfa;
+      border-left: 3px solid var(--color-teal);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 16px;
+      font-size: 11.5px;
+      color: var(--color-text-secondary);
+      line-height: 1.55;
+      flex-shrink: 0;
+    }
+    .insight-box strong { color: var(--color-text-primary); font-weight: 600; }
+    .insight-box .so-what {
+      display: inline-block;
+      font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--color-teal);
+      margin-right: 8px;
+    }
+
+    /* ── Churn by Tenure slides ── */
+    .block-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #1e3a8a;
+      padding-bottom: 8px; border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .block-label .legend-inline { font-weight: 500; letter-spacing: 0; text-transform: none; }
+    .churn-chart-wrap { position: relative; flex: 1; min-height: 0; width: 100%; height: 390px; }
+    .legend-inline { display: flex; flex-wrap: nowrap; gap: 14px; align-items: center; flex-shrink: 0; white-space: nowrap; }
+    .legend-inline .li { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--color-text-secondary); font-weight: 500; white-space: nowrap; }
+    .legend-inline .lb { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       SLIDE 1 — Section Cover
+       ============================================================ -->
+  <div class="slide section-cover">
+    <div class="eyebrow">Section 08</div>
+    <div class="section-title">Appendix</div>
+    <div class="section-sub">{{ config.quarter_label }}</div>
+    <div class="slide-num">1</div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 2 — Churn by Tenure: Global
+       ============================================================ -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="title">Churned companies breakdown by months since joining · GLO</span>
+    </div>
+    <div class="slide-body">
+      <div class="block-label">
+        <span>Companies churned per month · stacked by tenure at time of churn</span>
+        <span class="legend-inline" id="leg-global"></span>
+      </div>
+      <div class="churn-chart-wrap"><canvas id="chart-global"></canvas></div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">3</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 4 — Churn by Tenure: Core
+       ============================================================ -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="title">Churned companies breakdown by months since joining · CORE</span>
+    </div>
+    <div class="slide-body">
+      <div class="block-label">
+        <span>Core companies churned per month · stacked by tenure at time of churn</span>
+        <span class="legend-inline" id="leg-core"></span>
+      </div>
+      <div class="churn-chart-wrap"><canvas id="chart-core"></canvas></div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">4</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 5 — Churn by Tenure: Lite
+       ============================================================ -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="title">Churned companies breakdown by months since joining · LITE</span>
+    </div>
+    <div class="slide-body">
+      <div class="block-label">
+        <span>Lite companies churned per month · stacked by tenure at time of churn</span>
+        <span class="legend-inline" id="leg-lite"></span>
+      </div>
+      <div class="churn-chart-wrap"><canvas id="chart-lite"></canvas></div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">5</span>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+
+      const MONTHS = {{ metrics.churn_tenure.months | tojson }};
+      const BRACKETS = ["M1-M3","M4-M6","M7-M9","M10-M12","M13+"];
+
+      const DATA = {
+        Global: {{ metrics.churn_tenure.data.Global | tojson }},
+        Core: {{ metrics.churn_tenure.data.Core | tojson }},
+        Lite: {{ metrics.churn_tenure.data.Lite | tojson }}
+      };
+
+      const FILL        = ['#e2e8f0','#93c5fd','#3b82f6','#1d4ed8','#1e3a8a'];
+      const LABEL_COLOR = ['#334155','#1e3a8a','#ffffff','#ffffff','#ffffff'];
+
+      function buildLegend(id) {
+        const el = document.getElementById(id);
+        BRACKETS.forEach((b, i) => {
+          el.insertAdjacentHTML('beforeend',
+            `<span class="li"><span class="lb" style="background:${FILL[i]}"></span>${b}</span>`);
+        });
+      }
+
+      function computeShares(segData) {
+        const totals = MONTHS.map((_, i) =>
+          BRACKETS.reduce((sum, b) => sum + (segData[b][i] || 0), 0)
+        );
+        const shares = {};
+        BRACKETS.forEach(b => {
+          shares[b] = segData[b].map((v, i) => totals[i] > 0 ? (v / totals[i]) * 100 : 0);
+        });
+        return { totals, shares };
+      }
+
+      function buildChart(canvasId, seg) {
+        const segData = DATA[seg];
+        const { totals, shares } = computeShares(segData);
+        const datasets = BRACKETS.map((b, i) => ({
+          label: b,
+          data: segData[b],
+          backgroundColor: FILL[i],
+          borderWidth: 0,
+          borderRadius: 1,
+          stack: 'stack',
+          maxBarThickness: 42,
+          categoryPercentage: 0.78,
+          barPercentage: 0.9,
+          _totals: totals,
+          _shares: shares[b],
+          datalabels: {
+            display: ctx => shares[b][ctx.dataIndex] >= 5,
+            color: LABEL_COLOR[i],
+            font: { size: 9.5, weight: '600', family: 'Inter' },
+            formatter: (v, ctx) => {
+              const s = shares[b][ctx.dataIndex];
+              return s > 0 ? s.toFixed(0) + '%' : '';
+            }
+          }
+        }));
+
+        const canvas = document.getElementById(canvasId);
+        canvas.width  = canvas.parentElement.offsetWidth || 848;
+        canvas.height = 390;
+        new Chart(canvas, {
+          type: 'bar',
+          data: { labels: MONTHS, datasets: datasets },
+          options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 10, right: 4, bottom: 0 } },
+            interaction: { mode: 'index', intersect: false, axis: 'x' },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                enabled: true, backgroundColor: '#0f172b', padding: 12,
+                titleFont: { size: 12, weight: '600' }, titleColor: '#ffffff',
+                bodyFont: { size: 11 }, bodyColor: '#ffffff',
+                displayColors: true, boxPadding: 4, cornerRadius: 6,
+                borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+                callbacks: {
+                  label: ctx => {
+                    const val = ctx.raw;
+                    const total = ctx.dataset._totals[ctx.dataIndex];
+                    const pct = total > 0 ? (val / total * 100) : 0;
+                    return `  ${ctx.dataset.label}: ${val.toLocaleString()}  (${pct.toFixed(1)}%)`;
+                  },
+                  footer: items => `  Total: ${items[0].dataset._totals[items[0].dataIndex].toLocaleString()}`
+                },
+                footerFont: { size: 11, weight: '600' }, footerColor: '#1e3a8a', footerMarginTop: 6
+              }
+            },
+            scales: {
+              x: {
+                stacked: true,
+                grid: { display: false },
+                border: { display: false },
+                ticks: { font: { size: 10 }, color: '#94a3b8', maxRotation: 0 }
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                grid: { color: '#f1f5f9', drawBorder: false },
+                border: { display: false },
+                ticks: {
+                  font: { size: 10 }, color: '#94a3b8',
+                  callback: v => v.toLocaleString()
+                }
+              }
+            }
+          }
+        });
+      }
+
+      buildLegend('leg-global');
+      buildLegend('leg-core');
+      buildLegend('leg-lite');
+
+      buildChart('chart-global', 'Global');
+      buildChart('chart-core',   'Core');
+      buildChart('chart-lite',   'Lite');
+    })();
+  </script>
+
+</body>
+</html>

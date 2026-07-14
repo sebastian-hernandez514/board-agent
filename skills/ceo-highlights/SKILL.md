@@ -33,7 +33,7 @@ pasó mal, el resumen financiero), la skill solo las escribe en el formato y arc
 
 ## Contexto — el archivo y cómo se usa
 
-Todo vive en `Template Board/data/editorial/ceo.yaml`. El template (`1_inicio.j2`, slide 2) lo
+Todo vive en `data/editorial/ceo.yaml`. El template (`1_inicio.j2`, slide 2) lo
 lee así:
 - `ceo_title` → título de la slide (casi nunca cambia: "CEO Highlights & Lowlights").
 - `highlights` → lista de strings, columna izquierda.
@@ -84,7 +84,7 @@ lee así:
 ## Ejecución
 
 ```bash
-cd "/Users/sebastian_alegra/Alegra IA/Template Board"
+cd "/Users/sebastian_alegra/Alegra IA/Board Agent"
 uv run --with jinja2 --with pyyaml python3 scripts/generate.py --template 1_inicio
 ```
 

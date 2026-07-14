@@ -40,13 +40,19 @@ Cada slide del board vive repartida en 3 lugares:
 
 | Capa | Qué es | Ejemplo |
 |---|---|---|
-| **Template** (`Template Board/templates/*.j2`) | HTML + Jinja2, define el diseño | `3_arr_walk.j2` |
-| **Datos calculados** (`metrics.yaml`) | Lo que arma `fetch_metrics.py` desde Redshift | `metrics.arr_walk_products` |
+| **Template** (`templates/*.j2`) | HTML + Jinja2, define el diseño | `3_arr_walk.j2` |
+| **Datos calculados** (`metrics.yaml`) | Lo que arma `fetch_metrics.py` desde el cache de Metabase | `metrics.arr_walk_products` |
 | **Datos editoriales** (`data/editorial/*.yaml`, o sentinels en el propio `.j2`) | Texto que una persona escribe | `arr_walk.yaml` → `asks` |
 
 Un comentario/título persiste correctamente **solo si vive en la capa 2 o 3** — nunca edites
 `output/*.html` a mano, se pierde en la próxima regeneración (ver `memory/project_board_agent.md`,
 es exactamente el bug que se pasó media sesión arreglando el 2026-07-08).
+
+**Desde 2026-07-10 esto ya no depende solo de seguir esta regla:** F0.12 (`board_agent/output_integrity.py`)
+detecta automáticamente si algún `output/*.html` fue editado a mano después de la última
+generación y bloquea (FAIL) la siguiente corrida antes de que `generate.py` lo sobrescriba —
+con backup del archivo editado en `output/.manual-edits-backup/`. Si alguien viola la regla de
+arriba, el pipeline avisa en vez de perder el cambio en silencio.
 
 ---
 
@@ -57,9 +63,9 @@ Preguntar: ¿cuál slide (nombre o descripción)? ¿qué querés cambiar — un 
 agregar una slide nueva? ¿el contenido exacto?
 
 ### Paso 2 — Localizar la slide
-Buscar en los 8 templates de `Template Board/templates/`:
+Buscar en los 8 templates de `templates/`:
 ```bash
-grep -n "SLIDE.*<nombre o palabra clave>" Template\ Board/templates/*.j2
+grep -n "SLIDE.*<nombre o palabra clave>" templates/*.j2
 ```
 Los comentarios HTML (`<!-- SLIDE N — ... -->`) son el ancla — ya los usa Board Agent
 (`R19`, `F3.6`, `F3.7`, `F3.8`) para ubicar slides sin clase propia.
@@ -77,8 +83,8 @@ No reinventes estos 3 — ya están probados y documentados.
 
 ### Paso 4 — Caso nuevo: construir el enganche
 
-Esto **sí toca el `.j2` fuente de Template Board** — es la única excepción real a "no tocar
-Template Board", y requiere ir con cuidado:
+Esto **sí toca el `.j2` fuente del template** — es la única excepción real a "no editar el
+`.j2` a la ligera", y requiere ir con cuidado:
 
 1. **Leer el archivo completo alrededor de la slide** — nunca editar a ciegas.
 2. **Decidir dónde vive el texto nuevo:**
@@ -96,11 +102,11 @@ Template Board", y requiere ir con cuidado:
    mismo sentinel `<!-- updated_for_month: YYYY-MM -->` y una entrada nueva en
    `board_agent/slide_registry.py` (`SLIDE_SPECS`) — así queda cubierto por Fase 0/3
    automáticamente, sin escribir una función nueva.
-6. **Avisar explícitamente antes de escribir en el `.j2`** — es un cambio a Template Board,
+6. **Avisar explícitamente antes de escribir en el `.j2`** — es un cambio al template fuente,
    igual que se hizo con los sentinels de Discussion Topics/Headcount. No asumas luz verde.
 7. **Regenerar y verificar visualmente antes de dar por bueno:**
    ```bash
-   cd "Template Board"
+   cd "Board Agent"
    uv run --with jinja2 --with pyyaml python3 scripts/generate.py --template <nombre>
    ```
    Después, usar `preview.py` (Board Agent) o Playwright directo para screenshotear la slide
@@ -150,4 +156,4 @@ Caso más delicado — checklist adicional:
   100% mecánico, cada slide tiene su propio layout.
 - No decide por su cuenta si algo "debería" ser editable — si el equipo pide tocar algo que
   hoy está deliberadamente congelado (ej. la tabla de ARR Walk GLO, marcada "NO CAMBIAR" en
-  `Template Board/CLAUDE.md`), avisar eso explícitamente antes de proceder.
+  `CLAUDE.md`), avisar eso explícitamente antes de proceder.

@@ -33,7 +33,7 @@ lo escribe en el YAML correcto con el formato correcto.
 
 ## Contexto — dónde vive y cómo se conecta
 
-Archivo: `Template Board/data/editorial/arr_walk.yaml`, bajo `products` (uno por `id: core` /
+Archivo: `data/editorial/arr_walk.yaml`, bajo `products` (uno por `id: core` /
 `id: lite`):
 
 ```yaml
@@ -105,7 +105,7 @@ tiene su propio layout y puede romperse distinto.
 ## Ejecución
 
 ```bash
-cd "/Users/sebastian_alegra/Alegra IA/Template Board"
+cd "/Users/sebastian_alegra/Alegra IA/Board Agent"
 uv run --with jinja2 --with pyyaml python3 scripts/generate.py --template 3_arr_walk
 ```
 

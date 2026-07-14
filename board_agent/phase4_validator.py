@@ -35,7 +35,6 @@ historial.
 import csv
 import json
 import re
-import sys
 from pathlib import Path
 
 import yaml
@@ -332,41 +331,54 @@ def _count_slides(html_path: Path) -> int:
     return count
 
 
+_R7_LABEL = "Logos EoP = COUNT DISTINCT dedup (verificación independiente)"
+
+
 def _check_r7_logos_dedup(metrics: dict) -> CheckResult:
-    """Verifica smb_logos_eop vía COUNT(DISTINCT id_company) en RS — el mismo filtro que usa
-    _SQL_LOGOS_ALL en fetch_metrics.py, pero corrido de forma independiente (Board Agent no
-    reusa el código de Template Board). Validado 2026-07-03 contra mayo-26 real: match exacto
-    58,974 = 58,974."""
+    """Verifica smb_logos_eop contra un segundo conteo (COUNT DISTINCT id_company) que
+    Claude Code escribe a mano en cache["validator"]["R7"] junto con el resto del cache del
+    mes. Validado 2026-07-03 contra mayo-26 real: match exacto 58,974 = 58,974.
+
+    OJO — desde la migración a Metabase (2026-07-10) esto ya NO es una verificación
+    verdaderamente independiente: antes corría una query en vivo contra Redshift en el
+    momento de validar; ahora lee un número que la MISMA persona escribió en la MISMA
+    sesión manual que los datos primarios (ver board_agent/metabase_fetch_spec.py). No
+    protege contra un error de transcripción que se repita en ambos lados — sigue siendo
+    útil como chequeo de consistencia de doble entrada, pero no hay que confiar en el
+    nombre "independiente" al pie de la letra.
+
+    Bug corregido 2026-07-14: antes CUALQUIER excepción (cache no existe, falta
+    smb_logos_eop, mes no coincide, falta cache["validator"]["R7"]) caía en el mismo except
+    y devolvía SKIP — que en este validador se lee como "no aplica", no como "este freno
+    falló". Ahora solo se SKIPea cuando falta un prerequisito genuino para intentar el
+    check (metrics.yaml sin el campo, o el cache todavía no existe); si el cache SÍ existe
+    pero está desactualizado o nunca se pobló cache["validator"]["R7"], es FAIL — es un
+    error real, no un "no aplica"."""
     try:
         reported = int(metrics["smb_logos_eop"])
         cutoff = metrics["cutoff_month"]
-        sys.path.insert(0, str(paths.REDSHIFT_GUARD_MODULE_DIR))
-        from redshift_guard import fetch_results, run_query
+    except (KeyError, TypeError, ValueError) as e:
+        return CheckResult("R7", _R7_LABEL, "SKIP", f"metrics.yaml no tiene el campo necesario: {e}")
 
-        sql = f"""
-            SELECT COUNT(DISTINCT id_company) AS logos_eop
-            FROM dwh_facts.fact_customers_mrr
-            WHERE date_month = DATE '{cutoff}-01'
-              AND segment_type_def IN ('Core','Lite')
-              AND event_product NOT IN ('AWAITING PAYMENT','CHURN')
-              AND amount_usd_mrr > 0
-              AND plan_name IS NOT NULL AND plan_name <> ''
-        """
-        result = run_query(sql=sql, database=paths.RS_DATABASE, cluster_identifier=paths.RS_CLUSTER,
-                            db_user=paths.RS_DB_USER)
-        if result["status"] != "executed":
-            raise RuntimeError(f"query no se ejecutó: {result}")
-        rows = fetch_results(result["statement_id"])
-        independent = int(rows[0]["logos_eop"])
-        diff = reported - independent
-        status = "PASS" if diff == 0 else "FAIL"
-        return CheckResult(
-            "R7", "Logos EoP = COUNT DISTINCT dedup (verificación RS independiente)", status,
-            f"metrics.yaml={reported:,} vs RS independiente={independent:,} (diff={diff:+,})",
-        )
+    if not paths.METABASE_CACHE_FILE.exists():
+        return CheckResult("R7", _R7_LABEL, "SKIP", f"no existe {paths.METABASE_CACHE_FILE.name} todavía")
+
+    try:
+        cache = json.loads(paths.METABASE_CACHE_FILE.read_text(encoding="utf-8"))
+        if cache.get("month") != cutoff:
+            return CheckResult("R7", _R7_LABEL, "FAIL",
+                                f"cache de Metabase es de '{cache.get('month')}', se esperaba '{cutoff}' "
+                                "— refrescar el cache antes de validar")
+        independent = int(cache["validator"]["R7"]["logos_eop"])
     except Exception as e:
-        return CheckResult("R7", "Logos EoP = COUNT DISTINCT dedup (verificación RS independiente)", "SKIP",
-                            f"error: {e}")
+        return CheckResult("R7", _R7_LABEL, "FAIL",
+                            f"cache['validator']['R7'] mal formado o ausente ({e}) — correr la query "
+                            "independiente vía Metabase y agregarla al cache antes de validar")
+
+    diff = reported - independent
+    status = "PASS" if diff == 0 else "FAIL"
+    return CheckResult("R7", _R7_LABEL, status,
+                        f"metrics.yaml={reported:,} vs Metabase independiente={independent:,} (diff={diff:+,})")
 
 
 _R17_PLACEHOLDER_VALUES = (None, "", "N/A", "n/a")

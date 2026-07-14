@@ -5,21 +5,22 @@ un board, sobre todo si es tu primera vez.
 No crea, corrige ni instala nada. Solo diagnostica y separa dos problemas que se confunden
 fácil (encontrado simulando el flujo de junio-26 desde cero, ver memory/project_board_agent.md):
 
-  1. Herramientas/accesos que TE faltan a ti (uv, AWS CLI, sesión SSO).
+  1. Herramientas que TE faltan a ti (uv) o el cache de Metabase que Claude Code debe poblar
+     antes de correr el pipeline (ver board_agent/metabase_fetch_spec.py — migración 2026-07-10,
+     ya no hace falta AWS CLI ni sesión SSO, Board Agent no se conecta a Redshift).
   2. Fuentes de datos que están desactualizadas — esto NO es un problema del agente ni tuyo,
      es que alguien (ver el RACI en el Playbook de la wiki) todavía no actualizó su fuente
      ese mes. Si ves un FAIL/WARN acá, avísale a esa persona en vez de asumir que algo se rompió.
 
 Uso:
-    uv run --with boto3 --with pyyaml python check_setup.py --month 2026-06
+    uv run --with pyyaml python check_setup.py --month 2026-06
 """
 
 import argparse
 import shutil
-import subprocess
 import sys
 
-from board_agent import phase0_gate, phase1_freshness
+from board_agent import paths, phase0_gate, phase1_freshness
 from board_agent.report import CheckResult, print_report
 
 
@@ -31,14 +32,12 @@ def _check_uv() -> CheckResult:
                         "instalar desde https://docs.astral.sh/uv/getting-started/installation/")
 
 
-def _check_aws_cli() -> CheckResult:
-    try:
-        proc = subprocess.run(["aws", "--version"], capture_output=True, text=True, timeout=10)
-    except FileNotFoundError:
-        return CheckResult("S.2", "AWS CLI instalado", "FAIL",
-                            "comando 'aws' no encontrado — instalar AWS CLI v2 (pedir ayuda a Sebastián si es la primera vez)")
-    detail = (proc.stdout or proc.stderr).strip()
-    return CheckResult("S.2", "AWS CLI instalado", "PASS", detail)
+def _check_metabase_cache_exists() -> CheckResult:
+    if paths.METABASE_CACHE_FILE.exists():
+        return CheckResult("S.2", "Cache de Metabase poblado", "PASS", str(paths.METABASE_CACHE_FILE))
+    return CheckResult("S.2", "Cache de Metabase poblado", "FAIL",
+                        f"no existe {paths.METABASE_CACHE_FILE} — pedile a Claude Code que corra las "
+                        "queries MBQL del mes objetivo vía el MCP de Metabase (ver metabase_fetch_spec.py)")
 
 
 def main() -> int:
@@ -48,7 +47,7 @@ def main() -> int:
 
     print(f"Board Agent — chequeo de arranque para {args.month}\n")
 
-    setup_results = [_check_uv(), _check_aws_cli()]
+    setup_results = [_check_uv(), _check_metabase_cache_exists()]
     setup_ok = print_report("HERRAMIENTAS Y ACCESOS", setup_results)
 
     if not setup_ok:
@@ -60,7 +59,7 @@ def main() -> int:
     print_report("CONTENIDO EDITORIAL (Fase 0)", gate_results)
 
     freshness_results = phase1_freshness.run(args.month)
-    print_report("FUENTES DE DATOS EN REDSHIFT (Fase 1)", freshness_results)
+    print_report("FUENTES DE DATOS EN METABASE (Fase 1)", freshness_results)
 
     n_fail = sum(1 for r in gate_results + freshness_results if r.status == "FAIL")
     n_warn = sum(1 for r in gate_results + freshness_results if r.status == "WARN")
@@ -75,7 +74,7 @@ def main() -> int:
               f"del board puede salir con datos viejos o contenido sin llenar. Revisar antes de publicar.")
     else:
         print("✅ Todo listo — puedes correr el flujo completo:")
-        print(f"   uv run --with boto3 --with pyyaml python run.py --month {args.month}")
+        print(f"   uv run --with pyyaml python run.py --month {args.month}")
     return 1 if n_fail else 0
 
 

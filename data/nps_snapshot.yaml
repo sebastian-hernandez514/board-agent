@@ -1,0 +1,52 @@
+# NPS — snapshot asistido desde Amplitude (6_rd.j2, slide "NPS Alegra Accounting")
+#
+# fetch_metrics.py no puede llamar al MCP de Amplitude directamente (solo existe dentro de
+# una sesión de Claude Code) — decisión del usuario 2026-07-06: actualizar este YAML una vez
+# al mes en una sesión de Claude en vez de tomar screenshots. Ver Template Board/CLAUDE.md
+# sección "Template 6 — NPS" para el procedimiento exacto y el mapeo chart→campo.
+#
+# Dashboard fuente: https://app.amplitude.com/analytics/alegra/dashboard/jvmfiss8
+# ("Performance NPS Alegra All products", appId 496026 "Alegra - Production")
+#
+# Estructura por mes (YYYY-MM):
+#   score: NPS global del mes (chart "Evolutivo NPS general", te3hpyxp)
+#   responses: total de respuestas del mes (solo si se consulta ese mes puntual — opcional)
+#   distribution: {promoters_pct/n, passives_pct/n, detractors_pct/n} (chart 1yhusamz, solo mes de corte)
+#   by_country: {colombia, mexico, dom_rep, costa_rica} — NPS score por país
+#     (charts o1t24q2y=Colombia, sx2n44r0=Mexico, 6rkocooq=Dom.Rep, k67mnwk8=Costa Rica)
+#
+# Solo el mes de corte necesita responses/distribution completos (se muestran en el Hero y
+# la Distribution de la slide) — los meses anteriores solo se usan para el trend MoM/vs-3-meses,
+# que únicamente necesita "score" y "by_country".
+
+"2026-03":
+  score: 48.8
+  by_country:
+    colombia: 49.2
+    mexico: 30.8
+    dom_rep: 62.5
+    costa_rica: null   # sin dato ese mes
+
+"2026-04":
+  score: 41.6
+  by_country:
+    colombia: 40.9
+    mexico: 45.5
+    dom_rep: 55.9
+    costa_rica: 21.4
+
+"2026-05":
+  score: 46.5
+  responses: 1295
+  distribution:
+    promoters_pct: 64.7
+    promoters_n: 846
+    passives_pct: 14.9
+    passives_n: 195
+    detractors_pct: 19.4
+    detractors_n: 254
+  by_country:
+    colombia: 47.4
+    mexico: 52.4
+    dom_rep: 54.3
+    costa_rica: 30.2

@@ -1,0 +1,92 @@
+# P&L overrides manuales — cuando el CSV no tiene filas para el mes de corte.
+# Fuente: dashboard financiero Finance (capturas SS).
+# Formato: YYYY-MM → variables exactas que se inyectan en metrics.yaml.
+
+"2026-04":
+  # ── Monthly Performance (slide 4) ──────────────────────────────────────────
+  net_revenue:                      "$2.4M"
+  net_revenue_mom:                  "+2.7%"
+  net_revenue_mom_positive:         true
+  net_revenue_vs_budget:            "+8.0%"
+  net_revenue_vs_budget_positive:   true
+  net_revenue_yoy:                  "+31.5%"
+  net_revenue_yoy_positive:         true
+
+  gross_margin:                     "81.3%"
+  gross_margin_mom:                 "+0.2pp"
+  gross_margin_vs_budget:           "+0.5pp"
+  gross_margin_vs_budget_positive:  true
+  gross_margin_yoy:                 "-0.6pp"
+  gross_margin_yoy_positive:        false
+
+  ebitda_margin:                    "10.8%"
+  ebitda_margin_mom:                "+0.4pp"
+  ebitda_margin_mom_positive:       true
+  ebitda_margin_vs_budget:          "+12.2pp"
+  ebitda_margin_vs_budget_positive: true
+  ebitda_margin_yoy:                "+17.8pp"
+  ebitda_margin_yoy_positive:       true
+
+  # ── YTD Performance (slide 5) ───────────────────────────────────────────────
+  net_revenue_ytd:                       "$9.4M"
+  net_revenue_ytd_vs_budget:             "+7.2%"
+  net_revenue_ytd_vs_budget_positive:    true
+  net_revenue_ytd_yoy:                   "+31.6%"
+  net_revenue_ytd_yoy_positive:          true
+
+  gross_margin_ytd:                      "81.7%"
+  gross_margin_ytd_vs_budget:            "+0.9pp"
+  gross_margin_ytd_vs_budget_positive:   true
+  gross_margin_ytd_yoy:                  "+0.5pp"
+  gross_margin_ytd_yoy_positive:         true
+
+  ebitda_ytd:                            "$970K"
+  ebitda_ytd_vs_budget:                  "+485.6%"
+  ebitda_ytd_vs_budget_positive:         true
+  ebitda_ytd_yoy:                        "+207.5%"
+  ebitda_ytd_yoy_positive:               true
+
+"2026-05":
+  # ── Monthly Performance (slide 4) ──────────────────────────────────────────
+  net_revenue:                      "$2.4M"
+  net_revenue_mom:                  "-1.6%"
+  net_revenue_mom_positive:         false
+  net_revenue_vs_budget:            "+3.5%"
+  net_revenue_vs_budget_positive:   true
+  net_revenue_yoy:                  "+26.6%"
+  net_revenue_yoy_positive:         true
+
+  gross_margin:                     "80.9%"
+  gross_margin_mom:                 "-0.4pp"
+  gross_margin_mom_positive:        false
+  gross_margin_vs_budget:           "-0.3pp"
+  gross_margin_vs_budget_positive:  false
+  gross_margin_yoy:                 "-0.7pp"
+  gross_margin_yoy_positive:        false
+
+  ebitda_margin:                    "7.7%"
+  ebitda_margin_mom:                "-3.1pp"
+  ebitda_margin_mom_positive:       false
+  ebitda_margin_vs_budget:          "+4.8pp"
+  ebitda_margin_vs_budget_positive: true
+  ebitda_margin_yoy:                "+17.9pp"
+  ebitda_margin_yoy_positive:       true
+
+  # ── YTD Performance (slide 5) ───────────────────────────────────────────────
+  net_revenue_ytd:                       "$11.7M"
+  net_revenue_ytd_vs_budget:             "+6.4%"
+  net_revenue_ytd_vs_budget_positive:    true
+  net_revenue_ytd_yoy:                   "+30.5%"
+  net_revenue_ytd_yoy_positive:          true
+
+  gross_margin_ytd:                      "81.5%"
+  gross_margin_ytd_vs_budget:            "+0.6pp"
+  gross_margin_ytd_vs_budget_positive:   true
+  gross_margin_ytd_yoy:                  "+0.3pp"
+  gross_margin_ytd_yoy_positive:         true
+
+  ebitda_ytd:                            "$1.2M"
+  ebitda_ytd_vs_budget:                  "+721.8%"
+  ebitda_ytd_vs_budget_positive:         true
+  ebitda_ytd_yoy:                        "+205.2%"
+  ebitda_ytd_yoy_positive:               true

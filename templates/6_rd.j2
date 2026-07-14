@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alegra Board — R&D Investment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/base.css">
+  <style>
+    .section-cover {
+      background: var(--color-navy);
+      justify-content: center;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+    }
+    .section-cover .eyebrow {
+      font-size: 11px; font-weight: 600; color: var(--color-teal);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-cover .section-title {
+      font-size: 42px; font-weight: 700; color: #ffffff;
+      letter-spacing: -1.5px; line-height: 1.05; margin-bottom: 14px;
+    }
+    .section-cover .section-sub {
+      font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.40);
+    }
+    .section-cover .slide-num {
+      position: absolute; bottom: 24px; right: var(--slide-pad-x);
+      font-size: 10px; color: rgba(255,255,255,0.15);
+    }
+    /* ── Product Performance table ── */
+    .pp-body {
+      flex: 1; padding: 8px 56px 8px;
+      display: flex; flex-direction: column; gap: 4px; overflow: hidden;
+    }
+    .pp-table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; }
+    .pp-table thead th {
+      text-align: right; font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8;
+      padding: 2px 7px 4px; white-space: nowrap;
+      border-bottom: 1.5px solid #e2e8f0;
+    }
+    .pp-table thead th:first-child { text-align: left; padding-left: 4px; min-width: 170px; }
+    .pp-section td {
+      font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 700;
+      color: #0d9488; background: #f0fdfa; padding: 2px 7px;
+      border-top: 1.5px solid #e2e8f0; border-bottom: 1px solid #ccfbf1;
+      letter-spacing: 0.3px; text-transform: uppercase;
+    }
+    .pp-product td {
+      font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 600;
+      color: #0f172b; background: #f8fafc; padding: 2px 7px;
+      border-top: 1.5px solid #e2e8f0; border-bottom: 0.5px solid #e2e8f0;
+      text-align: right;
+    }
+    .pp-product td:first-child { text-align: left; }
+    .pp-metric td {
+      font-size: 10px; color: #64748b; padding: 1px 7px;
+      border-bottom: 1px solid #f1f5f9; text-align: right; white-space: nowrap;
+    }
+    .pp-metric td:first-child { text-align: left; font-style: italic; padding-left: 12px; }
+    .pp-gap td { padding: 1px 0; border: none; }
+    .pp-total td {
+      font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 600;
+      color: #0f172b; padding: 2px 7px; text-align: right;
+      border-top: 1.5px solid #e2e8f0; border-bottom: 0.5px solid #e2e8f0;
+    }
+    .pp-total td:first-child { text-align: left; }
+    .pp-teal  { color: #0d9488 !important; }
+    .pp-blue  { color: #185FA5 !important; }
+    .pp-red   { color: #C04828 !important; }
+
+    .placeholder-inner {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px;
+    }
+    .placeholder-label {
+      font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1;
+    }
+    .placeholder-note { font-size: 12px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       SLIDE 1 — Section Cover
+       ============================================================ -->
+  <div class="slide section-cover">
+    <div class="eyebrow">Section 06</div>
+    <div class="section-title">R&amp;D Investment</div>
+    <div class="section-sub">{{ config.quarter_label }}</div>
+    <div class="slide-num">1</div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 2 — Product Performance
+       ============================================================ -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="title">Product Performance — Active Subscriptions & Churn by Product</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div class="pp-body">
+      <table class="pp-table">
+        <thead>
+          <tr>
+            <th></th>
+            {% for m in metrics.rd.months %}<th>{{ m }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="pp-section"><td colspan="7">Active Subscriptions (Thousands)</td></tr>
+
+          {% for product in metrics.rd.products %}
+          <tr class="pp-product">
+            <td>{{ product.name }}</td>
+            {% for v in product.eop_subs %}<td>{{ v }}</td>{% endfor %}
+          </tr>
+          <tr class="pp-metric"><td>% of total Logos</td>{% for v in product.pct_logos %}<td class="pp-teal">{{ v }}</td>{% endfor %}</tr>
+          <tr class="pp-metric"><td>Churn rate %</td>{% for v in product.churn_rate %}<td class="pp-teal">{{ v }}</td>{% endfor %}</tr>
+          <tr class="pp-metric"><td>Avg Ticket New Additions</td>{% for v in product.avg_ticket %}<td class="pp-blue">{{ v }}</td>{% endfor %}</tr>
+          <tr class="pp-metric"><td>% of Core Subscribers</td>{% for v in product.pct_core %}<td class="pp-red">{{ v }}</td>{% endfor %}</tr>
+          <tr class="pp-gap"><td colspan="7"></td></tr>
+          {% endfor %}
+
+          <tr class="pp-total"><td>Total Subscriptions (K)</td>{% for v in metrics.rd.total_subs %}<td>{{ v }}</td>{% endfor %}</tr>
+          <tr class="pp-total"><td>Total Logos (K)</td>{% for v in metrics.rd.total_logos_k %}<td>{{ v }}</td>{% endfor %}</tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">2</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDE 3 — NPS Alegra
+       ============================================================ -->
+  <div class="slide">
+    <div class="slide-header">
+      <span class="title">NPS Alegra Accounting</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div class="slide-body" style="padding:10px 20px 8px; flex-direction:row; gap:14px; overflow:hidden;">
+
+      <!-- LEFT PANEL -->
+      <div style="flex:0 0 42%; display:flex; flex-direction:column; gap:7px; min-height:0; overflow:hidden;">
+
+        <!-- Hero: score + responses -->
+        <div style="display:flex; gap:7px; flex-shrink:0;">
+          <div style="flex:1; background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:9px 14px;">
+            <div style="font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-secondary);">NPS Alegra</div>
+            <div style="font-size:30px; font-weight:800; color:var(--color-text-primary); line-height:1.1; margin-top:1px;">{{ metrics.nps.score }}</div>
+          </div>
+          <div style="flex:1; background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:9px 14px;">
+            <div style="font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-secondary);">Responses</div>
+            <div style="font-size:30px; font-weight:800; color:var(--color-text-primary); line-height:1.1; margin-top:1px;">{{ metrics.nps.responses }}</div>
+          </div>
+        </div>
+
+        <!-- Distribution -->
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:8px 12px; flex-shrink:0;">
+          <div style="font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-secondary); margin-bottom:6px;">Distribution</div>
+          {% for label, pct, n, color in [('Promoters', metrics.nps.promoters_pct, metrics.nps.promoters_n, '#16a34a'),
+                                           ('Passives',  metrics.nps.passives_pct,  metrics.nps.passives_n,  '#f59e0b'),
+                                           ('Detractors', metrics.nps.detractors_pct, metrics.nps.detractors_n, '#dc2626')] %}
+          <div style="display:flex; align-items:center; gap:7px; {% if not loop.last %}margin-bottom:4px;{% endif %}">
+            <div style="font-size:10.5px; color:var(--color-text-secondary); width:68px; flex-shrink:0;">{{ label }}</div>
+            <div style="flex:1; height:7px; background:var(--color-border); border-radius:3px; overflow:hidden;"><div style="width:{{ pct }}%; height:100%; background:{{ color }};"></div></div>
+            <div style="font-size:10.5px; font-weight:700; color:{{ color }}; width:36px; text-align:right;">{{ pct }}%</div>
+            <div style="font-size:10px; color:var(--color-text-secondary); width:28px; text-align:right;">{{ n }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- By Country -->
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:8px 12px; flex-shrink:0;">
+          <div style="display:flex; justify-content:space-between; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-secondary); margin-bottom:5px;">
+            <span>By Country</span><div style="display:flex; gap:18px;"><span>NPS</span><span>Resp</span></div>
+          </div>
+          {% for row in metrics.nps.by_country %}
+          <div style="display:flex; align-items:center; gap:6px; {% if not loop.last %}margin-bottom:4px;{% endif %}">
+            <div style="font-size:10.5px; color:var(--color-text-secondary); width:70px; flex-shrink:0;">{{ row.name }}</div>
+            <div style="flex:1; height:6px; background:var(--color-border); border-radius:3px; overflow:hidden;"><div style="width:{{ row.bar_pct }}%; height:100%; background:#16a34a;"></div></div>
+            <div style="font-size:10.5px; font-weight:700; color:var(--color-text-primary); width:30px; text-align:right;">{{ row.score }}</div>
+            <div style="font-size:10px; color:var(--color-text-secondary); width:28px; text-align:right;">—</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- MoM -->
+        <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:5px; overflow:hidden;">
+          <div style="font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--color-text-secondary); flex-shrink:0;">NPS Month-over-Month · {{ metrics.nps.trend_period_label }}</div>
+          <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:5px; min-height:0;">
+            {% for card in metrics.nps.trend %}
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:8px; padding:6px 10px; display:flex; flex-direction:column; gap:2px; min-height:0; overflow:hidden;">
+              <div style="font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-secondary);">{{ card.name }}</div>
+              <div style="font-size:10.5px; font-weight:700; color:var(--color-text-primary); display:flex; align-items:center; gap:3px;">
+                <span style="color:#94a3b8;">{{ card.v2 }}</span><span style="color:#cbd5e1;">→</span><span style="color:#94a3b8;">{{ card.v1 }}</span><span style="color:#cbd5e1;">→</span><span>{{ card.cur }}</span>
+              </div>
+              <div style="font-size:9px; font-weight:600; color:{% if card.mom_class=='pos' %}#16a34a{% else %}#dc2626{% endif %};">{{ card.mom }} MoM</div>
+              <div style="font-size:9px; color:{% if card.vs2_class=='pos' %}#16a34a{% else %}#dc2626{% endif %};">{{ card.vs2 }} vs {{ metrics.nps.trend_period_label.split(' ')[0] }}</div>
+            </div>
+            {% endfor %}
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:8px; padding:6px 10px; grid-column:span 2; display:flex; align-items:center; gap:14px;">
+              <div style="font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-secondary);">{{ metrics.nps.costa_rica_trend.name }}</div>
+              <div style="font-size:10.5px; font-weight:700; color:var(--color-text-primary); display:flex; align-items:center; gap:3px;">
+                <span style="color:#94a3b8;">{{ metrics.nps.costa_rica_trend.v2 }}</span><span style="color:#cbd5e1;">→</span><span style="color:#94a3b8;">{{ metrics.nps.costa_rica_trend.v1 }}</span><span style="color:#cbd5e1;">→</span><span>{{ metrics.nps.costa_rica_trend.cur }}</span>
+              </div>
+              <div style="font-size:9px; color:var(--color-text-secondary);">
+                {% if metrics.nps.costa_rica_trend.vs2_note %}{{ metrics.nps.costa_rica_trend.vs2_note }} &nbsp;·&nbsp; {% endif %}
+                <span style="color:{% if metrics.nps.costa_rica_trend.mom_class=='pos' %}#16a34a{% else %}#dc2626{% endif %}; font-weight:600;">{{ metrics.nps.costa_rica_trend.mom }} MoM</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL: Mention distribution -->
+      <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:6px; overflow:hidden;">
+        <div style="font-size:11px; font-weight:700; color:var(--color-text-primary); flex-shrink:0;">Mention distribution — Alegra consolidated</div>
+        {% for m in [
+          ('#dc2626','Product quality','~105 · 41%',41,'Recurring errors, system outages, slowness in billing and sales, bugs in inventory, decimals, and accounting. Issues worsen after updates. In POS, directly impacts the point of sale in real time.'),
+          ('#ec4899','Support and customer service','~55 · 21%',21,'Slow responses, automated support without real resolution, no phone channel, post-sale abandonment. Entrepreneur plan especially underserved. Users feel they pay but have no one to turn to.'),
+          ('#f59e0b','Pricing and cost-value ratio','~51 · 20%',20,'Plans perceived as expensive for small businesses, price increases without prior notice, core features locked behind higher-tier plans, billing amount limits that feel unjustified.'),
+          ('#3b82f6','Missing or limited features','~34 · 13%',13,'CRM, purchase orders, improved payroll, flexible reports, local tax compliance (RESICO, DGII, SUNAT), more complete mobile app, bank integration, quotes, and invoice customization.'),
+          ('#94a3b8','Usability and overall experience','~13 · 5%',5,'Unintuitive navigation, complex flows, changes without notification, perception of a closed or hard-to-configure system.')
+        ] %}
+        <div style="flex:1; min-height:0; background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:8px 12px; display:flex; flex-direction:column; gap:4px; overflow:hidden;">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="width:11px; height:11px; border-radius:3px; background:{{ m[0] }}; flex-shrink:0;"></div>
+              <span style="font-size:12.5px; font-weight:700; color:var(--color-text-primary);">{{ m[1] }}</span>
+            </div>
+            <div style="font-size:10.5px; font-weight:600; color:var(--color-text-secondary);">{{ m[2] }}</div>
+          </div>
+          <div style="height:5px; background:var(--color-border); border-radius:3px; overflow:hidden; flex-shrink:0;"><div style="width:{{ m[3] }}%; height:100%; background:{{ m[0] }};"></div></div>
+          <div style="font-size:10px; color:var(--color-text-secondary); line-height:1.4; overflow:hidden;">{{ m[4] }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">3</span>
+    </div>
+  </div>
+
+</body>
+</html>

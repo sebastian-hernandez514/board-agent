@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alegra Board — ARR Walk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/base.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    /* Section cover */
+    .section-cover {
+      background: var(--color-navy);
+      justify-content: center;
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+    }
+    .section-cover .eyebrow {
+      font-size: 11px; font-weight: 600; color: var(--color-teal);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-cover .section-title {
+      font-size: 42px; font-weight: 700; color: #ffffff;
+      letter-spacing: -1.5px; line-height: 1.05; margin-bottom: 14px;
+    }
+    .section-cover .section-sub {
+      font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.40);
+    }
+    .section-cover .slide-num {
+      position: absolute; bottom: 24px; right: var(--slide-pad-x);
+      font-size: 10px; color: rgba(255,255,255,0.15);
+    }
+
+    /* ── ARR Walk Table (slides 2-3) — mismo sistema que 1_inicio slide 6 ── */
+    .aw-sum-wrap { flex: 1; padding: 8px 90px 0; overflow: hidden; display: flex; flex-direction: column; }
+    .aw-sum-table { width: 100%; border-collapse: collapse; }
+    .aw-sum-table thead tr { border-bottom: 1.5px solid #e2e8f0; }
+    .aw-sum-table thead th { text-align: right; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; padding: 3px 7px 5px; white-space: nowrap; }
+    .aw-sum-table thead th:first-child { text-align: left; padding-left: 4px; width: 200px; }
+    .aw-sum-table thead th.aw-cur { color: #208080; background: rgba(48,184,183,0.09); border-radius: 4px 4px 0 0; }
+    .aw-sum-table thead th.aw-ytd { font-size: 9px; color: #94a3b8; font-weight: 700; }
+    .aw-sum-table thead th.aw-ytd-vs { color: #64748b; border-left: 1px solid #e2e8f0; }
+    .aw-sum-table tbody td.aw-ytd-vs { border-left: 1px solid #e2e8f0; font-size: 9.5px; }
+    .aw-sum-table tbody td { text-align: right; padding: 0 7px; height: 17px; font-family: 'DM Mono', monospace; font-size: 10px; color: #475569; white-space: nowrap; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+    .aw-sum-table tbody td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 11px; color: #475569; padding-left: 4px; }
+    .aw-sum-table tbody td.aw-cur { background: rgba(48,184,183,0.07); color: #1a7e7f; font-weight: 600; }
+    .aw-sum-table tbody td.aw-ytd { font-weight: 500; color: #475569; }
+    tr.aw-rb td { font-weight: 700 !important; color: #1e293b !important; font-family: 'DM Sans', sans-serif !important; font-size: 10.5px !important; border-bottom: 1.5px solid #e2e8f0 !important; height: 19px !important; }
+    tr.aw-rb td:first-child { color: #0f172b !important; }
+    tr.aw-rb td.aw-cur { color: #1a7e7f !important; font-weight: 700 !important; background: rgba(48,184,183,0.09); }
+    tr.aw-in td:first-child { padding-left: 20px; font-size: 10.5px; font-weight: 400; color: #64748b; }
+    tr.aw-cc td { border-top: 1px dashed #cbd5e1 !important; }
+    tr.aw-cc td:first-child { color: #0f172b !important; font-weight: 600 !important; font-size: 10.5px; }
+    tr.aw-sh td { height: 15px !important; font-family: 'DM Sans', sans-serif !important; font-weight: 700 !important; font-size: 8.5px !important; text-transform: uppercase; letter-spacing: 1.4px; color: #0f172b !important; border-top: 1.5px solid #e2e8f0 !important; border-bottom: none !important; background: #f8fafc; padding-top: 3px !important; }
+    tr.aw-sh td.aw-cur { background: rgba(48,184,183,0.07); color: #1a7e7f !important; }
+    tr.aw-sh td:not(.aw-cur):not(:first-child) { background: #f8fafc; }
+    tr.aw-rt td { height: 14px !important; font-size: 9.5px !important; color: #94a3b8 !important; border-bottom: 1px solid transparent !important; }
+    tr.aw-delta-sub td { font-size:10px; color:#64748b; font-weight:400; border-bottom:none; height:15px !important; }
+    tr.aw-delta-sub td:first-child { padding-left:20px; text-align:left; font-size:10px; font-weight:400; color:#64748b; }
+    tr.aw-delta-sub td.aw-cur { background:rgba(48,184,183,0.07); }
+    tr.aw-rt td:first-child { font-size: 10px !important; color: #94a3b8 !important; font-style: italic; padding-left: 20px; }
+    tr.aw-rt td.aw-cur { color: #299e9c !important; }
+    tr.aw-gap td { height: 3px; padding: 0; border: none !important; background: transparent !important; }
+    .awdp { display:inline-block; font-family:'DM Sans',sans-serif; font-size:9.5px; font-weight:600; border-radius:4px; padding:1px 5px; line-height:1.45; }
+    .awdp-b { background:rgba(24,95,165,0.10); color:#185FA5; }
+    .awdp-o { background:rgba(232,119,34,0.10); color:#E87722; }
+    .awdp-n { background:#f1f5f9; color:#64748b; }
+    .aw-nv { color:#E87722 !important; }
+    .aw-di { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+    .aw-di-g { background:#30b8b7; } .aw-di-b { background:#185FA5; }
+    .aw-di-r { background:#E87722; } .aw-di-a { background:#f59e0b; } .aw-di-s { background:#cbd5e1; }
+
+    /* ── Layout tabla + comentarios ── */
+    .aw-body-row { flex: 1; display: flex; overflow: hidden; }
+    .aw-sum-wrap { flex: 1; padding: 8px 16px 0 45px; overflow: hidden; display: flex; flex-direction: column; }
+    .aw-comments-panel {
+      width: 220px; flex-shrink: 0;
+      padding: 10px 24px 10px 12px;
+      border-left: 1px solid #e2e8f0;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .aw-comments-label {
+      font-size: 8.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.4px; color: #94a3b8;
+    }
+    .aw-comment-item {
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .aw-comment-dot-row { display: flex; align-items: flex-start; gap: 7px; }
+    .aw-comment-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #cbd5e1; flex-shrink: 0; margin-top: 4px;
+    }
+    .aw-comment-text {
+      font-size: 10.5px; font-family: 'DM Sans', sans-serif;
+      color: #64748b; line-height: 1.5; flex: 1;
+    }
+    .aw-comment-line {
+      height: 1px; background: #f1f5f9; width: 100%; margin: 2px 0;
+    }
+    .aw-comment-placeholder {
+      height: 13px; background: #f8fafc; border-radius: 3px; width: 100%;
+    }
+
+    /* Redesign notice */
+    .redesign-notice {
+      display: flex; align-items: center; gap: 8px;
+      background: #fefce8; border: 1px solid #fde047;
+      border-radius: 6px; padding: 8px 14px;
+      font-size: 11px; font-weight: 500; color: #854d0e;
+      margin-bottom: 12px; flex-shrink: 0;
+    }
+
+    /* Waterfall table */
+    .waterfall-table {
+      width: 100%; border-collapse: collapse; font-size: 12px;
+    }
+    .waterfall-table td {
+      padding: 7px 12px; border-bottom: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+    .waterfall-table td:first-child {
+      color: var(--color-text-primary); font-weight: 500; width: 40%;
+    }
+    .waterfall-table td:nth-child(2) { text-align: right; font-weight: 600; font-size: 13px; }
+    .waterfall-table td:nth-child(3) { text-align: right; }
+    .waterfall-table td:nth-child(4) { text-align: right; }
+
+    .waterfall-table .row-start td,
+    .waterfall-table .row-end td {
+      background: var(--color-surface);
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+    .waterfall-table .row-end td { border-top: 2px solid var(--color-navy); }
+
+    .waterfall-table .row-positive td:first-child { border-left: 3px solid var(--color-positive); }
+    .waterfall-table .row-negative td:first-child { border-left: 3px solid var(--color-negative); }
+    .waterfall-table .row-neutral td:first-child  { border-left: 3px solid var(--color-border); }
+
+    .val-positive { color: var(--color-positive) !important; }
+    .val-negative { color: var(--color-negative) !important; }
+
+    /* KPI mini row */
+    .kpi-mini-row {
+      display: flex; gap: 12px;
+    }
+    .kpi-mini {
+      flex: 1; background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px; padding: 12px 16px;
+    }
+    .kpi-mini .label { font-size: 11px; color: var(--color-text-secondary); font-weight: 500; margin-bottom: 4px; }
+    .kpi-mini .value { font-size: 22px; font-weight: 700; color: var(--color-text-primary); letter-spacing: -0.5px; }
+    .kpi-mini .delta { font-size: 11px; margin-top: 3px; font-weight: 500; }
+
+    /* Country slide */
+    .country-header-band {
+      height: 4px; width: 100%; background: var(--color-teal); flex-shrink: 0;
+    }
+
+    .country-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .country-kpi {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .country-kpi .label { font-size: 11px; color: var(--color-text-secondary); font-weight: 500; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .country-kpi .value { font-size: 26px; font-weight: 700; color: var(--color-text-primary); letter-spacing: -0.8px; line-height: 1; }
+    .country-kpi .deltas { margin-top: 6px; display: flex; flex-direction: column; gap: 2px; }
+    .country-kpi .delta { font-size: 11px; font-weight: 500; }
+
+    .country-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .detail-block { display: flex; flex-direction: column; gap: 8px; }
+    .detail-block .block-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--color-teal);
+      padding-bottom: 7px; border-bottom: 1px solid var(--color-border);
+    }
+
+    .mini-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    .mini-table th {
+      text-align: right; font-size: 10px; font-weight: 600;
+      color: var(--color-text-secondary); padding: 0 8px 6px;
+      letter-spacing: 0.3px; border-bottom: 1px solid var(--color-border);
+    }
+    .mini-table th:first-child { text-align: left; }
+    .mini-table td {
+      padding: 6px 8px; text-align: right;
+      color: var(--color-text-secondary);
+      border-bottom: 1px solid var(--color-border);
+      font-size: 11.5px;
+    }
+    .mini-table td:first-child { text-align: left; color: var(--color-text-primary); font-weight: 500; }
+    .mini-table tr:last-child td { border-bottom: none; }
+
+    .slide-divider { width: var(--slide-width); text-align: center; font-size: 11px; color: #9ca3af; letter-spacing: 1px; user-select: none; }
+
+    /* ── Country Performance ── */
+    .cp-slide { display: flex; flex-direction: column; }
+    .cp-slide .slide-header { background: #0f172b; padding: 13px 40px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .cp-slide .slide-header .title { color: #fff; font-size: 15px; font-weight: 600; }
+    .cp-slide .slide-header .period { color: #14b8a6; font-size: 12px; font-weight: 500; }
+    .cp-inner { padding: 14px 28px 10px; display: flex; flex-direction: column; gap: 9px; }
+
+    .hero { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,2.67fr) 0.5px minmax(0,2.67fr); border: 0.5px solid #e5e5e5; border-radius: 10px; overflow: hidden; }
+    .hero-spacer { background: #fafafa; }
+    .hero-divider { background: #e5e5e5; }
+    .hseg { padding: 13px 16px; }
+    .seg-head { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot.c { background: #534AB7; } .dot.l { background: #1D9E75; }
+    .sname { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+    .sname.c { color: #534AB7; } .sname.l { color: #1D9E75; }
+    .sval { font-size: 22px; font-weight: 600; color: #111; line-height: 1; margin-bottom: 2px; }
+    .slabel { font-size: 10px; color: #999; margin-bottom: 7px; }
+    .sbottom { display: flex; align-items: center; gap: 14px; }
+    .smom, .syoy { display: flex; flex-direction: column; gap: 1px; }
+    .ml { font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: .04em; }
+    .mv { font-size: 13px; font-weight: 600; }
+    .pos { color: #1D9E75; } .neg { color: #D85A30; }
+    svg.spark { flex: 1; max-width: 90px; }
+
+    .insight { display: flex; align-items: center; justify-content: space-between; background: #f5f5f3; border-radius: 8px; padding: 8px 13px; gap: 12px; }
+    .it { font-size: 11px; font-weight: 600; color: #111; margin-bottom: 1px; }
+    .is { font-size: 10px; color: #666; }
+    .mix-lbl { font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; text-align: right; }
+    .mix-bar { display: flex; gap: 2px; align-items: center; }
+    .mb-c { height: 6px; background: #534AB7; border-radius: 2px 0 0 2px; }
+    .mb-l { height: 6px; background: #1D9E75; border-radius: 0 2px 2px 0; }
+    .mp { font-size: 10px; color: #666; margin-left: 4px; }
+
+    .strip { border: 0.5px solid #e5e5e5; border-radius: 10px; overflow: hidden; }
+    .gh { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,2.67fr) 0.5px minmax(0,2.67fr); border-bottom: 0.5px solid #e5e5e5; background: #f5f5f3; }
+    .gh-blank { padding: 5px 14px; }
+    .gh-seg { display: flex; align-items: center; gap: 5px; padding: 5px 10px; }
+    .gh-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .gh-dot.c { background: #534AB7; } .gh-dot.l { background: #1D9E75; }
+    .gh-name { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+    .gh-name.c { color: #534AB7; } .gh-name.l { color: #1D9E75; }
+    .divider-v { background: #e5e5e5; align-self: stretch; }
+
+    .st-head, .st-row { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,.65fr) minmax(0,.56fr) minmax(0,.56fr) minmax(0,.9fr) 0.5px minmax(0,.65fr) minmax(0,.56fr) minmax(0,.56fr) minmax(0,.9fr); align-items: center; }
+    .st-head { background: #f5f5f3; border-bottom: 0.5px solid #e5e5e5; }
+    .st-row { height: 30px; border-bottom: 0.5px solid #f0f0f0; }
+    .st-row:last-child { border-bottom: none; }
+
+    .th { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #999; padding: 5px 8px; text-align: center; }
+    .th.metric { text-align: left; padding-left: 14px; }
+    .td { padding: 0 8px; font-size: 11.5px; color: #111; text-align: center; }
+    .td.metric { padding: 0 8px 0 14px; font-size: 11.5px; font-weight: 500; text-align: left; }
+    .td.val { font-weight: 600; }
+    .td.delta { font-size: 11px; font-weight: 500; }
+    .td.dv { background: #e5e5e5; padding: 0; align-self: stretch; }
+    .th.dv { background: #e5e5e5; padding: 0; }
+
+    .bspark { display: flex; align-items: flex-end; gap: 1.5px; height: 20px; padding: 0 8px; }
+    .b { flex: 1; border-radius: 1px 1px 0 0; }
+    .b.c { background: #AFA9EC; } .b.c.hi { background: #534AB7; }
+    .b.l { background: #9FE1CB; } .b.l.hi { background: #1D9E75; }
+    .b.w { background: #F0997B; } .b.w.hi { background: #D85A30; }
+
+    /* ── Butterfly Country Performance ── */
+    .bf-cards { display: flex; border-bottom: 1px solid #eaeaea; flex-shrink: 0; }
+    .bf-card { flex: 1; padding: 13px 36px; text-align: center; }
+    .bf-card:first-child { border-right: 1px solid #eaeaea; }
+    .bf-card-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; margin-bottom: 4px; }
+    .bf-card-label.c { color: #534AB7; } .bf-card-label.l { color: #1D9E75; }
+    .bf-card-value { font-size: 32px; font-weight: 800; color: #111; margin: 2px 0; letter-spacing: -1.5px; }
+    .bf-card-sub { font-size: 11px; color: #888; }
+    /* ── Country Performance Table ── */
+    .bf-table { padding: 4px 14px 0; overflow: hidden; }
+    .bf-table table { width: 100%; border-collapse: collapse; }
+    .bf-table thead th { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #bbb; padding: 3px 8px 7px; border-bottom: 1px solid #eaeaea; }
+    .bf-table th.right { text-align: right; } .bf-table th.left { text-align: left; } .bf-table th.center { text-align: center; }
+    .bf-table tbody tr { border-bottom: 1px solid #f4f4f4; }
+    .bf-table tbody tr:last-child { border-bottom: none; }
+    .bf-table tbody tr.alert-row { background: rgba(216,90,48,0.05); }
+    .bf-table td { padding: 6px 8px; font-size: 11px; vertical-align: middle; }
+    .bf-table .metric-col { text-align: center; border-left: 1px solid #f0f0f0; border-right: 1px solid #f0f0f0; padding: 6px 12px; }
+    .bf-table .metric-name { font-size: 10px; color: #888; font-weight: 500; white-space: nowrap; }
+    .bf-table .metric-name.primary { color: #222; font-weight: 700; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
+    .sd-green { background: #1D9E75; } .sd-red { background: #D85A30; } .sd-amber { background: #E8A020; } .sd-gray { background: #ccc; }
+    .bf-table .val { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; color: #111; white-space: nowrap; }
+    .bf-table .val.alert { color: #D85A30; }
+    .bf-table .delta { font-size: 10px; white-space: nowrap; color: #bbb; }
+    .bf-table .pos { color: #1D9E75; } .bf-table .neg { color: #D85A30; } .bf-table .neutral { color: #444; }
+    .bf-table td.right { text-align: right; } .bf-table td.left { text-align: left; }
+
+    /* ── ARR Walk Visual Chart (Slides 2–3) ── */
+    .aw-content {
+      font-family: 'DM Sans', sans-serif; color: #1A1917;
+      -webkit-font-smoothing: antialiased;
+      padding: 18px 28px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1;
+      --aw-surface: #FFFFFF; --aw-border: rgba(0,0,0,0.08); --aw-border-strong: rgba(0,0,0,0.14);
+      --aw-text-primary: #1A1917; --aw-text-secondary: #6B6860; --aw-text-tertiary: #9E9C96;
+      --aw-red-dark: #7C2D12; --aw-red-bg: #FFEDD5; --aw-dark-card: #1A1917;
+      --aw-radius-xl: 16px; --aw-radius-lg: 12px;
+    }
+    .aw-hero-band { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .aw-kpi-card {
+      background: var(--aw-dark-card); border-radius: var(--aw-radius-xl);
+      padding: 16px 18px 14px; display: flex; flex-direction: column;
+      min-height: 108px; position: relative; overflow: hidden;
+    }
+    .aw-kpi-card::before {
+      content: ''; position: absolute; inset: 0; border-radius: var(--aw-radius-xl);
+      border: 0.5px solid rgba(255,255,255,0.07); pointer-events: none;
+    }
+    .aw-kpi-card.light { background: var(--aw-surface); border: 0.5px solid var(--aw-border-strong); }
+    .aw-kpi-card.light::before { border-color: transparent; }
+    .aw-kpi-card.light .aw-kpi-label { color: var(--aw-text-tertiary); }
+    .aw-kpi-card.light .aw-kpi-num  { color: var(--aw-text-primary); }
+    .aw-kpi-card.light .aw-kpi-num.red { color: #9A3412; }
+    .aw-kpi-card.light .aw-kpi-sub  { color: var(--aw-text-tertiary); }
+    .aw-kpi-card.light .aw-badge-r  { background: var(--aw-red-bg); color: var(--aw-red-dark); }
+    .aw-kpi-card.light .aw-badge-rr { background: var(--aw-red-bg); color: var(--aw-red-dark); }
+    .aw-kpi-card.light .aw-badge-n  { background: #F0EFE9; color: #6B6860; border: 0.5px solid rgba(0,0,0,0.1); }
+    .aw-kpi-label {
+      font-size: 9px; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 8px;
+    }
+    .aw-kpi-num { font-size: 32px; font-weight: 300; letter-spacing: -1.5px; color: #fff; line-height: 1; flex: 1; }
+    .aw-kpi-num.red { color: #FB923C; }
+    .aw-kpi-num.sm  { font-size: 26px; letter-spacing: -1px; }
+    .aw-kpi-badges  { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+    .aw-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px;
+    }
+    .aw-badge-g  { background: rgba(99,153,34,0.22);  color: #aada6e; }
+    .aw-badge-g2 { background: rgba(29,158,117,0.2);  color: #5ecfaa; }
+    .aw-badge-r  { background: rgba(221,107,32,0.2);   color: #fdba74; }
+    .aw-badge-n  { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.55); border: 0.5px solid rgba(255,255,255,0.1); }
+    .aw-badge-rr { background: rgba(221,107,32,0.15);  color: #fdba74; }
+    .aw-kpi-sub { font-size: 10px; color: rgba(255,255,255,0.28); margin-top: 2px; }
+    .aw-panel {
+      background: var(--aw-surface); border: 0.5px solid var(--aw-border-strong);
+      border-radius: var(--aw-radius-lg); padding: 16px 18px;
+    }
+    .aw-panel-label {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--aw-text-tertiary); margin-bottom: 10px; padding-bottom: 9px;
+      border-bottom: 0.5px solid var(--aw-border);
+    }
+    .aw-chart-headline { font-size: 13px; font-weight: 500; margin-bottom: 2px; color: var(--aw-text-primary); }
+    .aw-chart-subtitle { font-size: 11px; color: var(--aw-text-tertiary); margin-bottom: 10px; }
+    .aw-chart-legend { display: flex; gap: 18px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+    .aw-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--aw-text-secondary); }
+    .aw-l-stack { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
+    .aw-l-swatch-top { width: 10px; height: 5px; border-radius: 1px 1px 0 0; }
+    .aw-l-swatch-bot { width: 10px; height: 5px; border-radius: 0 0 1px 1px; }
+    .aw-l-line { width: 18px; height: 2px; border-radius: 1px; background: #1A1917; flex-shrink: 0; }
+    .aw-chart-wrap { position: relative; height: 220px; }
+    .aw-q-cards-wrap { display: flex; gap: 6px; margin-top: 8px; align-items: stretch; }
+    .aw-q-labels-col {
+      display: flex; flex-direction: column; justify-content: space-around;
+      padding: 9px 0; flex-shrink: 0; width: 28px;
+    }
+    .aw-q-label-tag {
+      font-size: 8.5px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--aw-text-tertiary); flex: 1; display: flex; align-items: center;
+    }
+    .aw-q-label-tag + .aw-q-label-tag { border-top: 0.5px solid var(--aw-border); }
+    .aw-q-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; flex: 1; }
+    .aw-q-card {
+      border: 0.5px solid var(--aw-border-strong); border-radius: 10px;
+      display: flex; flex-direction: column; background: var(--aw-surface); overflow: hidden;
+    }
+    .aw-q-half {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 6px 5px; flex: 1; gap: 2px;
+    }
+    .aw-q-half + .aw-q-half { border-top: 0.5px solid var(--aw-border); }
+    .aw-q-arr {
+      font-size: 11px; font-weight: 600; color: var(--aw-text-primary);
+      letter-spacing: -0.3px; font-family: 'DM Mono', monospace; text-align: center;
+    }
+    .aw-q-logos { font-size: 9px; color: var(--aw-text-tertiary); font-family: 'DM Mono', monospace; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       SLIDE 1 — Section Cover
+       ============================================================ -->
+  <div class="slide section-cover">
+    <div class="eyebrow">Section 03</div>
+    <div class="section-title">ARR Walk</div>
+    <div class="section-sub">Core, Lite &amp; Alanube · Countries Performance</div>
+    <div class="slide-num">1</div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ============================================================
+       SLIDES 2–3 — ARR Walk Core & Lite (loop dinámico)
+       ============================================================ -->
+  {% for product in metrics.arr_walk_products %}
+  {% set tbl = product.arr_walk_table %}
+  {% if not loop.first %}<div class="slide-divider">↓</div>{% endif %}
+  <div class="slide">
+    <div class="slide-header" style="border-bottom: 3px solid {{ product.color }};">
+      <span style="color:#fff; font-size:15px; font-weight:600; letter-spacing:-0.3px;">ARR {{ product.name }}</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+
+    <div class="aw-body-row">
+    <div class="aw-sum-wrap" style="padding: 8px 90px 0;">
+      <table class="aw-sum-table">
+        <thead>
+          <tr>
+            <th></th>
+            {% for q in tbl.quarters %}
+            <th{% if loop.last %} class="aw-cur"{% endif %}>{{ q }}</th>
+            {% endfor %}
+            <th class="aw-ytd">{{ tbl.ytd_labels[0] }}</th>
+            <th class="aw-ytd">{{ tbl.ytd_labels[1] }}</th>
+            <th class="aw-ytd aw-ytd-vs">YTD Δ%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for section in tbl.sections %}
+          <tr class="aw-sh">
+            <td>{{ section.label }}</td>
+            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
+            <td></td><td></td><td></td>
+          </tr>
+          {% for row in section.rows %}
+          <tr class="aw-{{ row.type }}">
+            <td>{% if row.dot %}<span class="aw-di aw-di-{{ row.dot }}"></span>{% endif %}{{ row.label }}</td>
+            {% for i in range(tbl.quarters | length) %}
+            {% set cell = row.cells[i] %}
+            <td{% if loop.last %} class="aw-cur{% if row.nv %} aw-nv{% endif %}"{% elif row.nv %} class="aw-nv"{% endif %}>{{ cell }}</td>
+            {% endfor %}
+            <td class="aw-ytd{% if row.nv %} aw-nv{% endif %}">{{ row.ytd_prev }}</td>
+            <td class="aw-ytd{% if row.nv %} aw-nv{% endif %}">{{ row.ytd_cur }}</td>
+            <td class="aw-ytd aw-ytd-vs{% if row.nv %} aw-nv{% endif %}">{{ row.ytd_vs if row.ytd_vs is defined else '—' }}</td>
+          </tr>
+          {% if row.label == "ARR EoP" %}
+          <tr class="aw-delta-sub">
+            <td>MoM</td>
+            {% for qc in row.qoq_cells %}<td{% if loop.last %} class="aw-cur"{% endif %}>{{ qc.v }}</td>{% endfor %}
+            <td></td><td></td><td></td>
+          </tr>
+          <tr class="aw-delta-sub">
+            <td>YoY</td>
+            {% for yc in row.yoy_cells %}<td{% if loop.last %} class="aw-cur"{% endif %}>{{ yc.v }}</td>{% endfor %}
+            <td></td><td></td><td></td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+          {% if not loop.last %}<tr class="aw-gap"><td colspan="9"></td></tr>{% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div><!-- /.aw-sum-wrap -->
+    {% if product.asks %}
+    <div class="aw-comments-panel">
+      <div class="aw-comments-label">{{ product.action_title or "Comments" }}</div>
+      {% for ask in product.asks %}
+      <div class="aw-comment-item">
+        <div class="aw-comment-dot-row">
+          <span class="aw-comment-dot"></span>
+          <span class="aw-comment-text">{{ ask }}</span>
+        </div>
+      </div>
+      {% if not loop.last %}<div class="aw-comment-line"></div>{% endif %}
+      {% endfor %}
+    </div><!-- /.aw-comments-panel -->
+    {% endif %}
+    </div><!-- /.aw-body-row -->
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">{{ loop.index + 1 }}</span>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="slide-divider">↓ &nbsp; Countries Performance</div>
+
+  <!-- ============================================================
+       SLIDES 5–8 — Country Performance (loop)
+       ============================================================ -->
+  {% for country in metrics.countries %}
+  <div class="slide cp-slide">
+    <div class="slide-header">
+      <span class="title">{{ country.action_title }}</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div class="cp-inner">
+      <div class="bf-cards">
+        <div class="bf-card">
+          <div class="bf-card-label c">● CORE</div>
+          <div class="bf-card-value">{{ country.core.arr }}</div>
+          <div class="bf-card-sub">ARR &nbsp;<span class="{{ 'bf-pos' if country.core.arr_mom_positive else 'bf-neg' }}">{{ country.core.arr_mom }}</span> {% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %} &nbsp;<span class="{{ 'bf-pos' if country.core.arr_yoy_positive else 'bf-neg' }}">{{ country.core.arr_yoy }}</span> YoY</div>
+        </div>
+        <div class="bf-card">
+          <div class="bf-card-label l">● LITE</div>
+          <div class="bf-card-value">{{ country.lite.arr }}</div>
+          <div class="bf-card-sub">ARR &nbsp;<span class="{{ 'bf-pos' if country.lite.arr_mom_positive else 'bf-neg' }}">{{ country.lite.arr_mom }}</span> {% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %} &nbsp;<span class="{{ 'bf-pos' if country.lite.arr_yoy_positive else 'bf-neg' }}">{{ country.lite.arr_yoy }}</span> YoY</div>
+        </div>
+      </div>
+      <div class="bf-table">
+        <table>
+          <thead>
+            <tr>
+              <th class="right" style="width:64px;">YoY</th>
+              <th class="right" style="width:56px;">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</th>
+              <th class="right" style="width:80px;">Value</th>
+              <th class="center" style="width:140px;">Metric</th>
+              <th class="left" style="width:80px; padding-left:16px;">Value</th>
+              <th class="right" style="width:56px;">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</th>
+              <th class="right" style="width:64px;">YoY</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in country.butterfly_rows %}
+            {% set is_alert = row.metric_name in ['Net New ARR', 'Churn Rate'] %}
+            {% set dot_class = 'sd-red' if row.metric_name in ['Net New ARR', 'Churn Rate'] else ('sd-amber' if row.metric_name in ['CAC', 'Logos Growth'] else ('sd-gray' if row.metric_name == 'ARPA' else 'sd-green')) %}
+            {% set is_primary = row.metric_name in ['New ARR', 'Net New ARR', 'Churn Rate'] %}
+            {% set neutral_delta = row.metric_name == 'Investment' %}
+            {% set invert_delta = row.metric_name in ['Churn Rate', 'CAC'] %}
+            <tr{% if is_alert %} class="alert-row"{% endif %}>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.core.yoy_positive if invert_delta else row.core.yoy_positive) else 'neg') }} right">{{ row.core.yoy }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.core.mom_positive if invert_delta else row.core.mom_positive) else 'neg') }} right">{{ row.core.mom }}</td>
+              <td class="val{{ ' alert' if row.core.val_negative else '' }} right">{{ row.core.val }}</td>
+              <td class="metric-col"><span class="status-dot {{ dot_class }}"></span><span class="metric-name{{ ' primary' if is_primary else '' }}">{{ row.metric_name }}</span></td>
+              <td class="val{{ ' alert' if row.lite.val_negative else '' }} left" style="padding-left:16px;">{{ row.lite.val }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.lite.mom_positive if invert_delta else row.lite.mom_positive) else 'neg') }} right">{{ row.lite.mom }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.lite.yoy_positive if invert_delta else row.lite.yoy_positive) else 'neg') }} right">{{ row.lite.yoy }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">{{ loop.index + 4 }}</span>
+    </div>
+  </div>
+
+  {% if not loop.last %}
+  <div class="slide-divider">↓</div>
+  {% endif %}
+  {% endfor %}
+
+<script>
+(function() {
+  const tc = '#9E9C96', gc = 'rgba(0,0,0,0.04)';
+  const fmt  = n => n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n);
+  const fmtM = v => '$'+v.toFixed(1)+'M';
+
+  function roundRect(ctx, x, y, w, h, radii) {
+    const [tl,tr,br,bl] = radii;
+    ctx.moveTo(x+tl,y); ctx.lineTo(x+w-tr,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+tr); ctx.lineTo(x+w,y+h-br);
+    ctx.quadraticCurveTo(x+w,y+h,x+w-br,y+h); ctx.lineTo(x+bl,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-bl); ctx.lineTo(x,y+tl);
+    ctx.quadraticCurveTo(x,y,x+tl,y); ctx.closePath();
+  }
+
+  function drawSegLabel(ctx, cx, cy, segH, logosText, arrText, logoColor, arrColor) {
+    ctx.save(); ctx.textAlign='center'; ctx.textBaseline='middle';
+    if (segH >= 26) {
+      ctx.font='500 7.5px DM Sans,sans-serif'; ctx.fillStyle=logoColor;
+      ctx.fillText(logosText, cx, cy-5.5);
+      ctx.font='600 9px DM Sans,sans-serif'; ctx.fillStyle=arrColor;
+      ctx.fillText(arrText, cx, cy+5.5);
+    } else if (segH >= 14) {
+      ctx.font='600 8px DM Sans,sans-serif'; ctx.fillStyle=arrColor;
+      ctx.fillText(arrText, cx, cy);
+    }
+    ctx.restore();
+  }
+
+  function buildChart(canvasId, quarters, data) {
+    const { newRec, expArr, churnB, downB, netNew, logosNew, logosExp, logosChurn, logosDown, yMax } = data;
+    const plugin = {
+      id: canvasId+'Plugin',
+      beforeDatasetsDraw(chart) {
+        const { ctx, scales: { x, y }, chartArea } = chart;
+        const n=quarters.length, slotW=(chartArea.right-chartArea.left)/n;
+        const barW=slotW*0.28, gap=barW*0.25;
+        quarters.forEach((_,i) => {
+          const cx=x.getPixelForValue(i);
+          const gx=cx-gap/2-barW, yNewBot=y.getPixelForValue(0);
+          const yNewTop=y.getPixelForValue(newRec[i]), yExpTop=y.getPixelForValue(newRec[i]+expArr[i]);
+          ctx.fillStyle='rgba(29,158,117,0.85)'; ctx.beginPath();
+          roundRect(ctx,gx,yNewTop,barW,yNewBot-yNewTop,[0,0,3,3]); ctx.fill();
+          ctx.fillStyle='rgba(29,158,117,0.38)'; ctx.beginPath();
+          roundRect(ctx,gx,yExpTop,barW,yNewTop-yExpTop,[3,3,0,0]); ctx.fill();
+          const gcx=gx+barW/2;
+          drawSegLabel(ctx,gcx,(yNewTop+yNewBot)/2,yNewBot-yNewTop,fmt(logosNew[i])+' logos',fmtM(newRec[i]),'rgba(255,255,255,0.75)','#fff');
+          drawSegLabel(ctx,gcx,(yExpTop+yNewTop)/2,yNewTop-yExpTop,fmt(logosExp[i])+' logos',fmtM(expArr[i]),'rgba(255,255,255,0.65)','rgba(255,255,255,0.92)');
+          const rx=cx+gap/2, yChurnBot=y.getPixelForValue(0);
+          const yChurnTop=y.getPixelForValue(churnB[i]), yDownTop=y.getPixelForValue(churnB[i]+downB[i]);
+          ctx.fillStyle='rgba(221,107,32,0.85)'; ctx.beginPath();
+          roundRect(ctx,rx,yChurnTop,barW,yChurnBot-yChurnTop,[0,0,3,3]); ctx.fill();
+          ctx.fillStyle='rgba(221,107,32,0.38)'; ctx.beginPath();
+          roundRect(ctx,rx,yDownTop,barW,yChurnTop-yDownTop,[3,3,0,0]); ctx.fill();
+          const rcx=rx+barW/2;
+          drawSegLabel(ctx,rcx,(yChurnTop+yChurnBot)/2,yChurnBot-yChurnTop,fmt(logosChurn[i])+' logos',fmtM(churnB[i]),'rgba(255,255,255,0.75)','#fff');
+          drawSegLabel(ctx,rcx,(yDownTop+yChurnTop)/2,yChurnTop-yDownTop,fmt(logosDown[i])+' logos',fmtM(downB[i]),'rgba(255,255,255,0.65)','rgba(255,255,255,0.92)');
+        });
+      },
+      afterDraw(chart) {
+        const ctx2 = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+        quarters.forEach((_, i) => {
+          if (!meta.data[i]) return;
+          const cx = meta.data[i].x;
+          const nn = netNew[i];
+          const isLow = nn < 0.05;
+          const color = isLow ? '#C2410C' : '#1A1917';
+          const sign = nn > 0 ? '+' : '';
+          const label = sign + '$' + nn.toFixed(1) + 'M';
+          ctx2.save();
+          ctx2.textAlign = 'center';
+          ctx2.textBaseline = 'bottom';
+          ctx2.fillStyle = '#9E9C96';
+          ctx2.font = '500 8px "DM Sans", sans-serif';
+          ctx2.fillText('Net New', cx, chart.chartArea.top - 10);
+          ctx2.fillStyle = color;
+          ctx2.font = '700 10px "DM Sans", sans-serif';
+          ctx2.fillText(label, cx, chart.chartArea.top - 1);
+          ctx2.restore();
+        });
+      }
+    };
+    new Chart(document.getElementById(canvasId), {
+      plugins: [plugin],
+      data: {
+        labels: quarters,
+        datasets: [
+          { type:'bar', data: quarters.map((_,i)=>newRec[i]+expArr[i]), backgroundColor:'transparent', borderColor:'transparent', borderWidth:0, yAxisID:'y' }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{enabled:false} },
+        scales: {
+          x:{ grid:{display:false}, border:{display:false}, ticks:{color:tc, font:{size:11,family:'DM Sans'}} },
+          y:{ position:'left', grid:{color:gc}, border:{display:false}, ticks:{color:tc, font:{size:10,family:'DM Sans'}, callback:v=>'$'+v+'M'}, min:0, max:yMax }
+        }
+      }
+    });
+  }
+
+  {% for product in metrics.arr_walk_products %}
+  /* ── {{ product.name }} ── */
+  (function() {
+    const quarters  = {{ product.quarters | tojson }};
+    const newRec    = {{ product.arr_new_rec | tojson }};
+    const expArr    = {{ product.arr_expansion | tojson }};
+    const churnB    = {{ product.arr_churn | tojson }};
+    const downB     = {{ product.arr_contraction | tojson }};
+    const netNew    = {{ product.arr_net_new | tojson }};
+    const logosNew   = {{ product.logos_new | tojson }};
+    const logosExp   = {{ product.logos_expansion | tojson }};
+    const logosChurn = {{ product.logos_churn | tojson }};
+    const logosDown  = {{ product.logos_contraction | tojson }};
+    const qData      = {{ product.q_cards | tojson }};
+    buildChart('aw{{ product.id }}Chart', quarters, {
+      newRec, expArr, churnB, downB, netNew,
+      logosNew, logosExp, logosChurn, logosDown,
+      yMax: {{ product.y_max }}
+    });
+    const el = document.getElementById('aw{{ product.id }}QCards');
+    qData.forEach(d => {
+      el.innerHTML += `<div class="aw-q-card"><div class="aw-q-half"><span class="aw-q-arr">${d.bopArr}</span><span class="aw-q-logos">${d.bopLogos.toFixed(1)}k logos</span></div><div class="aw-q-half"><span class="aw-q-arr">${d.eopArr}</span><span class="aw-q-logos">${d.eopLogos.toFixed(1)}k logos</span></div></div>`;
+    });
+  })();
+  {% endfor %}
+})();
+</script>
+
+</body>
+</html>

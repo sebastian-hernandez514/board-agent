@@ -1,0 +1,418 @@
+/* =============================================
+   Alegra Board — Base Design System
+   ============================================= */
+
+/* Variables */
+:root {
+  --color-navy:          #0f172b;
+  --color-bg:            #ffffff;
+  --color-surface:       #f8fafc;
+  --color-border:        #e2e8f0;
+  --color-teal:          #14b8a6;
+  --color-teal-light:    #f0fdfa;
+  --color-positive:      #16a34a;
+  --color-negative:      #C2410C;
+  --color-neutral:       #64748b;
+  --color-text-primary:  #0f172b;
+  --color-text-secondary:#64748b;
+
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --slide-width:  960px;
+  --slide-height: 540px;
+  --slide-pad-x:  56px;
+  --slide-pad-y:  48px;
+}
+
+/* Reset */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-family);
+  background: #e5e7eb;
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 40px 24px;
+  min-height: 100vh;
+}
+
+/* =============================================
+   Slide Container
+   ============================================= */
+.slide {
+  width: var(--slide-width);
+  height: var(--slide-height);
+  overflow: hidden;
+  background: var(--color-bg);
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* =============================================
+   Slide Header
+   ============================================= */
+.slide-header {
+  background: var(--color-navy);
+  padding: 16px var(--slide-pad-x);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.slide-header .title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.slide-header .period {
+  color: var(--color-teal);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* =============================================
+   Slide Body
+   ============================================= */
+.slide-body {
+  flex: 1;
+  padding: 28px var(--slide-pad-x) 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =============================================
+   KPI Cards Grid
+   ============================================= */
+.kpi-grid {
+  display: grid;
+  gap: 14px;
+  flex: 1;
+}
+
+.kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.kpi-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.kpi-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+.kpi-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kpi-card .kpi-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-card .kpi-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.kpi-card .kpi-deltas {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.kpi-card .delta {
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.delta.positive { color: var(--color-positive); }
+.delta.negative { color: var(--color-negative); }
+.delta.neutral  { color: var(--color-neutral); }
+
+/* =============================================
+   Insight Box
+   ============================================= */
+.insight-box {
+  background: var(--color-teal-light);
+  border-left: 3px solid var(--color-teal);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-top: auto;
+}
+
+/* =============================================
+   Footer
+   ============================================= */
+.slide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px var(--slide-pad-x) 14px;
+  flex-shrink: 0;
+}
+
+.slide-footer .footer-brand {
+  font-size: 10px;
+  color: var(--color-border);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.slide-footer .footer-source {
+  font-size: 9px;
+  color: #64748b;
+  font-style: italic;
+}
+
+.slide-footer .footer-page {
+  font-size: 10px;
+  color: var(--color-border);
+}
+
+/* =============================================
+   Cover Slide (Sección 1)
+   ============================================= */
+.slide-cover {
+  background: var(--color-navy);
+  justify-content: center;
+  padding: var(--slide-pad-y) var(--slide-pad-x);
+}
+
+.slide-cover .cover-eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-teal);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.slide-cover .cover-title {
+  font-size: 38px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.slide-cover .cover-subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+}
+
+.slide-cover .cover-logo {
+  position: absolute;
+  bottom: 36px;
+  right: var(--slide-pad-x);
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+}
+
+/* =============================================
+   Table of Contents
+   ============================================= */
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  flex: 1;
+}
+
+.toc-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 8px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toc-item .toc-number {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-teal);
+  letter-spacing: 1px;
+}
+
+.toc-item .toc-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+/* =============================================
+   Highlights / Lowlights
+   ============================================= */
+.hl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  flex: 1;
+}
+
+.hl-col-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 7px;
+  border-bottom: 2px solid;
+}
+
+.hl-col-title.positive { color: var(--color-positive); border-color: var(--color-positive); }
+.hl-col-title.negative { color: var(--color-negative); border-color: var(--color-negative); }
+
+.hl-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 7px;
+  font-size: 9px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.hl-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.hl-dot.positive { background: var(--color-positive); }
+.hl-dot.negative { background: var(--color-negative); }
+
+/* =============================================
+   Pill / Badge
+   ============================================= */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge.positive { background: #dcfce7; color: var(--color-positive); }
+.badge.negative { background: #ffedd5; color: var(--color-negative); }
+.badge.neutral  { background: #f1f5f9; color: var(--color-neutral); }
+.badge.teal     { background: var(--color-teal-light); color: var(--color-teal); }
+
+/* =============================================
+   Data Table
+   ============================================= */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.data-table thead tr {
+  background: var(--color-navy);
+  color: #ffffff;
+}
+
+.data-table thead th {
+  padding: 9px 12px;
+  font-weight: 600;
+  text-align: right;
+  letter-spacing: 0.3px;
+}
+
+.data-table thead th:first-child { text-align: left; }
+
+.data-table tbody tr:nth-child(even) { background: var(--color-surface); }
+
+.data-table tbody td {
+  padding: 8px 12px;
+  text-align: right;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table tbody td:first-child {
+  text-align: left;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+/* Divider entre slides (navegación visual) */
+.slide-divider {
+  width: var(--slide-width);
+  text-align: center;
+  font-size: 11px;
+  color: #9ca3af;
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+@media print {
+  .slide-divider { display: none; }
+}
+
+/* ── Ask to the Board chips ── */
+.ask-board-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--color-teal);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+  margin: 16px 0 10px;
+}
+.ask-board-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ask-board-chip {
+  flex: 1;
+  min-width: 200px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+.ask-board-chip strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-navy);
+  margin-bottom: 3px;
+}

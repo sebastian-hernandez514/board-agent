@@ -21,7 +21,7 @@ from datetime import datetime
 
 import yaml
 
-from . import paths
+from . import output_integrity, paths
 from .report import CheckResult
 
 MESES_ES = {
@@ -306,4 +306,5 @@ def run(month: str) -> list[CheckResult]:
         _check_financial_performance_month(month),
         _check_nps_snapshot(month),
         _check_headcount(month),
+        output_integrity.check_for_manual_edits(),
     ]

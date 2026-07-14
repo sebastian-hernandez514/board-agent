@@ -1,0 +1,16 @@
+# ARR Walk — Editorial content (Board asks per product + Alanube insight)
+# Llenar antes del board. Máximo 3 asks por producto.
+
+global_title: "ARR Walk GLO Alegra"
+
+products:
+  - id: core
+    action_title: ""
+    asks: []
+
+  - id: lite
+    action_title: ""
+    asks: []
+
+alanube_title: "Alanube ARR Walk — Documentos electrónicos"
+alanube_insight: ""

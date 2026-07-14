@@ -1,0 +1,26 @@
+# CEO Highlights & Lowlights — Mayo 2026
+updated_for_month: "2026-05"
+
+ceo_title: "CEO Highlights & Lowlights"
+
+highlights:
+  - "Launched the ICP-segmented model in Costa Rica — first market live with the new multi-product architecture (Facturación, Accounting/ERP, and Accountant), each with dedicated pricing and self-profiling onboarding; next steps focus on validating conversion by ICP to enable scaling to other markets."
+  - "Strong growth in the POD strategy, now rebranded for accountants as Alegra Impulsa — up 150% in COL and 50% in DOM MoM, with 46 new paying accounts acquired and the program now closing accountants directly through lead management."
+  - "Strong new-logo traction across Mexico +20% and Peru +24% MoM — accelerated SMB acquisition in these markets partially offset regional downturns."
+  - "Global CSAT reached an all-time high of 93.6% at the end of May, continuing the upward trend in service quality across support interactions."
+  - "AI automation continued scaling across functions — support coverage reached an all-time high of 23.7% globally, while a new in-house call transcription and analysis tool extended AI into the Sales workflow."
+  - "New Logos hold steady despite volume pressure (2,292 vs. 2,301), as Sign Up→MQL conversion rose to 72.9% (from 61.2%) and Sign Up→logo conversion improved to ~9% — a sign of stronger conversion efficiency at the top of the funnel."
+  - "Alegra MCP gained real traction in production — 168 active organizations ran 2,577 tool calls across 52 tools in the first full week (June 10–16) at a low 0.93% error rate, led by read-heavy invoicing, items, and expenses workflows. We also began testing our first create (write) tools and keep adding tools on a weekly basis."
+  - "Alegra Agent in early adoption — 7 organizations ran 27 conversations and 84 tool calls across 14 tools (May 25–Jun 13), led by reports (~43%) and 100%-reliable invoicing. Adoption is still concentrated (one org ~50% of traffic), and we're building skills that give the agent domain expertise — expanding what it can do while reducing errors as it scales."
+
+lowlights:
+  - "Mexican accountant adoption remains below target; accountants rate Alegra as clearly superior but hesitate to switch given migration risk and limited post-sale support — we are shifting the Mexico strategy toward a dedicated migration team and sustained accompaniment to drive activation, full-portfolio migration, and retention."
+  - "Colombia contracted across the funnel in May (sign-ups -13.1%, MRR -18.8% MoM), driven by a macro pattern — not a product or competitive signal — the predictable softening of SMB activity during the country's presidential election cycle."
+  - "New MRR down -11.6%, driven by a combination of factors that negatively impacted our commercial efficiency."
+  - "Dominican Republic SMB New MRR fell -11% in May — logos closed roughly level with April despite the Happy Week campaign, a market that historically doesn't react to such promotions, while the extended e-invoicing mandate deadline deferred SMB purchase urgency."
+
+financial_update: "May 2026 delivers Alegra's fifth consecutive EBITDA positive month at $184K (7.7% margin), +$117K above budget confirming the profitability inflection is structural, not episodic. Revenue reached $2.4M, +26.6% YoY and +3.5% above budget; the -1.6% MoM dip was entirely FX-driven (-$41K COP/USD headwind), not demand softness. YTD EBITDA stands at $1,153K, a $2.2M swing vs. the -$1,096K loss in the same period last year. The engine behind this: S&amp;M fell to 29.9% of revenue YTD (from 47.5% a year ago) while revenue grew 30.5% — operating leverage is now visible and measurable. Cash closed at $4,414K, the highest balance of 2026 and +119% above budget, with four straight months of positive operating cash flow. The Rule of 40 score reached 38.8 YTD, approaching best-in-class territory. The one structural watch item: monthly gross churn of -$112K (≈$1.3M annualized) remains the primary constraint on ARR growth, which is decelerating from +35% to +29% YoY — retention investment is the clearest lever available to sustain this trajectory."
+
+gtm_new_logos_title: "New Logos — May 2026"
+gtm_acq_title: "Customer Acquisition — May 2026"
+gtm_funnel_title: "Acquisition Funnel: conversion signups to Logo"
