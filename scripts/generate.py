@@ -15,17 +15,34 @@ Writes:
     output/<template_name>.html
 """
 
-import argparse, base64, json, re
+import argparse, base64, json, re, sys
 from pathlib import Path
 from datetime import datetime
 
 import yaml
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import ChainableUndefined, Environment, FileSystemLoader, Undefined
 
 ROOT       = Path(__file__).parent.parent
 TMPL_DIR   = ROOT / "templates"
 DATA_DIR   = ROOT / "data"
 OUTPUT_DIR = ROOT / "output"
+
+# Un dato en None a 2+ niveles de profundidad (ej. metrics.nps.costa_rica_trend.name
+# cuando metrics.nps es None — pasó de verdad con NPS) no debe poder tumbar el render()
+# de TODO el archivo — Jinja2 con Undefined por defecto lanza UndefinedError en el segundo
+# nivel de encadenamiento, y como generate.py renderiza cada .j2 en una sola llamada, eso
+# se lleva puestas las demás slides del mismo archivo. ChainableUndefined (Jinja2 built-in,
+# hecho para esto) permite encadenar sin explotar; _TrackingUndefined además registra cada
+# ocurrencia para que no desaparezca en silencio — ver board_agent/phase3_html_builder.py (F3.9).
+_missing_fields: list[str] = []
+
+
+class _TrackingUndefined(ChainableUndefined):
+    def __str__(self) -> str:
+        name = self._undefined_name or "?"
+        if name not in _missing_fields:
+            _missing_fields.append(name)
+        return super().__str__()
 
 
 def _load_nps_images(period: str) -> list[str]:
@@ -67,11 +84,17 @@ def _merge_arr_walk_editorial(metrics, arr_walk_ed):
 
 # ── tojson Jinja2 filter ───────────────────────────────────────────────────────
 def _tojson(value, indent=None):
+    # Undefined llega hasta acá como objeto Python plano, fuera del encadenamiento
+    # de Jinja2 (json.dumps no lo sabe serializar) — mismo motivo que el guard de abajo.
+    if isinstance(value, Undefined):
+        return "null"
     return json.dumps(value, ensure_ascii=False, indent=indent)
 
 # ── hl_split Jinja2 filter ─────────────────────────────────────────────────────
 def _hl_split(text, cls):
     """Bold the lead up to the first '.', ',', or ' —'."""
+    if isinstance(text, Undefined):
+        return ""
     m = re.search(r'\.| —', text)
     if m:
         end = m.end()
@@ -82,7 +105,7 @@ def _hl_split(text, cls):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--template", default=None,
-                        help="Render solo este template (sin extensión). Default: todos.")
+                        help="Render solo estos templates, separados por coma (sin extensión). Default: todos.")
     args = parser.parse_args()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -133,7 +156,8 @@ def main():
         }
 
     # ── Jinja2 environment
-    env = Environment(loader=FileSystemLoader(str(TMPL_DIR)), autoescape=False)
+    env = Environment(loader=FileSystemLoader(str(TMPL_DIR)), autoescape=False,
+                       undefined=_TrackingUndefined)
     env.filters["tojson"]   = _tojson
     env.filters["hl_split"] = _hl_split
     env.filters["safe"]     = lambda v: v  # already safe (no autoescaping)
@@ -143,24 +167,42 @@ def main():
     # ── Render templates
     templates = sorted(TMPL_DIR.glob("*.j2"))
     if args.template:
-        templates = [t for t in templates if t.stem == args.template]
-        if not templates:
-            print(f"❌ Template '{args.template}' no encontrado en {TMPL_DIR}")
-            return
+        wanted = {t.strip() for t in args.template.split(",") if t.strip()}
+        matched = [t for t in templates if t.stem in wanted]
+        not_found = wanted - {t.stem for t in matched}
+        if not_found:
+            print(f"❌ Template(s) no encontrado(s) en {TMPL_DIR}: {', '.join(sorted(not_found))}")
+            return 1
+        templates = matched
+
+    failed_templates: list[str] = []
+    missing_by_template: dict[str, list[str]] = {}
 
     for tmpl_path in templates:
         tmpl_name = tmpl_path.stem
+        _missing_fields.clear()
         try:
             tmpl  = env.get_template(tmpl_path.name)
             html  = tmpl.render(**ctx)
             out_f = OUTPUT_DIR / f"{tmpl_name}.html"
             out_f.write_text(html, encoding="utf-8")
             print(f"  ✅ {out_f.relative_to(ROOT)}")
+            if _missing_fields:
+                missing_by_template[tmpl_name] = list(_missing_fields)
         except Exception as e:
             print(f"  ❌ {tmpl_name}: {e}")
+            failed_templates.append(tmpl_name)
+
+    for tmpl_name, fields in missing_by_template.items():
+        print(f"MISSING_FIELDS {tmpl_name}: {', '.join(fields)}")
 
     print(f"\n🎉 HTML generado en {OUTPUT_DIR}/")
 
+    if failed_templates:
+        print(f"FALLARON: {', '.join(failed_templates)}")
+        return 2
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -1,0 +1,74 @@
+# Chequeo automático de cambios a templates — corre en cada PR, no depende de que
+# alguien se acuerde de correr `generate.py --template X` + preview.py a mano antes de
+# pedir aprobación. No valida corrección de datos (eso sigue siendo Fase 4 local, con
+# datos reales de Metabase) — valida que el render no truene por un error real y que el
+# HTML no tenga daño estructural, y publica un screenshot antes/después para que quien
+# aprueba el PR vea el resultado real sin correr nada en su máquina.
+name: Template Check
+
+on:
+  pull_request:
+    paths:
+      - "templates/**"
+      - "scripts/generate.py"
+      - "board_agent/**"
+
+jobs:
+  render-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (rama del PR)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Calcular qué templates .j2 cambiaron en este PR
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only "${{ github.event.pull_request.base.sha }}"...HEAD -- 'templates/*.j2' \
+            | sed 's#templates/##; s#\.j2$##' | paste -sd, -)
+          echo "templates=$CHANGED" >> "$GITHUB_OUTPUT"
+          if [ -n "$CHANGED" ]; then
+            echo "Templates cambiados: $CHANGED"
+          else
+            echo "Ningún .j2 cambió en este PR — el chequeo de render/screenshot no aplica."
+          fi
+
+      - name: Render + linter estructural (rama del PR)
+        if: steps.changed.outputs.templates != ''
+        run: |
+          uv run --with jinja2 --with pyyaml python3 scripts/ci_render_check.py \
+            --templates "${{ steps.changed.outputs.templates }}"
+
+      - name: Instalar Chromium para los screenshots
+        if: steps.changed.outputs.templates != ''
+        run: uv run --with playwright python3 -m playwright install --with-deps chromium
+
+      - name: Screenshot "después" (rama del PR)
+        if: steps.changed.outputs.templates != ''
+        run: |
+          uv run --with playwright python3 scripts/ci_screenshot.py \
+            --templates "${{ steps.changed.outputs.templates }}" --out-dir screenshots/after
+
+      - name: Render + screenshot "antes" (rama base, en un worktree aparte)
+        if: steps.changed.outputs.templates != ''
+        run: |
+          git worktree add /tmp/base-ref "${{ github.event.pull_request.base.sha }}"
+          cp tests/fixtures/metrics_sample.yaml /tmp/base-ref/data/metrics.yaml
+          cd /tmp/base-ref
+          uv run --with jinja2 --with pyyaml python3 scripts/generate.py \
+            --template "${{ steps.changed.outputs.templates }}" || true
+          uv run --with playwright python3 scripts/ci_screenshot.py \
+            --templates "${{ steps.changed.outputs.templates }}" \
+            --out-dir "$GITHUB_WORKSPACE/screenshots/before"
+
+      - name: Publicar screenshots antes/después
+        if: steps.changed.outputs.templates != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: template-check-screenshots
+          path: screenshots/
+          retention-days: 30

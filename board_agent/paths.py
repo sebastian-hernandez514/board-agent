@@ -38,6 +38,11 @@ BOARD_STANDALONE_HTML = OUTPUT_DIR / "board_standalone.html"
 # Template Board (167MB, nunca estuvo en git) y no se migra; desde acá en adelante
 # cada corrida completa de Board Agent guarda su versión nueva en este árbol.
 BOARDS_DIR = BOARD_AGENT_ROOT / "boards"
+# Histórico final — una sola entrada por mes (marcada explícitamente con
+# `run.py --mark-final`), separado de boards/YYYY-MM/ que guarda TODAS las versiones de
+# trabajo del mes. Decisión 2026-07-21: el histórico entre meses no debe acumular cada
+# iteración — solo la que se decidió publicar como definitiva.
+HISTORICO_DIR = BOARDS_DIR / "historico"
 
 # output_integrity.py (F0.12) — detecta ediciones manuales en output/*.html hechas después de
 # la última generación. El estado vive en Board Agent, no en Template Board, porque es Board
@@ -55,6 +60,18 @@ PDF_SCRIPT = SCRIPTS_DIR / "generate_pdf.py"
 SLIDE_CLASS_TOKENS = {"slide", "gtm-slide", "hc-slide", "board-slide", "dt-slide"}
 EXPECTED_SLIDE_COUNT = 47
 MIN_SLIDE_COUNT_WARNING = 40
+
+# Mismo orden que scripts/merge_standalone.py::SLIDE_FILES — usado para regeneración
+# selectiva (F3.1/F3.9/F3.10) y para decidir cuándo "no se pidió ningún template puntual"
+# significa "los 8".
+ALL_TEMPLATE_STEMS = [
+    "1_inicio", "2_discussion_topic", "3_arr_walk", "4_financial_performance",
+    "5_go_to_market", "6_rd", "7_headcount", "8_appendix",
+]
+
+# Alimentan el número principal del board (ARR/MRR/Financial) — un dato faltante ahí es
+# FAIL, no WARN, mismo criterio que F1.1/F1.2/F1.4/F1.5 en phase1_freshness.py.
+BOARD_CRITICAL_TEMPLATES = {"1_inicio", "3_arr_walk", "4_financial_performance"}
 
 # Abreviaturas de mes en inglés — mismo formato que usan los nombres de archivo ya
 # existentes en boards/YYYY-MM/ (ej. "board_May_2026_v37.html").

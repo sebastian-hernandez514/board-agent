@@ -53,6 +53,18 @@ def main() -> int:
                          help="Corre solo Fase 5 (Diff Review) sobre el metrics.yaml actual")
     parser.add_argument("--refresh", action="store_true",
                          help="Pasa --refresh a fetch_metrics.py (ignora .cache_metrics.json ya calculado)")
+    parser.add_argument("--mark-final", action="store_true",
+                         help="No corre el pipeline — copia una versión ya guardada en boards/YYYY-MM/ "
+                              "a boards/historico/ como LA versión final de ese mes (nombre limpio, sin "
+                              "_vN). Re-marcar el mismo mes sobreescribe la entrada anterior. Usa la "
+                              "versión más reciente por default, o --version N para elegir una puntual.")
+    parser.add_argument("--version", type=int, default=None,
+                         help="Versión específica a marcar como final (con --mark-final). Default: la más reciente.")
+    parser.add_argument("--only-templates", default=None,
+                         help="Regenera SOLO estos templates (ej. '3_arr_walk,6_rd'), sin tocar los demás "
+                              "output/*.html. Solo válido cuando metrics.yaml NO cambió — salta Fase 0/1/2 "
+                              "(no revalida ni recalcula el dato) y va directo a Fase 3 restringida a esta "
+                              "lista, seguida de Fase 4/5 completas. Si cambió el dato, usar el flujo normal.")
     parser.add_argument("--pdf", action="store_true",
                          help="Corre Fase 6 (PDF) — muestra HTML_FILE/PDF_OUT actuales de generate_pdf.py")
     parser.add_argument("--yes", action="store_true",
@@ -77,6 +89,49 @@ def main() -> int:
         print("Board Agent — Fase 4 (Validator) sobre metrics.yaml actual (cutoff configurado en data/config.yaml)")
         results = phase4_validator.run()
         ok = print_report("FASE 4 — Business Rules Validator", results) and ok
+        return 0 if ok else 1
+
+    if args.mark_final:
+        try:
+            result = versioning.mark_final(args.month, version=args.version)
+        except RuntimeError as e:
+            print(f"❌ {e}")
+            return 1
+        print(f"📌 Board final de {args.month} (v{result['version']}) guardado en {result['html'].parent}:")
+        print(f"   {result['html'].name}")
+        return 0
+
+    if args.only_templates:
+        # Regeneración selectiva: metrics.yaml NO cambió (por eso se saltan Fase 0/1/2 —
+        # no hay nada nuevo que validar ni recalcular), solo se tocó uno o más .j2/YAML
+        # editorial. Los output/*.html no listados quedan intactos — merge_standalone.py
+        # los toma igual del disco. Fase 4/5 sí corren completas (son baratas y locales).
+        templates = [t.strip() for t in args.only_templates.split(",") if t.strip()]
+        print(f"Board Agent — regeneración selectiva de: {', '.join(templates)}")
+        print("(sin Fase 0/1/2 — asume que data/metrics.yaml no cambió desde la última corrida completa)")
+
+        html_results = phase3_html_builder.run(args.month, templates=templates)
+        html_ok = print_report("FASE 3 — HTML Builder (selectivo)", html_results)
+
+        output_integrity.record_generated_state()
+
+        validator_results = phase4_validator.run()
+        validator_ok = print_report("FASE 4 — Business Rules Validator", validator_results)
+
+        diff_results = phase5_diff.run()
+        print_report("FASE 5 — Diff Review", diff_results)
+
+        saved = versioning.save_version(args.month, validator_results, diff_results)
+        print(f"\n📦 Guardado como v{saved['version']} en {saved['html'].parent}:")
+        print(f"   {saved['html'].name}")
+        print(f"   {saved['metrics'].name}")
+        print(f"   {saved['report'].name}")
+
+        ok = html_ok and validator_ok
+        if not ok:
+            print("\n⚠️  Hubo FAILs en Fase 3 o Fase 4 — revisar el reporte antes de publicar.")
+        else:
+            print("\n✅ Regeneración selectiva completa, validada y versionada.")
         return 0 if ok else 1
 
     print(f"Board Agent — mes objetivo: {args.month}")

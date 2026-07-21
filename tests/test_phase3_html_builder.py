@@ -446,6 +446,73 @@ def test_run_stops_early_if_generate_fails(monkeypatch, isolated_dirs):
     assert results[0].status == "FAIL"
 
 
+def test_run_returncode_2_does_not_abort_rest_of_fase_3(monkeypatch, isolated_dirs):
+    """returncode 1 (catastrófico) aborta todo — returncode 2 (uno o más templates con
+    un error real, no de datos) NO debería: los templates que sí se generaron bien no
+    deberían quedar bloqueados por un bug ajeno en otro archivo."""
+    calls = {"n": 0}
+
+    def fake_run(cmd, **kw):
+        calls["n"] += 1
+        if "generate.py" in str(cmd):
+            return _FakeProc(2, stdout="FALLARON: 6_rd")
+        return _FakeProc(0)
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    results = f3.run("2026-05")
+
+    assert calls["n"] == 2  # generate.py Y merge_standalone.py — no se abortó
+    f31 = next(r for r in results if r.id == "F3.1")
+    assert f31.status == "FAIL"
+    assert "6_rd" in f31.detail
+    assert results[-1].id == "F3.3"
+    assert results[-1].status == "PASS"
+
+
+def test_run_parses_missing_fields_as_warn_for_non_critical_template(monkeypatch, isolated_dirs):
+    monkeypatch.setattr(subprocess, "run",
+                         lambda cmd, **kw: _FakeProc(0, stdout="MISSING_FIELDS 6_rd: nps, costa_rica_trend"))
+    results = f3.run("2026-05")
+    f39 = next(r for r in results if r.id == "F3.9")
+    assert f39.status == "WARN"
+    assert "nps" in f39.detail and "costa_rica_trend" in f39.detail
+
+
+def test_run_parses_missing_fields_as_fail_for_board_critical_template(monkeypatch, isolated_dirs):
+    monkeypatch.setattr(subprocess, "run",
+                         lambda cmd, **kw: _FakeProc(0, stdout="MISSING_FIELDS 1_inicio: arr_total"))
+    results = f3.run("2026-05")
+    f39 = next(r for r in results if r.id == "F3.9")
+    assert f39.status == "FAIL"
+
+
+def test_run_with_templates_param_passes_comma_list_to_generate(monkeypatch, isolated_dirs):
+    captured_cmds = []
+
+    def fake_run(cmd, **kw):
+        captured_cmds.append(cmd)
+        return _FakeProc(0)
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    f3.run("2026-05", templates=["3_arr_walk", "6_rd"])
+
+    generate_cmd = captured_cmds[0]
+    assert "--template" in generate_cmd
+    assert "3_arr_walk,6_rd" in generate_cmd
+
+
+def test_structural_lint_flags_duplicate_id_as_fail(monkeypatch, isolated_dirs):
+    data_dir, output_dir = isolated_dirs
+    (output_dir / "6_rd.html").write_text('<div id="dup"></div><div id="dup"></div>', encoding="utf-8")
+    monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: _FakeProc(0))
+
+    results = f3.run("2026-05", templates=["6_rd"])
+
+    f310 = next(r for r in results if r.id == "F3.10")
+    assert f310.status == "FAIL"
+    assert "dup" in f310.detail
+
+
 def test_run_stops_before_merge_reembed_still_runs(monkeypatch, isolated_dirs):
     data_dir, output_dir = isolated_dirs
     (output_dir / "2_discussion_topic.html").write_text(
@@ -460,15 +527,19 @@ def test_run_stops_before_merge_reembed_still_runs(monkeypatch, isolated_dirs):
 
     results = f3.run("2026-05")
     ids = [r.id for r in results]
-    assert ids == ["F3.1", "F3.2", "F3.6", "F3.5", "F3.4", "F3.7", "F3.8", "F3.3"]
+    # F3.10 aparece una sola vez porque, en este test, 2_discussion_topic.html es el único
+    # output/*.html que existe en disco (de los 8 stems posibles) — el linter estructural
+    # solo corre sobre lo que sí existe.
+    assert ids == ["F3.1", "F3.10", "F3.2", "F3.6", "F3.5", "F3.4", "F3.7", "F3.8", "F3.3"]
     assert results[0].status == "PASS"
-    assert results[1].status == "WARN"  # imagen no existe en este test
-    assert results[2].status == "SKIP"  # no existe ceo.yaml en este test
-    assert results[3].status == "SKIP"  # sin sentinel 'updated_for_month' en este test
-    assert results[4].status == "SKIP"  # no hay 4_financial_performance.html en este test
-    assert results[5].status == "SKIP"  # no hay 6_rd.html en este test
-    assert results[6].status == "SKIP"  # no hay 7_headcount.html en este test
-    assert results[7].status == "PASS"
+    assert results[1].status == "PASS"  # F3.10 — <img> sin ids/scripts, nada que reportar
+    assert results[2].status == "WARN"  # F3.2 — imagen no existe en este test
+    assert results[3].status == "SKIP"  # no existe ceo.yaml en este test
+    assert results[4].status == "SKIP"  # sin sentinel 'updated_for_month' en este test
+    assert results[5].status == "SKIP"  # no hay 4_financial_performance.html en este test
+    assert results[6].status == "SKIP"  # no hay 6_rd.html en este test
+    assert results[7].status == "SKIP"  # no hay 7_headcount.html en este test
+    assert results[8].status == "PASS"
     assert calls["n"] == 2  # generate.py + merge_standalone.py
 
 

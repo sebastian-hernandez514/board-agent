@@ -81,10 +81,33 @@ Los comentarios HTML (`<!-- SLIDE N — ... -->`) son el ancla — ya los usa Bo
 
 No reinventes estos 3 — ya están probados y documentados.
 
+### Paso 3.5 — Antes de tocar el `.j2` real: propuesta y aprobación explícita
+
+Nace de una pregunta directa del usuario (2026-07-21): ¿qué pasa si el diseño que se
+implementa no es el que la persona en verdad quería? Editar el `.j2` de verdad y descubrir
+después que "no era eso" es más caro que mostrar el diseño ANTES de conectarlo a datos
+reales. Por eso, antes del Paso 4, hay un checkpoint obligatorio — no opcional, no "avisar
+y seguir":
+
+1. **Propuesta/mockup:** construir una vista previa del cambio — puede llevar un valor de
+   prueba/hardcodeado temporal en vez del dato real todavía (el objetivo es ver el diseño,
+   no que el dato ya esté conectado). Regenerar solo ese template:
+   ```bash
+   uv run --with jinja2 --with pyyaml python3 scripts/generate.py --template <nombre>
+   ```
+   y sacar un screenshot con `preview.py` o Playwright directo.
+2. **Aprobación explícita:** mostrar ese screenshot a quien pidió el cambio y esperar un
+   "sí, así" concreto. **No avanzar al Paso 4 sin esa confirmación** — a diferencia de la
+   Regla de oro #3 (más abajo), este paso no es "avisar antes de escribir", es no escribir
+   en absoluto hasta tener luz verde sobre el diseño.
+3. Recién con el diseño aprobado se sigue al Paso 4 — ahí sí se conecta el dato real (nunca
+   se deja el valor de prueba de este paso hardcodeado como si fuera dato real).
+
 ### Paso 4 — Caso nuevo: construir el enganche
 
 Esto **sí toca el `.j2` fuente del template** — es la única excepción real a "no editar el
-`.j2` a la ligera", y requiere ir con cuidado:
+`.j2` a la ligera", y requiere ir con cuidado. Asume que el Paso 3.5 ya pasó (diseño ya
+aprobado) — lo que queda es la implementación formal, "por detrás", para que quede bien:
 
 1. **Leer el archivo completo alrededor de la slide** — nunca editar a ciegas.
 2. **Decidir dónde vive el texto nuevo:**
@@ -131,12 +154,21 @@ Caso más delicado — checklist adicional:
 1. **Nunca editar `output/*.html` a mano** — siempre a través de `generate.py`.
 2. **Nunca tocar más de lo pedido** — si vas a agregar un panel de comentarios a NPS, no
    toques Country Performance de paso.
-3. **Avisar antes de escribir en un `.j2`** — no es un permiso permanente, es caso por caso.
+3. **Diseño aprobado ANTES de escribir en el `.j2` de verdad (Paso 3.5) — no es un aviso,
+   es un checkpoint obligatorio.** Mostrar el mockup, esperar "sí, así", recién ahí
+   implementar. No asumas luz verde por default.
 4. **Reusar el patrón visual existente** (`.aw-comments-panel` como referencia) — no inventes
    un estilo nuevo cada vez, el board debe sentirse consistente.
 5. **Si el contenido es sensible al mes, conectarlo a `slide_registry.py`** — no dejar otro
    hueco como el que tenía Headcount hasta el 2026-07-09.
-6. **Confirmar visualmente (Playwright/`preview.py`) antes de dar el cambio por terminado.**
+6. **Confirmar visualmente (Playwright/`preview.py`) antes de dar el cambio por terminado** —
+   además, si el `.j2` cambió, `.github/workflows/template-check.yml` corre esto mismo
+   automático en el PR (render + linter estructural + screenshot antes/después) — no
+   depende de que alguien se acuerde de hacerlo a mano.
+7. **Regenerar solo lo que cambió cuando `metrics.yaml` no cambió** — usar
+   `run.py --only-templates <nombre>` (o `generate.py --template <nombre>` directo para
+   iterar rápido) en vez de la corrida completa, para no darle al pipeline la chance de
+   tocar los otros 7 templates que nadie pidió modificar.
 
 ---
 

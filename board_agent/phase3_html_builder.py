@@ -31,9 +31,12 @@ import base64
 import re
 import subprocess
 
-from . import paths
+from . import paths, structural_lint
 from .report import CheckResult
 from .slide_registry import SLIDE_SPECS, check_stale_slide
+
+_MISSING_FIELDS_RE = re.compile(r"^MISSING_FIELDS ([^:]+): (.+)$", re.MULTILINE)
+_FALLARON_RE = re.compile(r"^FALLARON: (.+)$", re.MULTILINE)
 
 
 def _run_script(script_path, deps: tuple[str, ...], extra_args=None):
@@ -112,18 +115,94 @@ def _flag_stale_headcount(month: str) -> CheckResult:
     return check_stale_slide(_SPEC_BY_ID["F3.8"], month)
 
 
-def run(month: str) -> list[CheckResult]:
+def _parse_missing_fields(stdout: str) -> dict[str, list[str]]:
+    out = {}
+    for tmpl, fields in _MISSING_FIELDS_RE.findall(stdout or ""):
+        out[tmpl.strip()] = [f.strip() for f in fields.split(",") if f.strip()]
+    return out
+
+
+def _parse_failed_templates(stdout: str) -> list[str]:
+    m = _FALLARON_RE.search(stdout or "")
+    if not m:
+        return []
+    return [n.strip() for n in m.group(1).split(",") if n.strip()]
+
+
+def _missing_fields_results(missing_by_template: dict[str, list[str]]) -> list[CheckResult]:
+    results = []
+    for tmpl, fields in missing_by_template.items():
+        severity = "FAIL" if tmpl in paths.BOARD_CRITICAL_TEMPLATES else "WARN"
+        results.append(CheckResult(
+            "F3.9", f"{tmpl} — datos faltantes renderizados en blanco", severity,
+            f"campos: {', '.join(fields)}",
+        ))
+    return results
+
+
+def _structural_lint_results(template_stems: list[str]) -> list[CheckResult]:
+    results = []
+    for stem in template_stems:
+        html_path = paths.OUTPUT_DIR / f"{stem}.html"
+        if not html_path.exists():
+            continue
+        html = html_path.read_text(encoding="utf-8")
+        problems = []
+        dupes = structural_lint.check_duplicate_ids(html)
+        if dupes:
+            problems.append(f"ids duplicados: {dupes}")
+        unbalanced = structural_lint.check_balanced_tags(html)
+        if unbalanced:
+            problems.append(f"tags desbalanceados: {unbalanced}")
+        orphans = structural_lint.check_orphaned_references(html)
+        if orphans["canvases_sin_script"]:
+            problems.append(f"canvases sin script: {orphans['canvases_sin_script']}")
+        if orphans["scripts_a_id_inexistente"]:
+            problems.append(f"scripts a id inexistente: {orphans['scripts_a_id_inexistente']}")
+        if problems:
+            results.append(CheckResult("F3.10", f"{stem} — integridad estructural del HTML", "FAIL",
+                                        "; ".join(problems)))
+        else:
+            results.append(CheckResult("F3.10", f"{stem} — integridad estructural del HTML", "PASS", ""))
+    return results
+
+
+def run(month: str, templates: list[str] | None = None) -> list[CheckResult]:
+    """`templates`: lista de stems (ej. ["3_arr_walk", "6_rd"]) para regenerar solo esos —
+    None (default) regenera los 8, como siempre. Ver board_agent/paths.py::ALL_TEMPLATE_STEMS."""
     results = []
 
-    proc = _run_script(paths.GENERATE_SCRIPT, deps=("jinja2", "pyyaml"))
+    extra_args = ["--template", ",".join(templates)] if templates else None
+    proc = _run_script(paths.GENERATE_SCRIPT, deps=("jinja2", "pyyaml"), extra_args=extra_args)
     if proc.stdout:
         print(proc.stdout)
-    if proc.returncode != 0:
+
+    if proc.returncode == 1:
         if proc.stderr:
             print(proc.stderr)
         results.append(CheckResult("F3.1", "generate.py corrió sin errores", "FAIL", f"exit code {proc.returncode}"))
         return results
-    results.append(CheckResult("F3.1", "generate.py corrió sin errores", "PASS", ""))
+
+    failed = _parse_failed_templates(proc.stdout)
+    if proc.returncode == 2:
+        # returncode 2 = uno o más templates fallaron por un error REAL (no relacionado a
+        # datos faltantes, ej. sintaxis Jinja2 rota) — a diferencia de returncode 1, no
+        # abortamos el resto de Fase 3: los templates que sí se generaron bien no deberían
+        # quedar bloqueados por un bug en otro archivo sin relación.
+        if proc.stderr:
+            print(proc.stderr)
+        results.append(CheckResult("F3.1", "generate.py corrió sin errores", "FAIL",
+                                    f"template(s) con error real (no de datos): {', '.join(failed)} — "
+                                    "el resto de Fase 3 sigue con lo que sí se generó"))
+    else:
+        results.append(CheckResult("F3.1", "generate.py corrió sin errores", "PASS", ""))
+
+    missing_by_template = _parse_missing_fields(proc.stdout)
+    results.extend(_missing_fields_results(missing_by_template))
+
+    attempted = templates or list(paths.ALL_TEMPLATE_STEMS)
+    succeeded = [t for t in attempted if t not in failed]
+    results.extend(_structural_lint_results(succeeded))
 
     results.append(_reembed_cr_image(month))
     results.append(_flag_stale_ceo_highlights(month))

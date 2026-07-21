@@ -54,6 +54,15 @@ uv run --with pyyaml --with pytest --with jinja2 python -m pytest tests/ -v
 
 # Vista previa (screenshot) de una slide ya generada — después de usar una skill de self-service
 uv run --with playwright python preview.py --template 3_arr_walk --slide "ARR Core"
+
+# Regenerar SOLO un template (sin tocar los otros 7, sin correr Fase 0/1/2 — asume que
+# metrics.yaml no cambió) — para iterar rápido un cambio de diseño/contenido
+uv run --with pyyaml python run.py --only-templates 6_rd --month 2026-06
+
+# Marcar una versión ya guardada en boards/2026-06/ como LA versión final de ese mes —
+# se copia a boards/historico/ con nombre limpio (una sola entrada por mes, no todas las
+# versiones de trabajo). Usa la más reciente por default, o --version N para una puntual.
+uv run --with pyyaml python run.py --mark-final --month 2026-06
 ```
 
 No requiere AWS CLI, sesión SSO ni ninguna credencial de Redshift — el único acceso a datos es el MCP de Metabase, ya autenticado por OAuth en la sesión de Claude Code que puebla el cache.

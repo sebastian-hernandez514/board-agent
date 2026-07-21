@@ -9,6 +9,7 @@ MONTH = "2026-06"
 @pytest.fixture
 def isolated_paths(tmp_path, monkeypatch):
     boards_dir = tmp_path / "boards"
+    historico_dir = boards_dir / "historico"
     output_html = tmp_path / "output" / "board_standalone.html"
     metrics_yaml = tmp_path / "data" / "metrics.yaml"
     pdf_script = tmp_path / "scripts" / "generate_pdf.py"
@@ -26,6 +27,7 @@ def isolated_paths(tmp_path, monkeypatch):
     )
 
     monkeypatch.setattr(paths, "BOARDS_DIR", boards_dir)
+    monkeypatch.setattr(paths, "HISTORICO_DIR", historico_dir)
     monkeypatch.setattr(paths, "BOARD_STANDALONE_HTML", output_html)
     monkeypatch.setattr(paths, "METRICS_YAML", metrics_yaml)
     monkeypatch.setattr(paths, "PDF_SCRIPT", pdf_script)
@@ -85,6 +87,54 @@ def test_save_version_updates_generate_pdf_targets(isolated_paths):
     # Los valores viejos (mayo, v41) ya no deben quedar
     assert "2026-05" not in content
     assert "v41" not in content
+
+
+def test_mark_final_raises_if_no_version_exists(isolated_paths):
+    with pytest.raises(RuntimeError, match="No hay ninguna versión"):
+        versioning.mark_final(MONTH)
+
+
+def test_mark_final_copies_latest_version_with_clean_name(isolated_paths):
+    versioning.save_version(MONTH, [], [])  # v1
+    versioning.save_version(MONTH, [], [])  # v2
+
+    result = versioning.mark_final(MONTH)
+
+    assert result["version"] == 2
+    assert result["html"] == paths.HISTORICO_DIR / "board_Jun_2026.html"
+    assert result["html"].exists()
+    assert result["metrics"].exists()
+    assert result["report"].exists()
+    assert result["html"].read_text(encoding="utf-8") == "<html>board de prueba</html>"
+    # las versiones de trabajo en boards/YYYY-MM/ siguen intactas, no se tocan
+    assert (paths.BOARDS_DIR / MONTH / "board_Jun_2026_v1.html").exists()
+    assert (paths.BOARDS_DIR / MONTH / "board_Jun_2026_v2.html").exists()
+
+
+def test_mark_final_can_target_specific_version(isolated_paths):
+    versioning.save_version(MONTH, [], [])  # v1
+    versioning.save_version(MONTH, [], [])  # v2
+
+    result = versioning.mark_final(MONTH, version=1)
+
+    assert result["version"] == 1
+
+
+def test_mark_final_raises_if_requested_version_missing(isolated_paths):
+    versioning.save_version(MONTH, [], [])  # v1
+    with pytest.raises(RuntimeError, match="No existe"):
+        versioning.mark_final(MONTH, version=5)
+
+
+def test_mark_final_overwrites_previous_final_for_same_month(isolated_paths):
+    """Un mes tiene una sola entrada en el histórico — re-marcar lo pisa, no duplica."""
+    versioning.save_version(MONTH, [], [])  # v1
+    versioning.mark_final(MONTH, version=1)
+    versioning.save_version(MONTH, [], [])  # v2
+    versioning.mark_final(MONTH, version=2)
+
+    files = list(paths.HISTORICO_DIR.glob("board_Jun_2026*.html"))
+    assert len(files) == 1
 
 
 def test_update_pdf_script_targets_raises_if_pattern_does_not_match(isolated_paths):

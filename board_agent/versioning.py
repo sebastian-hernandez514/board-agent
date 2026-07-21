@@ -29,6 +29,51 @@ def next_version_number(cutoff_month: str, boards_dir: Path = None) -> int:
     return max(numbers, default=0) + 1
 
 
+def latest_version_number(cutoff_month: str, boards_dir: Path = None) -> int:
+    """Número de la versión más alta ya guardada para este mes (0 si no hay ninguna)."""
+    return next_version_number(cutoff_month, boards_dir) - 1
+
+
+def mark_final(cutoff_month: str, version: int = None, boards_dir: Path = None,
+                historico_dir: Path = None) -> dict:
+    """Copia una versión YA guardada de boards/YYYY-MM/ a boards/historico/ con nombre
+    limpio (sin '_vN') — a pedido explícito del usuario 2026-07-21: el histórico entre
+    meses debe guardar SOLO la versión marcada como final, no todas las de trabajo (esas
+    siguen intactas en boards/YYYY-MM/, sin cambios). Re-marcar el mismo mes sobreescribe
+    la entrada anterior — un mes tiene una sola entrada en el histórico, siempre.
+
+    `version=None` usa la más reciente ya guardada. Lanza RuntimeError si no hay ninguna
+    versión para ese mes, o si la versión pedida no existe en disco."""
+    board_dir = (boards_dir or paths.BOARDS_DIR) / cutoff_month
+    target_version = version or latest_version_number(cutoff_month, boards_dir)
+    if target_version == 0:
+        raise RuntimeError(f"No hay ninguna versión guardada para {cutoff_month} en {board_dir}")
+
+    stem = _file_stem(cutoff_month, target_version)
+    html_src = board_dir / f"{stem}.html"
+    if not html_src.exists():
+        raise RuntimeError(f"No existe {html_src} — ¿la versión {target_version} es correcta para {cutoff_month}?")
+    metrics_src = board_dir / f"{stem}.metrics.yaml"
+    report_src = board_dir / f"{stem}.report.md"
+
+    y, m = cutoff_month.split("-")
+    final_stem = f"board_{paths.MES_ABBR_EN[int(m)]}_{y}"
+
+    hist_dir = historico_dir or paths.HISTORICO_DIR
+    hist_dir.mkdir(parents=True, exist_ok=True)
+    html_out = hist_dir / f"{final_stem}.html"
+    metrics_out = hist_dir / f"{final_stem}.metrics.yaml"
+    report_out = hist_dir / f"{final_stem}.report.md"
+
+    shutil.copy2(html_src, html_out)
+    if metrics_src.exists():
+        shutil.copy2(metrics_src, metrics_out)
+    if report_src.exists():
+        shutil.copy2(report_src, report_out)
+
+    return {"version": target_version, "html": html_out, "metrics": metrics_out, "report": report_out}
+
+
 def _file_stem(cutoff_month: str, version: int) -> str:
     y, m = cutoff_month.split("-")
     mes = paths.MES_ABBR_EN[int(m)]

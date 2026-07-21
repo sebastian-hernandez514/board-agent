@@ -81,6 +81,103 @@ def test_validate_only_reflects_fail_in_exit_code(monkeypatch):
     assert run.main() == 1
 
 
+def test_mark_final_calls_versioning_and_returns_0(monkeypatch):
+    captured = {}
+
+    def fake_mark_final(month, version=None):
+        captured["month"] = month
+        captured["version"] = version
+        return {"version": 3, "html": Path("/tmp/boards/historico/board_Jun_2026.html"),
+                "metrics": Path("/tmp/boards/historico/board_Jun_2026.metrics.yaml"),
+                "report": Path("/tmp/boards/historico/board_Jun_2026.report.md")}
+    monkeypatch.setattr(run.versioning, "mark_final", fake_mark_final)
+    monkeypatch.setattr("sys.argv", ["run.py", "--mark-final", "--month", "2026-06"])
+
+    assert run.main() == 0
+    assert captured == {"month": "2026-06", "version": None}
+
+
+def test_mark_final_with_explicit_version(monkeypatch):
+    captured = {}
+    monkeypatch.setattr(run.versioning, "mark_final",
+                         lambda month, version=None: captured.update(version=version) or
+                         {"version": version, "html": Path("/tmp/x.html"),
+                          "metrics": Path("/tmp/x.yaml"), "report": Path("/tmp/x.md")})
+    monkeypatch.setattr("sys.argv", ["run.py", "--mark-final", "--month", "2026-06", "--version", "1"])
+
+    assert run.main() == 0
+    assert captured["version"] == 1
+
+
+def test_mark_final_returns_1_on_missing_version(monkeypatch):
+    def fake_mark_final(month, version=None):
+        raise RuntimeError("No hay ninguna versión guardada para 2026-06")
+    monkeypatch.setattr(run.versioning, "mark_final", fake_mark_final)
+    monkeypatch.setattr("sys.argv", ["run.py", "--mark-final", "--month", "2026-06"])
+
+    assert run.main() == 1
+
+
+def test_only_templates_skips_gate_freshness_and_metrics(monkeypatch):
+    """--only-templates asume que metrics.yaml no cambió — no hace falta revalidar
+    freshness ni recalcular el dato, solo regenerar HTML de la lista pedida."""
+    called = {}
+    monkeypatch.setattr(run.phase0_gate, "run", lambda month: called.update(gate=True) or [_r("F0.4", "PASS")])
+    monkeypatch.setattr(run.phase1_freshness, "run",
+                         lambda month: called.update(freshness=True) or [_r("F1.1", "PASS")])
+    monkeypatch.setattr(run.phase2_metrics, "run",
+                         lambda month, refresh=False: called.update(metrics=True) or _r("F2.1", "PASS"))
+    monkeypatch.setattr(run.phase3_html_builder, "run",
+                         lambda month, templates=None: called.update(html_templates=templates) or [_r("F3.1", "PASS")])
+    monkeypatch.setattr(run.phase4_validator, "run", lambda: [_r("R1", "PASS")])
+    monkeypatch.setattr(run.phase5_diff, "run", lambda: [_r("D1", "PASS")])
+    monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: None)
+    calls = []
+    _fake_versioning(monkeypatch, calls)
+    monkeypatch.setattr("sys.argv", ["run.py", "--only-templates", "3_arr_walk,6_rd", "--month", "2026-05"])
+
+    exit_code = run.main()
+
+    assert exit_code == 0
+    assert "gate" not in called
+    assert "freshness" not in called
+    assert "metrics" not in called
+    assert called["html_templates"] == ["3_arr_walk", "6_rd"]
+    assert len(calls) == 1  # se versiona igual que en el flujo completo
+
+
+def test_only_templates_reflects_fail_in_exit_code(monkeypatch):
+    monkeypatch.setattr(run.phase3_html_builder, "run", lambda month, templates=None: [_r("F3.1", "FAIL")])
+    monkeypatch.setattr(run.phase4_validator, "run", lambda: [_r("R1", "PASS")])
+    monkeypatch.setattr(run.phase5_diff, "run", lambda: [_r("D1", "PASS")])
+    monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: None)
+    calls = []
+    _fake_versioning(monkeypatch, calls)
+    monkeypatch.setattr("sys.argv", ["run.py", "--only-templates", "6_rd"])
+
+    assert run.main() == 1
+    assert len(calls) == 1  # se versiona igual aunque haya FAIL — mismo criterio que el flujo completo
+
+
+def test_only_templates_still_runs_validator_and_diff_despite_fase3_fail(monkeypatch):
+    """A diferencia del flujo completo (que aborta ante FAIL en Fase 3), el modo
+    selectivo sigue a Fase 4/5 igual — un FAIL puntual en un template no debe tapar la
+    validación/diff de lo que sí se generó bien."""
+    called = {}
+    monkeypatch.setattr(run.phase3_html_builder, "run", lambda month, templates=None: [_r("F3.1", "FAIL")])
+    monkeypatch.setattr(run.phase4_validator, "run", lambda: called.update(validator=True) or [_r("R1", "PASS")])
+    monkeypatch.setattr(run.phase5_diff, "run", lambda: called.update(diff=True) or [_r("D1", "PASS")])
+    monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: None)
+    calls = []
+    _fake_versioning(monkeypatch, calls)
+    monkeypatch.setattr("sys.argv", ["run.py", "--only-templates", "6_rd"])
+
+    run.main()
+
+    assert called.get("validator") is True
+    assert called.get("diff") is True
+
+
 def test_full_flow_happy_path_saves_version_and_exits_0(monkeypatch):
     monkeypatch.setattr(run.phase0_gate, "run", lambda month: [_r("F0.4", "PASS")])
     monkeypatch.setattr(run.phase1_freshness, "run", lambda month: [_r("F1.1", "PASS")])
