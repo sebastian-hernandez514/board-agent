@@ -31,8 +31,8 @@ from playwright.async_api import async_playwright
 from PIL import Image
 
 ROOT       = Path(__file__).resolve().parent.parent
-HTML_FILE = ROOT / "boards" / "2026-05" / "board_May_2026_v1.html"
-PDF_OUT = ROOT / "boards" / "2026-05" / "board_May_2026_v1.pdf"
+HTML_FILE = ROOT / "boards" / "2026-06" / "board_Jun_2026_v3.html"
+PDF_OUT = ROOT / "boards" / "2026-06" / "board_Jun_2026_v3.pdf"
 SCALE      = 4   # 4x → 3840x2160px por slide (4K/UHD, ~384 DPI — sobre el estándar de impresión 300 DPI)
 WAIT_MS    = 4000  # tiempo para que Chart.js termine de renderizar
 
