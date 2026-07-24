@@ -75,6 +75,31 @@ QUERIES = [
                  "agregarse a pares distintos antes del INNER JOIN, para no multiplicar filas.",
     },
     {
+        "label": "company mrr mensual (ARR Walk v2)",
+        "sql_const": "_SQL_COMPANY_MRR_MONTHLY",
+        "metabase_tables": ["dm_strategic.fact_customers_mrr"],
+        "status": "exact",
+        "notes": "Agregado 2026-07-22 — reemplaza el ARR Walk de 'fact_customers_mrr (summary)' "
+                 "(New/Churn/Reactivated/Recovered/Upsell/Downsell por producto+plan) por la "
+                 "metodología validada contra el Excel real de Finance (New=primer MRR>0, "
+                 "Churn=pasa a 0, Reactivated=vuelve el mes siguiente, Recovered=vuelve más "
+                 "tarde, Upsell/Downsell=compañía continua sube/baja, todo a nivel COMPAÑÍA "
+                 "completa, no por producto). Validado en vivo con 15 quarters reales contra "
+                 "RS (4Q22→2Q26) — match a la décima con el Excel en los 5 quarters completos "
+                 "de referencia (1Q25-1Q26). A diferencia de 'fact_customers_mrr (summary)', "
+                 "esta query NO tiene self-joins — es una agregación simple sin historial: "
+                 "`SUM(amount_conv) GROUP BY id_company, segment_type_def, app_version` **solo "
+                 "del mes de corte**. Toda la secuenciación (comparar contra el mes anterior, "
+                 "detectar gaps para Reactivated/Recovered) se hace en Python en "
+                 "fetch_metrics.py, leyendo/actualizando el estado local "
+                 "data/.company_mrr_history.json (NO vive en Metabase ni se recalcula cada "
+                 "mes vía MBQL — se sembró una sola vez con un pull directo a RS, ver "
+                 "memory/project_board_agent.md). Grano ~60K filas (una por compañía×segmento "
+                 "activa) — más grande que cualquier query de negocio existente salvo 'Alanube "
+                 "ARR Walk completo' (~3.5K filas), pero sin self-join hace que la traducción "
+                 "MBQL sea mecánicamente simple (mismo patrón que 'logos consolidados').",
+    },
+    {
         "label": "logos consolidados",
         "sql_const": "_SQL_LOGOS_ALL",
         "metabase_tables": ["dm_strategic.fact_customers_mrr"],

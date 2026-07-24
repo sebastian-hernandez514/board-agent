@@ -44,6 +44,10 @@ OUTPUT_FILE    = ROOT / "data" / "metrics.yaml"
 # puebla automáticamente — Claude Code escribe cada resultado a mano en este JSON,
 # vía el MCP de Metabase, antes de correr este script (proceso manual, no un job).
 METABASE_CACHE_FILE = ROOT / "data" / ".metabase_cache.json"
+# ARR Walk v2 (2026-07-22) — estado local de New/Churn/Reactivated/Recovered/Upsell/Downsell
+# por compañía, sembrado una sola vez vía RS directo y actualizado cada corrida con el pull
+# mensual chico vía Metabase. Ver docstring de _classify_arr_walk_entities() más abajo.
+COMPANY_MRR_HISTORY_FILE = ROOT / "data" / ".company_mrr_history.json"
 BUDGET_FILE  = ROOT / "csv" / "Metricas_budget.csv"
 PNL_ACTUAL   = ROOT / "csv" / "P&L Histórico- ACtual.csv"
 PNL_BUDGET   = ROOT / "csv" / "P&L Histórico - Budget.csv"
@@ -1068,6 +1072,206 @@ ORDER BY date_month
 """
 
 
+_SQL_COMPANY_MRR_MONTHLY = """
+SELECT id_company, app_version, segment_type_def,
+       SUM(CASE app_version
+             WHEN 'colombia'  THEN amount_mrr
+             WHEN 'mexico'    THEN amount_mrr
+             WHEN 'argentina' THEN amount_mrr
+             WHEN 'peru'      THEN amount_mrr
+             WHEN 'spain'     THEN amount_mrr
+             ELSE COALESCE(amount_usd_real_mrr, amount_usd_mrr)
+           END) AS local_mrr
+FROM dwh_facts.fact_customers_mrr
+WHERE date_month = '{cutoff}-01'
+  AND segment_type_def IN ('Core', 'Lite')
+  AND event_product NOT IN ('AWAITING PAYMENT', 'CHURN')
+  AND amount_usd_mrr > 0
+  AND plan_name IS NOT NULL AND plan_name <> ''
+GROUP BY 1,2,3
+HAVING SUM(CASE app_version
+             WHEN 'colombia'  THEN amount_mrr
+             WHEN 'mexico'    THEN amount_mrr
+             WHEN 'argentina' THEN amount_mrr
+             WHEN 'peru'      THEN amount_mrr
+             WHEN 'spain'     THEN amount_mrr
+             ELSE COALESCE(amount_usd_real_mrr, amount_usd_mrr)
+           END) > 0
+"""
+
+
+def _load_company_mrr_history() -> dict:
+    if not COMPANY_MRR_HISTORY_FILE.exists():
+        return {"as_of_month": None, "by_segment": {}, "by_company": {}}
+    return json.loads(COMPANY_MRR_HISTORY_FILE.read_text(encoding="utf-8"))
+
+
+def _save_company_mrr_history(state: dict) -> None:
+    COMPANY_MRR_HISTORY_FILE.write_text(json.dumps(state), encoding="utf-8")
+
+
+def _months_between(m1: str, m2: str) -> int:
+    """m1, m2 en 'YYYY-MM' — devuelve m2 - m1 en meses."""
+    y1, mo1 = int(m1[:4]), int(m1[5:7])
+    y2, mo2 = int(m2[:4]), int(m2[5:7])
+    return (y2 - y1) * 12 + (mo2 - mo1)
+
+
+def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_lookup) -> dict:
+    """ARR Walk v2 (2026-07-22) — clasifica New/Churn/Reactivated/Recovered/Upsell/Downsell
+    a nivel de ENTIDAD (una compañía completa para GLO, o compañía+segmento para Core/Lite —
+    lo decide qué `rows`/`history` se le pasa, no esta función) en vez de por producto+plan.
+    Metodología validada en vivo contra el Excel real de Finance (15 quarters, 4Q22→2Q26,
+    match a la décima en los 5 quarters completos de referencia — ver
+    memory/project_board_agent.md):
+
+      New         = la entidad no tenía entrada previa en `history` (primer MRR>0 real).
+      Upsell/Downsell = tenía MRR el mes inmediatamente anterior (gap=1) y el monto local subió/bajó.
+      Reactivated = tenía MRR hace exactamente 2 meses (gap=2) — volvió el mes siguiente a churnear.
+      Recovered   = el gap es de 3+ meses — volvió más tarde.
+      Churn       = tenía MRR el mes anterior (`prev["last_month"] == mes_anterior`) pero NO
+                    aparece en `rows` de este mes.
+      FX Impact   = NO se calcula acá — emerge solo como el residuo de bym/_calc() (BoP + todos
+                    los buckets vs. EoP real), exactamente igual que ya hace el código existente
+                    — es matemáticamente equivalente a revalorizar el BoP local a la tasa de
+                    este mes vs. la del mes anterior, siempre que Upsell/Downsell/New/Recovered/
+                    Reactivated/Churn ya estén en tasa DE ESTE MES (lo cual hace `rate_lookup`
+                    de abajo, no la tasa histórica de cada mes).
+
+    `rows`: lista de {"key", "app_version", "local_mrr"} del mes de corte (ya agregado, un
+    row por entidad). `history`: dict key -> {"last_month","last_local_mrr","app_version"} —
+    se actualiza IN PLACE (compañías ausentes este mes NO se tocan, para que el próximo mes
+    el gap se siga midiendo desde su verdadero último mes activo). `rate_lookup(app_version,
+    month) -> float` — 1.0 para países sin conversión propia.
+
+    Devuelve los 12 buckets en USD/conteos — NO en la forma final de `summary` (eso lo arma
+    el caller, mapeando a las claves `mrr_new_base_t0` etc. del schema existente, con
+    cross-sell/pricing en 0 porque esta metodología no los separa)."""
+    prev_month = _prev_m(cutoff)
+    out = {
+        "logos_new": 0, "logos_recovered": 0, "logos_reactivated": 0, "logos_churn": 0,
+        "usd_new": 0.0, "usd_recovered": 0.0, "usd_reactivated": 0.0, "usd_churn": 0.0,
+        "usd_upsell": 0.0, "usd_downsell": 0.0,
+    }
+    seen = set()
+    for row in rows:
+        key, app, local_mrr = row["key"], row["app_version"], row["local_mrr"]
+        seen.add(key)
+        rate_now = rate_lookup(app, cutoff)
+        prev = history.get(key)
+        if prev is None:
+            out["logos_new"] += 1
+            out["usd_new"] += local_mrr / rate_now
+        else:
+            gap = _months_between(prev["last_month"], cutoff)
+            if gap == 1:
+                delta = (local_mrr - prev["last_local_mrr"]) / rate_now
+                if delta > 0:
+                    out["usd_upsell"] += delta
+                elif delta < 0:
+                    out["usd_downsell"] += delta
+            elif gap == 2:
+                out["logos_reactivated"] += 1
+                out["usd_reactivated"] += local_mrr / rate_now
+            else:
+                out["logos_recovered"] += 1
+                out["usd_recovered"] += local_mrr / rate_now
+        history[key] = {"last_month": cutoff, "last_local_mrr": local_mrr, "app_version": app}
+
+    for key, prev in list(history.items()):
+        if prev["last_month"] == prev_month and key not in seen:
+            rate_now = rate_lookup(prev.get("app_version"), cutoff)
+            out["logos_churn"] += 1
+            out["usd_churn"] += -prev["last_local_mrr"] / rate_now
+    return out
+
+
+def _arr_walk_v2_bucket_row(bucket: dict, cutoff: str, seg_label: str) -> dict:
+    """Traduce el resultado de _classify_arr_walk_entities() a la forma de fila que ya
+    espera build_seg_metrics()/_calc() — mismas claves que `fact_customers_mrr (summary)`
+    producía, con cross-sell/pricing en 0 (esta metodología no los separa, ver docstring de
+    _classify_arr_walk_entities). `mrr_churn` se guarda POSITIVO (magnitud), igual que la
+    convención vieja — `_calc()` ya lo resta (`nc_m = react_m - churn_m`)."""
+    return {
+        "m": cutoff, "seg": seg_label,
+        "logos_new":   float(bucket["logos_new"]),
+        "logos_recov": float(bucket["logos_recovered"]),
+        "logos_react": float(bucket["logos_reactivated"]),
+        "logos_churn": float(bucket["logos_churn"]),
+        "mrr_new_base_t0": bucket["usd_new"], "mrr_new_cross_t0": 0.0,
+        "mrr_recov": bucket["usd_recovered"], "mrr_react": bucket["usd_reactivated"],
+        "mrr_churn": -bucket["usd_churn"],
+        "mrr_upsell": bucket["usd_upsell"], "mrr_downsell": bucket["usd_downsell"],
+        "mrr_pricing_others": 0.0, "mrr_cross_new_t1plus": 0.0,
+        "mrr_cross_readop": 0.0, "mrr_cross_down": 0.0,
+    }
+
+
+def _apply_arr_walk_v2(segs_raw: dict, seg_metrics: dict, all_months: list, latest_mm: str,
+                        cutoff: str, company_mrr_v2_rows: list) -> None:
+    """ARR Walk v2 (2026-07-22) — reemplaza los buckets de FLUJO (New/Recovered/Reactivated/
+    Churn/Upsell/Downsell) del MES DE CORTE únicamente, en `segs_raw`/`seg_metrics` (mutados
+    in place), con la metodología validada contra el Excel real de Finance. Los meses
+    HISTÓRICOS quedan tal como los calculó la metodología anterior (por producto+plan) — no
+    se reescribe historia; el board se estabiliza 100% a la metodología nueva después de 3
+    corridas mensuales consecutivas (un quarter completo procesado con esta lógica). Los
+    campos de STOCK (`mrr_eop`, `mrr_eop_cc`, `logos_eop`) NO se tocan — son el mismo total
+    real de MRR sin importar qué metodología clasificó los movimientos, y "all" (GLO) los
+    hereda ya sumados de Core+Lite por build_seg_metrics(), como siempre.
+
+    "all" (GLO) usa su PROPIA clasificación independiente a nivel de compañía completa (no
+    la suma de las clasificaciones de Core+Lite) — necesario para que una compañía con Core
+    Y Lite a la vez no aparezca como "New" en un segmento mientras ya era cliente en el
+    otro; el Excel de Finance también clasifica así, a nivel de compañía completa.
+
+    No hace nada si `company_mrr_v2_rows` viene vacío — defensivo, en la práctica esto ya
+    bloqueó la corrida más arriba en load_data() (F2/_MISSING_QUERIES)."""
+    if not company_mrr_v2_rows:
+        return
+
+    fx = load_fx()
+
+    def _rate_lookup(app_version, month):
+        if app_version not in _FX_PAISES:
+            return 1.0
+        t = fx.get((app_version, month))
+        if t:
+            return t
+        meses_disp = sorted(k[1] for k in fx if k[0] == app_version)
+        return fx.get((app_version, meses_disp[-1])) if meses_disp else 1.0
+
+    state = _load_company_mrr_history()
+    by_segment = state.setdefault("by_segment", {})
+    by_company = state.setdefault("by_company", {})
+
+    seg_rows = defaultdict(list)
+    company_totals = defaultdict(float)
+    for r in company_mrr_v2_rows:
+        cid, seg, app = str(r["id_company"]), r["segment_type_def"], r["app_version"]
+        local_mrr = float(r["local_mrr"] or 0)
+        seg_rows[seg].append({"key": f"{cid}|{seg}|{app}", "app_version": app, "local_mrr": local_mrr})
+        company_totals[(cid, app)] += local_mrr
+
+    company_rows = [{"key": f"{cid}|{app}", "app_version": app, "local_mrr": total}
+                     for (cid, app), total in company_totals.items()]
+
+    for seg_label in ("Core", "Lite"):
+        bucket = _classify_arr_walk_entities(seg_rows.get(seg_label, []), by_segment, cutoff, _rate_lookup)
+        row = segs_raw.setdefault(seg_label, {}).setdefault(cutoff, {"m": cutoff, "seg": seg_label})
+        row.update(_arr_walk_v2_bucket_row(bucket, cutoff, seg_label))
+
+    bucket_all = _classify_arr_walk_entities(company_rows, by_company, cutoff, _rate_lookup)
+    row_all = segs_raw.setdefault("all", {}).setdefault(cutoff, {"m": cutoff, "seg": "all"})
+    row_all.update(_arr_walk_v2_bucket_row(bucket_all, cutoff, "all"))
+
+    for seg in ("all", "Core", "Lite"):
+        if segs_raw.get(seg):
+            seg_metrics[seg] = _seg_metrics(segs_raw[seg], all_months, latest_mm)
+
+    state["as_of_month"] = cutoff
+    _save_company_mrr_history(state)
+
+
 _SQL_FUNNEL_SIGNUPS = """
 SELECT
     DATE_TRUNC('month', sign_up_cohort)::DATE AS mes,
@@ -1544,6 +1748,7 @@ def load_data(cutoff, refresh=False):
         "sc_events":       _run(_SQL_VALUE_EVENTS,                          "SC value events mensuales (amplitude)"),
         "sc_sow":          _run(_SQL_SOW_TOP20,                             "SC top-20 SoW"),
         "retention_churn": _run1(_SQL_RETENTION_CHURN,                      "retention churn (dm_retention, cluster-1)"),
+        "company_mrr_v2":  _run(_SQL_COMPANY_MRR_MONTHLY.format(cutoff=cutoff), "company mrr mensual (ARR Walk v2)"),
     }
     # Criterio unificado 2026-07-14: antes estas 11 llamadas no tenían try/except — la
     # primera query faltante tumbaba fetch_metrics.py entero con un traceback crudo, sin
@@ -1563,6 +1768,11 @@ def load_data(cutoff, refresh=False):
     sc_events_rows      = _pages_or_missing(sids["sc_events"],      [], "SC value events mensuales no disponible")
     sc_sow_rows         = _pages_or_missing(sids["sc_sow"],         [], "SC top-20 SoW no disponible")
     retention_rows      = _pages_or_missing(sids["retention_churn"],[], "retention churn no disponible")
+    # ARR Walk v2 (2026-07-22) — mismo criterio que las otras 11: si falta, se acumula en
+    # _MISSING_QUERIES y bloquea la corrida al final de main() (no hay fallback silencioso a
+    # la metodología vieja — sería exactamente el tipo de degradación silenciosa que este
+    # criterio unificado existe para evitar).
+    company_mrr_v2_rows = _pages_or_missing(sids["company_mrr_v2"], [], "company mrr mensual (ARR Walk v2) no disponible")
     # OJO: NO se chequea _MISSING_QUERIES acá — load_fx(), load_payback(), load_headcount_*()
     # y _build_churn_tenure() se llaman más adelante en el pipeline (algunos incluso fuera de
     # load_data(), en build_yaml()/merge_payback() dentro de main()), así que una query que
@@ -1731,10 +1941,11 @@ def load_data(cutoff, refresh=False):
         "product_perf": product_perf,
         "flywheel":     flywheel,
         "sc":           sc,
+        "company_mrr_v2": company_mrr_v2_rows,
     }))
     n_country = sum(len(segs) for ms in country.values() for segs in ms.values())
-    print(f"  ✅ {len(fact_summary_rows)} filas fact · {len(summary)} summary · {len(logos_all)} meses logos · {n_country} registros país · {len(investment)} países investment · {len(funnel)} meses funnel · {len(product_perf)} productos · {len(sc_hist_rows)} meses SC hist · {len(sc_events_rows)} meses SC events · {len(sc_sow_rows)} SC sow")
-    return summary, logos_all, country, investment, funnel, product_perf, flywheel, sc
+    print(f"  ✅ {len(fact_summary_rows)} filas fact · {len(summary)} summary · {len(logos_all)} meses logos · {n_country} registros país · {len(investment)} países investment · {len(funnel)} meses funnel · {len(product_perf)} productos · {len(sc_hist_rows)} meses SC hist · {len(sc_events_rows)} meses SC events · {len(sc_sow_rows)} SC sow · {len(company_mrr_v2_rows)} filas ARR Walk v2")
+    return summary, logos_all, country, investment, funnel, product_perf, flywheel, sc, company_mrr_v2_rows
 
 # ── Metric computation (adapted from dashboard.py) ────────────────────────────
 _MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
@@ -3771,38 +3982,12 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         ],
     }
 
-    # ── OVERRIDE TEMPORAL ARR Walk Global (valores del SS Apr-2026) ──────────
-    # Solo aplica en modo trimestral — en mensual los datos vienen directo de RS.
-    # Remover este bloque cuando RS entregue datos correctos en modo Q.
-    if is_quarter_end:
-        _aw_overrides = {
-            "Total EoP":          {"cells": ["54.5","54.2","55.1","56.8","57.6"]},
-            "Logo Monthly New Adds %": {"cells": ["5.1%","4.7%","4.9%","5.3%","5.3%"]},
-            "Logo Monthly Churn %":    {"cells": ["5.2%","4.9%","4.3%","4.3%","4.8%"]},
-            "ARR BoP":            {"cells": ["$19.2","$22.4","$22.9","$24.2","$26.6"]},
-            "Recovered":          {"cells": ["+$400K","+$500K","+$500K","+$700K","+$500K"]},
-            "Net Churn":          {"cells": ["($2.6M)","($2.6M)","($2.5M)","($2.4M)","($3.3M)"]},
-            "Net Expansion":      {"cells": ["+$2.7M","+$700K","+$700K","+$1.5M","+$400K"]},
-            "(+/−) FX Impact":    {"cells": ["+$800K","+$200K","+$700K","+$600K","+$400K"]},
-            "ARR EoP":            {
-                "cells": ["$22.4","$22.9","$24.2","$26.6","$27.3"],
-                "qoq_cells": [{"v":"—","good":None},{"v":"+3%","good":True},{"v":"+6%","good":True},{"v":"+10%","good":True},{"v":"+3%","good":True}],
-                "yoy_cells": [{"v":"+39%","good":True},{"v":"+41%","good":True},{"v":"+31%","good":True},{"v":"+39%","good":True},{"v":"+22%","good":True}],
-                "qoq": "+3%", "qoq_good": True, "yoy": "+22%", "yoy_good": True,
-                "ytd_prev": "$22.4", "ytd_cur": "$27.3",
-            },
-            "Net New ARR":        {"cells": ["+$3.2M","+$600K","+$1.3M","+$2.3M","+$700K"], "ytd_prev":"+$3.2M","ytd_cur":"+$700K"},
-            "ARR EoP (Constant Currency)":       {
-                "cells": ["$24.2","$24.6","$25.2","$27.0","$27.3"],
-                "qoq_cells": [{"v":"—","good":None},{"v":"+2%","good":True},{"v":"+2%","good":True},{"v":"+7%","good":True},{"v":"+1%","good":True}],
-                "ytd_prev": "$24.2", "ytd_cur": "$27.3",
-            },
-        }
-        for _sec in out["arr_walk_table"]["sections"]:
-            for _row in _sec["rows"]:
-                if _row["label"] in _aw_overrides:
-                    _row.update(_aw_overrides[_row["label"]])
-    # ── FIN OVERRIDE ─────────────────────────────────────────────────────────
+    # Override temporal "SS Apr-2026" para cierre de Q — REMOVIDO 2026-07-22, ver
+    # memory/project_board_agent.md. Existía porque la metodología anterior (por
+    # producto+plan) no era confiable en cierre de Q; ARR Walk v2 (New/Churn/Reactivated/
+    # Recovered/Upsell/Downsell a nivel compañía, ver _apply_arr_walk_v2()) sí lo es —
+    # validado en vivo contra el Excel real de Finance en 5 quarters completos, incluidos
+    # cierres de Q reales.
 
     # ── Per-segment ARR Walk Table (slides 2-3 de 3_arr_walk) ────────────────
     for _prod in out["arr_walk_products"]:
@@ -4301,10 +4486,13 @@ def main():
         merge_accountant_logos(out)
     else:
         print("📡 Cargando datos del cache de Metabase…")
-        summary, logos_all, country_raw, investment, funnel, product_perf, flywheel, sc = load_data(cutoff, refresh=args.refresh)
+        summary, logos_all, country_raw, investment, funnel, product_perf, flywheel, sc, company_mrr_v2_rows = load_data(cutoff, refresh=args.refresh)
 
         print("⚙️  Calculando métricas por segmento…")
         seg_metrics, segs_raw, all_months, latest_mm = build_seg_metrics(summary, logos_all, sc=sc)
+
+        print("🔁 Aplicando ARR Walk v2 (New/Churn/Reactivated/Recovered/Upsell/Downsell por compañía)…")
+        _apply_arr_walk_v2(segs_raw, seg_metrics, all_months, latest_mm, cutoff, company_mrr_v2_rows)
 
         print("🗺️  Construyendo estructura YAML…")
         out = build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff, investment, funnel=funnel, product_perf=product_perf, logos_all=logos_all, flywheel=flywheel, sc=sc)

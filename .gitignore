@@ -18,6 +18,13 @@ data/metrics.yaml
 data/.metabase_cache.json
 data/.cache_metrics.json
 data/.raw_cache.yaml
+# Estado local del ARR Walk v2 (2026-07-22) — último mes/MRR conocido por
+# (id_company, segmento, país), usado para clasificar New/Churn/Reactivated/Recovered/
+# Upsell/Downsell sin necesitar un pull histórico multi-año vía Metabase cada mes. Se
+# siembra una sola vez con un bootstrap vía RS directo y de ahí en adelante se actualiza
+# solo con el pull mensual — igual criterio que .state/ (F0.12): estado local, no dato
+# versionado.
+data/.company_mrr_history.json
 
 # boards/ (versiones publicadas) es salida derivada igual que output/ — versioning.py y
 # phase5_diff.py leen del disco local, no de git, así que no le aporta nada a la

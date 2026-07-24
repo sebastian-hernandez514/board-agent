@@ -12,10 +12,11 @@ versión reducida y honesta de la regla original: solo verifica completitud del 
 de budget en cierre de Q, no reproduce la aritmética completa de vs_budget (no se
 pudo validar contra un mes de cierre de Q real en esta sesión — mayo-26 no lo es).
 
-R5 y R13-15 están implementadas y activas desde 2026-07-06 (commit "Completar Validator
-R5, R13-15"): R5 recomputa Net Expansion desde arr_walk_raw_buckets, R13-15 parsean el HTML
-generado para verificar colores de delta. Caen a SKIP solo cuando el dato que necesitan no
-existe (metrics.yaml viejo sin arr_walk_raw_buckets, o HTML no disponible), no por diseño.
+R13-15 están implementadas y activas desde 2026-07-06 (commit "Completar Validator R5,
+R13-15") — parsean el HTML generado para verificar colores de delta. Caen a SKIP solo
+cuando el HTML no está disponible, no por diseño. (R5 vivió acá desde esa misma fecha
+hasta 2026-07-22, cuando se retiró — su premisa, la trampa de signos de "cross_down" en
+Net Expansion, dejó de aplicar con ARR Walk v2, ver scripts/fetch_metrics.py.)
 
 R16 (cumplimiento de diseño, agregada 2026-07-06) también cae a SKIP si no encuentra ningún
 elemento con clase de slide-shell en el HTML — ver docstring de _check_r16_slide_dimensions.
@@ -531,45 +532,13 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
         ]:
             results.append(CheckResult(rid, desc, "SKIP", f"error: {e}"))
 
-    # R5 — Net Expansion = upsell + down + pricing + cross_new + cross_readop − cross_down
-    # (trampa de signos: cross_down viene positivo del SQL, hay que restarlo — ver CLAUDE.md
-    # de Template Board). Verificación independiente: recomputa desde los 12 buckets crudos
-    # (arr_walk_raw_buckets, expuestos 2026-07-06) y compara contra el "Net Expansion" ya
-    # mostrado en arr_walk_table — detecta si la fórmula de exportación de buckets crudos y
-    # la de arr_walk_table alguna vez divergen (código duplicado, mismo riesgo que motivó R1/R2).
-    #
-    # SKIP en cierre de Q (no FAIL) — hallazgo 2026-07-08 generando junio real (primer cierre de
-    # Q real probado): fetch_metrics.py tiene un "OVERRIDE TEMPORAL ARR Walk Global (valores del
-    # SS Apr-2026)" que SOBREESCRIBE las celdas de arr_walk_table con números fijos de abril
-    # cada vez que is_quarter_end=True (comentario propio: "Remover este bloque cuando RS
-    # entregue datos correctos en modo Q") — es deuda técnica conocida de Template Board, no un
-    # bug de esta regla ni de Board Agent. Mientras ese override siga activo, comparar el valor
-    # mostrado (abril, hardcodeado) contra el recomputado (real, del mes de corte) SIEMPRE va a
-    # divergir — no es información nueva cada trimestre, es ruido. R5 sigue corriendo y avisando
-    # (WARN-level detail dentro del SKIP), solo no bloquea con un FAIL que sugeriría un bug donde
-    # no lo hay.
-    try:
-        b = metrics["arr_walk_raw_buckets"]
-        rows = _arr_walk_glo_rows(metrics)
-        net_expansion_shown = parse_money_cell(last(find_row(rows, "Net Expansion")))
-        net_expansion_recomputed = (b["a_upsell"] + b["a_down"] + b["a_pricing"]
-                                     + b["a_cross_new"] + b["a_cross_readop"] - b["a_cross_down"])
-        diff = net_expansion_recomputed - net_expansion_shown
-        detail = (f"recomputado={net_expansion_recomputed:,.0f} vs mostrado={net_expansion_shown:,.0f} "
-                  f"(diff={diff:,.0f}); cross_down={b['a_cross_down']:,.0f} (debe restarse, no sumarse)")
-        if abs(diff) <= TOL_ARR_WALK:
-            results.append(CheckResult("R5", "cross_down restado en Net Expansion", "PASS", detail))
-        elif metrics.get("is_quarter_end"):
-            results.append(CheckResult(
-                "R5", "cross_down restado en Net Expansion", "SKIP",
-                f"{detail} — no confiable en cierre de Q: fetch_metrics.py sobreescribe arr_walk_table "
-                f"con el override temporal 'valores del SS Apr-2026' (ver comentario en el código), "
-                f"no es un bug de esta regla",
-            ))
-        else:
-            results.append(CheckResult("R5", "cross_down restado en Net Expansion", "FAIL", detail))
-    except Exception as e:
-        results.append(CheckResult("R5", "cross_down restado en Net Expansion", "SKIP", f"error: {e}"))
+    # R5 — RETIRADA 2026-07-22 (ver memory/project_board_agent.md): verificaba que
+    # "cross_down" se restara en vez de sumarse dentro de Net Expansion (trampa de signos
+    # de la metodología por producto+plan). ARR Walk v2 (New/Churn/Reactivated/Recovered/
+    # Upsell/Downsell a nivel compañía, ver scripts/fetch_metrics.py::_apply_arr_walk_v2)
+    # ya no separa cross-sell/pricing de Upsell/Downsell — Net Expansion pasa a ser
+    # simplemente Upsell + Downsell, sin ningún signo que verificar acá. R3 sigue
+    # validando que el walk balancee en conjunto.
 
     # R9 — Consistencia MoM vs QoQ según mes de cierre de quarter
     try:

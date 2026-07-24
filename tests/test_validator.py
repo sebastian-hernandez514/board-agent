@@ -53,7 +53,7 @@ def test_smoke_against_real_may_2026_data():
     # que R17 da FAIL acá por un hueco del fixture, no porque el board real de mayo no tuviera P&L.
     assert by_id["R17"].status == "FAIL"
 
-    for rid in ("R5", "R7", "R11", "R13", "R14", "R15", "R18", "R19"):
+    for rid in ("R7", "R11", "R13", "R14", "R15", "R18", "R19"):
         assert by_id[rid].status == "SKIP"
 
 
@@ -96,66 +96,9 @@ def test_r10_fails_on_implausible_churn(tmp_path):
     assert _results_by_id(results)["R10"].status == "FAIL"
 
 
-def _raw_buckets_matching_net_expansion(net_expansion=300_000, cross_down=200_000):
-    """12 buckets crudos consistentes con un Net Expansion dado (upsell+down+pricing+
-    cross_new+cross_readop-cross_down = net_expansion) — el resto de valores no importan
-    para R5, se rellenan con placeholders. 300_000 = el Net Expansion real (último valor,
-    '0.3') de la sección GLO del fixture (tests/fixtures/metrics_sample.yaml)."""
-    upsell, down, pricing, cross_new, cross_readop = 300_000, -50_000, 20_000, 10_000, 5_000
-    # ajusta 'down' para que la suma dé exacto el net_expansion pedido
-    down = net_expansion - (upsell + pricing + cross_new + cross_readop - cross_down)
-    return {
-        "a_new_base_t0": 700_000, "a_new_cross_t0": 70_000, "a_recov": 190_000, "a_react": 470_000,
-        "a_churn": 1_400_000, "a_upsell": upsell, "a_down": down, "a_pricing": pricing,
-        "a_cross_new": cross_new, "a_cross_readop": cross_readop, "a_cross_down": cross_down,
-        "a_fx": -450_000,
-    }
-
-
-def test_r5_passes_when_raw_buckets_reconcile_with_net_expansion(tmp_path):
-    metrics = _load_fixture()
-    metrics["arr_walk_raw_buckets"] = _raw_buckets_matching_net_expansion()
-    results = _write_and_run(tmp_path, metrics)
-    assert _results_by_id(results)["R5"].status == "PASS"
-
-
-def test_r5_fails_when_cross_down_is_added_instead_of_subtracted(tmp_path):
-    """Reproduce la 'trampa de signos' documentada en CLAUDE.md de Template Board: si
-    cross_down se sumara en vez de restarse, el recomputado se aleja del Net Expansion
-    mostrado por 2×cross_down — con cross_down=200_000 eso son $400K de diferencia,
-    muy por encima de TOL_ARR_WALK ($150K)."""
-    metrics = _load_fixture()
-    buckets = _raw_buckets_matching_net_expansion(net_expansion=300_000, cross_down=200_000)
-    buckets["a_cross_down"] = -200_000  # bug hipotético: quedó con el signo volteado en el SQL
-    metrics["arr_walk_raw_buckets"] = buckets
-    results = _write_and_run(tmp_path, metrics)
-    assert _results_by_id(results)["R5"].status == "FAIL"
-
-
-def test_r5_skip_when_raw_buckets_missing(tmp_path):
-    """El fixture real (extracto de v37) no tiene arr_walk_raw_buckets — campo agregado
-    2026-07-06, boards anteriores a esa fecha no lo tienen."""
-    metrics = _load_fixture()
-    results = _write_and_run(tmp_path, metrics)
-    assert _results_by_id(results)["R5"].status == "SKIP"
-
-
-def test_r5_skip_not_fail_on_quarter_end_due_to_known_override(tmp_path):
-    """Hallazgo real 2026-07-08 generando junio (primer cierre de Q real probado):
-    fetch_metrics.py tiene un override temporal documentado ("valores del SS Apr-2026") que
-    sobreescribe arr_walk_table con números fijos de abril en CUALQUIER cierre de Q — hace que
-    el recomputado (real) y el mostrado (hardcodeado) diverjan siempre, sin ser un bug real.
-    Debe dar SKIP explicando la causa, no FAIL (que sugeriría un bug de esta regla/Board Agent)."""
-    metrics = _load_fixture()
-    metrics["is_quarter_end"] = True
-    buckets = _raw_buckets_matching_net_expansion(net_expansion=300_000, cross_down=200_000)
-    buckets["a_cross_down"] = -200_000  # misma divergencia que el test de FAIL, pero en cierre de Q
-    metrics["arr_walk_raw_buckets"] = buckets
-    results = _write_and_run(tmp_path, metrics)
-    r = _results_by_id(results)["R5"]
-    assert r.status == "SKIP"
-    assert "override" in r.detail.lower()
-
+# R5 (recompute de Net Expansion desde arr_walk_raw_buckets) fue retirada 2026-07-22 junto
+# con sus 4 tests — su premisa (trampa de signos de cross_down) dejó de aplicar con ARR
+# Walk v2, ver board_agent/phase4_validator.py y scripts/fetch_metrics.py.
 
 # ── R3, R6 — aisladas del smoke test (que solo verifica el caso PASS/FAIL del fixture real) ──
 

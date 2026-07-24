@@ -41,10 +41,10 @@ Claude Code en `data/.metabase_cache.json`. **Antes de correr `run.py` o `check_
 Claude debe:
 
 1. Leer `board_agent/metabase_fetch_spec.py` — ahí está la lista completa de qué correr
-   (20 queries de negocio + 13 checks de freshness + 1 check de validador independiente),
+   (21 queries de negocio + 13 checks de freshness + 1 check de validador independiente),
    con la tabla de Metabase que respalda cada una y su estado de migración. Hay un 14º
    check de Fase 1 (F1.14) que NO requiere correr ninguna query nueva — valida la forma de
-   las 20 queries de negocio ya puestas en `cache["queries"]` (nada vacío/mal formado/en
+   las 21 queries de negocio ya puestas en `cache["queries"]` (nada vacío/mal formado/en
    blanco). Es una versión acotada (no valida columnas/tipos por query todavía — ver
    `metabase_fetch_spec.py` para el alcance pendiente).
 2. Correr cada query vía `mcp__metabase__construct_query`/`execute_query` (MBQL — este
@@ -57,10 +57,23 @@ Los patrones de sintaxis MBQL ya resueltos (self-joins con `lib/uuid` explícito
 default posicional, joins anidados de 2+ stages para replicar `ROW_NUMBER`, etc.) están en
 `memory/project_board_agent.md`, sección "CIERRE DEFINITIVO" — no hay que redescubrirlos.
 
-Las 20/20 queries del inventario ya están migradas (ver `metabase_fetch_spec.py`) — la última,
-`_SQL_VALUE_EVENTS` (slide Value Events/Supercontadores), se resolvió creando una tabla derivada
+Las 20/20 queries del inventario original ya están migradas (ver `metabase_fetch_spec.py`) — la
+última, `_SQL_VALUE_EVENTS` (slide Value Events/Supercontadores), se resolvió creando una tabla derivada
 propia (`dm_accountant.value_events_monthly`) en vez de esperar a que Arquitectura copie la cruda
 de Amplitude.
+
+## ARR Walk v2 (2026-07-22) — estado local que NO se puede saltear un mes
+
+El ARR Walk (New/Churn/Reactivated/Recovered/Upsell/Downsell) se calcula a nivel de
+compañía (metodología validada contra el Excel real de Finance, ver
+`memory/project_board_agent.md`). Depende de `data/.company_mrr_history.json` (gitignored,
+sembrado una sola vez vía RS directo) — cada corrida de `fetch_metrics.py` lo actualiza
+con el mes de corte. **Importante:** si se salta un mes (ej. se corre marzo y después
+directamente mayo, sin abril), la clasificación de mayo va a leer un gap de 2 meses y
+confundir compañías continuas con "Reactivated" — el pipeline debe correrse mes a mes, en
+orden, sin huecos. La query nueva que hay que poblar en Metabase cada mes es "company mrr
+mensual (ARR Walk v2)" (ver `metabase_fetch_spec.py`) — simple, sin self-join, un pull del
+mes de corte nada más.
 
 ## Arquitectura — 6 fases
 
