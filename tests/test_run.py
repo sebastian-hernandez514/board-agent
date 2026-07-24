@@ -182,7 +182,7 @@ def test_full_flow_happy_path_saves_version_and_exits_0(monkeypatch):
     monkeypatch.setattr(run.phase0_gate, "run", lambda month: [_r("F0.4", "PASS")])
     monkeypatch.setattr(run.phase1_freshness, "run", lambda month: [_r("F1.1", "PASS")])
     monkeypatch.setattr(run.phase2_metrics, "run", lambda month, refresh=False: _r("F2.1", "PASS"))
-    monkeypatch.setattr(run.phase3_html_builder, "run", lambda month: [_r("F3.1", "PASS")])
+    monkeypatch.setattr(run.phase3_html_builder, "run", lambda month: [_r("F3.1", "PASS"), _r("F3.3", "PASS")])
     monkeypatch.setattr(run.phase4_validator, "run", lambda: [_r("R1", "PASS")])
     monkeypatch.setattr(run.phase5_diff, "run", lambda: [_r("D1", "PASS")])
     monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: None)
@@ -231,13 +231,41 @@ def test_full_flow_stops_before_validator_if_html_builder_fails(monkeypatch):
     assert called["validator"] is False
 
 
+def test_full_flow_content_fail_in_fase3_does_not_block_validator_or_versioning(monkeypatch):
+    """Encontrado corriendo el board real de junio-26 (2026-07-21): un FAIL de CONTENIDO en
+    Fase 3 (F3.9 — un dato faltante en un template crítico, ej. P&L de ese mes sin llegar
+    todavía) no debe abortar Fase 4/5/versionado, mismo criterio que R17/F0.4 — el board se
+    arma completo e igual se versiona, con el problema marcado, siempre que sí exista un
+    board_standalone.html completo (F3.3 PASS). Solo la ausencia/fallo de F3.3 es
+    catastrófico y debe abortar."""
+    monkeypatch.setattr(run.phase0_gate, "run", lambda month: [_r("F0.4", "PASS")])
+    monkeypatch.setattr(run.phase1_freshness, "run", lambda month: [_r("F1.1", "PASS")])
+    monkeypatch.setattr(run.phase2_metrics, "run", lambda month, refresh=False: _r("F2.1", "PASS"))
+    monkeypatch.setattr(run.phase3_html_builder, "run",
+                         lambda month: [_r("F3.1", "PASS"), _r("F3.9", "FAIL"), _r("F3.3", "PASS")])
+    called = {}
+    monkeypatch.setattr(run.phase4_validator, "run", lambda: called.update(validator=True) or [_r("R1", "PASS")])
+    monkeypatch.setattr(run.phase5_diff, "run", lambda: called.update(diff=True) or [_r("D1", "PASS")])
+    monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: None)
+    calls = []
+    _fake_versioning(monkeypatch, calls)
+    monkeypatch.setattr("sys.argv", ["run.py", "--month", "2026-06"])
+
+    exit_code = run.main()
+
+    assert called.get("validator") is True
+    assert called.get("diff") is True
+    assert len(calls) == 1  # se versiona igual
+    assert exit_code == 1  # pero el exit code SÍ refleja que algo quedó mal
+
+
 def test_full_flow_validator_fail_still_saves_version(monkeypatch):
     """Decisión de diseño documentada en versioning.py: se versiona pase o no pase el
     Validator — un board fallido sigue siendo un checkpoint útil."""
     monkeypatch.setattr(run.phase0_gate, "run", lambda month: [_r("F0.4", "PASS")])
     monkeypatch.setattr(run.phase1_freshness, "run", lambda month: [_r("F1.1", "PASS")])
     monkeypatch.setattr(run.phase2_metrics, "run", lambda month, refresh=False: _r("F2.1", "PASS"))
-    monkeypatch.setattr(run.phase3_html_builder, "run", lambda month: [_r("F3.1", "PASS")])
+    monkeypatch.setattr(run.phase3_html_builder, "run", lambda month: [_r("F3.1", "PASS"), _r("F3.3", "PASS")])
     monkeypatch.setattr(run.phase4_validator, "run", lambda: [_r("R1", "FAIL")])
     monkeypatch.setattr(run.phase5_diff, "run", lambda: [_r("D1", "PASS")])
     monkeypatch.setattr(run.output_integrity, "record_generated_state", lambda: None)

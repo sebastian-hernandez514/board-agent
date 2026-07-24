@@ -212,6 +212,18 @@ def test_financial_performance_month_passes_when_title_matches(isolated_paths):
     assert results["F0.9"].status == "PASS"
 
 
+def test_financial_performance_month_passes_with_qclose_title_format(isolated_paths):
+    """Caso real encontrado con el HTML de Finance de junio-26 (2026-07-21): en cierre de Q
+    (mar/jun/sep/dic) el título viene como "Alegra Board Deck — June 2026 (Q2 Close)", no
+    la convención mensual normal — debe reconocerse igual, no quedar en SKIP 4 meses al año."""
+    _seed_all_pass(isolated_paths, month="2026-06")
+    (isolated_paths / "4_financial_performance.j2").write_text(
+        "<title>Alegra Board Deck — June 2026 (Q2 Close)</title>", encoding="utf-8"
+    )
+    results = _by_id(phase0_gate.run("2026-06"))
+    assert results["F0.9"].status == "PASS"
+
+
 def test_financial_performance_month_skips_when_title_pattern_missing(isolated_paths):
     _seed_all_pass(isolated_paths)
     (isolated_paths / "4_financial_performance.j2").write_text(

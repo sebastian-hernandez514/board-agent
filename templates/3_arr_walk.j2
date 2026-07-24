@@ -678,15 +678,26 @@
     const logosChurn = {{ product.logos_churn | tojson }};
     const logosDown  = {{ product.logos_contraction | tojson }};
     const qData      = {{ product.q_cards | tojson }};
-    buildChart('aw{{ product.id }}Chart', quarters, {
-      newRec, expArr, churnB, downB, netNew,
-      logosNew, logosExp, logosChurn, logosDown,
-      yMax: {{ product.y_max }}
-    });
-    const el = document.getElementById('aw{{ product.id }}QCards');
-    qData.forEach(d => {
-      el.innerHTML += `<div class="aw-q-card"><div class="aw-q-half"><span class="aw-q-arr">${d.bopArr}</span><span class="aw-q-logos">${d.bopLogos.toFixed(1)}k logos</span></div><div class="aw-q-half"><span class="aw-q-arr">${d.eopArr}</span><span class="aw-q-logos">${d.eopLogos.toFixed(1)}k logos</span></div></div>`;
-    });
+    // Guard defensivo (2026-07-21, encontrado corriendo el linter estructural nuevo por
+    // primera vez): ni 'aw{{ product.id }}Chart' ni 'aw{{ product.id }}QCards' existen como
+    // elementos en este archivo — no hay ningún <canvas> en todo 3_arr_walk.j2. Este bloque
+    // nunca corrió con éxito (new Chart(null, ...) revienta) — parece código de un diseño
+    // viejo, reemplazado por la tabla aw-sum-table que ya muestra estos mismos datos. No se
+    // borra por ahora (decisión explícita del usuario) — se protege con el mismo patrón ya
+    // usado en 5_go_to_market.j2 para las slides de Flywheel deshabilitadas.
+    if (document.getElementById('aw{{ product.id }}Chart')) {
+      buildChart('aw{{ product.id }}Chart', quarters, {
+        newRec, expArr, churnB, downB, netNew,
+        logosNew, logosExp, logosChurn, logosDown,
+        yMax: {{ product.y_max }}
+      });
+    }
+    if (document.getElementById('aw{{ product.id }}QCards')) {
+      const el = document.getElementById('aw{{ product.id }}QCards');
+      qData.forEach(d => {
+        el.innerHTML += `<div class="aw-q-card"><div class="aw-q-half"><span class="aw-q-arr">${d.bopArr}</span><span class="aw-q-logos">${d.bopLogos.toFixed(1)}k logos</span></div><div class="aw-q-half"><span class="aw-q-arr">${d.eopArr}</span><span class="aw-q-logos">${d.eopLogos.toFixed(1)}k logos</span></div></div>`;
+      });
+    }
   })();
   {% endfor %}
 })();

@@ -74,3 +74,39 @@ def test_orphaned_references_query_selector_variant():
     html = '<canvas id="fw2Chart"></canvas><script>document.querySelector("#fw2Chart")</script>'
     result = lint.check_orphaned_references(html)
     assert result["canvases_sin_script"] == []
+
+
+def test_orphaned_references_canvas_used_via_helper_function_argument():
+    """Caso real encontrado corriendo contra 5_go_to_market.j2/8_appendix.j2: el id se pasa
+    como argumento a un helper propio (mkChart/buildChart), no vía getElementById directo —
+    antes esto daba un falso positivo de 'canvas sin script'."""
+    html = """
+    <canvas id="cCore"></canvas>
+    <script>function mkChart(id, data) { ... } mkChart('cCore', someData);</script>
+    """
+    result = lint.check_orphaned_references(html)
+    assert result["canvases_sin_script"] == []
+    assert result["scripts_a_id_inexistente"] == []  # 'cCore' vía helper no cuenta como lookup roto
+
+
+def test_orphaned_references_defensive_guard_is_not_flagged_as_broken():
+    """Caso real de 5_go_to_market.j2 (slides de Flywheel deshabilitadas con {% if false %}):
+    if (document.getElementById('X')) ... es código que ya anticipa que el id puede no
+    existir — no es una referencia rota, es manejo defensivo correcto."""
+    html = """<script>
+    if (document.getElementById('fw_entitiesLine')) new Chart(document.getElementById('fw_entitiesLine'), {});
+    </script>"""
+    result = lint.check_orphaned_references(html)
+    assert result["scripts_a_id_inexistente"] == []
+
+
+def test_orphaned_references_unguarded_getelementbyid_to_missing_id_is_still_flagged():
+    """El caso real encontrado en 3_arr_walk.j2: getElementById SIN ningún if de protección
+    y el id no existe en ningún lado — esto sí debe seguir marcado, es un bug real (el
+    siguiente uso de esa variable revienta con 'Cannot read properties of null')."""
+    html = """<script>
+    const el = document.getElementById('awcoreQCards');
+    el.innerHTML += '<div></div>';
+    </script>"""
+    result = lint.check_orphaned_references(html)
+    assert result["scripts_a_id_inexistente"] == ["awcoreQCards"]

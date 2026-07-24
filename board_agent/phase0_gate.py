@@ -202,18 +202,25 @@ def _check_config_month(month: str) -> CheckResult:
                         f"period='{period}', month_label='{config.get('month_label')}'")
 
 
-_TEMPLATE4_TITLE_RE = re.compile(r"Financial Performance\s*·\s*(\w+)\s+(\d{4})", re.IGNORECASE)
+_TEMPLATE4_TITLE_RE = re.compile(r"Financial Performance\s*·\s*(?P<month>\w+)\s+(?P<year>\d{4})", re.IGNORECASE)
+# En cierre de Q (mar/jun/sep/dic) Finance manda el título como "Alegra Board Deck — June
+# 2026 (Q2 Close)" en vez de la convención mensual normal — encontrado en vivo con el HTML
+# real de junio-26 (2026-07-21). Es recurrente (4 veces al año, no un caso único), así que
+# se reconoce en código en vez de aceptar un SKIP permanente 4 meses de cada 12.
+_TEMPLATE4_TITLE_QCLOSE_RE = re.compile(r"(?P<month>\w+)\s+(?P<year>\d{4})\s*\(Q\d\s*Close\)", re.IGNORECASE)
 
 
 def extract_financial_performance_title_month(html: str):
-    """Extrae '{Mes} {Año}' y el mes en formato 'YYYY-MM' del <title> de Template 4 (convención
-    ya existente: "Financial Performance · May 2026"). Devuelve (label, 'YYYY-MM') o (None, None)
-    si no se pudo parsear. Compartida entre F0.9 (Fase 0, solo lectura del .j2 fuente) y F3.4
-    (Fase 3, post-procesa el output/*.html ya generado) — mismo parseo, un solo lugar."""
-    m = _TEMPLATE4_TITLE_RE.search(html)
+    """Extrae '{Mes} {Año}' y el mes en formato 'YYYY-MM' del <title> de Template 4 — soporta
+    la convención mensual normal ("Financial Performance · May 2026") y la de cierre de Q
+    ("Alegra Board Deck — June 2026 (Q2 Close)"). Devuelve (label, 'YYYY-MM') o (None, None)
+    si no se pudo parsear con ninguna de las dos. Compartida entre F0.9 (Fase 0, solo lectura
+    del .j2 fuente) y F3.4 (Fase 3, post-procesa el output/*.html ya generado) — mismo
+    parseo, un solo lugar."""
+    m = _TEMPLATE4_TITLE_RE.search(html) or _TEMPLATE4_TITLE_QCLOSE_RE.search(html)
     if not m:
         return None, None
-    month_name, year = m.group(1), m.group(2)
+    month_name, year = m.group("month"), m.group("year")
     month_num = MESES_EN.get(month_name.lower())
     if month_num is None:
         return None, None

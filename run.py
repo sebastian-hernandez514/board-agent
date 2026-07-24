@@ -155,7 +155,16 @@ def main() -> int:
 
     html_results = phase3_html_builder.run(args.month)
     ok = print_report("FASE 3 — HTML Builder", html_results) and ok
-    if not ok:
+
+    # Solo un fallo catastrófico (no llegamos a tener un board_standalone.html completo)
+    # debe abortar Fase 4/5/versionado. Un FAIL "de contenido" (F3.9 con un dato faltante
+    # en un template crítico, F3.10 con un problema estructural) debe seguir el mismo
+    # criterio que R17/F0.4 ya establecido en este repo: el board se arma completo e
+    # igual se muestra, con el problema marcado en el reporte — no bloqueado desde el
+    # minuto uno. `ok` ya quedó en False arriba, así que el exit code final sigue
+    # reflejando el problema aunque no abortemos acá.
+    f33 = next((r for r in html_results if r.id == "F3.3"), None)
+    if f33 is None or f33.status != "PASS":
         print("\n❌ La generación de HTML falló — no se puede validar un board a medio generar.")
         return 1
 
