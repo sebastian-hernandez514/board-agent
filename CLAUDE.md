@@ -75,6 +75,37 @@ orden, sin huecos. La query nueva que hay que poblar en Metabase cada mes es "co
 mensual (ARR Walk v2)" (ver `metabase_fetch_spec.py`) — simple, sin self-join, un pull del
 mes de corte nada más.
 
+**Stock vs Flujo — por qué Core+Lite no siempre suma igual a GLO:** el STOCK (mrr_eop,
+BoP/EoP/ARR total) SIEMPRE cuadra Core+Lite=GLO, por construcción (`build_seg_metrics()`
+arma "all" como suma literal de segmentos) — el Validator lo verifica mes a mes (R20). El
+FLUJO (New/Churn/Upsell/Downsell/Recovered/Reactivated) NO cuadra por diseño — compañías que
+migran de plan Lite↔Core (pasa todos los meses) aparecen como "New" en un segmento y "Churn"
+en el otro, sin ser plata nueva real; a nivel de compañía completa (GLO) es solo una
+continuación. Por eso se retiró R2 (asumía esa igualdad para New MRR) — ver
+`memory/project_board_agent.md` sección 2026-07-24 para el ejemplo real (compañía 213808).
+
+**Re-correr un mes ya procesado es seguro (2026-07-24):** `_apply_arr_walk_v2()` detecta si
+`state["as_of_month"] >= cutoff` (el mes ya quedó reflejado en `data/.company_mrr_history.json`)
+y no hace nada — ni re-clasifica, ni toca el store histórico. Antes de este fix, re-correr un
+mes ya cerrado caía en un gap<=0 (no-op de clasificación) que igual se agregaba al store
+histórico, pisando con ceros el valor real que ya tenía ese mes — así se corrompió `2026-06`
+en `data/arr_walk_v2_monthly_history.json` durante las corridas v8-v10 hasta detectarlo.
+
+## ARR Walk v2 — histórico completo migrado (2026-07-24)
+
+Todo el ARR Walk (no solo el mes de corte) usa la metodología v2 desde 2024-01 en adelante.
+`data/arr_walk_v2_monthly_history.json` (SÍ se commitea — agregado por mes×segmento, sin PII,
+~60KB) guarda los buckets ya clasificados de cada mes; `build_seg_metrics()` los aplica sobre
+`segs_raw` para TODO mes presente ahí (`_apply_arr_walk_v2_historical_overrides`), no solo el
+de corte. Se sembró con un backfill único (2022-10→2026-06, vía `redshift_guard.py`, SQL con
+`LAG()`/`LEAD()` — MBQL no tiene window functions, por eso este backfill corrió directo contra
+Redshift y no por Metabase) — validado contra `~/Downloads/arr_logo_walk_board_agent_v3.csv` y
+el Excel de Finance, coincide a la décima en 1Q25-2Q26. De acá en adelante, cada corrida
+mensual agrega su propio mes al store (`_append_arr_walk_v2_history`), así nunca vuelve a
+hacer falta tocar Redshift para esto. R2 (New MRR Core+Lite ≈ Total) se retiró — su premisa
+(Core+Lite siempre suma exacto al total) ya no aplica: GLO se clasifica independiente a nivel
+de compañía completa, por diseño (ver docstring de `_apply_arr_walk_v2`).
+
 ## Arquitectura — 6 fases
 
 Ver `docs/AGENT_ARCHITECTURE.md` para el diseño completo.

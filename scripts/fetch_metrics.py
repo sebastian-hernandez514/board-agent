@@ -25,7 +25,7 @@ Data NOT covered here (needs fetch_sheets.py):
     Placeholders are written as "N/A" so templates render without crashing.
 """
 
-import sys, json, argparse, time, math, csv, calendar
+import sys, json, argparse, time, math, csv, calendar, re
 from datetime import datetime
 from collections import defaultdict
 from pathlib import Path
@@ -34,6 +34,8 @@ import yaml  # pip install pyyaml (or uv run --with pyyaml)
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 ROOT        = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT))
+from board_agent.phase0_gate import extract_financial_performance_title_month  # noqa: E402
 CACHE_FILE     = ROOT / "data" / ".cache_metrics.json"
 RAW_CACHE_FILE = ROOT / "data" / ".raw_cache.yaml"
 OUTPUT_FILE    = ROOT / "data" / "metrics.yaml"
@@ -48,9 +50,16 @@ METABASE_CACHE_FILE = ROOT / "data" / ".metabase_cache.json"
 # por compañía, sembrado una sola vez vía RS directo y actualizado cada corrida con el pull
 # mensual chico vía Metabase. Ver docstring de _classify_arr_walk_entities() más abajo.
 COMPANY_MRR_HISTORY_FILE = ROOT / "data" / ".company_mrr_history.json"
+# Backfill histórico (2026-07-24) — resultados YA CLASIFICADOS con la metodología v2 por mes
+# × segmento (Core/Lite/all), desde 2024-01 en adelante. Agregado, sin PII — sí se commitea al
+# repo (a diferencia de COMPANY_MRR_HISTORY_FILE, que es estado granular por compañía).
+# Sembrado una sola vez vía backfill contra RS; cada corrida mensual de _apply_arr_walk_v2()
+# le agrega el mes de corte, así nunca hace falta volver a tocar Redshift.
+ARR_WALK_V2_HISTORY_FILE = ROOT / "data" / "arr_walk_v2_monthly_history.json"
 BUDGET_FILE  = ROOT / "csv" / "Metricas_budget.csv"
 PNL_ACTUAL   = ROOT / "csv" / "P&L Histórico- ACtual.csv"
 PNL_BUDGET   = ROOT / "csv" / "P&L Histórico - Budget.csv"
+FINANCIAL_PERFORMANCE_TEMPLATE = ROOT / "templates" / "4_financial_performance.j2"
 
 # ── FX Conversion ───────────────────────────────────────────────────────────────
 # Los 5 países con conversión propia — el resto usa amount_mrr tal cual (ya en USD)
@@ -243,11 +252,12 @@ def _build_alanube_monthly():
     return monthly
 
 
-_ALANUBE_QUARTERS_2025 = [
+_ALANUBE_HISTORICAL_QUARTERS = [
     ("1Q25", ["2025-01", "2025-02", "2025-03"]),
     ("2Q25", ["2025-04", "2025-05", "2025-06"]),
     ("3Q25", ["2025-07", "2025-08", "2025-09"]),
     ("4Q25", ["2025-10", "2025-11", "2025-12"]),
+    ("1Q26", ["2026-01", "2026-02", "2026-03"]),
 ]
 
 
@@ -333,16 +343,24 @@ def _shift_months(months, offset):
 
 def _build_alanube_walk_table(cutoff):
     """Slide 9 de 1_inicio.j2 ('ARR Walk — Alanube') — Logo Walk + ARR Walk + Finance/Operation
-    Metrics, histórico trimestral (1Q25-4Q25 fijo) + período actual (mes o trimestre según
-    is_quarter_end) + YTD. Fuente: bi_alanube.fact_alanube_arr_walk vía _build_alanube_monthly().
-    Reemplaza el hardcode manual que existía desde antes — ver memory/project_board_agent.md
-    2026-07-06 para la validación completa (EoP exacto, Logos con desfase de 2-4 unidades sin
-    explicar, 'Price per Document' no reproducido exacto)."""
+    Metrics, histórico trimestral fijo (_ALANUBE_HISTORICAL_QUARTERS, hoy 1Q25-1Q26) + período
+    actual (mes o trimestre según is_quarter_end) + YTD. Fuente: bi_alanube.fact_alanube_arr_walk
+    vía _build_alanube_monthly(). Reemplaza el hardcode manual que existía desde antes — ver
+    memory/project_board_agent.md 2026-07-06 para la validación completa (EoP exacto, Logos con
+    desfase de 2-4 unidades sin explicar, 'Price per Document' no reproducido exacto).
+
+    IMPORTANTE (2026-07-24): _ALANUBE_HISTORICAL_QUARTERS es una lista FIJA de trimestres ya
+    cerrados que se muestran siempre como referencia histórica — cada vez que el cutoff avanza
+    a un trimestre nuevo (ej. de 2Q26 a 3Q26), el trimestre que HOY es "actual" (2Q26) hay que
+    agregarlo a esta lista para que no quede un hueco (el mismo bug que motivó este comentario:
+    faltaba 1Q26). También hay que agregar el <th> correspondiente en templates/1_inicio.j2 y
+    subir en 1 los colspan de las filas de sección (buscar
+    'colspan="{% if aw.is_quarter_end %}...{% else %}...{% endif %}"')."""
     monthly = _build_alanube_monthly()
     y, m = int(cutoff[:4]), int(cutoff[5:])
     is_q_end = m in (3, 6, 9, 12)
 
-    period_months = [ms for _, ms in _ALANUBE_QUARTERS_2025]
+    period_months = [ms for _, ms in _ALANUBE_HISTORICAL_QUARTERS]
 
     if is_q_end:
         cur_months_list = [[f"{y:04d}-{mm:02d}" for mm in range(m - 2, m + 1)]]
@@ -386,7 +404,7 @@ def _build_alanube_walk_table(cutoff):
             raw = [None if p is None else get_value_or_raw(p) for p in all_periods]
         else:
             raw = get_value_or_raw
-        cur_raw = raw[4:4 + n_cur]
+        cur_raw = raw[len(period_months):len(period_months) + n_cur]
         ytd_py_raw, ytd_cy_raw = raw[-2], raw[-1]
         if len(cur_raw) > 1:
             cur_delta = _al_pct(cur_raw[-1], cur_raw[0])
@@ -397,7 +415,7 @@ def _build_alanube_walk_table(cutoff):
         ytd_delta = _al_pct(ytd_cy_raw, ytd_py_raw)
         fmt = lambda v: "—" if v is None else formatter(v)
         return {
-            "quarters": [fmt(v) for v in raw[:4]],
+            "quarters": [fmt(v) for v in raw[:len(period_months)]],
             "current": [fmt(v) for v in cur_raw],
             "ytd_py": fmt(ytd_py_raw), "ytd_cy": fmt(ytd_cy_raw),
             "current_delta": cur_delta, "ytd_delta": ytd_delta,
@@ -1164,7 +1182,12 @@ def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_loo
             out["usd_new"] += local_mrr / rate_now
         else:
             gap = _months_between(prev["last_month"], cutoff)
-            if gap == 1:
+            if gap <= 0:
+                # Re-procesando un mes que ya quedó reflejado en el historial (mismo
+                # `cutoff` que `prev["last_month"]`, o corrida repetida) — no es un
+                # movimiento real, no debe contar como Recovered.
+                pass
+            elif gap == 1:
                 delta = (local_mrr - prev["last_local_mrr"]) / rate_now
                 if delta > 0:
                     out["usd_upsell"] += delta
@@ -1180,7 +1203,12 @@ def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_loo
 
     for key, prev in list(history.items()):
         if prev["last_month"] == prev_month and key not in seen:
-            rate_now = rate_lookup(prev.get("app_version"), cutoff)
+            # `app_version` puede faltar en entradas viejas del bootstrap — la clave
+            # siempre lo tiene como último segmento ("id|app" o "id|segmento|app"), así
+            # que se deriva de ahí en vez de confiar ciegamente en el campo (si faltara,
+            # rate_lookup caía a 1.0 y dejaba montos en moneda local sin convertir).
+            app_version = prev.get("app_version") or key.rsplit("|", 1)[-1]
+            rate_now = rate_lookup(app_version, cutoff)
             out["logos_churn"] += 1
             out["usd_churn"] += -prev["last_local_mrr"] / rate_now
     return out
@@ -1198,6 +1226,7 @@ def _arr_walk_v2_bucket_row(bucket: dict, cutoff: str, seg_label: str) -> dict:
         "logos_recov": float(bucket["logos_recovered"]),
         "logos_react": float(bucket["logos_reactivated"]),
         "logos_churn": float(bucket["logos_churn"]),
+        "mrr_new": bucket["usd_new"],
         "mrr_new_base_t0": bucket["usd_new"], "mrr_new_cross_t0": 0.0,
         "mrr_recov": bucket["usd_recovered"], "mrr_react": bucket["usd_reactivated"],
         "mrr_churn": -bucket["usd_churn"],
@@ -1225,8 +1254,21 @@ def _apply_arr_walk_v2(segs_raw: dict, seg_metrics: dict, all_months: list, late
     otro; el Excel de Finance también clasifica así, a nivel de compañía completa.
 
     No hace nada si `company_mrr_v2_rows` viene vacío — defensivo, en la práctica esto ya
-    bloqueó la corrida más arriba en load_data() (F2/_MISSING_QUERIES)."""
+    bloqueó la corrida más arriba en load_data() (F2/_MISSING_QUERIES).
+
+    Tampoco hace nada si el mes de corte YA fue procesado antes (`state["as_of_month"] >=
+    cutoff`) — bug real encontrado en vivo 2026-07-24: sin este guard, re-correr un mes ya
+    persistido cae en el caso gap<=0 de _classify_arr_walk_entities (no-op, todo en cero) y
+    ESE resultado en cero se agregaba igual al store histórico permanente
+    (_append_arr_walk_v2_history), pisando el valor real que ya tenía ese mes (del backfill
+    o de la corrida original). Re-procesar un mes ya cerrado no debe tocar nada — ni
+    segs_raw, ni el estado rodante, ni el store histórico."""
     if not company_mrr_v2_rows:
+        return
+
+    state = _load_company_mrr_history()
+    if state.get("as_of_month") and state["as_of_month"] >= cutoff:
+        print(f"  ⚠️  ARR Walk v2: {cutoff} ya estaba procesado (as_of_month={state['as_of_month']}) — no se re-clasifica, se deja el store histórico como está")
         return
 
     fx = load_fx()
@@ -1240,7 +1282,6 @@ def _apply_arr_walk_v2(segs_raw: dict, seg_metrics: dict, all_months: list, late
         meses_disp = sorted(k[1] for k in fx if k[0] == app_version)
         return fx.get((app_version, meses_disp[-1])) if meses_disp else 1.0
 
-    state = _load_company_mrr_history()
     by_segment = state.setdefault("by_segment", {})
     by_company = state.setdefault("by_company", {})
 
@@ -1255,14 +1296,17 @@ def _apply_arr_walk_v2(segs_raw: dict, seg_metrics: dict, all_months: list, late
     company_rows = [{"key": f"{cid}|{app}", "app_version": app, "local_mrr": total}
                      for (cid, app), total in company_totals.items()]
 
+    bucket_rows = {}
     for seg_label in ("Core", "Lite"):
         bucket = _classify_arr_walk_entities(seg_rows.get(seg_label, []), by_segment, cutoff, _rate_lookup)
+        bucket_rows[seg_label] = _arr_walk_v2_bucket_row(bucket, cutoff, seg_label)
         row = segs_raw.setdefault(seg_label, {}).setdefault(cutoff, {"m": cutoff, "seg": seg_label})
-        row.update(_arr_walk_v2_bucket_row(bucket, cutoff, seg_label))
+        row.update(bucket_rows[seg_label])
 
     bucket_all = _classify_arr_walk_entities(company_rows, by_company, cutoff, _rate_lookup)
+    bucket_rows["all"] = _arr_walk_v2_bucket_row(bucket_all, cutoff, "all")
     row_all = segs_raw.setdefault("all", {}).setdefault(cutoff, {"m": cutoff, "seg": "all"})
-    row_all.update(_arr_walk_v2_bucket_row(bucket_all, cutoff, "all"))
+    row_all.update(bucket_rows["all"])
 
     for seg in ("all", "Core", "Lite"):
         if segs_raw.get(seg):
@@ -1270,6 +1314,44 @@ def _apply_arr_walk_v2(segs_raw: dict, seg_metrics: dict, all_months: list, late
 
     state["as_of_month"] = cutoff
     _save_company_mrr_history(state)
+
+    _append_arr_walk_v2_history(cutoff, bucket_rows)
+
+
+def _load_arr_walk_v2_history() -> dict:
+    if not ARR_WALK_V2_HISTORY_FILE.exists():
+        return {"months": {}}
+    return json.loads(ARR_WALK_V2_HISTORY_FILE.read_text(encoding="utf-8"))
+
+
+def _save_arr_walk_v2_history(store: dict) -> None:
+    ARR_WALK_V2_HISTORY_FILE.write_text(
+        json.dumps(store, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8"
+    )
+
+
+def _append_arr_walk_v2_history(month: str, seg_rows: dict) -> None:
+    """Agrega el mes de corte (ya clasificado con la metodología v2) al store permanente
+    (`data/arr_walk_v2_monthly_history.json`) — así queda como histórico correcto para
+    siempre, sin volver a tocar Redshift el mes que viene."""
+    store = _load_arr_walk_v2_history()
+    store.setdefault("months", {})[month] = seg_rows
+    _save_arr_walk_v2_history(store)
+
+
+def _apply_arr_walk_v2_historical_overrides(segs_raw: dict) -> None:
+    """Sobreescribe, para TODO mes presente en `data/arr_walk_v2_monthly_history.json`
+    (backfill único 2026-07-24 + lo que cada corrida va agregando desde entonces), los
+    campos de FLUJO del ARR Walk (New/Churn/Reactivated/Recovered/Upsell/Downsell) en
+    `segs_raw[seg][mes]` — mutado in place. Los campos de STOCK (`mrr_eop`, `mrr_eop_cc`,
+    `logos_eop`) NO se tocan, siguen viniendo de la query vieja (`summary`), igual que hace
+    `_apply_arr_walk_v2` para el mes de corte. Un mes ausente del store queda intacto (sigue
+    con la metodología vieja hasta que se procese/backfillee)."""
+    store = _load_arr_walk_v2_history()
+    for month, by_seg in store.get("months", {}).items():
+        for seg_label, bucket_row in by_seg.items():
+            if seg_label in segs_raw and month in segs_raw[seg_label]:
+                segs_raw[seg_label][month].update(bucket_row)
 
 
 _SQL_FUNNEL_SIGNUPS = """
@@ -2110,6 +2192,11 @@ def build_seg_metrics(summary, logos_all, sc=None):
                 row[lk] = logos_all[m][lk]
         segs_raw["all"][m] = row
 
+    # ARR Walk v2 (2026-07-24) — sobreescribe los buckets de FLUJO de TODO mes ya migrado a
+    # la metodología nueva (backfill histórico + lo que cada corrida va agregando desde
+    # entonces), no solo el mes de corte — ver _apply_arr_walk_v2_historical_overrides().
+    _apply_arr_walk_v2_historical_overrides(segs_raw)
+
     # Inyectar tasa de churn desde dm_retention.bi_customer_monthly_status (cluster-1)
     # Aplica a "all", "Core" y "Lite" — la tabla tiene columna segment
     _rc_seg = ((sc or {}).get("retention_churn") or {}).get("by_seg", {})
@@ -2813,10 +2900,15 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         y_max          = max((max(arr_new_rec + arr_expansion) if arr_new_rec else 0),
                              (max(arr_churn + arr_contraction) if arr_churn else 0)) * 1.25 or 1
 
-        # q_cards (BoP/EoP per quarter for last 5 quarters)
+        # q_cards (BoP/EoP por quarter — año calendario anterior completo + año actual hasta
+        # el mes de corte, mismo criterio que _last5q más abajo — no un slice fijo de
+        # "últimos 5" que se comía 1Q25 apenas entraba 2Q26, bug real reportado 2026-07-24)
         q_cards = []
         bym_seg = segs_raw.get(seg, {})
-        for q_lbl, ms in QUARTERS[-5:]:
+        _cutoff_yr_suffix_pc = latest_q_lbl[-2:]
+        _prev_yr_suffix_pc = f"{int(_cutoff_yr_suffix_pc) - 1:02d}"
+        _q_cards_quarters = [(lbl, ms) for lbl, ms in QUARTERS if lbl[-2:] in (_prev_yr_suffix_pc, _cutoff_yr_suffix_pc)]
+        for q_lbl, ms in _q_cards_quarters:
             if not any(m in bym_seg for m in ms): continue
             bop_m_key = _prev_m(ms[0])
             bop_mrr   = bym_seg.get(bop_m_key, {}).get("mrr_eop", 0)
@@ -3620,6 +3712,26 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "ebitda_margin_yoy":              "N/A",
         "ebitda_margin_yoy_positive":     True,
 
+        # --- Financial KPIs YTD (slide 5 de 1_inicio.j2) — mismo criterio: "N/A" hasta que
+        # load_finance_pnl_html() encuentre el HTML de Finance ya actualizado para el cutoff.
+        "net_revenue_ytd":                  "N/A",
+        "net_revenue_ytd_vs_budget":        "N/A",
+        "net_revenue_ytd_vs_budget_positive": True,
+        "net_revenue_ytd_yoy":              "N/A",
+        "net_revenue_ytd_yoy_positive":     True,
+
+        "gross_margin_ytd":                  "N/A",
+        "gross_margin_ytd_vs_budget":        "N/A",
+        "gross_margin_ytd_vs_budget_positive": True,
+        "gross_margin_ytd_yoy":              "N/A",
+        "gross_margin_ytd_yoy_positive":     True,
+
+        "ebitda_ytd":                  "N/A",
+        "ebitda_ytd_vs_budget":        "N/A",
+        "ebitda_ytd_vs_budget_positive": True,
+        "ebitda_ytd_yoy":              "N/A",
+        "ebitda_ytd_yoy_positive":     True,
+
         # --- Risk KPIs (Sheets for payback, RS for churn)
         "logo_churn_core":    round((_q("Core") if is_quarter_end else _mo("Core")).get("l_churn_pct", 0) * 100, 1),
         "logo_churn_lite":    round((_q("Lite") if is_quarter_end else _mo("Lite")).get("l_churn_pct", 0) * 100, 1),
@@ -3684,8 +3796,12 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     _g_ymax     = max((max(_g_new_rec+_g_exp) if _g_new_rec else 0),
                       (max(_g_churn+_g_cont)   if _g_churn   else 0)) * 1.25 or 1
 
+    # Año calendario anterior completo + año actual hasta el mes de corte — mismo criterio
+    # que _last5q/q_cards de Core-Lite más abajo (no un slice fijo de "últimos 5").
+    _cutoff_yr_suffix_gqc = latest_q_lbl[-2:]
+    _prev_yr_suffix_gqc = f"{int(_cutoff_yr_suffix_gqc) - 1:02d}"
     _gqc = []
-    for _ql, _ms in QUARTERS[-5:]:
+    for _ql, _ms in [(l, m) for l, m in QUARTERS if l[-2:] in (_prev_yr_suffix_gqc, _cutoff_yr_suffix_gqc)]:
         if not any(m in _all_bym for m in _ms): continue
         _bop_k = _prev_m(_ms[0]); _eop_k = _ms[-1]
         _gqc.append({
@@ -3737,7 +3853,14 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     })
 
     # ── ARR Walk Table (nuevo slide en 1_inicio) ──────────────────────────────
-    _last5q = [lbl for lbl, _ in QUARTERS if lbl in _all_q_data][-5:]
+    # Muestra el año calendario ANTERIOR completo (4 quarters) + el año calendario ACTUAL
+    # hasta el mes de corte (2 quarters en 2Q26) — no un slice fijo de "últimos 5", que se
+    # comía 1Q25 apenas entraba 2Q26 (bug real reportado por el usuario 2026-07-24). Crece
+    # naturalmente cada quarter (6 columnas ahora, 8 en 4Q26) hasta que cambia el año.
+    _cutoff_yr_suffix = latest_q_lbl[-2:]
+    _prev_yr_suffix = f"{int(_cutoff_yr_suffix) - 1:02d}"
+    _last5q = [lbl for lbl, _ in QUARTERS if lbl in _all_q_data
+               and lbl[-2:] in (_prev_yr_suffix, _cutoff_yr_suffix)]
 
     def _fa_abs(v):
         return _fm(v) if v != 0 else "—"
@@ -4413,6 +4536,23 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     # ── Alanube ARR Walk completo (slide 9 de 1_inicio.j2) — desde RS ──────────
     out["alanube_walk"] = _build_alanube_walk_table(cutoff)
 
+    # ── Stock Core+Lite=GLO mes a mes (para R20 en phase4_validator.py) ───────
+    # El STOCK (mrr_eop) de "all" siempre es la suma de Core+Lite por construcción
+    # (build_seg_metrics() arma "all" así) — este export es un guardrail de regresión,
+    # no algo que deba fallar nunca en la práctica (a diferencia del FLUJO
+    # New/Churn/Upsell/Downsell, que NO cuadra por diseño — ver migraciones Lite↔Core,
+    # memory/project_board_agent.md sección 2026-07-24).
+    out["seg_stock_by_month"] = [
+        {
+            "m": m,
+            "core_eop": segs_raw.get("Core", {}).get(m, {}).get("mrr_eop", 0.0),
+            "lite_eop": segs_raw.get("Lite", {}).get(m, {}).get("mrr_eop", 0.0),
+            "all_eop":  segs_raw.get("all", {}).get(m, {}).get("mrr_eop", 0.0),
+        }
+        for m in all_months
+        if m in segs_raw.get("all", {})
+    ]
+
     return out
 
 def merge_accountant_logos(out: dict) -> None:
@@ -4481,6 +4621,7 @@ def main():
         out.pop("_raw", None)
         print("📊 Mergeando P&L (Net Revenue, Gross Margin, EBITDA)…")
         merge_pnl(out, cutoff)
+        _apply_finance_pnl_html(out, cutoff)
         print("⏱️  Mergeando Payback…")
         merge_payback(out, cutoff)
         merge_accountant_logos(out)
@@ -4507,6 +4648,7 @@ def main():
 
         print("📊 Mergeando P&L (Net Revenue, Gross Margin, EBITDA)…")
         merge_pnl(out, cutoff)
+        _apply_finance_pnl_html(out, cutoff)
 
         print("⏱️  Mergeando Payback…")
         merge_payback(out, cutoff)
@@ -4770,6 +4912,233 @@ def _calc_pnl(rows):
         "fo":              fo,
         "fo_pct":          fo_pct,
     }
+
+# ── Finance P&L desde el HTML de Template 4 (Financial Performance) ─────────────
+# El HTML de Template 4 es pegado a mano por Finance cada mes/trimestre (ver F0.9 en
+# board_agent/phase0_gate.py) — no es una fuente automatizable vía RS/Metabase (decisión
+# ya tomada, ver memory/project_board_agent.md), pero SÍ podemos parsear ese HTML ya
+# provisto para llenar los KPIs de Financial Performance de 1_inicio.j2 (slides 4/5) en
+# vez de dejarlos en "N/A" para siempre. Gate de frescura: reusa
+# extract_financial_performance_title_month() (misma función que ya usa F0.9) — si el
+# <title> del HTML no corresponde al `cutoff` que se está generando, no se toca nada y
+# quedan los defaults "N/A" ya declarados arriba.
+_QTR_LABEL_RE = re.compile(r"Q([1-4])'(\d{2})")
+
+
+def _fp_strip_tags(fragment):
+    text = re.sub(r"<[^>]+>", "", fragment)
+    return (text.replace("&amp;", "&").replace("&nbsp;", " ")
+                .replace("&lt;", "<").replace("&gt;", ">")).strip()
+
+
+def _fp_slide_blocks(html_text):
+    """Separa Template 4 en sub-slides por los comentarios '<!-- SLIDE N — ... -->'."""
+    parts = re.split(r"<!--\s*SLIDE\s+\d+\s*—", html_text)
+    return parts[1:]  # parts[0] es todo el <head>/CSS antes de la primera slide
+
+
+def _fp_table_headers(slide_html):
+    return [_fp_strip_tags(th) for th in re.findall(r"<th[^>]*>(.*?)</th>", slide_html, re.DOTALL)]
+
+
+def _fp_table_rows(slide_html):
+    """{label_primera_celda: [resto de celdas]} para cada <tr> de la primera tabla."""
+    rows = {}
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", slide_html, re.DOTALL):
+        cells = [_fp_strip_tags(td) for td in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.DOTALL)]
+        if cells:
+            rows[cells[0]] = cells[1:]
+    return rows
+
+
+def _fp_num(cell_text):
+    t = (cell_text.replace("−", "-").replace("$", "").replace(",", "")
+                   .replace("%", "").replace("pp", "").replace("k", "").replace("K", "").strip())
+    if not t or t in ("—", "-", "n/a", "N/A"):
+        return None
+    try:
+        return float(t)
+    except ValueError:
+        return None
+
+
+def _fp_fmt_usd_k(kusd):
+    v = kusd * 1000
+    if abs(v) >= 1e6: return f"${v/1e6:.1f}M"
+    if abs(v) >= 1e3: return f"${v/1e3:.0f}k"
+    return f"${v:.0f}"
+
+
+def _fp_delta_dollar_k(delta_kusd):
+    sign = "+" if delta_kusd >= 0 else "-"
+    return f"{sign}${abs(delta_kusd):,.0f}k", delta_kusd >= 0
+
+
+def _fp_delta_pct(a, b):
+    if not b: return "N/A", True
+    d = (a - b) / abs(b) * 100
+    return f"{'+' if d >= 0 else ''}{d:.1f}%", d >= 0
+
+
+def _fp_delta_pp(a, b):
+    d = a - b
+    return f"{'+' if d >= 0 else ''}{d:.1f}pp", d >= 0
+
+
+def _fp_is_positive_str(cell_text):
+    return not cell_text.strip().startswith(("-", "−"))
+
+
+def load_finance_pnl_html(cutoff):
+    """Parsea templates/4_financial_performance.j2 (HTML de Finance) y arma un dict con
+    los KPIs de Financial Performance (Net Revenue / Gross Margin / EBITDA Margin, quarter
+    + YTD) para 1_inicio.j2. Devuelve None (sin tocar nada) si el archivo no existe, si su
+    <title> no corresponde a `cutoff`, o si la estructura de tablas no matchea lo esperado
+    — nunca lanza excepción por un HTML con forma distinta a la de un mes de cierre de Q."""
+    try:
+        html_text = FINANCIAL_PERFORMANCE_TEMPLATE.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+    _, found_month = extract_financial_performance_title_month(html_text)
+    if found_month != cutoff:
+        return None
+
+    try:
+        blocks = _fp_slide_blocks(html_text)
+        if len(blocks) < 2:
+            return None
+        slide1, slide2 = blocks[0], blocks[1]
+
+        headers1 = _fp_table_headers(slide1)
+        qtr_cols = [h for h in headers1 if _QTR_LABEL_RE.fullmatch(h)]
+        if not qtr_cols:
+            return None
+        cur_label = qtr_cols[-1]
+        cur_q, cur_yy = (int(x) for x in _QTR_LABEL_RE.fullmatch(cur_label).groups())
+
+        rows1 = _fp_table_rows(slide1)
+        headers2 = _fp_table_headers(slide2)
+        rows2 = _fp_table_rows(slide2)
+
+        def _idx2(*substrings):
+            for i, h in enumerate(headers2):
+                if all(s in h for s in substrings):
+                    return i
+            return None
+
+        act_idx     = _idx2(cur_label, "Act")
+        bud_idx     = _idx2(cur_label, "Bud")
+        ytd_act_idx = _idx2("YTD Act")
+        ytd_bud_idx = _idx2("YTD Bud")
+        var_idx     = _idx2("Var")
+        if None in (act_idx, bud_idx, ytd_act_idx, ytd_bud_idx, var_idx):
+            return None
+        # headers2 incluye la columna de label en 0; rows2[label] ya viene sin esa celda.
+        act_idx, bud_idx = act_idx - 1, bud_idx - 1
+        ytd_act_idx, ytd_bud_idx, var_idx = ytd_act_idx - 1, ytd_bud_idx - 1, var_idx - 1
+
+        def _quarter_year_sum(row_label, max_q, year_suffix):
+            """Suma una fila $ de Slide 1 (Revenue/Gross Profit/EBITDA) para Q1..max_q de
+            un año dado — usado para armar el YoY de YTD, que Finance no calcula directo."""
+            if row_label not in rows1:
+                return None
+            r1, total, found_any = rows1[row_label], 0.0, False
+            for i, h in enumerate(headers1):
+                m = _QTR_LABEL_RE.fullmatch(h)
+                if not m:
+                    continue
+                q, yy = int(m.group(1)), int(m.group(2))
+                if yy != year_suffix or q > max_q:
+                    continue
+                col = i - 1
+                if 0 <= col < len(r1):
+                    v = _fp_num(r1[col])
+                    if v is not None:
+                        total, found_any = total + v, True
+            return total if found_any else None
+
+        result = {}
+
+        # ── Quarter (slide 4 de 1_inicio.j2) ──
+        for metric_key, row_label, is_pct in (
+            ("net_revenue", "Revenue", False),
+            ("gross_margin", "Gross Margin %", True),
+            ("ebitda_margin", "EBITDA Margin", True),
+        ):
+            r1 = rows1.get(row_label)
+            if not r1 or len(r1) < 3:
+                continue
+            cur_cell, mom_cell, yoy_cell = r1[-3], r1[-2], r1[-1]
+            cur_val = _fp_num(cur_cell)
+            if cur_val is None:
+                continue
+            result[metric_key] = f"{cur_val:.1f}%" if is_pct else _fp_fmt_usd_k(cur_val)
+            result[f"{metric_key}_mom"] = mom_cell
+            result[f"{metric_key}_mom_positive"] = _fp_is_positive_str(mom_cell)
+            result[f"{metric_key}_yoy"] = yoy_cell
+            result[f"{metric_key}_yoy_positive"] = _fp_is_positive_str(yoy_cell)
+
+            r2 = rows2.get(row_label)
+            if r2 and len(r2) > max(act_idx, bud_idx):
+                act_val, bud_val = _fp_num(r2[act_idx]), _fp_num(r2[bud_idx])
+                if act_val is not None and bud_val is not None:
+                    vs_bud, vs_bud_pos = (_fp_delta_pp(act_val, bud_val) if is_pct
+                                          else _fp_delta_pct(act_val, bud_val))
+                    result[f"{metric_key}_vs_budget"] = vs_bud
+                    result[f"{metric_key}_vs_budget_positive"] = vs_bud_pos
+
+        # ── YTD (slide 5 de 1_inicio.j2) ──
+        for metric_key, row_label, is_pct in (
+            ("net_revenue_ytd", "Revenue", False),
+            ("gross_margin_ytd", "Gross Margin %", True),
+            ("ebitda_ytd", "EBITDA", False),
+        ):
+            r2 = rows2.get(row_label)
+            if not r2 or len(r2) <= max(ytd_act_idx, var_idx):
+                continue
+            ytd_val = _fp_num(r2[ytd_act_idx])
+            if ytd_val is None:
+                continue
+            result[metric_key] = f"{ytd_val:.1f}%" if is_pct else _fp_fmt_usd_k(ytd_val)
+            var_cell = r2[var_idx]
+            result[f"{metric_key}_vs_budget"] = var_cell
+            result[f"{metric_key}_vs_budget_positive"] = _fp_is_positive_str(var_cell)
+
+        # YTD YoY: no viene calculado en ningún lado del HTML — se arma sumando Q1..N de
+        # Slide 1 (año de corte vs año anterior) desde las filas $ (Revenue/Gross Profit/EBITDA).
+        rev_this, rev_last = _quarter_year_sum("Revenue", cur_q, cur_yy), _quarter_year_sum("Revenue", cur_q, cur_yy - 1)
+        gp_this, gp_last   = _quarter_year_sum("Gross Profit", cur_q, cur_yy), _quarter_year_sum("Gross Profit", cur_q, cur_yy - 1)
+        ebd_this, ebd_last = _quarter_year_sum("EBITDA", cur_q, cur_yy), _quarter_year_sum("EBITDA", cur_q, cur_yy - 1)
+
+        if rev_this is not None and rev_last:
+            result["net_revenue_ytd_yoy"], result["net_revenue_ytd_yoy_positive"] = _fp_delta_pct(rev_this, rev_last)
+        if rev_this and rev_last and gp_this is not None and gp_last is not None:
+            result["gross_margin_ytd_yoy"], result["gross_margin_ytd_yoy_positive"] = (
+                _fp_delta_pp(gp_this / rev_this * 100, gp_last / rev_last * 100))
+        if ebd_this is not None and ebd_last is not None:
+            result["ebitda_ytd_yoy"], result["ebitda_ytd_yoy_positive"] = _fp_delta_dollar_k(ebd_this - ebd_last)
+
+        return result or None
+    except Exception:
+        return None
+
+
+def _apply_finance_pnl_html(out, cutoff):
+    """Si templates/4_financial_performance.j2 ya trae el HTML de Finance del mes de corte
+    (mismo <title> que `cutoff`), sobreescribe con esos valores los KPIs que merge_pnl()
+    haya dejado en "N/A" (o los que traía el CSV viejo, si Finance ya mandó algo más nuevo).
+    Si el HTML no corresponde a este cutoff (o no existe), no hace nada — quedan los
+    defaults/CSV ya presentes en `out`."""
+    result = load_finance_pnl_html(cutoff)
+    if result:
+        out.update(result)
+        print(f"✅ Financial Performance tomado del HTML de Finance (Template 4, {cutoff}): "
+              f"Revenue {out.get('net_revenue')} · GM {out.get('gross_margin')} · EBITDA {out.get('ebitda_margin')}")
+    else:
+        print(f"ℹ️  Financial Performance: templates/4_financial_performance.j2 no corresponde "
+              f"a {cutoff} (o no se pudo parsear) — se deja lo que haya de merge_pnl()/N/A")
+
 
 def merge_pnl(out, cutoff):
     """Lee los CSVs de P&L actual y budget, calcula métricas e inyecta en out."""

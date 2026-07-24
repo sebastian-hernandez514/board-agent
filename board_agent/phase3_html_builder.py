@@ -12,10 +12,18 @@ busca cualquier <img src="...data/assets/{month}/..."> sin importar el nombre de
 así que un topic nuevo con una imagen de otro nombre queda cubierto automáticamente.
 
 F3.4/F3.5/F3.6/F3.7/F3.8: tapan visualmente el contenido desactualizado de Template 4
-(Financial Performance), Discussion Topics, CEO Highlights, 6_rd (Product Performance + NPS)
-y Headcount respectivamente — cada uno con su propia fuente de frescura (título del HTML,
-sentinel en comentario, campo YAML, presencia de clave en snapshot). Solo escriben en
-output/*.html (el artefacto ya generado por generate.py), nunca en el .j2 fuente.
+(Financial Performance), Discussion Topics, CEO Highlights, 6_rd (NPS) y Headcount
+respectivamente — cada uno con su propia fuente de frescura (título del HTML, sentinel en
+comentario, campo YAML, presencia de clave en snapshot). Solo escriben en output/*.html (el
+artefacto ya generado por generate.py), nunca en el .j2 fuente.
+
+F3.7 usaba scope="file" con slide_classes=["slide"] hasta 2026-07-24 — como Product
+Performance y NPS comparten la misma clase genérica "slide" en 6_rd.html (sin clase propia
+por slide), tapaba las DOS cuando solo NPS estaba desactualizado, ocultando contenido de
+Product Performance que sí estaba fresco. Bug real reportado por el usuario ("la parte de
+Product Performance si o si se debió haber generado"). Fix: mismo patrón que F3.6 (CEO
+Highlights, que tiene el mismo problema de clase compartida) — scope="marker" ubicando el
+comentario "SLIDE 3 — NPS Alegra" y tapando solo esa slide específica.
 
 Refactor 2026-07-09: las 4 funciones originales (F3.4-F3.7, agregadas 2026-07-08) eran casi
 idénticas — cada una con su archivo/marcador/sentinel hardcodeado a mano y repetido. A raíz de

@@ -702,7 +702,7 @@
           </tr>
           {% endif %}
           {% endfor %}
-          {% if not loop.last %}<tr class="aw-gap"><td colspan="9"></td></tr>{% endif %}
+          {% if not loop.last %}<tr class="aw-gap"><td colspan="{{ metrics.arr_walk_table.quarters|length + 4 }}"></td></tr>{% endif %}
           {% endfor %}
 
         </tbody>
@@ -824,7 +824,7 @@
           <thead>
             <tr>
               <th>Consolidated Alanube</th>
-              <th>1Q25</th><th>2Q25</th><th>3Q25</th><th>4Q25</th>
+              <th>1Q25</th><th>2Q25</th><th>3Q25</th><th>4Q25</th><th>1Q26</th>
               <th class="al-sp-col"></th>
               {% for lbl in metrics.alanube_walk.current_labels %}<th class="al-cur">{{ lbl }}</th>{% endfor %}
               <th class="aw-dh">{{ metrics.alanube_walk.current_header_label }}</th>
@@ -835,16 +835,16 @@
           <tbody>
             {% set aw = metrics.alanube_walk %}
             <!-- Logo Walk -->
-            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}12{% else %}13{% endif %}">Logo Walk</td></tr>
+            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}13{% else %}14{% endif %}">Logo Walk</td></tr>
             {{ aw_row('Logos BoP', aw.logos.bop, rb=true) }}
             {{ aw_row('New Logos', aw.logos.new) }}
             {{ aw_row('Recovered Logos', aw.logos.recovered) }}
             {{ aw_row('Churned Logos', aw.logos.churned) }}
             {{ aw_row('Logos EoP', aw.logos.eop, rb=true, hl=true) }}
-            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}12{% else %}13{% endif %}"></td></tr>
+            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}13{% else %}14{% endif %}"></td></tr>
 
             <!-- ARR Walk -->
-            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}12{% else %}13{% endif %}">ARR Walk (MM USD)</td></tr>
+            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}13{% else %}14{% endif %}">ARR Walk (MM USD)</td></tr>
             {{ aw_row('ARR BoP', aw.arr.bop, rb=true) }}
             {{ aw_row('New ARR', aw.arr.new) }}
             {{ aw_row('Recovered ARR', aw.arr.recovered) }}
@@ -854,18 +854,18 @@
             {{ aw_row('FX', aw.arr.fx) }}
             {{ aw_row('ARR EoP', aw.arr.eop, rb=true, hl=true) }}
             {{ aw_row('OTR (One-Time Revenue) — $K', aw.arr.otr) }}
-            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}12{% else %}13{% endif %}"></td></tr>
+            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}13{% else %}14{% endif %}"></td></tr>
 
             <!-- Finance Metrics -->
-            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}12{% else %}13{% endif %}">Finance Metrics</td></tr>
+            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}13{% else %}14{% endif %}">Finance Metrics</td></tr>
             {{ aw_row('ARR Growth Rate ' + (aw.is_quarter_end and 'QoQ' or 'MoM') + ' (%)', aw.finance.growth_pct) }}
             {{ aw_row('ARR Growth Rate YoY (%)', aw.finance.growth_yoy_pct) }}
             {{ aw_row('Avg. ARR per Logo', aw.finance.arr_per_logo) }}
             {{ aw_row('Avg. Monthly Churn Rate (%)', aw.finance.churn_rate_pct) }}
-            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}12{% else %}13{% endif %}"></td></tr>
+            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}13{% else %}14{% endif %}"></td></tr>
 
             <!-- Operation Metrics -->
-            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}12{% else %}13{% endif %}">Operation Metrics</td></tr>
+            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}13{% else %}14{% endif %}">Operation Metrics</td></tr>
             {{ aw_row('Avg. Monthly Processed Docs (MM)', aw.operation.docs_mm) }}
             {{ aw_row('Monthly Documents per Logo (k)', aw.operation.docs_per_logo_k) }}
             {{ aw_row('Price per Document', aw.operation.price_per_doc) }}

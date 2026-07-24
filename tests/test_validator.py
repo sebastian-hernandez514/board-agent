@@ -40,7 +40,6 @@ def test_smoke_against_real_may_2026_data():
     by_id = _results_by_id(results)
 
     assert by_id["R1"].status == "PASS"  # ARR total ya incluye Alanube
-    assert by_id["R2"].status == "PASS"  # New MRR core+lite = total
     assert by_id["R3"].status == "PASS"  # ARR walk balancea (dentro de tolerancia de redondeo)
     assert by_id["R4"].status == "PASS"  # Net Churn negativo
     assert by_id["R6"].status == "PASS"  # FX residual < $3M
@@ -53,7 +52,7 @@ def test_smoke_against_real_may_2026_data():
     # que R17 da FAIL acá por un hueco del fixture, no porque el board real de mayo no tuviera P&L.
     assert by_id["R17"].status == "FAIL"
 
-    for rid in ("R7", "R11", "R13", "R14", "R15", "R18", "R19"):
+    for rid in ("R7", "R11", "R13", "R14", "R15", "R18", "R19", "R20"):
         assert by_id[rid].status == "SKIP"
 
 
@@ -65,14 +64,6 @@ def test_r1_fails_when_arr_total_excludes_alanube(tmp_path):
     assert _results_by_id(results)["R1"].status == "FAIL"
 
 
-def test_r2_fails_when_new_mrr_not_divided_by_12(tmp_path):
-    """Reproduce el bug real de v37: total en ARR anualizado en vez de MRR mensual."""
-    metrics = _load_fixture()
-    metrics["new_mrr"] = "$852K"  # $71K * 12 — el bug real (faltaba /12)
-    results = _write_and_run(tmp_path, metrics)
-    assert _results_by_id(results)["R2"].status == "FAIL"
-
-
 def test_r4_fails_when_net_churn_sign_is_flipped(tmp_path):
     metrics = _load_fixture()
     for row in metrics["arr_walk_table"]["sections"][1]["rows"]:
@@ -80,6 +71,29 @@ def test_r4_fails_when_net_churn_sign_is_flipped(tmp_path):
             row["cells"][-1] = "0.9"  # positivo en vez de "(0.9)"
     results = _write_and_run(tmp_path, metrics)
     assert _results_by_id(results)["R4"].status == "FAIL"
+
+
+def test_r20_passes_when_seg_stock_sums_correctly(tmp_path):
+    metrics = _load_fixture()
+    metrics["seg_stock_by_month"] = [
+        {"m": "2026-04", "core_eop": 15_000_000.0, "lite_eop": 11_000_000.0, "all_eop": 26_000_000.0},
+        {"m": "2026-05", "core_eop": 15_500_000.0, "lite_eop": 11_100_000.0, "all_eop": 26_600_000.0},
+    ]
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R20"].status == "PASS"
+
+
+def test_r20_fails_when_a_month_does_not_sum(tmp_path):
+    """Guardrail de regresión (2026-07-24, pedido explícito del usuario): el stock
+    (mrr_eop) de Core+Lite debe sumar exacto al de GLO en TODOS los meses -- a diferencia
+    del flujo (New/Churn/Upsell/Downsell), que no cuadra por diseño (ver R2 retirada)."""
+    metrics = _load_fixture()
+    metrics["seg_stock_by_month"] = [
+        {"m": "2026-04", "core_eop": 15_000_000.0, "lite_eop": 11_000_000.0, "all_eop": 26_000_000.0},
+        {"m": "2026-05", "core_eop": 15_500_000.0, "lite_eop": 11_100_000.0, "all_eop": 30_000_000.0},  # no cuadra
+    ]
+    results = _write_and_run(tmp_path, metrics)
+    assert _results_by_id(results)["R20"].status == "FAIL"
 
 
 def test_r9_fails_when_quarter_end_flag_is_wrong(tmp_path):

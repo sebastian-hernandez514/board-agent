@@ -173,59 +173,44 @@ def test_flag_stale_discussion_topics_pass_when_sentinel_matches(isolated_dirs):
     assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
 
 
-def test_flag_stale_discussion_topics_warns_and_overlays_when_sentinel_is_old(isolated_dirs):
-    """Reproduce el bug real: el archivo sigue marcado como mayo pero se está generando junio.
-    Debe taparse visualmente cada .dt-slide, sin borrar el contenido original."""
+def test_flag_stale_discussion_topics_replaces_body_with_fixed_placeholder(isolated_dirs):
+    """Fix 2026-07-24 (pedido explícito del usuario): el número real de topics/slides varía
+    mes a mes (1, 2 o 3 topics = 3, 6 o 9 slides) — taparlas todas in-place llenaría el board
+    con tantos "contenido pendiente" como topics hubiera el mes anterior. En vez de eso, todo
+    el <body> se reemplaza por un esqueleto FIJO: portada genérica "Discussion Topics" + 2
+    slides vacías tapadas, sin importar cuánto contenido (ni qué títulos) había antes."""
     data_dir, output_dir = isolated_dirs
     html_path = output_dir / "2_discussion_topic.html"
     html_path.write_text(
-        '<!-- updated_for_month: 2026-05 --><body>'
+        '<!-- updated_for_month: 2026-05 --><html><head></head><body>'
+        '<div class="slide section-divider"><div class="section-title">Mexico Strategy</div></div>'
         '<div class="dt-slide">topic 1 viejo</div>'
-        '<div class="dt-slide" style="padding:0;">topic con imagen</div>'
-        '</body>', encoding="utf-8")
+        '<div class="slide section-divider"><div class="section-title">ICP Split Costa Rica Update</div></div>'
+        '<div class="dt-slide">topic 2 viejo</div>'
+        '</body></html>', encoding="utf-8")
 
     r = f3._flag_stale_discussion_topics("2026-06")
     assert r.status == "WARN"
     assert "2026-05" in r.detail and "2026-06" in r.detail
+    assert "portada + 2 slide(s)" in r.detail
 
     new_html = html_path.read_text(encoding="utf-8")
-    assert new_html.count("stale-overlay") >= 2
-    assert "topic 1 viejo" in new_html
-    assert "topic con imagen" in new_html
+    # contenido viejo (de cualquier cantidad de topics que hubiera) ya no aparece
+    assert "Mexico Strategy" not in new_html
+    assert "ICP Split Costa Rica Update" not in new_html
+    assert "topic 1 viejo" not in new_html
+    assert "topic 2 viejo" not in new_html
+    # esqueleto fijo: 1 portada genérica + exactamente 2 slides vacías tapadas
+    assert new_html.count('class="slide section-divider"') == 1
+    assert "Discussion Topic" in new_html
     assert new_html.count('class="dt-slide stale-slide"') == 2
-    # el slide con style pre-existente conserva su atributo original, no se pisa
-    assert 'class="dt-slide stale-slide" style="padding:0;"' in new_html
+    assert new_html.count('class="stale-overlay"') == 2
 
 
-def test_flag_stale_discussion_topics_also_overlays_section_cover(isolated_dirs):
-    """Reproduce el hallazgo del usuario 2026-07-08 (segunda revisión): la portada de cada
-    topic (class="slide section-divider") revelaba el título del tema viejo (ej. "ICP Split
-    Costa Rica Update") aunque las slides de contenido ya estuvieran tapadas."""
+def test_flag_stale_discussion_topics_skip_when_no_body_found(isolated_dirs):
     data_dir, output_dir = isolated_dirs
     html_path = output_dir / "2_discussion_topic.html"
-    html_path.write_text(
-        '<!-- updated_for_month: 2026-05 --><body>'
-        '<div class="slide section-divider"><div class="section-title">Mexico Strategy</div></div>'
-        '<div class="dt-slide">contenido</div>'
-        '<div class="slide section-divider"><div class="section-title">ICP Split Costa Rica Update</div></div>'
-        '<div class="dt-slide">contenido 2</div>'
-        '</body>', encoding="utf-8")
-
-    r = f3._flag_stale_discussion_topics("2026-06")
-    assert r.status == "WARN"
-    assert "4 slide(s)" in r.detail  # 2 portadas + 2 dt-slide, todas cuentan en el total
-
-    new_html = html_path.read_text(encoding="utf-8")
-    assert new_html.count('class="slide section-divider stale-slide"') == 2  # portadas tapadas
-    assert new_html.count('class="dt-slide stale-slide"') == 2
-    assert "Mexico Strategy" in new_html  # texto original conservado, solo tapado
-    assert "ICP Split Costa Rica Update" in new_html
-
-
-def test_flag_stale_discussion_topics_skip_when_no_dt_slide_found(isolated_dirs):
-    data_dir, output_dir = isolated_dirs
-    html_path = output_dir / "2_discussion_topic.html"
-    html_path.write_text('<!-- updated_for_month: 2026-05 --><body>sin slides</body>', encoding="utf-8")
+    html_path.write_text('<!-- updated_for_month: 2026-05 -->sin body', encoding="utf-8")
     r = f3._flag_stale_discussion_topics("2026-06")
     assert r.status == "SKIP"
 
@@ -350,13 +335,14 @@ def test_flag_stale_nps_pass_when_month_present(tmp_path, isolated_dirs):
     assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
 
 
-def test_flag_stale_nps_warns_and_overlays_whole_file(tmp_path, isolated_dirs):
-    """Reproduce el crash real, con el alcance correcto: generate.py truena armando NPS para
-    junio (nps_snapshot.yaml sin esa entrada) y, como Jinja2 renderiza el archivo entero de una
-    sola pasada, TODO output/6_rd.html queda sin regenerar — no solo NPS, también Product
-    Performance (que de otro modo sí tomaría el mes correcto). Ambas slides .slide deben
-    taparse; la portada (clase "slide section-cover", no coincide exacto con "slide") queda
-    fuera de alcance a propósito — solo muestra un título de sección + quarter_label, no datos."""
+def test_flag_stale_nps_warns_and_overlays_only_nps(tmp_path, isolated_dirs):
+    """Fix 2026-07-24 (bug real reportado por el usuario): NPS sin snapshot para el mes de
+    corte NO debe tapar Product Performance — desde que generate.py usa
+    ChainableUndefined/_TrackingUndefined, un campo de NPS faltante ya no truena el render
+    del archivo entero (queda en blanco, ver F3.9); Product Performance sí se regenera bien
+    para el mes correcto en la misma corrida. Antes (scope="file" con slide_classes=["slide"])
+    tapaba las DOS slides porque comparten la misma clase genérica — ahora usa el mismo
+    patrón de marcador que F3.6 (CEO Highlights) para tapar solo la slide de NPS."""
     data_dir, output_dir = isolated_dirs
     html_path = output_dir / "6_rd.html"
     html_path.write_text(_RD_WITH_NPS_SLIDE, encoding="utf-8")
@@ -365,14 +351,14 @@ def test_flag_stale_nps_warns_and_overlays_whole_file(tmp_path, isolated_dirs):
     r = f3._flag_stale_nps("2026-06")
     assert r.status == "WARN"
     assert "2026-06" in r.detail
-    assert "Product Performance" in r.detail
+    assert "Product Performance" not in r.detail
 
     new_html = html_path.read_text(encoding="utf-8")
-    assert new_html.count('class="stale-overlay"') == 2
-    assert new_html.count('class="slide stale-slide"') == 2  # Product Performance + NPS
-    assert "product performance de mayo" in new_html  # conservado, solo tapado
+    assert new_html.count('class="stale-overlay"') == 1
+    assert new_html.count('class="slide stale-slide"') == 1  # solo NPS
     assert "contenido real de NPS de mayo" in new_html  # conservado, solo tapado
-    assert 'class="slide section-cover"' in new_html  # portada NO tocada (clase distinta)
+    assert 'class="slide">product performance de mayo</div>' in new_html  # NO tapado
+    assert 'class="slide section-cover"' in new_html  # portada tampoco tocada
 
 
 def test_flag_stale_nps_skip_when_no_slide_found(tmp_path, isolated_dirs):

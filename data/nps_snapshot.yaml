@@ -18,6 +18,26 @@
 # Solo el mes de corte necesita responses/distribution completos (se muestran en el Hero y
 # la Distribution de la slide) — los meses anteriores solo se usan para el trend MoM/vs-3-meses,
 # que únicamente necesita "score" y "by_country".
+#
+# CÓMO SACAR ESTO DE AMPLITUDE (2026-07-24, ya 100% automatizable, sin screenshots):
+# Los charts de este dashboard usan metric="formula" (NPS = %promotores - %detractores vía
+# TOTALS(A..F)) — esa fórmula NO se evalúa bien corriéndola vía query_dataset/query_charts del
+# MCP (da valores imposibles, ej. 977 en vez de 60.9 — probado y descartado). La forma que SÍ
+# funciona: pedir los 6 componentes crudos por separado con metric="uniques" (sin fórmula) e
+# interval=30 (mensual — con interval=1/diario devuelve PROMEDIOS por día, no el total del
+# mes) y calcular la fórmula uno mismo:
+#   A = Survey Submitted, Survey Response in (0-6)      [detractores, canal G&S]
+#   B = Survey Submitted, Survey Response in (0-10)     [total, canal G&S]
+#   C = Survey Submitted, Survey Response in (9-10)      [promotores, canal G&S]
+#   D = nps-survey-response, response in (1-6)           [detractores, canal Bandeja/inbox]
+#   E = nps-survey-response, response in (0-10)          [total, canal Bandeja/inbox]
+#   F = nps-survey-response, response in (9-10)          [promotores, canal Bandeja/inbox]
+#   score = (C+F)/(B+E)*100 - (A+D)/(B+E)*100
+#   responses = B+E ; promoters_n = C+F ; detractors_n = A+D ; passives_n = responses - promoters_n - detractors_n
+# Para by_country, agregar el segmento gp:appVersion is [colombia,COL] / [mexico,MEX] /
+# [rdominicana,republicaDominicana,DOM] / [costarica,costaRica,CRI] a los mismos 6 eventos
+# (mismos filtros que los charts o1t24q2y/sx2n44r0/6rkocooq/k67mnwk8, ver sus definiciones).
+# Validado contra la UI de Amplitude con el filtro Jun 1-30 2026 puesto a mano: coincide.
 
 "2026-03":
   score: 48.8
@@ -50,3 +70,19 @@
     mexico: 52.4
     dom_rep: 54.3
     costa_rica: 30.2
+
+"2026-06":
+  score: 60.9
+  responses: 414
+  distribution:
+    promoters_pct: 72.9
+    promoters_n: 302
+    passives_pct: 15.0
+    passives_n: 62
+    detractors_pct: 12.1
+    detractors_n: 50
+  by_country:
+    colombia: 60.6
+    mexico: 100.0    # muestra chica: 2 respuestas, ambas promotoras
+    dom_rep: 50.0
+    costa_rica: 100.0  # muestra chica: 3 respuestas, todas promotoras

@@ -80,6 +80,43 @@ def _overlay_stale_slides(html: str, slide_classes, section: str, old_label: str
     return html, total
 
 
+def _replace_stale_body_with_placeholder(html: str, section: str, old_label: str,
+                                          n_placeholder_slides: int = 2) -> tuple[str, int]:
+    """Para secciones cuyo CONTENIDO real varía en cantidad mes a mes (ej. Discussion Topics
+    puede tener 1, 2 o 3 topics = 3, 6 o 9 slides distintas) — en vez de tapar cada slide
+    existente (lo que llenaría el board con tantos "contenido pendiente" como topics tenía
+    el mes anterior), reemplaza TODO el <body> por un esqueleto FIJO: una portada genérica de
+    sección + `n_placeholder_slides` slides vacías tapadas — siempre el mismo tamaño, sin
+    importar cuánto contenido había antes. Pedido explícito del usuario (2026-07-24): "así no
+    estén debe salir la portada... y 2 slides vacías... porque si no llenamos el board de
+    slides vacías" (F3.5, Discussion Topics). Devuelve (html_modificado,
+    n_placeholder_slides) — o (html, 0) si no encuentra <body>."""
+    body_match = re.search(r"<body>.*</body>", html, re.S)
+    if not body_match:
+        return html, 0
+
+    overlay = _STALE_OVERLAY_HTML.format(section=section, old_label=old_label)
+    cover = (
+        '<div class="slide section-divider">'
+        '<div class="eyebrow">Discussion Topic</div>'
+        f'<div class="section-title">{section}</div>'
+        '<div class="slide-num">1</div>'
+        '</div>'
+        '<div class="slide-divider">↓</div>'
+    )
+    placeholders = "".join(
+        f'<div class="dt-slide stale-slide">{overlay}</div>'
+        for _ in range(n_placeholder_slides)
+    )
+    new_body = f"<body>{cover}{placeholders}</body>"
+    html = html[:body_match.start()] + new_body + html[body_match.end():]
+    if "</head>" in html:
+        html = html.replace("</head>", _STALE_OVERLAY_STYLE + "</head>", 1)
+    else:
+        html = _STALE_OVERLAY_STYLE + html
+    return html, n_placeholder_slides
+
+
 def _overlay_single_slide_by_marker(html: str, marker_text: str, slide_class: str,
                                      section: str, old_label: str) -> tuple[str, int]:
     """Para slides SIN clase propia (comparten `slide_class` con otras slides del mismo
@@ -158,7 +195,9 @@ class StaleSlideSpec:
     label: str
     output_filename: str
     check_freshness: Callable[[str, str], tuple]  # (html, month) -> ("pass"|"stale"|"skip", info)
-    scope: str  # "file" (tapa varias clases de slide en todo el archivo) o "marker" (una sola slide)
+    scope: str  # "file" (tapa varias clases de slide en todo el archivo), "marker" (una sola
+                # slide) o "body_replace" (reemplaza todo <body> por portada + N slides vacías
+                # fijas — para secciones cuyo conteo real de slides varía mes a mes)
     section_label: str
     slide_classes: Optional[list] = None  # requerido si scope == "file"
     marker: Optional[str] = None  # requerido si scope == "marker"
@@ -175,7 +214,7 @@ SLIDE_SPECS = [
     StaleSlideSpec(
         check_id="F3.5", label="Discussion Topics — ocultar visualmente si están desactualizados",
         output_filename="2_discussion_topic.html", check_freshness=_discussion_topics_freshness,
-        scope="file", slide_classes=["dt-slide", "slide section-divider"], section_label="Discussion Topics",
+        scope="body_replace", section_label="Discussion Topics",
     ),
     StaleSlideSpec(
         check_id="F3.4", label="Template 4 — ocultar visualmente si está desactualizado",
@@ -184,9 +223,9 @@ SLIDE_SPECS = [
         notify="Avisar a Sofía Maldonado.",
     ),
     StaleSlideSpec(
-        check_id="F3.7", label="6_rd (Product Performance + NPS) — ocultar visualmente si está desactualizado",
+        check_id="F3.7", label="6_rd (NPS) — ocultar visualmente si está desactualizado",
         output_filename="6_rd.html", check_freshness=_nps_freshness,
-        scope="file", slide_classes=["slide"], section_label="R&D — Product Performance & NPS",
+        scope="marker", marker="SLIDE 3 — NPS Alegra", section_label="NPS",
     ),
     StaleSlideSpec(
         check_id="F3.8", label="Headcount — ocultar visualmente si está desactualizado",
@@ -215,16 +254,26 @@ def check_stale_slide(spec: StaleSlideSpec, month: str) -> CheckResult:
     old_label = info
     if spec.scope == "marker":
         new_html, n = _overlay_single_slide_by_marker(html, spec.marker, "slide", spec.section_label, old_label)
+    elif spec.scope == "body_replace":
+        new_html, n = _replace_stale_body_with_placeholder(html, spec.section_label, old_label)
     else:
         new_html, n = _overlay_stale_slides(html, spec.slide_classes, spec.section_label, old_label)
 
     if n == 0:
-        reason = (f"no se encontró la slide de {spec.section_label} en el HTML" if spec.scope == "marker"
-                   else "no se encontró ninguna slide en el HTML")
+        if spec.scope == "marker":
+            reason = f"no se encontró la slide de {spec.section_label} en el HTML"
+        elif spec.scope == "body_replace":
+            reason = "no se encontró <body> en el HTML"
+        else:
+            reason = "no se encontró ninguna slide en el HTML"
         return CheckResult(spec.check_id, spec.label, "SKIP", reason)
 
     html_path.write_text(new_html, encoding="utf-8")
     notify = f" {spec.notify}" if spec.notify else ""
-    return CheckResult(spec.check_id, spec.label, "WARN",
-                        f"{n} slide(s) de {spec.section_label} ocultas con overlay — mostraba '{old_label}' "
-                        f"pero se está generando {month}.{notify}")
+    if spec.scope == "body_replace":
+        detail = (f"reemplazado por portada + {n} slide(s) vacía(s) — mostraba '{old_label}' "
+                   f"pero se está generando {month}.{notify}")
+    else:
+        detail = (f"{n} slide(s) de {spec.section_label} ocultas con overlay — mostraba '{old_label}' "
+                   f"pero se está generando {month}.{notify}")
+    return CheckResult(spec.check_id, spec.label, "WARN", detail)

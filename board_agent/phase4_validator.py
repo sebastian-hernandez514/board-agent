@@ -1,8 +1,9 @@
 """Fase 4 — Business Rules Validator.
 
 Verifica que el board sea matemáticamente correcto ANTES de publicarlo.
-Las reglas R1/R2 son las que hubieran bloqueado los bugs reales de v36/v37
-(ver Board Agent/docs/AGENT_ARCHITECTURE.md). R8 se agregó porque al construir
+La regla R1 es la que hubiera bloqueado un bug real de v36/v37
+(ver Board Agent/docs/AGENT_ARCHITECTURE.md; R2 cubría el otro bug de esa época pero se
+retiró 2026-07-24, ver nota sobre R5/R2 más abajo). R8 se agregó porque al construir
 este validador se encontró una inconsistencia real en el board de mayo-26 ya
 publicado (ver docs/AGENT_ARCHITECTURE.md — hallazgo 2026-07-02).
 
@@ -16,7 +17,11 @@ R13-15 están implementadas y activas desde 2026-07-06 (commit "Completar Valida
 R13-15") — parsean el HTML generado para verificar colores de delta. Caen a SKIP solo
 cuando el HTML no está disponible, no por diseño. (R5 vivió acá desde esa misma fecha
 hasta 2026-07-22, cuando se retiró — su premisa, la trampa de signos de "cross_down" en
-Net Expansion, dejó de aplicar con ARR Walk v2, ver scripts/fetch_metrics.py.)
+Net Expansion, dejó de aplicar con ARR Walk v2, ver scripts/fetch_metrics.py. R2 se retiró
+2026-07-24 por la misma razón: asumía que New MRR de Core+Lite siempre suma exacto al
+total GLO, pero ARR Walk v2 clasifica GLO de forma independiente a nivel de compañía
+completa — una compañía nueva en un segmento pero ya cliente en el otro correctamente NO
+cuenta como "New" a nivel de compañía, aunque sí cuente como "New" en ese segmento.)
 
 R16 (cumplimiento de diseño, agregada 2026-07-06) también cae a SKIP si no encuentra ningún
 elemento con clase de slide-shell en el HTML — ver docstring de _check_r16_slide_dimensions.
@@ -31,6 +36,12 @@ slides): verifica que el ARR EoP mostrado en "Monthly Performance" coincida lite
 el de "YTD Performance" en el HTML ya renderizado. FAIL, no WARN — es el mismo tipo de bug
 real que ya pasó una vez (v36, ARR sin Alanube en una vista) y no un heurístico nuevo sin
 historial.
+
+R20 (agregada 2026-07-24, pedido explícito del usuario "por si acaso"): el STOCK de MRR
+(mrr_eop) de Core+Lite debe sumar exacto al de GLO ("all") en TODOS los meses — a diferencia
+del FLUJO (New/Churn/Upsell/Downsell), que NO cuadra por diseño (migraciones Lite↔Core, ver
+R2 retirada). Es un guardrail de regresión: nunca debería fallar en la práctica, porque "all"
+se construye literalmente como suma de segmentos en build_seg_metrics().
 """
 
 import csv
@@ -46,7 +57,6 @@ from .report import CheckResult
 
 TOL_ARR_WALK = 150_000  # celdas de arr_walk_table vienen redondeadas a 1 decimal en $M (±$50K por celda)
 TOL_ARR_TOTAL = 50_000
-TOL_NEW_MRR = 1_000
 TOL_CC = 100_000
 FX_RESIDUAL_LIMIT = 3_000_000
 CHURN_MIN_PCT = 0.0
@@ -322,6 +332,39 @@ def _check_r19_arr_slide_consistency(html_path: Path) -> CheckResult:
     return CheckResult("R19", label, "PASS", f"ambas slides muestran {values[0]}")
 
 
+TOL_SEG_STOCK = 5_000  # margen de redondeo del pull mensual, no de la lógica en sí
+
+
+def _check_r20_seg_stock_sums(metrics: dict) -> CheckResult:
+    """R20 (2026-07-24) — guardrail de regresión: el STOCK de MRR ("mrr_eop", lo que
+    alimenta ARR EoP/BoP) de Core + Lite debe sumar exacto al de "all" (GLO) en TODOS los
+    meses, no solo en el de corte. A diferencia del FLUJO (New/Churn/Upsell/Downsell, que
+    NO cuadra por diseño — las migraciones de compañías entre Lite y Core mueven plata
+    entre esos buckets sin que sea plata nueva real, ver memory/project_board_agent.md
+    sección 2026-07-24 y R2 retirada por la misma razón), el stock SIEMPRE debe cuadrar
+    porque "all" se construye literalmente como la suma de los segmentos
+    (build_seg_metrics() en fetch_metrics.py) — este check no debería fallar nunca en la
+    práctica; si falla, es una regresión real en esa construcción, no un caso esperado."""
+    label = "Stock Core+Lite = GLO, mes a mes"
+    rows = metrics.get("seg_stock_by_month")
+    if not rows:
+        return CheckResult("R20", label, "SKIP", "seg_stock_by_month no está en metrics.yaml")
+
+    peores = []
+    for row in rows:
+        expected = row.get("core_eop", 0.0) + row.get("lite_eop", 0.0)
+        actual = row.get("all_eop", 0.0)
+        diff = actual - expected
+        if abs(diff) > TOL_SEG_STOCK:
+            peores.append((row.get("m"), diff))
+
+    if peores:
+        detalle = ", ".join(f"{m}: diff={diff:,.0f}" for m, diff in peores[:5])
+        return CheckResult("R20", label, "FAIL",
+                            f"{len(peores)}/{len(rows)} meses no cuadran — {detalle}")
+    return CheckResult("R20", label, "PASS", f"{len(rows)} meses verificados, todos cuadran")
+
+
 def _count_slides(html_path: Path) -> int:
     html = html_path.read_text(encoding="utf-8")
     count = 0
@@ -469,20 +512,6 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
     except Exception as e:
         results.append(CheckResult("R1", "ARR total incluye Alanube", "SKIP", f"error: {e}"))
 
-    # R2 — New MRR Core + Lite = Total (bug real: faltaba /12 en v37)
-    try:
-        core = parse_cell(metrics["new_mrr_core_fmt"])
-        lite = parse_cell(metrics["new_mrr_lite_fmt"])
-        total = parse_cell(metrics["new_mrr"])
-        diff = (core + lite) - total
-        status = "PASS" if abs(diff) <= TOL_NEW_MRR else "FAIL"
-        results.append(CheckResult(
-            "R2", "New MRR Core + Lite ≈ Total", status,
-            f"core={core:,.0f} + lite={lite:,.0f} = {core + lite:,.0f} vs total={total:,.0f} (diff={diff:,.0f})",
-        ))
-    except Exception as e:
-        results.append(CheckResult("R2", "New MRR Core + Lite ≈ Total", "SKIP", f"error: {e}"))
-
     # R3 — ARR Walk balancea: Additions+Recovered+NetChurn+NetExpansion+FX ≈ NetNewARR ≈ EoP-BoP
     try:
         rows = _arr_walk_glo_rows(metrics)
@@ -589,5 +618,6 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
     results.append(_check_r16_slide_dimensions(html_path))
     results.append(_check_r18_slide_overflow(html_path))
     results.append(_check_r19_arr_slide_consistency(html_path))
+    results.append(_check_r20_seg_stock_sums(metrics))
 
     return results
