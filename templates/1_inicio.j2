@@ -102,7 +102,7 @@
        ARR Walk Summary — slide 6
        ============================================================ */
     .aw-sum-wrap {
-      flex: 1; padding: 6px 90px 0;
+      flex: 1; padding: 0 90px 0;
       overflow: hidden; display: flex; flex-direction: column; gap: 4px;
     }
     .aw-sum-headline {
@@ -155,11 +155,11 @@
     tr.aw-cc td:first-child { color: #0f172b !important; font-weight: 600 !important; font-size: 10.5px; }
 
     tr.aw-sh td {
-      height: 15px !important; font-family: 'DM Sans', sans-serif !important;
+      height: 13px !important; font-family: 'DM Sans', sans-serif !important;
       font-weight: 700 !important; font-size: 8.5px !important;
       text-transform: uppercase; letter-spacing: 1.4px; color: #0f172b !important;
       border-top: 1.5px solid #e2e8f0 !important; border-bottom: none !important;
-      background: #f8fafc; padding-top: 3px !important;
+      background: #f8fafc; padding-top: 2px !important;
     }
     tr.aw-sh td.aw-cur { background: rgba(48,184,183,0.07); color: #1a7e7f !important; }
     tr.aw-sh td:not(.aw-cur):not(:first-child) { background: #f8fafc; }
@@ -170,7 +170,7 @@
     }
     tr.aw-rt td:first-child { font-size: 10px !important; color: #94a3b8 !important; font-style: italic; padding-left: 20px; }
     tr.aw-rt td.aw-cur { color: #299e9c !important; }
-    tr.aw-gap td { height: 3px; padding: 0; border: none !important; background: transparent !important; }
+    tr.aw-gap td { height: 0; padding: 0; border: none !important; background: transparent !important; }
 
     tr.aw-delta-sub td { font-size:10px; color:#64748b; font-weight:400; border-bottom:none; height:15px !important; }
     tr.aw-delta-sub td:first-child { padding-left:20px; text-align:left; font-size:10px; font-weight:400; color:#64748b; }
@@ -311,17 +311,6 @@
     <div class="slide-body" style="padding-top: 20px; padding-bottom: 16px;">
       <div class="hl-outer-grid">
 
-        <!-- Highlights -->
-        <div>
-          <div class="hl-col-title positive">✦ &nbsp;Highlights</div>
-          {% for h in editorial.highlights %}
-          <div class="hl-item">
-            <span class="hl-dot positive"></span>
-            <span>{{ h }}</span>
-          </div>
-          {% endfor %}
-        </div>
-
         <!-- Lowlights + Financial Update -->
         <div>
           <div class="hl-col-title negative">▼ &nbsp;Lowlights</div>
@@ -337,6 +326,17 @@
             <div class="hl-financial-text">{{ editorial.financial_update }}</div>
           </div>
           {% endif %}
+        </div>
+
+        <!-- Highlights -->
+        <div>
+          <div class="hl-col-title positive">✦ &nbsp;Highlights</div>
+          {% for h in editorial.highlights %}
+          <div class="hl-item">
+            <span class="hl-dot positive"></span>
+            <span>{{ h }}</span>
+          </div>
+          {% endfor %}
         </div>
 
       </div>
@@ -874,10 +874,6 @@
       </div><!-- /.aw-sum-wrap -->
 
     </div><!-- /.aw-body-row -->
-    <div class="slide-footer">
-      <span class="footer-brand">Alegra · Confidential</span>
-      <span class="footer-page">9</span>
-    </div>
   </div>
 
 <script>

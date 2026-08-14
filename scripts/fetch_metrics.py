@@ -1135,7 +1135,8 @@ def _months_between(m1: str, m2: str) -> int:
     return (y2 - y1) * 12 + (mo2 - mo1)
 
 
-def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_lookup) -> dict:
+def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_lookup,
+                                 status_out: dict | None = None) -> dict:
     """ARR Walk v2 (2026-07-22) — clasifica New/Churn/Reactivated/Recovered/Upsell/Downsell
     a nivel de ENTIDAD (una compañía completa para GLO, o compañía+segmento para Core/Lite —
     lo decide qué `rows`/`history` se le pasa, no esta función) en vez de por producto+plan.
@@ -1164,7 +1165,15 @@ def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_loo
 
     Devuelve los 12 buckets en USD/conteos — NO en la forma final de `summary` (eso lo arma
     el caller, mapeando a las claves `mrr_new_base_t0` etc. del schema existente, con
-    cross-sell/pricing en 0 porque esta metodología no los separa)."""
+    cross-sell/pricing en 0 porque esta metodología no los separa).
+
+    `status_out` (opcional, 2026-07-27): si se pasa un dict, se llena in-place con
+    key -> 'new'/'delta'/'reactivated'/'recovered'/'churn' (sin tocar el tipo de retorno,
+    para no romper los tests existentes que llaman esta función sin este parámetro). Lo usa
+    _apply_arr_walk_v2 para clasificar UNA VEZ a nivel de compañía completa (mismo criterio
+    que GLO) y reusar esa misma decisión al repartir los montos por segmento en Core/Lite —
+    pedido explícito del usuario: el New/Churn de Core y Lite debe seguir la misma lógica
+    que GLO, solo que se filtra por segmento al armar el monto, sin re-clasificar aparte."""
     prev_month = _prev_m(cutoff)
     out = {
         "logos_new": 0, "logos_recovered": 0, "logos_reactivated": 0, "logos_churn": 0,
@@ -1180,25 +1189,29 @@ def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_loo
         if prev is None:
             out["logos_new"] += 1
             out["usd_new"] += local_mrr / rate_now
+            if status_out is not None: status_out[key] = "new"
         else:
             gap = _months_between(prev["last_month"], cutoff)
             if gap <= 0:
                 # Re-procesando un mes que ya quedó reflejado en el historial (mismo
                 # `cutoff` que `prev["last_month"]`, o corrida repetida) — no es un
                 # movimiento real, no debe contar como Recovered.
-                pass
+                if status_out is not None: status_out[key] = None
             elif gap == 1:
                 delta = (local_mrr - prev["last_local_mrr"]) / rate_now
                 if delta > 0:
                     out["usd_upsell"] += delta
                 elif delta < 0:
                     out["usd_downsell"] += delta
+                if status_out is not None: status_out[key] = "delta"
             elif gap == 2:
                 out["logos_reactivated"] += 1
                 out["usd_reactivated"] += local_mrr / rate_now
+                if status_out is not None: status_out[key] = "reactivated"
             else:
                 out["logos_recovered"] += 1
                 out["usd_recovered"] += local_mrr / rate_now
+                if status_out is not None: status_out[key] = "recovered"
         history[key] = {"last_month": cutoff, "last_local_mrr": local_mrr, "app_version": app}
 
     for key, prev in list(history.items()):
@@ -1209,6 +1222,81 @@ def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_loo
             # rate_lookup caía a 1.0 y dejaba montos en moneda local sin convertir).
             app_version = prev.get("app_version") or key.rsplit("|", 1)[-1]
             rate_now = rate_lookup(app_version, cutoff)
+            out["logos_churn"] += 1
+            out["usd_churn"] += -prev["last_local_mrr"] / rate_now
+            if status_out is not None: status_out[key] = "churn"
+    return out
+
+
+def _split_arr_walk_bucket_by_segment(seg_rows: list, seg_history: dict, company_status: dict,
+                                       cutoff: str, rate_lookup) -> dict:
+    """Construye el bucket de UN segmento (Core o Lite) reutilizando el status ya decidido
+    a nivel de COMPAÑÍA COMPLETA (`company_status`, viene de _classify_arr_walk_entities
+    corrida sobre company_rows/by_company — el mismo criterio que usa GLO) — 2026-07-27,
+    pedido explícito del usuario: "todo el ARR Walk Core y Lite debería seguir la misma
+    lógica [que GLO], solo que en el Core filtras por Core... y en el Lite por Lite, nada
+    más". Antes, Core/Lite clasificaban 'new'/'churn' con su PROPIO historial por segmento
+    (¿esta compañía es nueva PARA CORE?), lo que hacía que Core+Lite no sumara exacto a GLO
+    en el flujo — una compañía nueva en Core pero ya cliente en Lite contaba como "New" en
+    Core aunque GLO (compañía completa) correctamente no la contara. Ahora la DECISIÓN de
+    qué le pasó a la compañía este mes se toma una sola vez (GLO); acá solo se reparte el
+    monto en dólares de ESE segmento según esa decisión — garantiza por construcción que
+    Core+Lite sumen exacto a GLO en every bucket de flujo, no solo en el stock (R20).
+
+    `seg_history` (antes `by_segment`) ya NO decide new/churn — solo se usa para conocer el
+    monto local del mes anterior EN ESTE SEGMENTO (necesario para el delta de Upsell/
+    Downsell y para el monto de Churn), y se sigue actualizando para el próximo mes.
+
+    Nota: si una compañía sigue activa a nivel GLO pero se mueve de un segmento al otro
+    (migración Lite↔Core), esta función no la cuenta como churn ni new en ningún segmento
+    (el status de GLO para esa compañía es 'delta', no 'churn') — el monto que se mueve
+    entre segmentos queda reflejado como (+/-) FX Impact residual de cada segmento (mismo
+    comportamiento documentado para GLO, ver docstring de _apply_arr_walk_v2 y
+    memory/project_board_agent.md, migraciones Lite↔Core)."""
+    prev_month = _prev_m(cutoff)
+    out = {
+        "logos_new": 0, "logos_recovered": 0, "logos_reactivated": 0, "logos_churn": 0,
+        "usd_new": 0.0, "usd_recovered": 0.0, "usd_reactivated": 0.0, "usd_churn": 0.0,
+        "usd_upsell": 0.0, "usd_downsell": 0.0,
+    }
+    seen_seg_keys = set()
+    for row in seg_rows:
+        seg_key, app, local_mrr = row["key"], row["app_version"], row["local_mrr"]
+        seen_seg_keys.add(seg_key)
+        cid, _seg, _app = seg_key.split("|")
+        company_key = f"{cid}|{app}"
+        rate_now = rate_lookup(app, cutoff)
+        status = company_status.get(company_key)
+        prev_seg = seg_history.get(seg_key)
+
+        if status == "new":
+            out["logos_new"] += 1
+            out["usd_new"] += local_mrr / rate_now
+        elif status == "reactivated":
+            out["logos_reactivated"] += 1
+            out["usd_reactivated"] += local_mrr / rate_now
+        elif status == "recovered":
+            out["logos_recovered"] += 1
+            out["usd_recovered"] += local_mrr / rate_now
+        elif status == "delta":
+            prev_amt = prev_seg["last_local_mrr"] if prev_seg else 0.0
+            delta = (local_mrr - prev_amt) / rate_now
+            if delta > 0:
+                out["usd_upsell"] += delta
+            elif delta < 0:
+                out["usd_downsell"] += delta
+        # status is None (gap<=0, re-procesando) o "churn" no debería pasar acá (una
+        # compañía que churneó a nivel GLO no tiene fila este mes) — no-op, consistente.
+
+        seg_history[seg_key] = {"last_month": cutoff, "last_local_mrr": local_mrr, "app_version": app}
+
+    for seg_key, prev in list(seg_history.items()):
+        if seg_key in seen_seg_keys or prev["last_month"] != prev_month:
+            continue
+        cid, _seg, app = seg_key.split("|")
+        company_key = f"{cid}|{app}"
+        if company_status.get(company_key) == "churn":
+            rate_now = rate_lookup(app, cutoff)
             out["logos_churn"] += 1
             out["usd_churn"] += -prev["last_local_mrr"] / rate_now
     return out
@@ -1296,17 +1384,28 @@ def _apply_arr_walk_v2(segs_raw: dict, seg_metrics: dict, all_months: list, late
     company_rows = [{"key": f"{cid}|{app}", "app_version": app, "local_mrr": total}
                      for (cid, app), total in company_totals.items()]
 
-    bucket_rows = {}
+    # Clasificar UNA SOLA VEZ, a nivel de compañía completa (2026-07-27, pedido explícito
+    # del usuario) — mismo criterio que ya usaba GLO. `company_status` guarda la decisión
+    # (new/delta/reactivated/recovered/churn) por compañía; Core y Lite ya NO clasifican
+    # con su propio historial por segmento (by_segment) — solo reparten el monto en dólares
+    # de su segmento según esta misma decisión (_split_arr_walk_bucket_by_segment). Esto
+    # garantiza que Core+Lite sumen exacto a GLO en todos los buckets de flujo, no solo en
+    # el stock (R20) — antes una compañía nueva en Core pero ya cliente en Lite contaba
+    # como "New" en Core aunque GLO correctamente no la contara.
+    company_status: dict = {}
+    bucket_all = _classify_arr_walk_entities(company_rows, by_company, cutoff, _rate_lookup,
+                                              status_out=company_status)
+
+    bucket_rows = {"all": _arr_walk_v2_bucket_row(bucket_all, cutoff, "all")}
+    row_all = segs_raw.setdefault("all", {}).setdefault(cutoff, {"m": cutoff, "seg": "all"})
+    row_all.update(bucket_rows["all"])
+
     for seg_label in ("Core", "Lite"):
-        bucket = _classify_arr_walk_entities(seg_rows.get(seg_label, []), by_segment, cutoff, _rate_lookup)
+        bucket = _split_arr_walk_bucket_by_segment(seg_rows.get(seg_label, []), by_segment,
+                                                     company_status, cutoff, _rate_lookup)
         bucket_rows[seg_label] = _arr_walk_v2_bucket_row(bucket, cutoff, seg_label)
         row = segs_raw.setdefault(seg_label, {}).setdefault(cutoff, {"m": cutoff, "seg": seg_label})
         row.update(bucket_rows[seg_label])
-
-    bucket_all = _classify_arr_walk_entities(company_rows, by_company, cutoff, _rate_lookup)
-    bucket_rows["all"] = _arr_walk_v2_bucket_row(bucket_all, cutoff, "all")
-    row_all = segs_raw.setdefault("all", {}).setdefault(cutoff, {"m": cutoff, "seg": "all"})
-    row_all.update(bucket_rows["all"])
 
     for seg in ("all", "Core", "Lite"):
         if segs_raw.get(seg):
@@ -1639,7 +1738,7 @@ cur_ranked AS (
     GROUP BY a.hs_accounting_entity_id, a.entity_name, a.entity_country_version, a.entity_hs_pipeline_stage
 ),
 top20 AS (
-    SELECT *, ROW_NUMBER() OVER (ORDER BY mrr DESC NULLS LAST) AS rn FROM cur_ranked
+    SELECT *, ROW_NUMBER() OVER (ORDER BY real_logos DESC NULLS LAST) AS rn FROM cur_ranked
 ),
 asoc AS (
     SELECT hs.hs_accounting_entity_id::varchar AS hs_id,
@@ -2091,18 +2190,22 @@ def _calc(ms, bym):
                      - churn_m + up_m + down_m + pricing_m
                      + cross_new_m + cross_ro_m - cross_dn_m)
 
-    # Churn rate: promedio de tasas mensuales (CHURN - REACTIVATED) / BoP
-    # Usa bi_retention.bi_customer_monthly_status cuando disponible (precalculado en logos_churn_rate_retention)
+    # Churn rate: promedio de tasas mensuales (CHURN - REACTIVATED) / BoP, con CHURN/REACTIVATED
+    # clasificados por ARR Walk v2 (compañía completa) para todo mes ya migrado — antes esto
+    # priorizaba "logos_churn_rate_retention" (dm_retention.bi_customer_monthly_status,
+    # cluster-1) cuando estaba disponible, pisando el número ya consistente con ARR Walk v2 que
+    # traía `bym` para esos mismos meses. Cambiado 2026-07-27 (hallazgo real del usuario
+    # comparando contra la metodología de Jhon Gallego/BI-Retention en tts-bi-data): el
+    # churn neto vía ARR Walk v2 da Core 4.4%/Lite 6.2% para 2Q26, mucho más cerca de lo que
+    # reportó BI-Retention (Core 3.2%/Lite 6.9%) que el 2.5%/4.8% que daba la fuente de
+    # retención — ver memory/project_board_agent.md.
     _monthly_churn_rates = []
     for mi in ms:
-        if "logos_churn_rate_retention" in bym.get(mi, {}):
-            _monthly_churn_rates.append(bym[mi]["logos_churn_rate_retention"])
-        else:
-            _bop_mi   = le(_prev_m(mi))
-            _churn_mi = bym.get(mi, {}).get("logos_churn", 0)
-            _react_mi = bym.get(mi, {}).get("logos_react", 0)
-            if _bop_mi > 0:
-                _monthly_churn_rates.append(max(_churn_mi - _react_mi, 0) / _bop_mi)
+        _bop_mi   = le(_prev_m(mi))
+        _churn_mi = bym.get(mi, {}).get("logos_churn", 0)
+        _react_mi = bym.get(mi, {}).get("logos_react", 0)
+        if _bop_mi > 0:
+            _monthly_churn_rates.append(max(_churn_mi - _react_mi, 0) / _bop_mi)
     l_churn_pct = sum(_monthly_churn_rates) / len(_monthly_churn_rates) if _monthly_churn_rates else 0
 
     last    = ms[-1]
@@ -2196,16 +2299,6 @@ def build_seg_metrics(summary, logos_all, sc=None):
     # la metodología nueva (backfill histórico + lo que cada corrida va agregando desde
     # entonces), no solo el mes de corte — ver _apply_arr_walk_v2_historical_overrides().
     _apply_arr_walk_v2_historical_overrides(segs_raw)
-
-    # Inyectar tasa de churn desde dm_retention.bi_customer_monthly_status (cluster-1)
-    # Aplica a "all", "Core" y "Lite" — la tabla tiene columna segment
-    _rc_seg = ((sc or {}).get("retention_churn") or {}).get("by_seg", {})
-    for m, seg_data in _rc_seg.items():
-        for target_seg in ("all", "Core", "Lite"):
-            rd = seg_data.get(target_seg)
-            if rd and rd["bop"] > 0 and m in segs_raw.get(target_seg, {}):
-                net = rd["churned"] - rd["reactivated"]
-                segs_raw[target_seg][m]["logos_churn_rate_retention"] = max(net, 0) / rd["bop"]
 
     latest_mm = max(all_months)[5:] if all_months else "12"
 
@@ -3012,6 +3105,9 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     _cur_q_ms_py = [f"{int(m[:4])-1}{m[4:]}" for m in _cur_q_ms]
 
     countries = []
+    country_stock_eop = {}  # {app_version: {"Core": {mrr_eop, logos_eop}, "Lite": {...}}} —
+    # raw (sin redondear) del mes de corte, para verificación cruzada independiente contra
+    # ARR Walk v2 por país (R21 en phase4_validator.py, 2026-07-27).
     for cfg in COUNTRY_CFG:
         tm  = cfg["team"]   # display code: CO/MX/DR/CR
         key = cfg["key"]    # lookup key in country_raw: colombia/mexico/...
@@ -3370,6 +3466,10 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             "lite":         _seg_kpi("Lite", LITE_COLOR),
             "butterfly_rows": butterfly_rows,
         })
+        country_stock_eop[key] = {
+            "Core": {"mrr_eop": _val_cm("Core").get("mrr_eop", 0), "logos_eop": _val_cm("Core").get("logos_eop", 0)},
+            "Lite": {"mrr_eop": _val_cm("Lite").get("mrr_eop", 0), "logos_eop": _val_cm("Lite").get("logos_eop", 0)},
+        }
 
     # ── Global Country Performance (TODOS los países — usa segs_raw global) ──
     # segs_raw["Core"/"Lite"][m] = datos globales de fact_customers_mrr sin filtro de país
@@ -3549,12 +3649,21 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         return {"arr": _fm(ac), "arr_mom": ms, "arr_mom_positive": mp,
                 "arr_yoy": ys, "arr_yoy_positive": yp}
 
-    # ── Core vs Lite split percentages for summary slide ────────────────────────
+    # ── Core vs Lite ARR raw (el % de 3 vías con Alanube se calcula más abajo, una vez
+    # que _al_cur está disponible) ───────────────────────────────────────────────
     _core_arr_raw  = _gm("Core").get("mrr_eop", 0) * 12
     _lite_arr_raw  = _gm("Lite").get("mrr_eop", 0) * 12
-    _total_arr_spl = _core_arr_raw + _lite_arr_raw
-    _core_arr_pct  = round(_core_arr_raw / _total_arr_spl * 100) if _total_arr_spl else 0
 
+    # New MRR Core/Lite (2026-07-27, pedido explícito del usuario): "nueva" = compañía que
+    # nunca existió en Alegra antes en NINGÚN segmento (event_logo=NEW a nivel de compañía
+    # completa, no por segmento) — ver _apply_arr_walk_v2, que ya calculó y guardó esto en
+    # data/new_mrr_company_event_monthly_history.json para el mes de corte. Los meses previos
+    # a 2026-07-27 no están backfillados todavía (limitación conocida, pendiente decidir con
+    # el usuario si se backfillea vía RS como se hizo con ARR Walk v2).
+    # New MRR Core/Lite (2026-07-27): viene directo de segs_raw, que _apply_arr_walk_v2 ya
+    # llena clasificando UNA SOLA VEZ a nivel de compañía completa (mismo criterio que GLO)
+    # y repartiendo el monto por segmento — ver _split_arr_walk_bucket_by_segment. Por
+    # construcción, Core+Lite ahora suman exacto al "new_mrr" de GLO más abajo.
     if is_quarter_end:
         _core_new_mrr_raw = sum(_graw("Core", m).get("mrr_new_base_t0", 0) + _graw("Core", m).get("mrr_new_cross_t0", 0) for m in _cur_q_ms)
         _lite_new_mrr_raw = sum(_graw("Lite", m).get("mrr_new_base_t0", 0) + _graw("Lite", m).get("mrr_new_cross_t0", 0) for m in _cur_q_ms)
@@ -3645,6 +3754,15 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     arr_mom_str, arr_mom_pos = _pct_delta(_total_cur, _total_prev)
     arr_yoy_str, arr_yoy_pos = _pct_delta(_total_cur, _total_py)
 
+    # ── ARR Mix (Core/Lite/Alanube) — corregido 2026-07-27 (hallazgo real del usuario:
+    # Core/Lite se calculaban entre sí solos (suman 100%) y Alanube se mostraba con un
+    # "3%" hardcodeado en el template (arr_alanube_pct nunca se calculaba acá) — juntos
+    # daban 103%. Ahora los 3 comparten el mismo denominador real.
+    _true_total_arr    = _core_arr_raw + _lite_arr_raw + _al_cur
+    _core_arr_pct3     = round(_core_arr_raw / _true_total_arr * 100) if _true_total_arr else 0
+    _lite_arr_pct3     = round(_lite_arr_raw / _true_total_arr * 100) if _true_total_arr else 0
+    _alanube_arr_pct3  = round(_al_cur       / _true_total_arr * 100) if _true_total_arr else 0
+
     # ── Assemble final structure
     out = {
         # --- Config (also needed by templates)
@@ -3664,7 +3782,9 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "arr_vs_budget_positive": True,
         "arr_yoy":             arr_yoy_str,
         "arr_yoy_positive":    arr_yoy_pos,
-        "arr_core_lite_split":     f"Core {_core_arr_pct}% · Lite {100 - _core_arr_pct}%",
+        "arr_core_lite_split":     f"Core {_core_arr_pct3}% · Lite {_lite_arr_pct3}%",
+        "arr_alanube_pct":         f"{_alanube_arr_pct3}%",
+        "arr_alanube_fmt":         _fm(_al_cur),
         "new_mrr_core_lite_split": f"Core {_core_new_mrr_pct}% · Lite {100 - _core_new_mrr_pct}%",
         "new_mrr_core_fmt":        _fm(_core_new_mrr_raw),
         "new_mrr_lite_fmt":        _fm(_lite_new_mrr_raw),
@@ -3759,6 +3879,7 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         # --- Countries (Section 03)
         "countries": countries,
         "global_country": global_country,
+        "country_stock_eop": country_stock_eop,
     }
 
     # ── YTD acumulado (slide 5) ───────────────────────────────────────────────
@@ -3975,6 +4096,27 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         v = _pb_global.get("Total", {}).get(m_iso)
         return v if v is not None else 0
 
+    # 2026-07-27 — hallazgo real del usuario: en modo trimestral, "SaaS Metrics" de las
+    # tablas ARR Walk Core/Lite llamaba a _sm_for_q/_payback_for_q (las de arriba, GLO —
+    # suman TODOS los segmentos) en vez de una versión propia por segmento. El modo mensual
+    # sí tenía su propia versión (_sm_for_m/_payback_for_m, definidas más abajo, filtradas
+    # por _seg_name) — el trimestral nunca la tuvo, por eso Core y Lite mostraban los mismos
+    # números que GLO en S&M Total Spend / CAC Payback cuando el mes de corte cierra un Q.
+    def _sm_for_q_seg(seg_name, q):
+        ms = _q_months_map.get(q, [])
+        total = 0.0
+        for country_inv in (investment or {}).values():
+            seg_inv = country_inv.get(seg_name, {})
+            for m in ms:
+                total += seg_inv.get(m, {}).get("total", 0)
+        return total
+
+    def _payback_for_q_seg(seg_name, q):
+        ms = _q_months_map.get(q, [])
+        vals = [_pb_global.get(seg_name, {}).get(m) for m in ms
+                if _pb_global.get(seg_name, {}).get(m)]
+        return sum(vals) / len(vals) if vals else 0
+
     _fx_rates = load_fx()
 
     def _fx_avg_q(pais, q):
@@ -4130,8 +4272,8 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             _sl_bop_raw = _sraw("l_bop")
             _sl_new_pct = [_sraw("l_new")[i] / (3 * _sl_bop_raw[i]) if _sl_bop_raw[i] else 0
                            for i in range(len(_s5))]
-            _sa_sm      = [_sm_for_q(q) for q in _s5]
-            _sa_pb      = [_payback_for_q(q) for q in _s5]
+            _sa_sm      = [_sm_for_q_seg(_seg_name, q) for q in _s5]
+            _sa_pb      = [_payback_for_q_seg(_seg_name, q) for q in _s5]
             _sa_cop     = [_fx_avg_q("colombia", q) for q in _s5]
             _sa_mxn     = [_fx_avg_q("mexico",   q) for q in _s5]
             _sa_eop_py  = [_sq_data.get(_py_lbl(q), {}).get("a_eop") or 0 for q in _s5]
@@ -4249,65 +4391,14 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             ],
         }
 
-        # ── OVERRIDE TEMPORAL por segmento (solo modo trimestral) ───────────
-        if not is_quarter_end:
-            continue
-        _seg_overrides = {
-            "Core": {
-                "Total EoP":           {"cells": ["18.8","19.4","20.4","22.0","23.0"]},
-                "Logo Monthly New Adds %": {"cells": ["4.6%","4.5%","4.6%","4.5%","4.5%"]},
-                "Logo Monthly Churn %":    {"cells": ["3.4%","3.2%","3.0%","2.8%","3.6%"]},
-                "ARR BoP":             {"cells": ["$10.6","$12.2","$12.8","$13.8","$15.6"]},
-                "New — Base T0":       {"cells": ["+$1.0M","+$1.0M","+$1.0M","+$1.1M","+$1.2M"]},
-                "Recovered":           {"cells": ["+$100K","+$200K","+$100K","+$200K","+$100K"]},
-                "Churn":               {"cells": ["($1.0M)","($1.0M)","($1.0M)","($1.0M)","($1.5M)"]},
-                "Upsell":              {"cells": ["+$1.2M","+$400K","+$400K","+$900K","+$200K"]},
-                "(+/−) FX Impact":     {"cells": ["+$500K","+$100K","+$400K","+$300K","+$300K"]},
-                "ARR EoP":             {
-                    "cells": ["$12.2","$12.8","$13.8","$15.6","$16.2"],
-                    "qoq_cells": [{"v":"—","good":None},{"v":"+5%","good":True},{"v":"+8%","good":True},{"v":"+13%","good":True},{"v":"+4%","good":True}],
-                    "yoy_cells": [{"v":"+36%","good":True},{"v":"+41%","good":True},{"v":"+36%","good":True},{"v":"+48%","good":True},{"v":"+33%","good":True}],
-                    "qoq": "+4%", "qoq_good": True, "yoy": "+33%", "yoy_good": True,
-                    "ytd_prev": "$12.2", "ytd_cur": "$16.2",
-                },
-                "Net New ARR":         {"cells": ["+$1.6M","+$600K","+$1.0M","+$1.8M","+$600K"], "ytd_prev":"+$1.6M","ytd_cur":"+$600K"},
-                "ARR EoP (Constant Currency)":        {
-                    "cells": ["$13.2","$13.8","$14.4","$15.9","$16.2"],
-                    "qoq_cells": [{"v":"—","good":None},{"v":"+4%","good":True},{"v":"+4%","good":True},{"v":"+11%","good":True},{"v":"+2%","good":True}],
-                    "ytd_prev": "$13.2", "ytd_cur": "$16.2",
-                },
-            },
-            "Lite": {
-                "Total EoP":           {"cells": ["35.7","34.8","34.7","34.8","34.6"]},
-                "Logo Monthly New Adds %": {"cells": ["5.4%","4.8%","5.0%","5.8%","5.7%"]},
-                "Logo Monthly Churn %":    {"cells": ["6.1%","5.7%","5.1%","5.1%","5.5%"]},
-                "ARR BoP":             {"cells": ["$8.6","$10.1","$10.1","$10.4","$10.9"]},
-                "New — Base T0":       {"cells": ["+$700K","+$800K","+$800K","+$900K","+$1.3M"]},
-                "Recovered":           {"cells": ["+$300K","+$400K","+$400K","+$500K","+$400K"]},
-                "Churn":               {"cells": ["($1.5M)","($1.6M)","($1.5M)","($1.5M)","($1.8M)"]},
-                "Upsell":              {"cells": ["+$1.5M","+$300K","+$300K","+$600K","+$200K"]},
-                "(+/−) FX Impact":     {"cells": ["+$400K","+$100K","+$300K","+$200K","+$200K"]},
-                "ARR EoP":             {
-                    "cells": ["$10.1","$10.1","$10.4","$10.9","$11.1"],
-                    "qoq_cells": [{"v":"—","good":None},{"v":"−0%","good":False},{"v":"+3%","good":True},{"v":"+5%","good":True},{"v":"+1%","good":True}],
-                    "yoy_cells": [{"v":"+43%","good":True},{"v":"+41%","good":True},{"v":"+26%","good":True},{"v":"+27%","good":True},{"v":"+9%","good":True}],
-                    "qoq": "+1%", "qoq_good": True, "yoy": "+9%", "yoy_good": True,
-                    "ytd_prev": "$10.1", "ytd_cur": "$11.1",
-                },
-                "Net New ARR":         {"cells": ["+$1.6M","($0K)","+$300K","+$500K","+$100K"], "ytd_prev":"+$1.6M","ytd_cur":"+$100K"},
-                "ARR EoP (Constant Currency)":        {
-                    "cells": ["$11.0","$10.9","$10.8","$11.1","$11.1"],
-                    "qoq_cells": [{"v":"—","good":None},{"v":"−1%","good":False},{"v":"−0%","good":False},{"v":"+3%","good":True},{"v":"−0%","good":False}],
-                    "ytd_prev": "$11.0", "ytd_cur": "$11.1",
-                },
-            },
-        }
-        if _seg_name in _seg_overrides:
-            for _sec in _prod["arr_walk_table"]["sections"]:
-                for _row in _sec["rows"]:
-                    if _row["label"] in _seg_overrides[_seg_name]:
-                        _row.update(_seg_overrides[_seg_name][_row["label"]])
-        # ── FIN OVERRIDE ─────────────────────────────────────────────────────
+        # Override temporal por segmento (Core/Lite) para cierre de Q — REMOVIDO 2026-07-27,
+        # mismo motivo y mismo criterio que el override global "SS Apr-2026" removido
+        # 2026-07-22 (ver comentario arriba): existía porque la metodología anterior no era
+        # confiable en cierre de Q, pero quedó hardcodeado con los números de un trimestre
+        # anterior y nunca se actualizó — pisaba en silencio la fila "ARR EoP" real (calculada
+        # desde seg_metrics, la misma fuente que el KPI card de la slide) con valores viejos,
+        # causando que la tabla y el KPI card de la misma slide mostraran números distintos
+        # para el mismo trimestre (hallazgo real del usuario revisando board_Jun_2026_v22).
 
     # ── pp namespace (4_financial_performance) ────────────────────────────────
     _pp_months = [_month_label(m) for m in all_months[-12:]]
@@ -4342,12 +4433,27 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     }
 
     # ── gtm namespace (5_go_to_market) ────────────────────────────────────────
-    _nl_c     = round(_mo("Core").get("l_new",0))
-    _nl_c_prv = round(_mo_prev("Core").get("l_new",0))
-    _nl_c_py  = round(_mo_py("Core").get("l_new",0))
-    _nl_l     = round(_mo("Lite").get("l_new",0))
-    _nl_l_prv = round(_mo_prev("Lite").get("l_new",0))
-    _nl_l_py  = round(_mo_py("Lite").get("l_new",0))
+    # Q-aware (2026-07-27): "New Logos"/"Customer Acquisition" (5_go_to_market.j2) ya
+    # mostraban el período como QoQ/2Q26 en cierre de trimestre, pero los NÚMEROS seguían
+    # siendo del mes de corte solamente — quedaba una etiqueta de trimestre sobre un dato
+    # mensual, y el delta rotulado "QoQ" en realidad comparaba mes vs. mes anterior. Mismo
+    # criterio que el resto del board (_row_q, _g_churn_row_q, etc.): en cierre de Q, sumar
+    # los 3 meses del trimestre; si no, usar el mes de corte solo.
+    _sum_new_logos = lambda seg, ms: sum(segs_raw.get(seg, {}).get(m, {}).get("logos_new", 0) for m in ms)
+    if is_quarter_end:
+        _nl_c     = round(_sum_new_logos("Core", _cur_q_ms))
+        _nl_c_prv = round(_sum_new_logos("Core", _prev_q_ms))
+        _nl_c_py  = round(_sum_new_logos("Core", _cur_q_ms_py))
+        _nl_l     = round(_sum_new_logos("Lite", _cur_q_ms))
+        _nl_l_prv = round(_sum_new_logos("Lite", _prev_q_ms))
+        _nl_l_py  = round(_sum_new_logos("Lite", _cur_q_ms_py))
+    else:
+        _nl_c     = round(_mo("Core").get("l_new",0))
+        _nl_c_prv = round(_mo_prev("Core").get("l_new",0))
+        _nl_c_py  = round(_mo_py("Core").get("l_new",0))
+        _nl_l     = round(_mo("Lite").get("l_new",0))
+        _nl_l_prv = round(_mo_prev("Lite").get("l_new",0))
+        _nl_l_py  = round(_mo_py("Lite").get("l_new",0))
 
     # Country new logos — arrays of last 13 months for stacked bar chart
     _gtm_months13 = sorted(country_raw.keys())[-13:]
@@ -4381,10 +4487,22 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             result.append(round(n/d*100, 1) if (n and d) else None)
         return result
 
-    # Current, prev month, prev year values per segment
-    _g_inv_m  = {s: _g_inv(s, latest_m)  for s in ("Core","Lite")}
-    _g_inv_pm = {s: _g_inv(s, prev_m)    for s in ("Core","Lite")}
-    _g_inv_py = {s: _g_inv(s, prev_yr)   for s in ("Core","Lite")}
+    # Current, prev month, prev year values per segment — Q-aware (2026-07-27, mismo
+    # hallazgo/criterio que _nl_c/_nl_l más arriba): en cierre de trimestre suma los 3
+    # meses del Q en vez de tomar solo el mes de corte, para que el número real coincida
+    # con la etiqueta QoQ/2Q26 que ya muestra 5_go_to_market.j2.
+    def _g_inv_q(fn, seg, ms):
+        vals = [v for v in (fn(seg, m) for m in ms) if v is not None]
+        return sum(vals) if vals else None
+
+    if is_quarter_end:
+        _g_inv_m  = {s: _g_inv_q(_g_inv, s, _cur_q_ms)    for s in ("Core","Lite")}
+        _g_inv_pm = {s: _g_inv_q(_g_inv, s, _prev_q_ms)   for s in ("Core","Lite")}
+        _g_inv_py = {s: _g_inv_q(_g_inv, s, _cur_q_ms_py) for s in ("Core","Lite")}
+    else:
+        _g_inv_m  = {s: _g_inv(s, latest_m)  for s in ("Core","Lite")}
+        _g_inv_pm = {s: _g_inv(s, prev_m)    for s in ("Core","Lite")}
+        _g_inv_py = {s: _g_inv(s, prev_yr)   for s in ("Core","Lite")}
 
     def _inv_delta(seg, cur_fn, prv_fn):
         c, p = cur_fn(seg, latest_m), prv_fn(seg, latest_m)
@@ -4396,8 +4514,22 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     _team_pct_core_series  = _pct_series("Core", _g_inv_people, _g_inv)
 
     def _pct_cur(seg, comp_fn):
-        t, c = _g_inv(seg, latest_m), comp_fn(seg, latest_m)
+        if is_quarter_end:
+            t = _g_inv_q(_g_inv, seg, _cur_q_ms)
+            c = _g_inv_q(comp_fn, seg, _cur_q_ms)
+        else:
+            t, c = _g_inv(seg, latest_m), comp_fn(seg, latest_m)
         return _pct_str(c, t) if (t and c is not None) else _na
+
+    def _pct_prev(seg, comp_fn, ms_quarter, m_month):
+        """Composición % (paid/people/other) para prev/prev_year — suma el Q correspondiente
+        en cierre de trimestre, o el mes solo si no."""
+        if is_quarter_end:
+            t = _g_inv_q(_g_inv, seg, ms_quarter)
+            c = _g_inv_q(comp_fn, seg, ms_quarter)
+        else:
+            t, c = _g_inv(seg, m_month), comp_fn(seg, m_month)
+        return _pct_str(c or 0, t or 1)
 
     # top2_concentration: % of Core new logos from top-2 countries in latest month
     _top2_vals = sorted([
@@ -4435,14 +4567,14 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "sm_core_total_prev":      _fmt_inv(_g_inv_pm["Core"]),
         "sm_core_total_prev_year": _fmt_inv(_g_inv_py["Core"]),
         "sm_core_people":          _pct_cur("Core", _g_inv_people),
-        "sm_core_people_prev":     _pct_str(_g_inv_people("Core", prev_m) or 0, _g_inv("Core", prev_m) or 1),
-        "sm_core_people_prev_year":_pct_str(_g_inv_people("Core", prev_yr) or 0, _g_inv("Core", prev_yr) or 1),
+        "sm_core_people_prev":     _pct_prev("Core", _g_inv_people, _prev_q_ms, prev_m),
+        "sm_core_people_prev_year":_pct_prev("Core", _g_inv_people, _cur_q_ms_py, prev_yr),
         "sm_core_paid":            _pct_cur("Core", _g_inv_paid),
-        "sm_core_paid_prev":       _pct_str(_g_inv_paid("Core", prev_m) or 0, _g_inv("Core", prev_m) or 1),
-        "sm_core_paid_prev_year":  _pct_str(_g_inv_paid("Core", prev_yr) or 0, _g_inv("Core", prev_yr) or 1),
+        "sm_core_paid_prev":       _pct_prev("Core", _g_inv_paid, _prev_q_ms, prev_m),
+        "sm_core_paid_prev_year":  _pct_prev("Core", _g_inv_paid, _cur_q_ms_py, prev_yr),
         "sm_core_other":           _pct_cur("Core", _g_inv_other),
-        "sm_core_other_prev":      _pct_str(_g_inv_other("Core", prev_m) or 0, _g_inv("Core", prev_m) or 1),
-        "sm_core_other_prev_year": _pct_str(_g_inv_other("Core", prev_yr) or 0, _g_inv("Core", prev_yr) or 1),
+        "sm_core_other_prev":      _pct_prev("Core", _g_inv_other, _prev_q_ms, prev_m),
+        "sm_core_other_prev_year": _pct_prev("Core", _g_inv_other, _cur_q_ms_py, prev_yr),
         "sm_core_var":             _pct_delta(_g_inv_m["Core"], _g_inv_pm["Core"])[0] if _g_inv_m["Core"] else _na,
         "sm_core_var_positive":    _pct_delta(_g_inv_m["Core"], _g_inv_pm["Core"])[1] if _g_inv_m["Core"] else True,
         "sm_lite_total":           _fmt_inv(_g_inv_m["Lite"]),
@@ -4450,14 +4582,14 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "sm_lite_total_prev":      _fmt_inv(_g_inv_pm["Lite"]),
         "sm_lite_total_prev_year": _fmt_inv(_g_inv_py["Lite"]),
         "sm_lite_people":          _pct_cur("Lite", _g_inv_people),
-        "sm_lite_people_prev":     _pct_str(_g_inv_people("Lite", prev_m) or 0, _g_inv("Lite", prev_m) or 1),
-        "sm_lite_people_prev_year":_pct_str(_g_inv_people("Lite", prev_yr) or 0, _g_inv("Lite", prev_yr) or 1),
+        "sm_lite_people_prev":     _pct_prev("Lite", _g_inv_people, _prev_q_ms, prev_m),
+        "sm_lite_people_prev_year":_pct_prev("Lite", _g_inv_people, _cur_q_ms_py, prev_yr),
         "sm_lite_paid":            _pct_cur("Lite", _g_inv_paid),
-        "sm_lite_paid_prev":       _pct_str(_g_inv_paid("Lite", prev_m) or 0, _g_inv("Lite", prev_m) or 1),
-        "sm_lite_paid_prev_year":  _pct_str(_g_inv_paid("Lite", prev_yr) or 0, _g_inv("Lite", prev_yr) or 1),
+        "sm_lite_paid_prev":       _pct_prev("Lite", _g_inv_paid, _prev_q_ms, prev_m),
+        "sm_lite_paid_prev_year":  _pct_prev("Lite", _g_inv_paid, _cur_q_ms_py, prev_yr),
         "sm_lite_other":           _pct_cur("Lite", _g_inv_other),
-        "sm_lite_other_prev":      _pct_str(_g_inv_other("Lite", prev_m) or 0, _g_inv("Lite", prev_m) or 1),
-        "sm_lite_other_prev_year": _pct_str(_g_inv_other("Lite", prev_yr) or 0, _g_inv("Lite", prev_yr) or 1),
+        "sm_lite_other_prev":      _pct_prev("Lite", _g_inv_other, _prev_q_ms, prev_m),
+        "sm_lite_other_prev_year": _pct_prev("Lite", _g_inv_other, _cur_q_ms_py, prev_yr),
         "sm_lite_var":             _pct_delta(_g_inv_m["Lite"], _g_inv_pm["Lite"])[0] if _g_inv_m["Lite"] else _na,
         "sm_lite_var_positive":    _pct_delta(_g_inv_m["Lite"], _g_inv_pm["Lite"])[1] if _g_inv_m["Lite"] else True,
         # Paid media / team % series

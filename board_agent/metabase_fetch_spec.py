@@ -315,7 +315,14 @@ QUERIES = [
                  "otra vez, exactamente Yenny y FTAVAREZ (mismo id_entity, mismo nombre, valores "
                  "distintos de pipeline_stage/real_logos/mrr) — confirma que NO es una "
                  "coincidencia de una sola sesión, es un desfase recurrente y predecible de esta "
-                 "tabla específica.",
+                 "tabla específica. **Cambio de criterio 2026-07-28:** el ranking del top 20 "
+                 "pasó de ordenar por `mrr DESC` a ordenar por `real_logos DESC` (feedback de "
+                 "Jorge — la tabla se llama 'Share of Wallet' y muestra % capturado/cartera de "
+                 "logos, pero rankeaba por dinero; eso dejaba fuera a contadores con muchos "
+                 "logos capturados pero MRR bajo, ej. 'TAX ONDIGITAL - Baruch Abin' con 13-19 "
+                 "logos). Al reconstruir esta query vía Metabase MCP, el order-by de la MBQL "
+                 "debe apuntar al índice de la agregación `distinct id_company` (real_logos), "
+                 "no al de `sum amount_usd_mrr`.",
     },
     {
         "label": "SC value events mensuales (amplitude)",

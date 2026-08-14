@@ -42,6 +42,15 @@ R20 (agregada 2026-07-24, pedido explícito del usuario "por si acaso"): el STOC
 del FLUJO (New/Churn/Upsell/Downsell), que NO cuadra por diseño (migraciones Lite↔Core, ver
 R2 retirada). Es un guardrail de regresión: nunca debería fallar en la práctica, porque "all"
 se construye literalmente como suma de segmentos en build_seg_metrics().
+
+R21 (agregada 2026-07-27, misma motivación que R20 — el usuario preguntó si Country
+Performance tenía el mismo tipo de problema que se encontró en el override hardcodeado de
+ARR Walk Core/Lite): verifica el STOCK por país (ARR EoP, Logos EoP) contra una segunda
+fuente independiente (la query de ARR Walk v2 agregada por país en vez de a nivel compañía
+completa). Confirmado contra Redshift en vivo que ambas agregaciones dan resultados
+idénticos en el mismo momento — ver docstring de _check_r21_country_stock_vs_arr_walk_v2.
+No cubre "New ARR"/"New Logos" (metodología vieja, no migrada a ARR Walk v2) ni "Churn Rate"
+(fuente distinta) — queda pendiente revisar esa parte en otra sesión.
 """
 
 import csv
@@ -365,6 +374,117 @@ def _check_r20_seg_stock_sums(metrics: dict) -> CheckResult:
     return CheckResult("R20", label, "PASS", f"{len(rows)} meses verificados, todos cuadran")
 
 
+_R21_COUNTRIES = [
+    ("Colombia", "colombia"),
+    ("México", "mexico"),
+    ("Rep. Dominicana", "republicaDominicana"),
+    ("Costa Rica", "costaRica"),
+]
+_R21_FX_PAISES = {"colombia", "mexico"}  # mismo set que _FX_PAISES en fetch_metrics.py —
+# estos países tienen amount_mrr en moneda local y necesitan tasa; el resto ya viene en USD.
+TOL_R21_ARR_PCT = 0.02   # 2% — confirmado contra RS en vivo 2026-07-27 que ambas fuentes dan
+TOL_R21_LOGOS_PCT = 0.02 # resultados idénticos corridas en el mismo momento; el margen es
+                          # solo por desfase de timing entre las dos queries del cache, no de metodología
+
+
+def _check_r21_country_stock_vs_arr_walk_v2(metrics: dict) -> list[CheckResult]:
+    """R21 (2026-07-27) — verifica el STOCK (ARR EoP, Logos EoP) que muestra Country
+    Performance para cada país (fuente: fact_customers_mrr agrupado por país,
+    country_stock_eop en metrics.yaml) contra una segunda fuente independiente: la misma
+    query 'company mrr mensual (ARR Walk v2)' que ya se usa para clasificar el flujo GLO
+    (New/Churn/Reactivated/Recovered/Upsell/Downsell), agregada por app_version en vez de a
+    nivel compañía completa.
+
+    Pedido explícito del usuario tras encontrar el override hardcodeado de R20/ARR Walk
+    Core-Lite (ver esa sección) — quería confirmar que Country Performance no tenga un
+    problema análogo. Investigado en vivo contra Redshift (no contra el cache, para
+    descartar que el cache mismo estuviera desfasado): las dos agregaciones (fila por fila,
+    la de fact_summary, vs. por compañía con HAVING SUM>0, la de company_mrr_v2) dan
+    resultados IDÉNTICOS cuando se corren en el mismo momento (Colombia Core, 2026-06:
+    17,520 logos / $3,464,993,446.60 en ambas). Un mismatch acá indica un problema real
+    (cache desfasado entre las dos queries, bug de FX, filtro de país mal armado) — no una
+    diferencia de metodología esperada.
+
+    Ojo — esto NO valida "New ARR"/"New Logos" (siguen usando la clasificación vieja
+    producto+plan, distinta de ARR Walk v2 — ver memory/project_board_agent.md 2026-07-27)
+    ni "Churn Rate" (fuente completamente distinta, tabla de retención de logos) — solo el
+    STOCK, que por construcción debería ser el mismo total sin importar qué metodología
+    clasificó los movimientos."""
+    label_base = "Country Performance: stock vs ARR Walk v2 (verificación cruzada)"
+    stock = metrics.get("country_stock_eop")
+    if not stock:
+        return [CheckResult("R21", label_base, "SKIP", "country_stock_eop no está en metrics.yaml")]
+
+    if not paths.METABASE_CACHE_FILE.exists():
+        return [CheckResult("R21", label_base, "SKIP", f"no existe {paths.METABASE_CACHE_FILE.name} todavía")]
+
+    try:
+        cache = json.loads(paths.METABASE_CACHE_FILE.read_text(encoding="utf-8"))
+        cutoff = metrics.get("cutoff_month")
+        if cache.get("month") != cutoff:
+            return [CheckResult("R21", label_base, "FAIL",
+                                 f"cache de Metabase es de '{cache.get('month')}', se esperaba '{cutoff}' "
+                                 "— refrescar el cache antes de validar")]
+        v2_rows = cache["queries"]["company mrr mensual (ARR Walk v2)"]
+        fx_rows = cache["queries"]["tasas FX (tb_trm_banrep)"]
+    except Exception as e:
+        return [CheckResult("R21", label_base, "FAIL",
+                             f"cache mal formado o falta una query necesaria ({e}) — correrlas vía "
+                             "Metabase y agregarlas al cache antes de validar")]
+
+    fx_month = next((r for r in fx_rows if str(r.get("month", ""))[:7] == cutoff), None)
+    fx_rate = {"colombia": (fx_month or {}).get("cop_usd"), "mexico": (fx_month or {}).get("mex_usd")}
+
+    results = []
+    for name, app in _R21_COUNTRIES:
+        country_reported = stock.get(app)
+        if not country_reported:
+            results.append(CheckResult("R21", f"{label_base} — {name}", "SKIP",
+                                        "país no encontrado en country_stock_eop"))
+            continue
+        rows = [r for r in v2_rows if r.get("app_version") == app]
+        if not rows:
+            results.append(CheckResult("R21", f"{label_base} — {name}", "SKIP",
+                                        "sin filas para este país en el cache de ARR Walk v2"))
+            continue
+        rate = 1.0
+        if app in _R21_FX_PAISES:
+            rate = fx_rate.get(app)
+            if not rate:
+                results.append(CheckResult("R21", f"{label_base} — {name}", "SKIP",
+                                            f"sin tasa FX para '{app}' en el mes de corte"))
+                continue
+
+        mrr_sum, logos = {}, {}
+        for r in rows:
+            seg = r.get("segment_type_def")
+            mrr_sum[seg] = mrr_sum.get(seg, 0.0) + float(r.get("local_mrr") or 0)
+            logos.setdefault(seg, set()).add(r.get("id_company"))
+
+        for seg in ("Core", "Lite"):
+            reported = country_reported.get(seg, {})
+            reported_mrr = reported.get("mrr_eop", 0.0)
+            reported_logos = reported.get("logos_eop", 0.0)
+            test_mrr = mrr_sum.get(seg, 0.0) / rate
+            test_logos = len(logos.get(seg, set()))
+
+            mrr_diff_pct = abs(test_mrr - reported_mrr) / reported_mrr if reported_mrr else (1.0 if test_mrr else 0.0)
+            mrr_status = "PASS" if mrr_diff_pct <= TOL_R21_ARR_PCT else "FAIL"
+            results.append(CheckResult(
+                "R21", f"{label_base} — {name} {seg} ARR EoP", mrr_status,
+                f"reportado=${reported_mrr*12:,.0f} vs ARR Walk v2=${test_mrr*12:,.0f} (diff={mrr_diff_pct*100:+.2f}%)"
+            ))
+
+            logos_diff_pct = abs(test_logos - reported_logos) / reported_logos if reported_logos else (1.0 if test_logos else 0.0)
+            logos_status = "PASS" if logos_diff_pct <= TOL_R21_LOGOS_PCT else "FAIL"
+            results.append(CheckResult(
+                "R21", f"{label_base} — {name} {seg} Logos EoP", logos_status,
+                f"reportado={reported_logos:,.0f} vs ARR Walk v2={test_logos:,} (diff={logos_diff_pct*100:+.2f}%)"
+            ))
+
+    return results
+
+
 def _count_slides(html_path: Path) -> int:
     html = html_path.read_text(encoding="utf-8")
     count = 0
@@ -619,5 +739,6 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
     results.append(_check_r18_slide_overflow(html_path))
     results.append(_check_r19_arr_slide_consistency(html_path))
     results.append(_check_r20_seg_stock_sums(metrics))
+    results.extend(_check_r21_country_stock_vs_arr_walk_v2(metrics))
 
     return results

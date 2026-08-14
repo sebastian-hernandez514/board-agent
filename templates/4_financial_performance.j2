@@ -16,12 +16,12 @@
   --slide-pad-x:32px;--slide-pad-y:20px;
 }
 body{font-family:'Inter',sans-serif;background:#dde3ea;display:flex;flex-direction:column;align-items:center;padding:24px 16px;min-height:100vh;color:var(--color-text-primary)}
-/* Regla .slide{...} removida (2026-07-21): CSS muerto en el HTML original de Finance —
-   ningún elemento de este archivo usa class="slide" (todos usan "board-slide"). Al
-   fusionarse con los otros 7 templates en un solo <style> global (merge_standalone.py),
-   esta regla pisaba el background navy de .slide-cover (1_inicio.j2) por empate de
-   especificidad + orden en la cascada — la portada del board quedaba blanco-sobre-blanco.
-   Hallazgo real generando el board de junio-26. */
+/* Regla .slide{...} removida (2026-07-27, mismo hallazgo que 2026-07-21): CSS muerto en el HTML
+   original de Finance — ningún elemento de este archivo usa class="slide" (todos usan
+   "board-slide"). Al fusionarse con los otros 7 templates en un solo <style> global
+   (merge_standalone.py), esta regla pisaba el background navy de .slide-cover (1_inicio.j2)
+   por empate de especificidad + orden en la cascada — la portada del board quedaba
+   blanco-sobre-blanco. */
 
 /* slide-header */
 .slide-header{background:var(--color-navy);padding:14px var(--slide-pad-x);display:flex;justify-content:space-between;align-items:center}

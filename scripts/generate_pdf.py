@@ -22,7 +22,13 @@ CRÍTICO — Selector de slides:
     .slide      → 1_inicio, 2_discussion_topic, 3_arr_walk, 4_financial_performance, 6_rd, 8_appendix
     .gtm-slide  → 5_go_to_market
     .hc-slide   → 7_headcount
-  Si se agrega un nuevo template, verificar su clase y añadirla al selector de abajo.
+    .dtmx-slide / .dttax-board-slide → discussion topics con clases prefijadas (ver
+      board_agent/paths.py::SLIDE_CLASS_TOKENS — mismo mapa, agregado 2026-07-27 tras un bug
+      real: el PDF salió con 42/56 slides porque este selector tiene su propia lista, separada
+      de la del Validator, y no se había actualizado)
+  Si se agrega un nuevo template (o un discussion topic con clases propias prefijadas),
+  verificar su clase y añadirla ACÁ y en board_agent/paths.py::SLIDE_CLASS_TOKENS — son dos
+  listas independientes que deben mantenerse en sync a mano.
 """
 
 import asyncio, io, os
@@ -31,8 +37,8 @@ from playwright.async_api import async_playwright
 from PIL import Image
 
 ROOT       = Path(__file__).resolve().parent.parent
-HTML_FILE = ROOT / "boards" / "2026-06" / "board_Jun_2026_v19.html"
-PDF_OUT = ROOT / "boards" / "2026-06" / "board_Jun_2026_v19.pdf"
+HTML_FILE = ROOT / "boards" / "2026-06" / "board_Jun_2026_v38.html"
+PDF_OUT = ROOT / "boards" / "2026-06" / "board_Jun_2026_v38.pdf"
 SCALE      = 4   # 4x → 3840x2160px por slide (4K/UHD, ~384 DPI — sobre el estándar de impresión 300 DPI)
 WAIT_MS    = 4000  # tiempo para que Chart.js termine de renderizar
 
@@ -47,8 +53,10 @@ async def main():
         await page.goto(url)
         await page.wait_for_timeout(WAIT_MS)
 
-        # Incluye todos los tipos de slide: .slide, .gtm-slide (go_to_market), .hc-slide (headcount), .board-slide (financial_performance), .dt-slide (discussion_topic)
-        slides = await page.query_selector_all(".slide, .gtm-slide, .hc-slide, .board-slide, .dt-slide")
+        # Incluye todos los tipos de slide: .slide, .gtm-slide (go_to_market), .hc-slide (headcount),
+        # .board-slide (financial_performance), .dt-slide (discussion_topic), .dtmx-slide/.dttax-board-slide
+        # (discussion topics México/Tax, agregados 2026-07-27 — mismos tokens que paths.SLIDE_CLASS_TOKENS)
+        slides = await page.query_selector_all(".slide, .gtm-slide, .hc-slide, .board-slide, .dt-slide, .dtmx-slide, .dttax-board-slide")
         print(f"Capturando {len(slides)} slides a {SCALE}x resolución...")
 
         images = []

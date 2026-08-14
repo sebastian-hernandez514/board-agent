@@ -528,7 +528,7 @@
   <div class="gtm-slide">
     <div class="slide-header">
       <span class="title">{{ editorial.gtm_new_logos_title | safe }}</span>
-      <span class="period">{{ config.month_label }}</span>
+      <span class="period">{% if metrics.is_quarter_end %}{{ config.quarter_label }}{% else %}{{ config.month_label }}{% endif %}</span>
     </div>
 
     <div class="gtm-inner">
@@ -585,7 +585,7 @@
   <div class="gtm-slide">
     <div class="slide-header">
       <span class="title">{{ editorial.gtm_acq_title | safe }}</span>
-      <span class="period">{{ config.month_label }}</span>
+      <span class="period">{% if metrics.is_quarter_end %}{{ config.quarter_label }}{% else %}{{ config.month_label }}{% endif %}</span>
     </div>
 
     <div class="acq-inner">
@@ -944,114 +944,6 @@
   })();
   </script>
 
-  <div class="slide-divider">↓</div>
-
-  <!-- ============================================================
-       SLIDE 4d — Accountant vs Non-Accountant SMBs
-       ============================================================ -->
-  <style>
-  .s4d-seg  { font-size:13px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
-  .s4d-arr  { font-size:32px; font-weight:800; color:#1a1a2e; line-height:1.1; margin:2px 0; }
-  .s4d-sub  { font-size:9.5px; color:#64748b; margin-top:1px; }
-  .s4d-pos  { color:#16a34a; font-weight:600; }
-  .s4d-neg  { color:#dc2626; font-weight:600; }
-  .s4d-neu  { color:#94a3b8; }
-  .s4d-tbl  { width:100%; border-collapse:collapse; }
-  .s4d-tbl thead th { font-size:8px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; padding:4px 6px; }
-  .s4d-tbl tbody td { font-size:11px; padding:6px 6px; vertical-align:middle; }
-  .s4d-tbl tbody tr:nth-child(odd) { background:#f8fafc; }
-  .s4d-tbl .td-val  { font-size:13px; font-weight:700; color:#1a1a2e; }
-  .s4d-tbl .td-mtr  { font-size:10px; font-weight:700; color:#334155; text-align:center; white-space:nowrap; }
-  .s4d-tbl .td-dot  { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:middle; }
-  .s4d-tbl .td-chg  { font-size:9.5px; font-weight:600; text-align:right; }
-  .s4d-tbl .td-chs  { font-size:9px; color:#94a3b8; text-align:center; }
-  </style>
-  <div class="gtm-slide">
-    <div class="slide-header">
-      <span class="title">SMBs with accountant vs. without accountant</span>
-      <span class="period">{{ config.month_label }}</span>
-    </div>
-    <!-- ARR Hero section -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e8e8e8;padding:10px 0 10px;">
-      <div style="text-align:center;border-right:1px solid #e8e8e8;padding:4px 24px 6px;">
-        <div class="s4d-seg">With accountant</div>
-        <div class="s4d-arr">$4.2M</div>
-        <div class="s4d-sub">ARR &nbsp;<span class="s4d-pos">+7.6%</span> MoM &nbsp;<span class="s4d-pos">+86.8%</span> YoY</div>
-        <div style="font-size:9px;color:#94a3b8;margin-top:3px;">7,892 logos · +8.2% MoM · +82.7% YoY</div>
-      </div>
-      <div style="text-align:center;padding:4px 24px 6px;">
-        <div class="s4d-seg">Without accountant</div>
-        <div class="s4d-arr">$22.3M</div>
-        <div class="s4d-sub">ARR &nbsp;<span class="s4d-pos">+0.1%</span> MoM &nbsp;<span class="s4d-pos">+6.6%</span> YoY</div>
-        <div style="font-size:9px;color:#94a3b8;margin-top:3px;">51,828 logos · +0.2% MoM · +3.4% YoY</div>
-      </div>
-    </div>
-    <!-- Metrics comparison table -->
-    <div style="flex:1;padding:0 16px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;">
-      <table class="s4d-tbl">
-        <thead>
-          <tr>
-            <th style="text-align:right;width:10%;">YoY</th>
-            <th style="text-align:right;width:10%;">MoM</th>
-            <th style="text-align:right;width:12%;">VALUE</th>
-            <th style="text-align:center;width:24%;">METRIC</th>
-            <th style="text-align:left;width:12%;">VALUE</th>
-            <th style="text-align:left;width:10%;">MoM</th>
-            <th style="text-align:left;width:10%;">YoY</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- ARPA -->
-          <tr>
-            <td class="td-chg s4d-pos" style="text-align:right;">+2.2%</td>
-            <td class="td-chg s4d-neg" style="text-align:right;">-0.6%</td>
-            <td class="td-val" style="text-align:right;">$44.7</td>
-            <td class="td-mtr"><span class="td-dot" style="background:#1a1a2e;"></span>ARPA</td>
-            <td class="td-val">$35.8</td>
-            <td class="td-chg s4d-neg">-0.1%</td>
-            <td class="td-chg s4d-pos">+3.1%</td>
-          </tr>
-          <!-- New ARPA -->
-          <tr>
-            <td class="td-chg s4d-pos" style="text-align:right;">+14.2%</td>
-            <td class="td-chg s4d-neg" style="text-align:right;">-20.9%</td>
-            <td class="td-val" style="text-align:right;">$35.0</td>
-            <td class="td-mtr"><span class="td-dot" style="background:#aab8c8;"></span>New ARPA</td>
-            <td class="td-val">$27.7</td>
-            <td class="td-chg s4d-neg">-10.3%</td>
-            <td class="td-chg s4d-pos">+5.7%</td>
-          </tr>
-          <!-- Churn Rate -->
-          <tr>
-            <td class="td-chg s4d-neg" style="text-align:right;">+30.1%</td>
-            <td class="td-chg s4d-pos" style="text-align:right;">-3.3%</td>
-            <td class="td-val" style="text-align:right;">3.8%</td>
-            <td class="td-mtr"><span class="td-dot" style="background:#f97316;"></span>Churn Rate</td>
-            <td class="td-val">4.2%</td>
-            <td class="td-chg s4d-neg">+3.9%</td>
-            <td class="td-chg s4d-pos">-2.5%</td>
-          </tr>
-          <!-- CHS -->
-          <tr>
-            <td class="td-chs" style="text-align:right;">—</td>
-            <td class="td-chs" style="text-align:right;">—</td>
-            <td class="td-val" style="text-align:right;">61</td>
-            <td class="td-mtr"><span class="td-dot" style="background:#14b8a6;"></span>CHS Score</td>
-            <td class="td-val">56</td>
-            <td class="td-chs">—</td>
-            <td class="td-chs">—</td>
-          </tr>
-        </tbody>
-      </table>
-      <div style="font-size:7.5px;color:#94a3b8;margin-top:8px;text-align:center;">
-        * Churn Rate May 2026 · ARPA monthly USD · New ARPA = new logo MRR / new logos · CHS current snapshot (no historical)
-      </div>
-    </div>
-    <div class="slide-footer">
-      <span class="footer-brand">Alegra · Confidential</span>
-      <span class="footer-page">4d</span>
-    </div>
-  </div>
 
   <script>
     /* ── Slide 2: New Logos charts ── */
@@ -1750,13 +1642,13 @@
 
 <div class="slide">
   <div class="slide-header">
-    <span class="title">The top 20 accountants by MRR already have 56.6% of their associated portfolio paying in Alegra — 447 companies left to convert</span>
+    <span class="title">The top 20 accountants by number of logos already have 56.6% of their associated portfolio paying in Alegra — 447 companies left to convert</span>
     <span class="period">3 · Share of wallet</span>
   </div>
   <div class="slide-body" style="gap:14px">
     <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:30px;flex:1;min-height:0">
       <div style="display:flex;flex-direction:column;min-height:0">
-        <div class="block-label">Paying portfolio vs gap to convert · by accountant, sorted by MRR</div>
+        <div class="block-label">Paying portfolio vs gap to convert · by accountant, sorted by logos</div>
         <div class="chart-wrap"><canvas id="sowChart"></canvas></div>
       </div>
       <div>
@@ -1853,194 +1745,6 @@ k_sow_d.textContent=fmtN(D.sow_tot.real); k_gap.textContent=fmtN(D.sow_tot.gap);
 </html>
   </script>
   {%- endif %}{# /SLIDES 5+ HIDDEN #}
-
-
-
-  <!-- ============================================================
-       Accountant Flywheel · The Growth Play
-       ============================================================ -->
-  <style>
-    .acfw-slide { overflow:hidden; }
-    .acfw-slide .acfw-header {
-      background:#0F172A;padding:16px var(--slide-pad-x);display:flex;justify-content:space-between;align-items:center;height:52px;flex-shrink:0;
-    }
-    .acfw-slide .acfw-header-title {
-      font-size:15px;font-weight:700;color:#FFFFFF;line-height:1.2;
-    }
-    .acfw-slide .acfw-header-date {
-      font-size:12px;font-weight:500;color:#30BBB7;
-    }
-    .acfw-slide .acfw-content {
-      padding:12px var(--slide-pad-x) 8px;flex:1;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden;
-    }
-    .acfw-slide .acfw-headline {
-      font-size:14px;font-weight:700;color:#0F172A;line-height:1.3;flex-shrink:0;
-    }
-    .acfw-slide .acfw-headline .acfw-teal { color:#30BBB7; }
-    .acfw-slide .acfw-subheadline {
-      font-size:10px;color:#64748B;line-height:1.4;flex-shrink:0;
-    }
-    .acfw-slide .acfw-bottom-area {
-      display:flex;flex:1;gap:14px;min-height:0;overflow:hidden;
-    }
-    .acfw-slide .acfw-left-col {
-      flex:1.15;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;
-    }
-    .acfw-slide .acfw-right-col {
-      flex:0.85;background:#FFFFFF;border-radius:10px;border:1px solid #E2E8F0;padding:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden;
-    }
-    .acfw-slide .acfw-play-label {
-      font-size:8.5px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#64748B;margin-bottom:3px;flex-shrink:0;
-    }
-    .acfw-slide .acfw-play-card {
-      background:#FFFFFF;border-radius:7px;border:1px solid #E2E8F0;padding:6px 10px;display:flex;gap:8px;align-items:flex-start;
-    }
-    .acfw-slide .acfw-play-num {
-      flex-shrink:0;width:20px;height:20px;background:#30BBB7;color:#fff;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;
-    }
-    .acfw-slide .acfw-play-title {
-      font-size:10px;font-weight:700;color:#0F172A;margin-bottom:1px;
-    }
-    .acfw-slide .acfw-play-desc {
-      font-size:9px;color:#64748B;line-height:1.4;
-    }
-    .acfw-slide .acfw-measure-box {
-      background:#D6F3F2;border-radius:7px;padding:6px 10px;margin-top:2px;border:1px solid #AEEAE8;
-    }
-    .acfw-slide .acfw-measure-label {
-      font-size:8.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#27918F;margin-bottom:3px;display:flex;align-items:center;gap:4px;
-    }
-    .acfw-slide .acfw-measure-text {
-      font-size:9.5px;color:#0F172A;line-height:1.4;
-    }
-    .acfw-slide .acfw-measure-text strong { font-weight:700; }
-    .acfw-slide .acfw-loop-title {
-      font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0F172A;margin-bottom:2px;text-align:center;flex-shrink:0;
-    }
-    .acfw-slide .acfw-loop-sub {
-      font-size:9px;color:#64748B;margin-bottom:6px;text-align:center;flex-shrink:0;
-    }
-    .acfw-slide .acfw-diagram-wrap {
-      flex:1;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;
-    }
-    .acfw-slide .acfw-diagram-svg { width:200px;height:200px; }
-    .acfw-slide .acfw-legend {
-      display:flex;gap:10px;justify-content:center;margin-top:4px;flex-shrink:0;
-    }
-    .acfw-slide .acfw-legend-item {
-      display:flex;align-items:center;gap:4px;font-size:8.5px;color:#64748B;
-    }
-    .acfw-slide .acfw-legend-dot { width:8px;height:8px;border-radius:2px; }
-    .acfw-slide .acfw-footer {
-      display:flex;gap:10px;align-items:center;padding:6px var(--slide-pad-x);font-size:9px;color:#64748B;border-top:1px solid #E2E8F0;flex-shrink:0;
-    }
-    .acfw-slide .acfw-footer strong { color:#30BBB7;font-weight:600; }
-    .acfw-slide .acfw-footer-note { color:#94A3B8; }
-  </style>
-  <div class="slide-divider">↓ &nbsp; Accountant Flywheel</div>
-<div class="slide acfw-slide">
-  <div class="acfw-header">
-    <div class="acfw-header-title">Accountant Flywheel · The Growth Play</div>
-    <div class="acfw-header-date">{{ config.month_label }}</div>
-  </div>
-
-  <div class="acfw-content">
-    <div class="acfw-headline">To accelerate the flywheel, we'll turn <span class="acfw-teal">unlinked SMBs into the<br>channel that recruits their own accountant</span> onto Alegra.</div>
-    <div class="acfw-subheadline">A warm, owned channel that compounds the linked-base advantage shown above — without paying to acquire accountants cold.</div>
-
-    <div class="acfw-bottom-area">
-      <div class="acfw-left-col">
-        <div class="acfw-play-label">The Play — "SMB as a Referral Channel"</div>
-
-        <div class="acfw-play-card">
-          <div class="acfw-play-num">1</div>
-          <div>
-            <div class="acfw-play-title">Warm referral, not cold acquisition</div>
-            <div class="acfw-play-desc">Each SMB introduces the accountant they already work with — a channel we don't pay agencies to source.</div>
-          </div>
-        </div>
-
-        <div class="acfw-play-card">
-          <div class="acfw-play-num">2</div>
-          <div>
-            <div class="acfw-play-title">Aligned incentives, capped cost</div>
-            <div class="acfw-play-desc">The SMB earns a capped reward only when their accountant adopts Alegra and onboards their portfolio. Zero conflict, predictable spend.</div>
-          </div>
-        </div>
-
-        <div class="acfw-play-card">
-          <div class="acfw-play-num">3</div>
-          <div>
-            <div class="acfw-play-title">Leverages the existing engine</div>
-            <div class="acfw-play-desc">Referred accountants enter today's accountant sales motion — no new team, no new playbook.</div>
-          </div>
-        </div>
-
-        <div class="acfw-measure-box">
-          <div class="acfw-measure-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-            What We'll Measure
-          </div>
-          <div class="acfw-measure-text"><strong>Net-new accountant-linked SMBs and accountants recruited — not leads.</strong> The target reverses the linking-rate decline shown earlier.</div>
-        </div>
-      </div>
-
-      <div class="acfw-right-col">
-        <div class="acfw-loop-title">The Compounding Loop</div>
-        <div class="acfw-loop-sub">Each turn recruits the next accountant — and their portfolio.</div>
-        <div class="acfw-diagram-wrap">
-          <svg class="acfw-diagram-svg" viewBox="0 0 320 320">
-            <defs>
-              <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-                <path d="M0,0 L0,6 L9,3 z" fill="#30BBB7" opacity="0.6"/>
-              </marker>
-            </defs>
-
-            <!-- Outer orbit circle -->
-            <circle cx="160" cy="160" r="105" fill="none" stroke="#30BBB7" stroke-width="2.5" opacity="0.35"/>
-
-            <!-- Curved arrows between nodes using quadratic bezier -->
-            <!-- SMB (top) → Accountant (right-bottom) -->
-            <path d="M 160,75 Q 235,75 235,140" fill="none" stroke="#30BBB7" stroke-width="2.5" opacity="0.5" marker-end="url(#arrowhead)"/>
-            <!-- Accountant (right-bottom) → Portfolio (left) -->
-            <path d="M 235,180 Q 160,255 85,180" fill="none" stroke="#30BBB7" stroke-width="2.5" opacity="0.5" marker-end="url(#arrowhead)"/>
-            <!-- Portfolio (left) → SMB (top) -->
-            <path d="M 85,140 Q 85,75 160,75" fill="none" stroke="#30BBB7" stroke-width="2.5" opacity="0.5" marker-end="url(#arrowhead)"/>
-
-            <!-- Center circle: Alegra flywheel -->
-            <circle cx="160" cy="160" r="42" fill="#27918F"/>
-            <text x="160" y="155" text-anchor="middle" fill="white" font-size="15" font-weight="700" font-family="Inter, sans-serif">Alegra</text>
-            <text x="160" y="173" text-anchor="middle" fill="white" font-size="11" font-weight="500" opacity="0.9" font-family="Inter, sans-serif">flywheel</text>
-
-            <!-- Top node: SMB refers -->
-            <circle cx="160" cy="55" r="32" fill="#EAF9F9" stroke="#30BBB7" stroke-width="2"/>
-            <text x="160" y="52" text-anchor="middle" fill="#0F172A" font-size="14" font-weight="700" font-family="Inter, sans-serif">SMB</text>
-            <text x="160" y="68" text-anchor="middle" fill="#64748B" font-size="10" font-weight="500" font-family="Inter, sans-serif">refers</text>
-
-            <!-- Right node: Accountant adopts -->
-            <circle cx="235" cy="160" r="32" fill="#EAF9F9" stroke="#30BBB7" stroke-width="2"/>
-            <text x="235" y="157" text-anchor="middle" fill="#0F172A" font-size="11" font-weight="700" font-family="Inter, sans-serif">Accountant</text>
-            <text x="235" y="171" text-anchor="middle" fill="#64748B" font-size="10" font-weight="500" font-family="Inter, sans-serif">adopts</text>
-
-            <!-- Left node: Portfolio onboards -->
-            <circle cx="85" cy="160" r="32" fill="#EAF9F9" stroke="#30BBB7" stroke-width="2"/>
-            <text x="85" y="157" text-anchor="middle" fill="#0F172A" font-size="12" font-weight="700" font-family="Inter, sans-serif">Portfolio</text>
-            <text x="85" y="171" text-anchor="middle" fill="#64748B" font-size="10" font-weight="500" font-family="Inter, sans-serif">onboards</text>
-          </svg>
-        </div>
-        <div class="acfw-legend">
-          <div class="acfw-legend-item"><div class="acfw-legend-dot" style="background:#AEEAE8;"></div>Warm, owned channel</div>
-          <div class="acfw-legend-item"><div class="acfw-legend-dot" style="background:#27918F;"></div>Compounding NRR</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="acfw-footer">
-    <div><strong>Front 2 of 2</strong></div>
-    <div class="acfw-footer-note">Front 1 activates accountants already linked but not yet working their clients' accounts.</div>
-  </div>
-</div>
 
 </body>
 </html>
