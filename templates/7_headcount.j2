@@ -1,4 +1,4 @@
-<!-- updated_for_month: 2026-06 -->
+<!-- updated_for_month: 2026-07 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -379,8 +379,8 @@
     ══════════════════════════════════════════════ */
     .hcs-wrap {
       flex: 1; overflow: hidden;
-      padding: 12px 18px 10px;
-      display: flex; flex-direction: column; gap: 8px;
+      padding: 8px 18px 6px;
+      display: flex; flex-direction: column; gap: 6px;
       font-family: 'Inter', system-ui, sans-serif;
     }
     .hcs-layout {
@@ -403,7 +403,7 @@
     table.hcs-tbl thead tr.hcs-sup th {
       font-size: 8px; font-weight: 700;
       color: #334155; background: #F1F5F9;
-      padding: 4px 3px;
+      padding: 3px 3px;
       border-bottom: 1px solid #E2E8F0;
       text-align: center;
     }
@@ -412,7 +412,7 @@
     }
     table.hcs-tbl thead tr.hcs-main th {
       font-size: 8px; font-weight: 700;
-      padding: 5px 3px; text-align: center;
+      padding: 4px 3px; text-align: center;
       color: #334155;
       border-right: 1px solid #E2E8F0;
     }
@@ -426,7 +426,7 @@
       background: #E9FAFA; color: #1A7E7F;
     }
     table.hcs-tbl tbody td {
-      padding: 3px 3px; text-align: center;
+      padding: 2px 3px; text-align: center;
       border-bottom: 1px solid #F1F5F9;
       border-right: 1px solid #F1F5F9;
       font-variant-numeric: tabular-nums;
@@ -438,7 +438,7 @@
     }
     tr.hcs-cat td {
       background: #1E293B; color: #fff;
-      font-weight: 700; padding: 5px 3px;
+      font-weight: 700; padding: 3px 3px;
       border-bottom: 1px solid #0F172A;
       border-right-color: rgba(255,255,255,0.08);
     }
@@ -447,12 +447,12 @@
     tr.hcs-cat td.hcs-hl { background: #208080; color: #fff; }
     tr.hcs-active td {
       background: #0F172A; color: #fff;
-      font-weight: 700; padding: 5px 3px;
+      font-weight: 700; padding: 3px 3px;
     }
     tr.hcs-active td.hcs-hl { background: #1A7E7F; color: #fff; }
     table.hcs-tbl tr.hcs-active td.hcs-lbl { padding-left: 8px; color: #fff !important; }
     tr.hcs-spacer td {
-      padding: 0; height: 3px;
+      padding: 0; height: 2px;
       background: #fff; border: none;
     }
     .hcs-pos { color: #15803D; font-weight: 600; }
@@ -492,28 +492,7 @@
       font-size: 9px; color: #64748B; margin-top: 2px; line-height: 1.3;
     }
 
-    /* Comments */
-    .hcs-comments {
-      background: #F8FAFC; border: 1px solid #CBD5E1;
-      border-radius: 7px; padding: 9px 14px;
-      display: grid; grid-template-columns: auto 1fr 1fr; gap: 0 20px;
-      align-items: start;
-    }
-    .hcs-comments-title {
-      font-size: 9px; font-weight: 700; color: #0F172A;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      padding-top: 1px;
-    }
-    .hcs-cblock { }
-    .hcs-ctag {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 9px; font-weight: 700; color: #1E293B;
-      margin-bottom: 3px; letter-spacing: 0.04em; text-transform: uppercase;
-    }
-    .hcs-ctag-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    .hcs-dot-high { background: #22C55E; }
-    .hcs-dot-low  { background: #F59E08; }
-    .hcs-ctext { font-size: 10px; line-height: 1.45; color: #334155; }
+    /* Comments (Slide 2 — Headcount Summary) removida 2026-08-19, ver nota en el HTML. */
 
   </style>
 </head>
@@ -627,25 +606,18 @@
 
       </div><!-- /hcs-layout -->
 
-      <!-- Comments -->
-      <section class="hcs-comments">
-        <div class="hcs-comments-title">Comments</div>
-        <div class="hcs-cblock">
-          <div class="hcs-ctag"><span class="hcs-ctag-dot hcs-dot-high"></span>Highlights</div>
-          <div class="hcs-ctext">Sales +5.0% MoM (60→63). New Hires (11) exceed Attrition (7) — net headcount gain. Finance on-plan vs Fcst (96%). Turnover 1.42%, lowest in 12 months.</div>
-        </div>
-        <div class="hcs-cblock">
-          <div class="hcs-ctag"><span class="hcs-ctag-dot hcs-dot-low"></span>Lowlights</div>
-          <div class="hcs-ctext">Active team -4.9% YoY (535→509). CAC -11.7% YoY (145→128), Growth -27.1% YoY. P&amp;D -1.4% MoM (208→205). Active team -64 vs Fcst (573).</div>
-        </div>
-      </section>
+      <!-- Comments — removida 2026-08-19 a pedido del usuario ("no nos sirven"). Era texto
+           editorial fijo (Sales/Finance/CAC, nunca conectado a metrics.hc), no se perdió
+           ningún dato real al sacarla. -->
 
     </div>
-
-    <div class="slide-footer">
-      <span class="footer-brand">Alegra · Confidential</span>
-      <span class="footer-page">2</span>
-    </div>
+    <!-- slide-footer removida (2026-08-19, pedido del usuario): con "Revenue" como equipo
+         nuevo (ver _HC_CATEGORY_ORDER), la tabla + fila "Active team" + Comments ya no
+         entraban en los 540px fijos de .hc-slide con el footer ocupando 33px fijos. Ahora
+         que Comments también se quitó sobra espacio de nuevo — se podría restaurar el
+         footer si en algún momento hace falta, pero se deja afuera por ahora (no se pidió
+         volver a agregarlo). El resto del board sigue usando .slide-footer normalmente,
+         esto es específico de esta slide. -->
   </div>
 
   <div class="slide-divider">↓</div>
@@ -691,8 +663,8 @@
       <section class="pt2-comments">
         <div class="pt2-comments-title">Comments</div>
         <ul class="pt2-ctext" style="margin: 0; padding-left: 12px; display: flex; flex-direction: column; gap: 2px;">
-          <li>People EoP: 499 at close of June 2026 (-2.0% MoM · -7.9% YoY vs 542 Jun-25).</li>
-          <li>New Hires: 9 · Attrition: 19 · Turnover Rate: 3.81% — data sourced from Sheets movimientos por TT.</li>
+          <li>People EoP: {{ metrics.hc.total }} at close of {{ config.month_label }} ({{ metrics.hc.active_team_row.mom_pct }} MoM · {{ metrics.hc.active_team_row.yoy_pct }} YoY vs {{ metrics.hc.active_team_row.m12 }} {{ metrics.hc.m12_label }}).</li>
+          <li>New Hires: {{ metrics.hc.new_hires }} · Attrition: {{ metrics.hc.attrition }} · Turnover Rate: {{ metrics.hc.turnover_rate }} — data sourced from Sheets movimientos por TT.</li>
         </ul>
       </section>
 

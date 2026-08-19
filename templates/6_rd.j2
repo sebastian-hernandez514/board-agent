@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/base.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     .section-cover {
       background: var(--color-navy);
@@ -80,6 +81,49 @@
       text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1;
     }
     .placeholder-note { font-size: 12px; color: #94a3b8; }
+
+    /* ── NPS — tendencia histórica interactiva (rediseño 2026-08-18) ──
+       Jerarquía visual: 1 hero (grande/blanco) > 2 chart (mediano/blanco) > 3 detalle
+       (chico/gris) — para que el hero no compita con el gráfico ni con el detalle. */
+    .nps-tabs { display: flex; gap: 4px; }
+    .nps-tab {
+      flex: 1; font-size: 9.5px; font-weight: 700; color: var(--color-text-secondary);
+      background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 6px;
+      padding: 5px 0; cursor: pointer; text-align: center; font-family: inherit;
+      transition: background .15s ease, color .15s ease;
+    }
+    .nps-tab:hover { background: var(--color-border); }
+    .nps-tab.active { background: var(--color-navy); color: #fff; border-color: var(--color-navy); }
+    .nps-tab.nodata { border-style: dashed; color: #94a3b8; }
+    .nps-tab.nodata.active { background: var(--color-text-secondary); border-color: var(--color-text-secondary); }
+    .tab-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-left: 4px; vertical-align: middle; }
+    .tab-dot.full { background: #16a34a; }
+    .tab-dot.partial { background: #f59e0b; }
+    .tab-dot.none { background: transparent; border: 1px solid #94a3b8; }
+    .nps-tab-legend { font-size: 6.8px; color: var(--color-text-secondary); display: flex; align-items: center; }
+
+    .nps-hero-card { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 9px 14px 8px; }
+    .nps-hero-label { font-size: 8px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-secondary); }
+    .nps-hero-score { font-size: 32px; font-weight: 800; color: var(--color-text-primary); line-height: 1; margin-top: 2px; }
+    .nps-hero-resp { font-size: 16px; font-weight: 700; color: var(--color-text-secondary); margin-top: 3px; }
+    .nps-insight { margin-top: 7px; padding-top: 6px; border-top: 1px dashed var(--color-border); font-size: 9px; font-weight: 600; color: #334155; line-height: 1.4; }
+    .nps-insight.pos { color: #15803d; }
+    .nps-insight.neg { color: #b91c1c; }
+    .nps-insight.neu { color: var(--color-text-secondary); font-weight: 500; font-style: italic; }
+
+    .nps-chart-card { flex: 1; min-height: 0; display: flex; flex-direction: column; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 6px 12px 4px; overflow: hidden; }
+    .nps-chart-label { font-size: 7.6px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-secondary); flex-shrink: 0; }
+
+    .nps-detail-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 7px 10px; flex-shrink: 0; }
+    .nps-detail-cols { display: flex; gap: 12px; }
+    .nps-detail-col { flex: 1; min-width: 0; }
+    .nps-detail-h { font-size: 7px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 3px; }
+    .nps-detail-row { display: flex; align-items: center; gap: 2px; margin-bottom: 2px; }
+    .nps-detail-nm { font-size: 7.6px; color: var(--color-text-secondary); width: 24px; flex-shrink: 0; }
+    .nps-detail-track { flex: 1; height: 4.5px; background: var(--color-border); border-radius: 3px; overflow: hidden; }
+    .nps-detail-val { font-size: 7.8px; font-weight: 700; color: var(--color-text-primary); width: 30px; text-align: right; flex-shrink: 0; }
+    .nps-nbadge { font-size: 5.6px; font-weight: 700; color: #b45309; background: #fef3c7; border-radius: 3px; padding: 0 2px; margin-left: 2px; }
+    .nps-bar-hatch { background-image: repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 4px) !important; }
   </style>
 </head>
 <body>
@@ -150,83 +194,83 @@
     </div>
     <div class="slide-body" style="padding:10px 20px 8px; flex-direction:row; gap:14px; overflow:hidden;">
 
-      <!-- LEFT PANEL -->
-      <div style="flex:0 0 42%; display:flex; flex-direction:column; gap:7px; min-height:0; overflow:hidden;">
+      <!-- LEFT PANEL — tendencia histórica interactiva (rediseño 2026-08-18) -->
+      <div style="flex:1; display:flex; flex-direction:column; gap:6px; min-height:0; overflow:hidden;">
 
-        <!-- Hero: score + responses -->
-        <div style="display:flex; gap:7px; flex-shrink:0;">
-          <div style="flex:1; background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:9px 14px;">
-            <div style="font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-secondary);">NPS Alegra</div>
-            <div style="font-size:30px; font-weight:800; color:var(--color-text-primary); line-height:1.1; margin-top:1px;">{{ metrics.nps.score }}</div>
-          </div>
-          <div style="flex:1; background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:9px 14px;">
-            <div style="font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-secondary);">Responses</div>
-            <div style="font-size:30px; font-weight:800; color:var(--color-text-primary); line-height:1.1; margin-top:1px;">{{ metrics.nps.responses }}</div>
-          </div>
-        </div>
-
-        <!-- Distribution -->
-        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:8px 12px; flex-shrink:0;">
-          <div style="font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-secondary); margin-bottom:6px;">Distribution</div>
-          {% for label, pct, n, color in [('Promoters', metrics.nps.promoters_pct, metrics.nps.promoters_n, '#16a34a'),
-                                           ('Passives',  metrics.nps.passives_pct,  metrics.nps.passives_n,  '#f59e0b'),
-                                           ('Detractors', metrics.nps.detractors_pct, metrics.nps.detractors_n, '#dc2626')] %}
-          <div style="display:flex; align-items:center; gap:7px; {% if not loop.last %}margin-bottom:4px;{% endif %}">
-            <div style="font-size:10.5px; color:var(--color-text-secondary); width:68px; flex-shrink:0;">{{ label }}</div>
-            <div style="flex:1; height:7px; background:var(--color-border); border-radius:3px; overflow:hidden;"><div style="width:{{ pct }}%; height:100%; background:{{ color }};"></div></div>
-            <div style="font-size:10.5px; font-weight:700; color:{{ color }}; width:36px; text-align:right;">{{ pct }}%</div>
-            <div style="font-size:10px; color:var(--color-text-secondary); width:28px; text-align:right;">{{ n }}</div>
-          </div>
+        <!-- Tabs — un tab por mes de la ventana móvil, click recalcula todo el panel -->
+        <div class="nps-tabs" style="flex-shrink:0;">
+          {% for mk in metrics.nps.months %}
+          <button class="nps-tab{% if metrics.nps.dots[mk] == 'none' %} nodata{% endif %}{% if mk == metrics.nps.default_month %} active{% endif %}"
+                  data-month="{{ mk }}">{{ metrics.nps.labels[mk] }}<span class="tab-dot {{ metrics.nps.dots[mk] }}"
+                  title="{{ {'full': 'dato completo', 'partial': 'solo score, sin distribution', 'none': 'sin ningún dato'}[metrics.nps.dots[mk]] }}"></span></button>
           {% endfor %}
         </div>
+        <div class="nps-tab-legend" style="flex-shrink:0;"><span class="tab-dot full" style="margin:0 3px 0 0;"></span>dato completo &nbsp; <span class="tab-dot partial" style="margin:0 3px 0 8px;"></span>solo score &nbsp; <span class="tab-dot none" style="margin:0 3px 0 8px;"></span>sin dato</div>
 
-        <!-- By Country -->
-        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:8px 12px; flex-shrink:0;">
-          <div style="display:flex; justify-content:space-between; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-secondary); margin-bottom:5px;">
-            <span>By Country</span><div style="display:flex; gap:18px;"><span>NPS</span><span>Resp</span></div>
+        <!-- 1 — HERO: lo que hay que mirar primero -->
+        <div class="nps-hero-card" style="flex-shrink:0;">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+            <div>
+              <div class="nps-hero-label">NPS Alegra · <span id="npsPeriodLabel2">{{ metrics.nps.period_short[metrics.nps.default_month] }}</span></div>
+              <div class="nps-hero-score" id="npsHeroScore">{{ metrics.nps.data[metrics.nps.default_month].score if metrics.nps.data[metrics.nps.default_month].score is not none else "—" }}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="nps-hero-label">Responses</div>
+              <div class="nps-hero-resp" id="npsHeroResponses">{{ metrics.nps.data[metrics.nps.default_month].responses if metrics.nps.data[metrics.nps.default_month].responses is not none else "—" }}</div>
+            </div>
           </div>
-          {% for row in metrics.nps.by_country %}
-          <div style="display:flex; align-items:center; gap:6px; {% if not loop.last %}margin-bottom:4px;{% endif %}">
-            <div style="font-size:10.5px; color:var(--color-text-secondary); width:70px; flex-shrink:0;">{{ row.name }}</div>
-            <div style="flex:1; height:6px; background:var(--color-border); border-radius:3px; overflow:hidden;"><div style="width:{{ row.bar_pct }}%; height:100%; background:#16a34a;"></div></div>
-            <div style="font-size:10.5px; font-weight:700; color:var(--color-text-primary); width:30px; text-align:right;">{{ row.score }}</div>
-            <div style="font-size:10px; color:var(--color-text-secondary); width:28px; text-align:right;">—</div>
-          </div>
-          {% endfor %}
+          <div class="nps-insight" id="npsInsight"></div>
         </div>
 
-        <!-- MoM -->
-        <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:5px; overflow:hidden;">
-          <div style="font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--color-text-secondary); flex-shrink:0;">NPS Month-over-Month · {{ metrics.nps.trend_period_label }}</div>
-          <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:5px; min-height:0;">
-            {% for card in metrics.nps.trend %}
-            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:8px; padding:6px 10px; display:flex; flex-direction:column; gap:2px; min-height:0; overflow:hidden;">
-              <div style="font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-secondary);">{{ card.name }}</div>
-              <div style="font-size:10.5px; font-weight:700; color:var(--color-text-primary); display:flex; align-items:center; gap:3px;">
-                <span style="color:#94a3b8;">{{ card.v2 }}</span><span style="color:#cbd5e1;">→</span><span style="color:#94a3b8;">{{ card.v1 }}</span><span style="color:#cbd5e1;">→</span><span>{{ card.cur }}</span>
+        <!-- 2 — CHART: contexto de tendencia, ya no compite con el hero -->
+        <div class="nps-chart-card">
+          <div class="nps-chart-label">Tendencia {{ metrics.nps.trend_range_label }} <span style="font-weight:500; text-transform:none;">· click en un punto o en los tabs</span></div>
+          <div style="position:relative; flex:1; min-height:0; margin-top:2px;"><canvas id="npsTrendChart"></canvas></div>
+        </div>
+
+        <!-- 3 — DETALLE: terciario, agrupado y en gris para que no compita visualmente -->
+        <div class="nps-detail-card">
+          <div class="nps-detail-cols">
+            <div class="nps-detail-col">
+              <div class="nps-detail-h">Distribution</div>
+              <div id="npsDistBars">
+                <div class="nps-detail-row">
+                  <div class="nps-detail-nm">Prom.</div>
+                  <div class="nps-detail-track"><div id="npsPromBar" style="width:0%; height:100%; background:#16a34a;"></div></div>
+                  <div class="nps-detail-val" style="color:#16a34a;" id="npsPromPct">—</div>
+                </div>
+                <div class="nps-detail-row">
+                  <div class="nps-detail-nm">Pas.</div>
+                  <div class="nps-detail-track"><div id="npsPassBar" style="width:0%; height:100%; background:#f59e0b;"></div></div>
+                  <div class="nps-detail-val" style="color:#f59e0b;" id="npsPassPct">—</div>
+                </div>
+                <div class="nps-detail-row">
+                  <div class="nps-detail-nm">Det.</div>
+                  <div class="nps-detail-track"><div id="npsDetBar" style="width:0%; height:100%; background:#dc2626;"></div></div>
+                  <div class="nps-detail-val" style="color:#dc2626;" id="npsDetPct">—</div>
+                </div>
               </div>
-              <div style="font-size:9px; font-weight:600; color:{% if card.mom_class=='pos' %}#16a34a{% else %}#dc2626{% endif %};">{{ card.mom }} MoM</div>
-              <div style="font-size:9px; color:{% if card.vs2_class=='pos' %}#16a34a{% else %}#dc2626{% endif %};">{{ card.vs2 }} vs {{ metrics.nps.trend_period_label.split(' ')[0] }}</div>
+              <div id="npsDistEmpty" style="display:none; font-size:7.6px; color:var(--color-text-secondary); font-style:italic; line-height:1.35; margin-top:2px;"></div>
             </div>
-            {% endfor %}
-            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:8px; padding:6px 10px; grid-column:span 2; display:flex; align-items:center; gap:14px;">
-              <div style="font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-secondary);">{{ metrics.nps.costa_rica_trend.name }}</div>
-              <div style="font-size:10.5px; font-weight:700; color:var(--color-text-primary); display:flex; align-items:center; gap:3px;">
-                <span style="color:#94a3b8;">{{ metrics.nps.costa_rica_trend.v2 }}</span><span style="color:#cbd5e1;">→</span><span style="color:#94a3b8;">{{ metrics.nps.costa_rica_trend.v1 }}</span><span style="color:#cbd5e1;">→</span><span>{{ metrics.nps.costa_rica_trend.cur }}</span>
+            <div class="nps-detail-col">
+              <div class="nps-detail-h">By Country</div>
+              {% for code, id_suffix in [('CO','Co'), ('MX','Mx'), ('DO','Do'), ('CR','Cr')] %}
+              <div style="display:flex; align-items:center; gap:2px; {% if not loop.last %}margin-bottom:2px;{% endif %}">
+                <div class="nps-detail-nm">{{ code }}<span id="nps{{ id_suffix }}N" class="nps-nbadge"></span></div>
+                <div class="nps-detail-track"><div id="nps{{ id_suffix }}Bar" style="width:0%; height:100%; background:#16a34a;"></div></div>
+                <div class="nps-detail-val" id="nps{{ id_suffix }}Val">—</div>
               </div>
-              <div style="font-size:9px; color:var(--color-text-secondary);">
-                {% if metrics.nps.costa_rica_trend.vs2_note %}{{ metrics.nps.costa_rica_trend.vs2_note }} &nbsp;·&nbsp; {% endif %}
-                <span style="color:{% if metrics.nps.costa_rica_trend.mom_class=='pos' %}#16a34a{% else %}#dc2626{% endif %}; font-weight:600;">{{ metrics.nps.costa_rica_trend.mom }} MoM</span>
-              </div>
+              {% endfor %}
             </div>
           </div>
+          <div id="npsCountryNote" style="font-size:6.8px; color:var(--color-text-secondary); margin-top:4px; line-height:1.3;">muestra chica visible en el badge junto al país — no se promedia igual que Colombia</div>
         </div>
 
       </div>
 
-      <!-- RIGHT PANEL: Mention distribution -->
-      <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:6px; overflow:hidden;">
-        <div style="font-size:11px; font-weight:700; color:var(--color-text-primary); flex-shrink:0;">Mention distribution — Alegra consolidated</div>
+      <!-- RIGHT PANEL: Mention distribution — ancho fijo (no flex:1), como en la propuesta original -->
+      <div style="flex:0 0 250px; min-height:0; display:flex; flex-direction:column; gap:4px; overflow:hidden;">
+        <div style="font-size:9px; font-weight:700; color:var(--color-text-primary); flex-shrink:0;">Mention distribution — Alegra consolidated</div>
         {% for m in [
           ('#dc2626','Product quality','~105 · 41%',41,'Recurring errors, system outages, slowness in billing and sales, bugs in inventory, decimals, and accounting. Issues worsen after updates. In POS, directly impacts the point of sale in real time.'),
           ('#ec4899','Support and customer service','~55 · 21%',21,'Slow responses, automated support without real resolution, no phone channel, post-sale abandonment. Entrepreneur plan especially underserved. Users feel they pay but have no one to turn to.'),
@@ -234,16 +278,14 @@
           ('#3b82f6','Missing or limited features','~34 · 13%',13,'CRM, purchase orders, improved payroll, flexible reports, local tax compliance (RESICO, DGII, SUNAT), more complete mobile app, bank integration, quotes, and invoice customization.'),
           ('#94a3b8','Usability and overall experience','~13 · 5%',5,'Unintuitive navigation, complex flows, changes without notification, perception of a closed or hard-to-configure system.')
         ] %}
-        <div style="flex:1; min-height:0; background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:8px 12px; display:flex; flex-direction:column; gap:4px; overflow:hidden;">
-          <div style="display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-            <div style="display:flex; align-items:center; gap:6px;">
-              <div style="width:11px; height:11px; border-radius:3px; background:{{ m[0] }}; flex-shrink:0;"></div>
-              <span style="font-size:12.5px; font-weight:700; color:var(--color-text-primary);">{{ m[1] }}</span>
-            </div>
-            <div style="font-size:10.5px; font-weight:600; color:var(--color-text-secondary);">{{ m[2] }}</div>
+        <div style="flex:1; min-height:0; background:var(--color-surface); border:1px solid var(--color-border); border-radius:7px; padding:5px 8px; display:flex; flex-direction:column; gap:2px; overflow:hidden;">
+          <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
+            <div style="width:7px; height:7px; border-radius:2px; background:{{ m[0] }}; flex-shrink:0;"></div>
+            <span style="font-size:8.6px; font-weight:700; color:var(--color-text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0;">{{ m[1] }}</span>
+            <span style="font-size:7.4px; font-weight:600; color:var(--color-text-secondary); flex-shrink:0;">{{ m[2] }}</span>
           </div>
-          <div style="height:5px; background:var(--color-border); border-radius:3px; overflow:hidden; flex-shrink:0;"><div style="width:{{ m[3] }}%; height:100%; background:{{ m[0] }};"></div></div>
-          <div style="font-size:10px; color:var(--color-text-secondary); line-height:1.4; overflow:hidden;">{{ m[4] }}</div>
+          <div style="height:3px; background:var(--color-border); border-radius:2px; overflow:hidden; flex-shrink:0;"><div style="width:{{ m[3] }}%; height:100%; background:{{ m[0] }};"></div></div>
+          <div style="font-size:6.9px; color:var(--color-text-secondary); line-height:1.32; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">{{ m[4] }}</div>
         </div>
         {% endfor %}
       </div>
@@ -254,6 +296,166 @@
       <span class="footer-page">3</span>
     </div>
   </div>
+
+<script>
+/* ============ NPS — tendencia histórica interactiva (rediseño 2026-08-18) ============
+   Datos reales de data/nps_snapshot.yaml vía _build_nps() (fetch_metrics.py) — el delta
+   (flecha + pp vs mes anterior) SIEMPRE se calcula acá de los scores, nunca a mano; "context"
+   solo aporta la nota cualitativa del YAML. Ver metrics.nps para la forma exacta de los datos. */
+(function(){
+  const TEAL='#14b8a6', MUTED='#94a3b8', GRID='#f1f5f9';
+  const MONTHS = {{ metrics.nps.months | tojson }};
+  const LABELS = {{ metrics.nps.labels | tojson }};
+  const PERIOD_SHORT = {{ metrics.nps.period_short | tojson }};
+  const CONTEXT = {{ metrics.nps.context | tojson }};
+  const NPS_DATA = {{ metrics.nps.data | tojson }};
+  const DEFAULT_MONTH = {{ metrics.nps.default_month | tojson }};
+
+  const npsEl = document.getElementById('npsTrendChart');
+  if (!npsEl) return; // esta slide no está en la página (ej. si se edita el archivo)
+
+  let activeMonth = DEFAULT_MONTH;
+  const chart = new Chart(npsEl, {
+    type: 'line',
+    data: {
+      labels: MONTHS.map(k => LABELS[k]),
+      datasets: [{
+        data: MONTHS.map(k => NPS_DATA[k].score),
+        borderColor: TEAL, backgroundColor: 'rgba(20,184,166,0.12)',
+        borderWidth: 2, pointRadius: 3, pointHoverRadius: 5,
+        pointBackgroundColor: MONTHS.map(k => k === activeMonth ? '#1a1a2e' : TEAL),
+        pointBorderColor: '#fff', pointBorderWidth: 1.5,
+        tension: 0.3, fill: true, spanGaps: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      onClick(evt, els){ if (els.length) setMonth(MONTHS[els[0].index]); },
+      onHover(evt, els){ evt.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+      plugins: { legend:{display:false}, tooltip:{enabled:false} },
+      scales: {
+        x: { grid:{display:false}, border:{display:false}, ticks:{font:{size:9,weight:'600'},color:MUTED,maxRotation:0} },
+        y: { min:0, max:80, grid:{color:GRID}, border:{display:false},
+             ticks:{font:{size:8.5},color:MUTED,stepSize:20} }
+      }
+    },
+    plugins: [{
+      id:'npsMonthMarkers',
+      afterDraw(c){
+        const {ctx} = c;
+        MONTHS.forEach((k, xi) => {
+          const row = NPS_DATA[k];
+          const xPx = c.scales.x.getPixelForValue(xi);
+          ctx.save();
+          if (k === activeMonth) {
+            ctx.strokeStyle = 'rgba(26,26,46,0.35)'; ctx.setLineDash([2,3]);
+            ctx.beginPath(); ctx.moveTo(xPx, c.chartArea.top); ctx.lineTo(xPx, c.chartArea.bottom); ctx.stroke();
+            ctx.setLineDash([]);
+          }
+          ctx.font = '700 8.5px Inter,sans-serif'; ctx.textAlign = 'center';
+          if (row.score === null) {
+            const yMid = c.scales.y.getPixelForValue(40);
+            ctx.beginPath(); ctx.arc(xPx, yMid, 3, 0, Math.PI*2);
+            ctx.strokeStyle = MUTED; ctx.stroke();
+            ctx.fillStyle = MUTED; ctx.textBaseline = 'bottom';
+            ctx.fillText('sin dato', xPx, c.chartArea.bottom + 12);
+          } else {
+            const yPx = c.scales.y.getPixelForValue(row.score);
+            ctx.fillStyle = k === activeMonth ? '#1a1a2e' : '#64748b';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(row.score.toFixed(1), xPx, yPx - 6);
+          }
+          ctx.restore();
+        });
+      }
+    }]
+  });
+
+  function fmtOrDash(v){ return (v === null || v === undefined) ? '—' : (v.toFixed ? v.toFixed(1) : v); }
+
+  function setMonth(key){
+    activeMonth = key;
+    const d = NPS_DATA[key];
+    const idx = MONTHS.indexOf(key);
+    const prevKey = idx > 0 ? MONTHS[idx - 1] : null;
+    const prevScore = prevKey ? NPS_DATA[prevKey].score : null;
+
+    document.querySelectorAll('.nps-tab').forEach(btn =>
+      btn.classList.toggle('active', btn.dataset.month === key));
+    document.getElementById('npsPeriodLabel2').textContent = PERIOD_SHORT[key];
+
+    chart.data.datasets[0].pointBackgroundColor = MONTHS.map(k => k === key ? '#1a1a2e' : TEAL);
+    chart.update();
+
+    const heroScoreEl = document.getElementById('npsHeroScore');
+    heroScoreEl.textContent = fmtOrDash(d.score);
+    document.getElementById('npsHeroResponses').textContent = d.responses === null ? '—' : d.responses.toLocaleString('en-US');
+
+    // Insight — la parte numérica (flecha + pp) SIEMPRE se calcula de los datos, nunca se
+    // redacta a mano; solo el contexto cualitativo (por qué) viene de CONTEXT (YAML).
+    const insightEl = document.getElementById('npsInsight');
+    insightEl.classList.remove('pos','neg','neu');
+    heroScoreEl.style.color = '';
+    if (d.score === null) {
+      insightEl.classList.add('neu');
+      insightEl.textContent = '— ' + (CONTEXT[key] || 'Sin dato ese mes.');
+    } else if (prevScore === null) {
+      insightEl.classList.add('neu');
+      insightEl.textContent = CONTEXT[key] || 'Sin mes anterior para comparar.';
+    } else {
+      const delta = Math.round((d.score - prevScore) * 10) / 10;
+      const arrow = delta > 0 ? '▲' : (delta < 0 ? '▼' : '→');
+      const cls = delta > 0 ? 'pos' : (delta < 0 ? 'neg' : 'neu');
+      insightEl.classList.add(cls);
+      heroScoreEl.style.color = delta > 0 ? '#15803d' : (delta < 0 ? '#b91c1c' : '');
+      const ctxNote = CONTEXT[key];
+      insightEl.textContent = `${arrow} ${delta > 0 ? '+' : ''}${delta.toFixed(1)} pts vs ${PERIOD_SHORT[prevKey]}` + (ctxNote ? ' · ' + ctxNote : '');
+    }
+
+    const distBars = document.getElementById('npsDistBars');
+    const distEmpty = document.getElementById('npsDistEmpty');
+    if (d.distribution) {
+      distBars.style.display = ''; distEmpty.style.display = 'none';
+      document.getElementById('npsPromBar').style.width = d.distribution.prom.pct + '%';
+      document.getElementById('npsPromPct').textContent = d.distribution.prom.pct.toFixed(1) + '%';
+      document.getElementById('npsPassBar').style.width = d.distribution.pass.pct + '%';
+      document.getElementById('npsPassPct').textContent = d.distribution.pass.pct.toFixed(1) + '%';
+      document.getElementById('npsDetBar').style.width = d.distribution.det.pct + '%';
+      document.getElementById('npsDetPct').textContent = d.distribution.det.pct.toFixed(1) + '%';
+    } else {
+      distBars.style.display = 'none';
+      distEmpty.style.display = '';
+      distEmpty.textContent = d.score === null
+        ? (CONTEXT[key] || 'Sin dato ese mes.')
+        : 'Sin distribution registrada ese mes — solo se guardó el score global.';
+    }
+
+    const ss = d.by_country_n || {};
+    const cMap = [
+      ['npsCoBar','npsCoVal', d.by_country.colombia, null],
+      ['npsMxBar','npsMxVal', d.by_country.mexico, ss.mexico],
+      ['npsDoBar','npsDoVal', d.by_country.dom_rep, ss.dom_rep],
+      ['npsCrBar','npsCrVal', d.by_country.costa_rica, ss.costa_rica],
+    ];
+    cMap.forEach(([barId, valId, v, n]) => {
+      const bar = document.getElementById(barId);
+      bar.style.width = (v === null ? 0 : v) + '%';
+      bar.classList.toggle('nps-bar-hatch', !!n);
+      document.getElementById(valId).textContent = fmtOrDash(v);
+    });
+    document.getElementById('npsMxN').textContent = ss.mexico ? `n=${ss.mexico}` : '';
+    document.getElementById('npsDoN').textContent = ss.dom_rep ? `n=${ss.dom_rep}` : '';
+    document.getElementById('npsCrN').textContent = ss.costa_rica ? `n=${ss.costa_rica}` : '';
+    document.getElementById('npsCountryNote').style.display =
+      (ss.mexico || ss.dom_rep || ss.costa_rica) ? '' : 'none';
+  }
+
+  document.querySelectorAll('.nps-tab').forEach(btn =>
+    btn.addEventListener('click', () => setMonth(btn.dataset.month)));
+
+  setMonth(DEFAULT_MONTH);
+})();
+</script>
 
 </body>
 </html>

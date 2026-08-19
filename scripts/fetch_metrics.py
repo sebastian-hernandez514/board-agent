@@ -738,22 +738,13 @@ def _build_churn_tenure(cutoff):
 _NPS_SNAPSHOT_FILE = ROOT / "data" / "nps_snapshot.yaml"
 _NPS_COUNTRIES = [("colombia", "Colombia"), ("mexico", "Mexico"),
                   ("dom_rep", "Dom. Rep."), ("costa_rica", "Costa Rica")]
-_NPS_BAR_MAX = 75  # referencia visual para el ancho de barra "By Country" — no es un límite
-                   # real de NPS (va de -100 a 100), es la escala elegida en el diseño
-                   # original del template (63/47.4 ≈ 72/54.3 ≈ 70/52.4 ≈ 40/30.2 ≈ 1/75).
+# _NPS_BAR_MAX (escala 0-75 para las barras "By Country") y _nps_delta() (formateo de deltas
+# MoM) quedaron eliminados en el rediseño 2026-08-18 — la nueva slide interactiva calcula el
+# delta en el cliente (JS) y usa el score crudo como % de ancho de barra directamente, ver
+# `_build_nps()` más abajo y `templates/6_rd.j2`.
 
 
-def _nps_delta(cur, prev):
-    """Formatea un delta de NPS al estilo del template ('▲ +4.9 MoM' / '▼ -2.3 vs Mar')."""
-    if cur is None or prev is None:
-        return None, "neu"
-    d = round(cur - prev, 1)
-    if d > 0:
-        return f"▲ +{d}", "pos"
-    if d < 0:
-        return f"▼ {d}", "neg"
-    return "▬ 0.0", "neu"
-
+_NPS_WINDOW = 7  # meses en la ventana móvil de tabs (rediseño 2026-08-18) — incluye el mes de corte
 
 def _build_nps(cutoff):
     """NPS (6_rd.j2 slide 3) desde snapshot asistido (data/nps_snapshot.yaml) — la fuente real
@@ -763,66 +754,112 @@ def _build_nps(cutoff):
     2026-07-06: actualizar este YAML una vez al mes vía sesión de Claude en vez de screenshots.
     Se evaluó calcular esto 100% desde RS (db_amplitude_events.amplitude_events_gold ya tiene
     los eventos de encuesta) pero la fórmula reconstruida dio ~2-8% de diferencia vs Amplitude
-    (no exacta) — el usuario prefirió el snapshot exacto por ahora. Ver memory/project_board_agent.md."""
+    (no exacta) — el usuario prefirió el snapshot exacto por ahora. Ver memory/project_board_agent.md.
+
+    REDISEÑO 2026-08-18 — tendencia histórica interactiva (antes: solo hero del mes de corte +
+    4 tarjetas MoM estáticas). Ahora la slide muestra tabs por mes (ventana móvil de
+    `_NPS_WINDOW` meses terminando en el mes de corte) — el click en un tab recalcula TODO el
+    panel (score/responses/insight/distribution/by country) en el cliente, mismo patrón que
+    `hc`/`pt` (headcount) ya usan para pasarle datos a JS vía `| tojson`. El delta (flecha +
+    pp vs mes anterior) SIEMPRE se calcula del lado del cliente a partir de los scores, nunca
+    a mano; `context` (nota editorial corta del YAML) solo aporta el "por qué" cualitativo.
+
+    Importante: a diferencia de la versión vieja, esta función YA NO devuelve `None` cuando el
+    mes de corte no tiene dato real (ver `data/nps_snapshot.yaml`, entrada "2026-07") — el mes
+    de corte se representa con un objeto con todos los campos en `None` dentro de `data`, y el
+    propio tab/gráfico muestra el hueco ("sin dato") en vez de que 6_rd.j2 truene armando la
+    slide (bug real que motivó F0.10/F3.7 en `phase0_gate.py`/`slide_registry.py` — esos 2
+    checks siguen funcionando sin cambios porque solo verifican `month in snap`, y ahora
+    siempre hay una entrada explícita para el mes de corte, aunque sea en null)."""
     if not _NPS_SNAPSHOT_FILE.exists():
         return None
     snap = yaml.safe_load(_NPS_SNAPSHOT_FILE.read_text()) or {}
-    m1, m2 = _prev_m(cutoff), _prev_m(_prev_m(cutoff))
-    cur, d1, d2 = snap.get(cutoff), snap.get(m1) or {}, snap.get(m2) or {}
-    if not cur:
+    if not snap:
         return None
 
-    dist = cur.get("distribution") or {}
-    by_country_cur = cur.get("by_country") or {}
+    # Ventana móvil: los últimos _NPS_WINDOW meses terminando en el mes de corte, recortada
+    # para no arrancar antes del primer mes que existe en el snapshot (evita tabs "fantasma"
+    # de antes de que existiera este tracking).
+    months = []
+    m = cutoff
+    for _ in range(_NPS_WINDOW):
+        months.append(m)
+        m = _prev_m(m)
+    months.reverse()
+    first_present = min(snap.keys())
+    months = [mk for mk in months if mk >= first_present]
+    if not months:
+        return None
 
-    def _dist_pct(key):
-        """Amplitude reporta cada % del chart de distribución redondeado de forma independiente
-        (ej. mayo-26: 64.7+14.9+19.4 = 99.0%, no 100%) — mismo bug que Mayra detectó antes.
-        Los 'n' de cada bucket sí suman exacto a 'responses', así que recalcular desde ahí
-        garantiza que el total siempre dé 100%."""
-        n, total = dist.get(f"{key}_n"), cur.get("responses")
-        if n is not None and total:
-            return round(n / total * 100, 1)
-        return dist.get(f"{key}_pct")
+    def _month_data(mk):
+        d = snap.get(mk)
+        if not d:
+            return {"score": None, "responses": None, "distribution": None,
+                    "by_country": {key: None for key, _ in _NPS_COUNTRIES}, "by_country_n": {}}
 
-    by_country_out = []
-    for key, label in _NPS_COUNTRIES:
-        score = by_country_cur.get(key)
-        if score is None:
-            continue
-        by_country_out.append({
-            "name": label, "score": f"{score:.1f}",
-            "bar_pct": round(score / _NPS_BAR_MAX * 100),
-        })
+        dist_raw = d.get("distribution") or {}
+        responses = d.get("responses")
 
-    def _trend_card(label, key=None):
-        cur_v = cur.get("score") if key is None else (cur.get("by_country") or {}).get(key)
-        v1 = d1.get("score") if key is None else (d1.get("by_country") or {}).get(key)
-        v2 = d2.get("score") if key is None else (d2.get("by_country") or {}).get(key)
-        mom_s, mom_c = _nps_delta(cur_v, v1)
-        vs2_s, vs2_c = _nps_delta(cur_v, v2)
+        def _dist_pct(key):
+            """Amplitude reporta cada % del chart de distribución redondeado de forma
+            independiente (ej. mayo-26: 64.7+14.9+19.4 = 99.0%, no 100%) — mismo bug que Mayra
+            detectó antes. Los 'n' de cada bucket sí suman exacto a 'responses', así que
+            recalcular desde ahí garantiza que el total siempre dé 100%."""
+            n = dist_raw.get(f"{key}_n")
+            if n is not None and responses:
+                return round(n / responses * 100, 1)
+            return dist_raw.get(f"{key}_pct")
+
+        distribution = None
+        if dist_raw:
+            distribution = {
+                "prom": {"pct": _dist_pct("promoters"), "n": dist_raw.get("promoters_n")},
+                "pass": {"pct": _dist_pct("passives"), "n": dist_raw.get("passives_n")},
+                "det":  {"pct": _dist_pct("detractors"), "n": dist_raw.get("detractors_n")},
+            }
+
+        by_country_raw = d.get("by_country") or {}
         return {
-            "name": label,
-            "v2": f"{v2:.1f}" if v2 is not None else "—",
-            "v1": f"{v1:.1f}" if v1 is not None else "—",
-            "cur": f"{cur_v:.1f}" if cur_v is not None else "—",
-            "mom": mom_s or "—", "mom_class": mom_c,
-            "vs2": vs2_s or "—", "vs2_class": vs2_c,
-            "vs2_note": None if v2 is not None else f"{_MONTH_NAMES[int(m2[5:]) - 1]}: no data",
+            "score": d.get("score"),
+            "responses": responses,
+            "distribution": distribution,
+            "by_country": {key: by_country_raw.get(key) for key, _ in _NPS_COUNTRIES},
+            "by_country_n": d.get("by_country_n") or {},
         }
 
+    data = {mk: _month_data(mk) for mk in months}
+
+    def _dot(mk):
+        """Clasificación visual del tab: 'full' (score+distribution), 'partial' (solo score,
+        ej. mar/abr-26 que no guardaron distribution ese mes) o 'none' (sin dato, ej. jul-26)."""
+        d = data[mk]
+        if d["score"] is None:
+            return "none"
+        return "full" if d["distribution"] is not None else "partial"
+
+    def _es_abbr(mk):
+        return _MONTH_NAMES_ES[int(mk[5:]) - 1]
+
+    # mes por defecto al abrir la slide: el de corte si tiene dato real, si no el último mes
+    # HACIA ATRÁS que sí lo tenga — así el board impreso/PDF siempre abre con un score real de
+    # cabecera (no en blanco), aunque el mes de corte todavía no tenga NPS (ej. jul-26); el
+    # propio mes de corte sigue visible en el gráfico como el hueco real, un click lo muestra.
+    default_month = cutoff
+    for mk in reversed(months):
+        if data[mk]["score"] is not None:
+            default_month = mk
+            break
+
     return {
-        "score": f"{cur['score']:.1f}" if cur.get("score") is not None else "—",
-        "responses": f"{cur['responses']:,}" if cur.get("responses") is not None else "—",
-        "promoters_pct": _dist_pct("promoters"), "promoters_n": dist.get("promoters_n"),
-        "passives_pct": _dist_pct("passives"), "passives_n": dist.get("passives_n"),
-        "detractors_pct": _dist_pct("detractors"), "detractors_n": dist.get("detractors_n"),
-        "by_country": by_country_out,
-        "trend": [_trend_card("NPS Global"), _trend_card("Colombia", "colombia"),
-                  _trend_card("Mexico", "mexico"), _trend_card("Dom. Rep.", "dom_rep")],
-        "costa_rica_trend": _trend_card("Costa Rica", "costa_rica"),
-        "trend_period_label": (f"{_MONTH_NAMES[int(m2[5:]) - 1]} → {_MONTH_NAMES[int(m1[5:]) - 1]} "
-                                f"→ {_MONTH_NAMES[int(cutoff[5:]) - 1]} {cutoff[:4]}"),
+        "months": months,
+        "labels": {mk: f"{_es_abbr(mk)}'{mk[2:4]}" for mk in months},          # "Jul'26"
+        "period_short": {mk: f"{_es_abbr(mk).lower()}-{mk[2:4]}" for mk in months},            # "jul-26"
+        "trend_range_label": f"{_es_abbr(months[0]).lower()}-{_es_abbr(months[-1]).lower()} {months[-1][:4]}",  # "ene-jul 2026"
+        "context": {mk: (snap.get(mk) or {}).get("context") or "" for mk in months},
+        "data": data,
+        "dots": {mk: _dot(mk) for mk in months},
+        "current": cutoff,
+        "default_month": default_month,
     }
 
 def _apply_fx_to_row(row, fx, cutoff):
@@ -1229,7 +1266,7 @@ def _classify_arr_walk_entities(rows: list, history: dict, cutoff: str, rate_loo
 
 
 def _split_arr_walk_bucket_by_segment(seg_rows: list, seg_history: dict, company_status: dict,
-                                       cutoff: str, rate_lookup) -> dict:
+                                       cutoff: str, rate_lookup, seg_label: str) -> dict:
     """Construye el bucket de UN segmento (Core o Lite) reutilizando el status ya decidido
     a nivel de COMPAÑÍA COMPLETA (`company_status`, viene de _classify_arr_walk_entities
     corrida sobre company_rows/by_company — el mismo criterio que usa GLO) — 2026-07-27,
@@ -1241,11 +1278,34 @@ def _split_arr_walk_bucket_by_segment(seg_rows: list, seg_history: dict, company
     Core aunque GLO (compañía completa) correctamente no la contara. Ahora la DECISIÓN de
     qué le pasó a la compañía este mes se toma una sola vez (GLO); acá solo se reparte el
     monto en dólares de ESE segmento según esa decisión — garantiza por construcción que
-    Core+Lite sumen exacto a GLO en every bucket de flujo, no solo en el stock (R20).
+    Core+Lite sumen exacto a GLO en New/Recovered/Reactivated/Churn (ver R22 en
+    phase4_validator.py). Upsell/Downsell NO tienen esta garantía todavía — ver nota
+    "2026-08-17" más abajo.
 
     `seg_history` (antes `by_segment`) ya NO decide new/churn — solo se usa para conocer el
     monto local del mes anterior EN ESTE SEGMENTO (necesario para el delta de Upsell/
     Downsell y para el monto de Churn), y se sigue actualizando para el próximo mes.
+
+    `seg_label` ("Core"/"Lite") — 2026-08-17, BUG REAL corregido: `seg_history` es UN SOLO
+    diccionario compartido entre Core y Lite (claves "cid|Core|app" y "cid|Lite|app"
+    mezcladas en el mismo namespace, `by_segment` en disco). El loop de detección de churn
+    de abajo recorre TODO `seg_history` — sin `seg_label` no había forma de distinguir "esta
+    entrada es de Core" de "esta entrada es de Lite", así que la llamada para Core contaba
+    TAMBIÉN las compañías que churnearon desde Lite (y viceversa): ambas llamadas terminaban
+    devolviendo el mismo total que GLO en vez de la mitad que le correspondía a cada una
+    (Core=Lite=3624 en vez de 941/2683 en jul-2026, ver memory/project_board_agent.md).
+    El resto de los buckets New/Recovered/Reactivated (main loop de arriba, sobre `seg_rows`
+    ya pre-filtrado por segmento) NO tenía este bug.
+
+    Upsell/Downsell — LIMITACIÓN DISTINTA, encontrada el mismo día, NO corregida todavía:
+    cuando una compañía migra de segmento en el mismo mes (activa el mes pasado en Lite,
+    este mes en Core, o viceversa — ~1,686 compañías en jul-2026), el segmento NUEVO no
+    tiene `prev_seg` (nunca tuvo fila ahí antes) así que cuenta el monto COMPLETO como
+    upsell puro, mientras el segmento VIEJO no registra nada (no tiene fila este mes, no es
+    "churn" porque la compañía sigue activa a nivel GLO) — el monto que se va del segmento
+    viejo desaparece sin ser downsell en ningún lado. GLO no tiene este problema (ve el
+    delta neto de la compañía completa, sin que importe en qué segmento aterrizó). No se
+    fuerza R22 sobre estos dos buckets por esto — ver docstring de _check_r22_seg_flow_sums.
 
     Nota: si una compañía sigue activa a nivel GLO pero se mueve de un segmento al otro
     (migración Lite↔Core), esta función no la cuenta como churn ni new en ningún segmento
@@ -1294,6 +1354,8 @@ def _split_arr_walk_bucket_by_segment(seg_rows: list, seg_history: dict, company
         if seg_key in seen_seg_keys or prev["last_month"] != prev_month:
             continue
         cid, _seg, app = seg_key.split("|")
+        if _seg != seg_label:
+            continue  # entrada de OTRO segmento en el mismo diccionario compartido — no es de acá
         company_key = f"{cid}|{app}"
         if company_status.get(company_key) == "churn":
             rate_now = rate_lookup(app, cutoff)
@@ -1402,7 +1464,7 @@ def _apply_arr_walk_v2(segs_raw: dict, seg_metrics: dict, all_months: list, late
 
     for seg_label in ("Core", "Lite"):
         bucket = _split_arr_walk_bucket_by_segment(seg_rows.get(seg_label, []), by_segment,
-                                                     company_status, cutoff, _rate_lookup)
+                                                     company_status, cutoff, _rate_lookup, seg_label)
         bucket_rows[seg_label] = _arr_walk_v2_bucket_row(bucket, cutoff, seg_label)
         row = segs_raw.setdefault(seg_label, {}).setdefault(cutoff, {"m": cutoff, "seg": seg_label})
         row.update(bucket_rows[seg_label])
@@ -2130,6 +2192,7 @@ def load_data(cutoff, refresh=False):
 
 # ── Metric computation (adapted from dashboard.py) ────────────────────────────
 _MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+_MONTH_NAMES_ES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]  # NPS (6_rd.j2)
 
 def _month_label(m):   # "2026-02" → "Feb-26"
     return f"{_MONTH_NAMES[int(m[5:])-1]}-{m[2:4]}"
@@ -2315,6 +2378,15 @@ def _fm(v):
     if abs(v) >= 1e6:
         return f"${v/1e6:.1f}M"
     return f"${v/1e3:.0f}K"
+
+def _fm1(v):
+    """Igual que _fm() pero con 1 decimal en el rango K ("$35.0K" en vez de "$35K") — pedido
+    2026-08-17 específico para la tarjeta "New MRR — Core vs Lite" de 1_inicio.j2, no cambia
+    el formateo general de _fm() (usado en muchos otros lugares del board)."""
+    if v is None: return "N/A"
+    if abs(v) >= 1e6:
+        return f"${v/1e6:.1f}M"
+    return f"${v/1e3:.1f}K"
 
 def _fl(v):
     """Logos → "X.Xk" """
@@ -2610,10 +2682,16 @@ def _build_supercontadores(sc_hist, sc_events, sc_sow, cutoff):
 
 # Orden de equipos por categoría — coincide con el orden ya usado en 7_headcount.j2.
 # dim_headcount_team_category solo da equipo→categoría, no el orden de presentación
-# dentro de cada categoría, así que se fija acá (son 21 equipos, no cambia seguido).
+# dentro de cada categoría, así que se fija acá (eran 21 equipos, no cambia seguido — pero
+# SÍ cambió: "Revenue" se agregó en jul-2026, ver memory/feedback_headcount_eop_stale_copy_bug.md).
+# Bug real corregido 2026-08-19: esta lista nunca se actualizó cuando se agregó "Revenue" a
+# dim_headcount_team_category (categoría real: "Customer Acquisition Costs") — como no
+# estaba en ningún grupo de acá, caía en el fallback "Other (sin mapear)" (`extra`, más
+# abajo) como una categoría NUEVA de 1 equipo, agregando una fila extra a la tabla que
+# desbordaba el alto fijo de la slide (`overflow:hidden` en `.hc-slide`).
 _HC_CATEGORY_ORDER = [
     ("Cost of Revenue", ["Customer Experience", "Customer Success", "Collection"]),
-    ("Customer Acquisition Costs", ["Growth", "Sales", "Accountants", "Strategic Relationships", "RevOps"]),
+    ("Customer Acquisition Costs", ["Growth", "Sales", "Accountants", "Strategic Relationships", "RevOps", "Revenue"]),
     ("Product & Development", ["Development", "Product"]),
     ("General & Administration", ["Data", "Finance", "People", "Strategic Direction", "Talent Acquisition"]),
     ("Alanube", ["Alanube"]),
@@ -3786,8 +3864,8 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "arr_alanube_pct":         f"{_alanube_arr_pct3}%",
         "arr_alanube_fmt":         _fm(_al_cur),
         "new_mrr_core_lite_split": f"Core {_core_new_mrr_pct}% · Lite {100 - _core_new_mrr_pct}%",
-        "new_mrr_core_fmt":        _fm(_core_new_mrr_raw),
-        "new_mrr_lite_fmt":        _fm(_lite_new_mrr_raw),
+        "new_mrr_core_fmt":        _fm1(_core_new_mrr_raw),
+        "new_mrr_lite_fmt":        _fm1(_lite_new_mrr_raw),
 
         "new_mrr":                    _fm(all_q.get("a_new", 0) / 12) if is_quarter_end else _fm(all_m.get("a_new", 0) / 12),  # Q=suma 3 meses, MoM=mes actual
         "new_mrr_mom":                new_mrr_mom_str,
@@ -4277,7 +4355,13 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             _sa_cop     = [_fx_avg_q("colombia", q) for q in _s5]
             _sa_mxn     = [_fx_avg_q("mexico",   q) for q in _s5]
             _sa_eop_py  = [_sq_data.get(_py_lbl(q), {}).get("a_eop") or 0 for q in _s5]
-            _ytd_labels = [f"YTD'{_s5[0][-2:]}", f"YTD'{_s5[-1][-2:]}"]
+            # Bug real corregido (2026-08-17): usar el año de _s5[0]/_s5[-1] (primer/último
+            # período MOSTRADO en la tabla de 5 columnas) daba "YTD'26"/"YTD'26" duplicado
+            # cada vez que las 5 columnas caían dentro del mismo año calendario (ej. Mar-26
+            # a Jul-26) — solo "funcionaba" quand la ventana cruzaba fin de año. Mismo cálculo
+            # robusto que ya usa GLO (_g_ytd_labels arriba): siempre año-de-corte-1 / año-de-corte,
+            # sin importar qué columnas se estén mostrando.
+            _ytd_labels = [f"YTD'{int(cutoff[:4]) % 100 - 1:02d}", f"YTD'{int(cutoff[:4]) % 100:02d}"]
 
         else:
             # ── Modo mensual: últimos 5 meses ──
@@ -4315,7 +4399,13 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             _sa_cop     = [_fx_rates.get(("colombia", m), 0) for m in _s5m_iso]
             _sa_mxn     = [_fx_rates.get(("mexico",   m), 0) for m in _s5m_iso]
             _sa_eop_py  = [_sm_data.get(_m_py_lbl(lbl), {}).get("a_eop") or 0 for lbl in _s5]
-            _ytd_labels = [f"YTD'{_s5[0][-2:]}", f"YTD'{_s5[-1][-2:]}"]
+            # Bug real corregido (2026-08-17): usar el año de _s5[0]/_s5[-1] (primer/último
+            # período MOSTRADO en la tabla de 5 columnas) daba "YTD'26"/"YTD'26" duplicado
+            # cada vez que las 5 columnas caían dentro del mismo año calendario (ej. Mar-26
+            # a Jul-26) — solo "funcionaba" quand la ventana cruzaba fin de año. Mismo cálculo
+            # robusto que ya usa GLO (_g_ytd_labels arriba): siempre año-de-corte-1 / año-de-corte,
+            # sin importar qué columnas se estén mostrando.
+            _ytd_labels = [f"YTD'{int(cutoff[:4]) % 100 - 1:02d}", f"YTD'{int(cutoff[:4]) % 100:02d}"]
 
         _sl_bop      = _sraw("l_bop")
         _sl_new      = _sraw("l_new")
@@ -4684,6 +4774,43 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         for m in all_months
         if m in segs_raw.get("all", {})
     ]
+
+    # ── Flujo (no-composite) Core+Lite=GLO — SOLO el mes de corte (para R22) ──────────
+    # 2026-08-17: guardrail nuevo tras el bug real de _split_arr_walk_bucket_by_segment()
+    # (Core y Lite devolvían el mismo total que GLO en vez de su propia mitad, ver docstring
+    # de esa función y memory/project_board_agent.md). A diferencia de R20 (stock, siempre
+    # cuadra en TODO el histórico por construcción de build_seg_metrics()) y de las métricas
+    # COMPUESTAS (logo_churn_core/lite/global %, que son tasas — Core%+Lite% NO tiene por
+    # qué sumar Global%, es un promedio ponderado, no una suma — ver docstring de R22), este
+    # export SOLO cubre el mes de corte, NO todo `arr_walk_v2_monthly_history.json` — los
+    # meses históricos (2022-10→2026-06) se sembraron con un backfill vía SQL directo contra
+    # RS que clasificaba Core/Lite con su PROPIO historial por segmento (metodología previa
+    # al refactor del 27-jul), así que ahí Core+Lite NO tiene por qué sumar exacto a GLO —
+    # eso es esperado, no un bug (confirmado en vivo: aplicar esta regla a todo el histórico
+    # da ~30/31 meses en FAIL, todos anteriores a jul-2026). La garantía de que Core+Lite
+    # sume exacto a GLO en el flujo solo aplica desde que `_apply_arr_walk_v2()` corre en
+    # vivo con la clasificación compartida (2026-07 en adelante) — por eso el check se limita
+    # al mes de corte de CADA corrida, que es el único que se re-clasifica con la lógica
+    # nueva cada vez.
+    # mrr_upsell/mrr_downsell se exportan igual (por si sirven para análisis) pero R22 NO
+    # los valida — tienen una limitación distinta y sin corregir (migraciones de segmento
+    # intra-mes inflan el upsell del segmento nuevo sin registrar downsell en el viejo), ver
+    # docstring de _split_arr_walk_bucket_by_segment y de _check_r22_seg_flow_sums.
+    _ADDITIVE_FLOW_KEYS = ["logos_new", "logos_recov", "logos_react", "logos_churn",
+                           "mrr_new", "mrr_recov", "mrr_react", "mrr_churn",
+                           "mrr_upsell", "mrr_downsell"]
+    seg_flow_rows = []
+    core_row = segs_raw.get("Core", {}).get(cutoff, {})
+    lite_row = segs_raw.get("Lite", {}).get(cutoff, {})
+    all_row  = segs_raw.get("all",  {}).get(cutoff, {})
+    if core_row and lite_row and all_row:
+        row = {"m": cutoff}
+        for k in _ADDITIVE_FLOW_KEYS:
+            row[f"core_{k}"] = core_row.get(k, 0.0)
+            row[f"lite_{k}"] = lite_row.get(k, 0.0)
+            row[f"all_{k}"]  = all_row.get(k, 0.0)
+        seg_flow_rows.append(row)
+    out["seg_flow_by_month"] = seg_flow_rows
 
     return out
 

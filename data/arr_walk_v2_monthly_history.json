@@ -1859,6 +1859,68 @@
         "mrr_upsell": 97385.92973052872,
         "seg": "all"
       }
+    },
+    "2026-07": {
+      "Core": {
+        "logos_churn": 941.0,
+        "logos_new": 759.0,
+        "logos_react": 362.0,
+        "logos_recov": 113.0,
+        "m": "2026-07",
+        "mrr_churn": 48170.34558266603,
+        "mrr_cross_down": 0.0,
+        "mrr_cross_new_t1plus": 0.0,
+        "mrr_cross_readop": 0.0,
+        "mrr_downsell": -32676.58428250652,
+        "mrr_new": 34862.17315448261,
+        "mrr_new_base_t0": 34862.17315448261,
+        "mrr_new_cross_t0": 0.0,
+        "mrr_pricing_others": 0.0,
+        "mrr_react": 16152.229212870203,
+        "mrr_recov": 3980.1025494034907,
+        "mrr_upsell": 153711.45473632074,
+        "seg": "Core"
+      },
+      "Lite": {
+        "logos_churn": 2683.0,
+        "logos_new": 1305.0,
+        "logos_react": 965.0,
+        "logos_recov": 599.0,
+        "m": "2026-07",
+        "mrr_churn": 74584.9808908286,
+        "mrr_cross_down": 0.0,
+        "mrr_cross_new_t1plus": 0.0,
+        "mrr_cross_readop": 0.0,
+        "mrr_downsell": -18635.121729529772,
+        "mrr_new": 31557.313014691055,
+        "mrr_new_base_t0": 31557.313014691055,
+        "mrr_new_cross_t0": 0.0,
+        "mrr_pricing_others": 0.0,
+        "mrr_react": 19303.861398068166,
+        "mrr_recov": 11613.378652558153,
+        "mrr_upsell": 51287.166439681314,
+        "seg": "Lite"
+      },
+      "all": {
+        "logos_churn": 3624.0,
+        "logos_new": 2064.0,
+        "logos_react": 1327.0,
+        "logos_recov": 711.0,
+        "m": "2026-07",
+        "mrr_churn": 122755.32647349633,
+        "mrr_cross_down": 0.0,
+        "mrr_cross_new_t1plus": 0.0,
+        "mrr_cross_readop": 0.0,
+        "mrr_downsell": -52935.39108086457,
+        "mrr_new": 66419.48616917359,
+        "mrr_new_base_t0": 66419.48616917359,
+        "mrr_new_cross_t0": 0.0,
+        "mrr_pricing_others": 0.0,
+        "mrr_react": 35456.090610937965,
+        "mrr_recov": 15593.481201961682,
+        "mrr_upsell": 122970.37773351684,
+        "seg": "all"
+      }
     }
   }
 }

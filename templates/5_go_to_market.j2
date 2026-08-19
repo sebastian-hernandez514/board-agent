@@ -758,189 +758,156 @@
   <div class="slide-divider">↓</div>
 
   <!-- ============================================================
-       SLIDE 4c — Value Events Funnel (area chart) + Stock 12m + Donut
+       SLIDE 4c — Accountants Month-End Summary (portfolio declarado)
+       (fuente: contadores-tracking-board.html recibido 2026-08-18 — reemplaza la 4c
+       vieja de "Depth of product adoption" + Top 20 SoW por decisión explícita del
+       usuario 2026-08-18; datos reales embebidos tal como llegaron, mismo criterio que
+       el Discussion Topic de Expansion en 2_discussion_topic.j2)
        ============================================================ -->
   <style>
-  .s4c-wip { display:inline-block; font-size:8.5px; font-weight:700; background:#fff7ed; color:#C2410C; border:1px solid #fed7aa; border-radius:4px; padding:1px 6px; letter-spacing:.5px; text-transform:uppercase; margin-left:8px; vertical-align:middle; }
-  .s4c-ev-leg { display:flex; align-items:center; gap:5px; font-size:8.5px; color:#475569; }
-  .s4c-ev-dot { width:9px; height:9px; border-radius:2px; flex-shrink:0; }
+  .atb-eye { font-size:9px; letter-spacing:.09em; text-transform:uppercase; color:#3aa88f; font-weight:700; margin:0 0 5px; flex-shrink:0; }
+  table.atb-res { width:100%; border-collapse:collapse; font-size:9.5px; flex-shrink:0; }
+  table.atb-res th { font-size:7.3px; text-transform:uppercase; letter-spacing:.03em; color:#7d8d98; font-weight:700; text-align:right; padding:3px 5px; border-bottom:1px solid #e7edf1; }
+  table.atb-res th:first-child { text-align:left; }
+  table.atb-res td { padding:3px 5px; border-bottom:1px solid #e7edf1; text-align:right; }
+  table.atb-res td:first-child { text-align:left; font-weight:600; }
+  table.atb-res tr:last-child td { color:#7d8d98; }
+  .atb-dot { display:inline-block; width:7px; height:7px; border-radius:2px; margin-right:5px; vertical-align:0; }
+  .atb-ws { font-weight:800; }
+  .atb-selrow { display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin:6px 0 1px; flex-shrink:0; }
+  .atb-selrow .atb-lb { font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:#3aa88f; font-weight:700; margin-right:2px; }
+  .atb-pill { font:inherit; font-size:8.3px; font-weight:600; padding:2.5px 8px; border:1px solid #cfdae1; background:#fff; color:#3d505c; border-radius:20px; cursor:pointer; }
+  .atb-pill.on { background:#0f2b45; color:#fff; border-color:#0f2b45; }
+  .atb-ctitle { text-align:center; font-size:10px; font-weight:700; color:#3d505c; margin:3px 0 1px; flex-shrink:0; }
+  .atb-leg { display:flex; flex-wrap:wrap; gap:9px; justify-content:center; font-size:7.6px; font-weight:600; color:#3d505c; margin:1px 0; flex-shrink:0; }
+  .atb-leg i { display:inline-block; width:11px; height:0; border-top:2px solid; margin-right:3px; vertical-align:2px; }
+  .atb-take { background:#e7f6f0; border-left:3px solid #46b295; border-radius:0 6px 6px 0; padding:6px 10px; font-size:8.6px; color:#3d505c; margin-top:4px; line-height:1.4; flex-shrink:0; }
+  .atb-take b { color:#17262f; }
+  .atb-take-lg { background:#e7f6f0; border-left:4px solid #46b295; border-radius:0 8px 8px 0; padding:11px 15px; font-size:11.5px; color:#3d505c; line-height:1.5; flex-shrink:0; }
+  .atb-take-lg b { color:#17262f; }
+  #atb-tip { position:fixed; pointer-events:none; background:#0f172a; color:#fff; font-size:9px; padding:5px 8px; border-radius:6px; opacity:0; transition:.1s; z-index:9; }
+  /* By Paid Logos (4d) */
+  table.atb-mv { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.atb-mv th { font-size:8.5px; text-transform:uppercase; letter-spacing:.05em; color:#7d8d98; font-weight:700; text-align:right; padding:6px 8px; border-bottom:1px solid #e7edf1; }
+  table.atb-mv th:first-child { text-align:left; }
+  table.atb-mv td { padding:9px 8px; text-align:right; }
+  table.atb-mv td:first-child { text-align:left; font-weight:600; }
+  table.atb-mv tr { border-bottom:1px solid #e7edf1; }
+  .atb-dot-lg { display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px; vertical-align:-1px; }
   </style>
   <div class="gtm-slide">
     <div class="slide-header">
-      <span class="title">Accountant-linked SMBs — Depth of product adoption</span>
-      <span class="period">{{ config.month_label }}</span>
+      <span class="title">Accountants — Month-End Summary</span>
+      <span class="period">{{ config.month_label }} · by declared portfolio</span>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;flex:1;overflow:hidden;">
-      <!-- LEFT: Value Events Area Chart + Band Definitions -->
-      <div style="padding:10px 20px 8px;border-right:1px solid #e8e8e8;display:flex;flex-direction:column;">
-        <div style="font-size:8px;color:#94a3b8;margin-bottom:4px;">% of active accountant-linked SMBs by adoption stage · rolling 90-day window</div>
-        <div style="position:relative;flex:1;min-height:0;"><canvas id="s4c_area"></canvas></div>
-        <!-- Band definitions -->
-        <div style="margin-top:7px;flex-shrink:0;display:flex;flex-direction:column;gap:4px;">
-          <div style="display:flex;align-items:center;gap:7px;">
-            <span style="width:9px;height:9px;border-radius:2px;background:#14b8a6;flex-shrink:0;display:inline-block;"></span>
-            <span style="font-size:8.5px;font-weight:700;color:#0f172a;">Bookkeeping +</span><span style="font-size:8px;color:#64748b;"> — recorded journal entries or more · using Alegra for real accounting</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:7px;">
-            <span style="width:9px;height:9px;border-radius:2px;background:#aab8c8;flex-shrink:0;display:inline-block;"></span>
-            <span style="font-size:8.5px;font-weight:700;color:#0f172a;">Invoicing only</span><span style="font-size:8px;color:#64748b;"> — submitted invoices, no bookkeeping yet · core feature adopted</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:7px;">
-            <span style="width:9px;height:9px;border-radius:2px;background:#dde5ef;border:1px solid #cbd5e1;flex-shrink:0;display:inline-block;"></span>
-            <span style="font-size:8.5px;font-weight:700;color:#0f172a;">Not yet active</span><span style="font-size:8px;color:#64748b;"> — linked to accountant but no value action in the last 90 days</span>
-          </div>
-        </div>
-      </div>
-      <!-- RIGHT: top-20 SoW table -->
-      <div style="padding:10px 14px 8px;display:flex;flex-direction:column;overflow:hidden;">
-        <div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;flex-shrink:0;">
-          Top 20 accountants · Share of wallet
-        </div>
-        <div style="flex:1;overflow:auto;" id="s4c_sow_wrap">
-          <table id="s4c_sow_tbl" style="width:100%;border-collapse:collapse;"></table>
-        </div>
-        <div style="font-size:7px;color:#94a3b8;margin-top:4px;flex-shrink:0;">* % capturado = logos pagando / logos asociados en HubSpot · deltas en pp vs mismo denominador</div>
-      </div>
+    <div style="flex:1; padding:8px 22px 6px; display:flex; flex-direction:column; overflow:hidden; min-height:0;">
+      <div class="atb-eye">Month-end close · one row per declared-portfolio range</div>
+      <table class="atb-res" id="s4c_res"></table>
+      <div class="atb-selrow"><span class="atb-lb">Trend · pick a metric</span><span id="s4c_sel"></span></div>
+      <div class="atb-ctitle" id="s4c_ctitle"></div>
+      <div class="atb-leg" id="s4c_leg"></div>
+      <div style="flex:1; min-height:0;" id="s4c_chart"></div>
+      <div class="atb-take" id="s4c_take"></div>
     </div>
     <div class="slide-footer">
-      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-brand">Alegra · Data · Confidential</span>
+      <span class="footer-source">Source: bi_accountant.accountant_master_table</span>
       <span class="footer-page">4c</span>
+    </div>
+  </div>
+  <div id="atb-tip"></div>
+
+  <!-- ============================================================
+       SLIDE 4d — Accountants By Paid Logos (movement)
+       ============================================================ -->
+  <div class="gtm-slide">
+    <div class="slide-header">
+      <span class="title">Accountants — By Paid Logos</span>
+      <span class="period">Movement {{ config.prev_month_label[:3] }} → {{ config.month_label[:3] }} {{ config.year }}</span>
+    </div>
+    <div style="flex:1; padding:14px 26px 10px; display:flex; flex-direction:column; overflow:hidden; min-height:0; justify-content:center; gap:14px;">
+      <div class="atb-eye">Where accountants move · tier = number of paid logos on Alegra</div>
+      <table class="atb-mv">
+        <thead><tr><th>Paid logos</th><th>Accountants</th><th>Logos</th><th>New</th><th>Upsell ↑</th><th>Downsell ↓</th><th>Churn</th></tr></thead>
+        <tbody>
+          <tr><td><span class="atb-dot-lg" style="background:#b7c3cb"></span>1 paid logo</td><td>8,132</td><td>8,132</td><td style="color:#2f9e78">491</td><td style="color:#2f9e78">100</td><td style="color:#c96a80">0</td><td style="color:#c96a80">443</td></tr>
+          <tr><td><span class="atb-dot-lg" style="background:#57c9b0"></span>2–5</td><td>1,562</td><td>3,993</td><td style="color:#2f9e78">16</td><td style="color:#2f9e78">13</td><td style="color:#c96a80">102</td><td style="color:#c96a80">7</td></tr>
+          <tr><td><span class="atb-dot-lg" style="background:#2b8670"></span>6–15</td><td>237</td><td>2,077</td><td style="color:#2f9e78">2</td><td style="color:#2f9e78">3</td><td style="color:#c96a80">12</td><td style="color:#c96a80">0</td></tr>
+          <tr><td><span class="atb-dot-lg" style="background:#14324a"></span>15+</td><td>51</td><td>1,348</td><td style="color:#2f9e78">0</td><td style="color:#2f9e78">0</td><td style="color:#c96a80">2</td><td style="color:#c96a80">0</td></tr>
+          <tr style="border-top:2px solid #0f2b45;border-bottom:none"><td style="font-weight:800">Total</td><td style="font-weight:800">9,982</td><td style="font-weight:800">15,550</td><td style="font-weight:700;color:#2f9e78">509</td><td style="font-weight:700;color:#2f9e78">116</td><td style="font-weight:700;color:#c96a80">116</td><td style="font-weight:700;color:#c96a80">450</td></tr>
+        </tbody>
+      </table>
+      <div class="atb-take-lg"><b>Churn is almost entirely a single-logo event: 98% of it is 1-paid-logo accountants</b> (443 of 450). Accountants with 2+ paid logos barely leave (7 / 0 / 0). Upsell and downsell cancel out (116 each), so on net accountants aren't climbing tiers — the base stays dominated by fragile single-logo accountants.</div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Data · Confidential</span>
+      <span class="footer-source">Source: bi_accountant.accountant_master_table · tier = paid logos · movement = month over month</span>
+      <span class="footer-page">4d</span>
     </div>
   </div>
 
   <script>
   (function(){
-    const TEAL='#14b8a6', SLATE='#aab8c8', NAVY='#1a1a2e', GRID='#f1f5f9', MUTED='#94a3b8';
-    const fmtN = v => Number(Math.round(v)).toLocaleString('es-CO');
+    /* ── Accountants Month-End Summary (4c) — datos reales embebidos, ver comentario
+       arriba del slide. cur = último mes de D.mos (no depende del mes de corte del board;
+       si se conecta a Metabase más adelante, esto pasaría a venir de metrics.gtm). ── */
+    const D={"mos":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],"order":["1 a 5","6 a 15","Más de 15","Sin Identificar"],"M":{"2025-01":{"1 a 5":{"entes":570,"cartera":2121,"migrada":764,"n1":439,"nm":131},"Sin Identificar":{"entes":6482,"cartera":0,"migrada":7586,"n1":5782,"nm":700},"6 a 15":{"entes":630,"cartera":6033,"migrada":1593,"n1":303,"nm":327},"Más de 15":{"entes":316,"cartera":13088,"migrada":2037,"n1":107,"nm":209}},"2025-02":{"1 a 5":{"entes":605,"cartera":2257,"migrada":812,"n1":464,"nm":141},"Sin Identificar":{"entes":6371,"cartera":0,"migrada":7426,"n1":5705,"nm":666},"Más de 15":{"entes":325,"cartera":12827,"migrada":2067,"n1":113,"nm":212},"6 a 15":{"entes":695,"cartera":6624,"migrada":1670,"n1":364,"nm":331}},"2025-03":{"Sin Identificar":{"entes":6352,"cartera":0,"migrada":7399,"n1":5691,"nm":661},"Más de 15":{"entes":331,"cartera":13201,"migrada":2143,"n1":109,"nm":222},"1 a 5":{"entes":632,"cartera":2356,"migrada":843,"n1":484,"nm":148},"6 a 15":{"entes":730,"cartera":6980,"migrada":1772,"n1":370,"nm":360}},"2025-04":{"1 a 5":{"entes":670,"cartera":2499,"migrada":901,"n1":510,"nm":160},"Sin Identificar":{"entes":6246,"cartera":0,"migrada":7259,"n1":5616,"nm":630},"Más de 15":{"entes":338,"cartera":13500,"migrada":2167,"n1":111,"nm":227},"6 a 15":{"entes":766,"cartera":7306,"migrada":1854,"n1":395,"nm":371}},"2025-05":{"Más de 15":{"entes":359,"cartera":14427,"migrada":2253,"n1":130,"nm":229},"6 a 15":{"entes":792,"cartera":7524,"migrada":1947,"n1":402,"nm":390},"1 a 5":{"entes":710,"cartera":2659,"migrada":964,"n1":539,"nm":171},"Sin Identificar":{"entes":6244,"cartera":0,"migrada":7264,"n1":5608,"nm":636}},"2025-06":{"Sin Identificar":{"entes":6186,"cartera":0,"migrada":7183,"n1":5555,"nm":631},"Más de 15":{"entes":368,"cartera":14836,"migrada":2284,"n1":137,"nm":231},"6 a 15":{"entes":820,"cartera":7790,"migrada":2006,"n1":424,"nm":396},"1 a 5":{"entes":751,"cartera":2803,"migrada":1033,"n1":558,"nm":193}},"2025-07":{"1 a 5":{"entes":812,"cartera":3015,"migrada":1124,"n1":596,"nm":216},"Más de 15":{"entes":377,"cartera":15404,"migrada":2299,"n1":145,"nm":232},"Sin Identificar":{"entes":6188,"cartera":0,"migrada":7179,"n1":5563,"nm":625},"6 a 15":{"entes":850,"cartera":8120,"migrada":2099,"n1":426,"nm":424}},"2025-08":{"Más de 15":{"entes":382,"cartera":16181,"migrada":2336,"n1":148,"nm":234},"6 a 15":{"entes":899,"cartera":8657,"migrada":2208,"n1":458,"nm":441},"Sin Identificar":{"entes":6181,"cartera":0,"migrada":7155,"n1":5570,"nm":611},"1 a 5":{"entes":879,"cartera":3244,"migrada":1215,"n1":650,"nm":229}},"2025-11":{"Sin Identificar":{"entes":6309,"cartera":0,"migrada":7278,"n1":5704,"nm":605},"6 a 15":{"entes":1026,"cartera":9897,"migrada":2424,"n1":543,"nm":483},"Más de 15":{"entes":427,"cartera":18400,"migrada":2553,"n1":183,"nm":244},"1 a 5":{"entes":1103,"cartera":3968,"migrada":1499,"n1":829,"nm":274}},"2025-12":{"Más de 15":{"entes":449,"cartera":19307,"migrada":2650,"n1":205,"nm":244},"1 a 5":{"entes":1188,"cartera":4235,"migrada":1639,"n1":875,"nm":313},"Sin Identificar":{"entes":6351,"cartera":0,"migrada":7340,"n1":5732,"nm":619},"6 a 15":{"entes":1049,"cartera":10068,"migrada":2466,"n1":563,"nm":486}},"2026-01":{"Más de 15":{"entes":457,"cartera":19741,"migrada":2743,"n1":205,"nm":252},"1 a 5":{"entes":1273,"cartera":4464,"migrada":1755,"n1":946,"nm":327},"Sin Identificar":{"entes":6332,"cartera":0,"migrada":7303,"n1":5721,"nm":611},"6 a 15":{"entes":1077,"cartera":10307,"migrada":2538,"n1":563,"nm":514}},"2026-02":{"1 a 5":{"entes":1330,"cartera":4659,"migrada":1812,"n1":993,"nm":337},"Sin Identificar":{"entes":6317,"cartera":0,"migrada":7274,"n1":5721,"nm":596},"Más de 15":{"entes":479,"cartera":20457,"migrada":2763,"n1":225,"nm":254},"6 a 15":{"entes":1103,"cartera":10510,"migrada":2595,"n1":573,"nm":530}},"2026-03":{"6 a 15":{"entes":1155,"cartera":11013,"migrada":2689,"n1":615,"nm":540},"Sin Identificar":{"entes":6381,"cartera":0,"migrada":7361,"n1":5768,"nm":613},"Más de 15":{"entes":494,"cartera":20985,"migrada":2844,"n1":227,"nm":267},"1 a 5":{"entes":1406,"cartera":4856,"migrada":1947,"n1":1030,"nm":376}},"2026-05":{"Sin Identificar":{"entes":6555,"cartera":0,"migrada":7515,"n1":5953,"nm":602},"6 a 15":{"entes":1206,"cartera":11413,"migrada":2800,"n1":652,"nm":554},"Más de 15":{"entes":498,"cartera":21489,"migrada":2839,"n1":216,"nm":282},"1 a 5":{"entes":1538,"cartera":5232,"migrada":2125,"n1":1142,"nm":396}},"2026-06":{"1 a 5":{"entes":1568,"cartera":5317,"migrada":2163,"n1":1165,"nm":403},"Más de 15":{"entes":506,"cartera":21709,"migrada":2864,"n1":224,"nm":282},"Sin Identificar":{"entes":6620,"cartera":0,"migrada":7584,"n1":6016,"nm":604},"6 a 15":{"entes":1220,"cartera":11573,"migrada":2813,"n1":668,"nm":552}},"2026-07":{"1 a 5":{"entes":1591,"cartera":5319,"migrada":2198,"n1":1183,"nm":408},"Sin Identificar":{"entes":6674,"cartera":0,"migrada":7656,"n1":6063,"nm":611},"6 a 15":{"entes":1209,"cartera":11453,"migrada":2818,"n1":662,"nm":547},"Más de 15":{"entes":498,"cartera":21237,"migrada":2862,"n1":215,"nm":283}},"2025-09":{"Sin Identificar":{"entes":6212,"cartera":0,"migrada":7194,"n1":5606,"nm":606},"6 a 15":{"entes":940,"cartera":9049,"migrada":2286,"n1":488,"nm":452},"Más de 15":{"entes":413,"cartera":17401,"migrada":2433,"n1":173,"nm":240},"1 a 5":{"entes":932,"cartera":3436,"migrada":1287,"n1":694,"nm":238}},"2025-10":{"1 a 5":{"entes":998,"cartera":3648,"migrada":1362,"n1":752,"nm":246},"Sin Identificar":{"entes":6304,"cartera":0,"migrada":7283,"n1":5692,"nm":612},"6 a 15":{"entes":973,"cartera":9325,"migrada":2366,"n1":501,"nm":472},"Más de 15":{"entes":433,"cartera":18807,"migrada":2509,"n1":191,"nm":242}},"2026-04":{"Más de 15":{"entes":499,"cartera":21298,"migrada":2825,"n1":226,"nm":273},"6 a 15":{"entes":1188,"cartera":11270,"migrada":2752,"n1":636,"nm":552},"1 a 5":{"entes":1469,"cartera":5029,"migrada":2036,"n1":1079,"nm":390},"Sin Identificar":{"entes":6491,"cartera":0,"migrada":7457,"n1":5885,"nm":606}}},"CH":{"2025-01":{"1 a 5":{"base":510,"churned":25},"Más de 15":{"base":304,"churned":7},"Sin Identifipotencial_declarado":{"base":6479,"churned":329},"6 a 15":{"base":603,"churned":22}},"2025-02":{"1 a 5":{"base":570,"churned":38},"Sin Identifipotencial_declarado":{"base":6482,"churned":399},"6 a 15":{"base":630,"churned":11},"Más de 15":{"base":316,"churned":11}},"2025-04":{"1 a 5":{"base":632,"churned":28},"Sin Identifipotencial_declarado":{"base":6352,"churned":338},"6 a 15":{"base":730,"churned":23},"Más de 15":{"base":331,"churned":4}},"2025-05":{"Más de 15":{"base":338,"churned":2},"6 a 15":{"base":766,"churned":30},"Sin Identifipotencial_declarado":{"base":6246,"churned":286},"1 a 5":{"base":670,"churned":26}},"2025-07":{"Sin Identifipotencial_declarado":{"base":6186,"churned":256},"1 a 5":{"base":751,"churned":24},"Más de 15":{"base":368,"churned":14},"6 a 15":{"base":820,"churned":23}},"2025-08":{"Sin Identifipotencial_declarado":{"base":6188,"churned":260},"6 a 15":{"base":850,"churned":22},"Más de 15":{"base":377,"churned":20},"1 a 5":{"base":812,"churned":33}},"2025-12":{"Más de 15":{"base":427,"churned":11},"Sin Identifipotencial_declarado":{"base":6309,"churned":284},"1 a 5":{"base":1103,"churned":61},"6 a 15":{"base":1026,"churned":47}},"2026-01":{"Más de 15":{"base":449,"churned":20},"Sin Identifipotencial_declarado":{"base":6351,"churned":332},"1 a 5":{"base":1188,"churned":88},"6 a 15":{"base":1049,"churned":51}},"2026-02":{"Sin Identifipotencial_declarado":{"base":6332,"churned":352},"1 a 5":{"base":1273,"churned":74},"Más de 15":{"base":457,"churned":12},"6 a 15":{"base":1077,"churned":48}},"2026-03":{"6 a 15":{"base":1103,"churned":33},"Sin Identifipotencial_declarado":{"base":6317,"churned":328},"Más de 15":{"base":479,"churned":13},"1 a 5":{"base":1330,"churned":78}},"2026-06":{"Sin Identifipotencial_declarado":{"base":6555,"churned":325},"1 a 5":{"base":1538,"churned":83},"Más de 15":{"base":498,"churned":8},"6 a 15":{"base":1206,"churned":48}},"2026-07":{"6 a 15":{"base":1220,"churned":46},"1 a 5":{"base":1568,"churned":76},"Más de 15":{"base":506,"churned":16},"Sin Identifipotencial_declarado":{"base":6620,"churned":312}},"2025-03":{"Más de 15":{"base":325,"churned":6},"Sin Identifipotencial_declarado":{"base":6371,"churned":346},"1 a 5":{"base":605,"churned":25},"6 a 15":{"base":695,"churned":20}},"2025-06":{"Más de 15":{"base":359,"churned":10},"Sin Identifipotencial_declarado":{"base":6244,"churned":320},"1 a 5":{"base":710,"churned":41},"6 a 15":{"base":792,"churned":27}},"2025-09":{"6 a 15":{"base":899,"churned":30},"Más de 15":{"base":382,"churned":13},"Sin Identifipotencial_declarado":{"base":6181,"churned":257},"1 a 5":{"base":879,"churned":42}},"2025-10":{"Sin Identifipotencial_declarado":{"base":6212,"churned":246},"1 a 5":{"base":932,"churned":57},"Más de 15":{"base":413,"churned":16},"6 a 15":{"base":940,"churned":49}},"2026-04":{"Más de 15":{"base":494,"churned":13},"1 a 5":{"base":1406,"churned":70},"6 a 15":{"base":1155,"churned":40},"Sin Identifipotencial_declarado":{"base":6381,"churned":317}},"2025-11":{"Sin Identifipotencial_declarado":{"base":6304,"churned":316},"1 a 5":{"base":998,"churned":52},"Más de 15":{"base":433,"churned":32},"6 a 15":{"base":973,"churned":38}},"2026-05":{"1 a 5":{"base":1469,"churned":73},"Sin Identifipotencial_declarado":{"base":6491,"churned":318},"Más de 15":{"base":499,"churned":18},"6 a 15":{"base":1188,"churned":47}}},"mlbl":["Jan-25","Feb-25","Mar-25","Apr-25","May-25","Jun-25","Jul-25","Aug-25","Sep-25","Oct-25","Nov-25","Dec-25","Jan-26","Feb-26","Mar-26","Apr-26","May-26","Jun-26","Jul-26"]};
+    const $s4c=s=>document.querySelector(s), atbTip=document.getElementById('atb-tip');
+    const RC={'1 a 5':'#14324a','6 a 15':'#2b8670','Más de 15':'#57c9b0','Sin Identificar':'#b7c3cb'};
+    const RL={'1 a 5':'1–5','6 a 15':'6–15','Más de 15':'15+','Sin Identificar':'Not declared'};
+    const nf=n=>Math.round(n).toLocaleString('en-US');
+    const cur=D.mos[D.mos.length-1];
+    const MET={
+     ws:{label:'% Wallet Share',fmt:'%',f:(d)=>d&&d.cartera? 100*d.migrada/d.cartera:null},
+     entes:{label:'Accountants',fmt:'n',f:(d)=>d?d.entes:null},
+     migrada:{label:'Migrated Portfolio',fmt:'n',f:(d)=>d?d.migrada:null},
+     cartera:{label:'Total Portfolio',fmt:'n',f:(d)=>d&&d.cartera?d.cartera:null},
+     mas1:{label:'% with 2+ Logos',fmt:'%',f:(d)=>d&&d.entes?100*d.nm/d.entes:null},
+     churn:{label:'Accountant Churn',fmt:'%',f:(d,ch)=>ch&&ch.base?100*ch.churned/ch.base:null},
+    };
+    const ORDER=['ws','entes','migrada','cartera','mas1','churn'];
+    function tipOn(e,h){atbTip.innerHTML=h;atbTip.style.opacity=1;atbTip.style.left=Math.min(e.clientX+13,innerWidth-190)+'px';atbTip.style.top=(e.clientY+13)+'px';}
+    function tipOff(){atbTip.style.opacity=0;}
 
-    /* ── LEFT: value events area chart (últimos 7 meses, 90d rolling) ── */
-    const funnelHist = {{ metrics.gtm.value_events | tojson | safe }};
-    // 3 bands bottom→top, cumulative thresholds, fill:'-1'
-    // Bookkeeping+ (asiento+) / Invoicing only / Not yet active
-    const funnelBands = [
-      { cum: d=>d.asiento, label:'Bookkeeping +',   color:TEAL,      bg:'rgba(20,184,166,0.80)',  lightText:true  },
-      { cum: d=>d.factura, label:'Invoicing only',  color:SLATE,     bg:'rgba(170,184,200,0.78)', lightText:false },
-      { cum: d=>100,       label:'Not yet active',  color:'#dde5ef', bg:'rgba(221,229,239,0.60)', lightText:false }
-    ];
-    const areaChart = new Chart(document.getElementById('s4c_area'), {
-      type: 'line',
-      data: {
-        labels: funnelHist.map(r => r.m),
-        datasets: funnelBands.map((b,i) => ({
-          label: b.label,
-          data: funnelHist.map(r => b.cum(r)),
-          borderColor: b.color,
-          backgroundColor: b.bg,
-          borderWidth: 1,
-          pointRadius: 0,
-          tension: 0.3,
-          fill: i === 0 ? 'origin' : '-1'
-        }))
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, animation: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            mode: 'index', intersect: false,
-            backgroundColor: '#fff', borderColor: 'rgba(0,0,0,.1)', borderWidth: 1,
-            titleColor: '#111', bodyColor: '#555', titleFont:{size:9}, bodyFont:{size:9}, padding:6,
-            filter: item => item.datasetIndex < 3,
-            callbacks: {
-              label: c => {
-                const prev = c.datasetIndex === 0 ? 0 : areaChart.data.datasets[c.datasetIndex-1].data[c.dataIndex];
-                return '  '+c.dataset.label+': '+(c.raw-prev).toFixed(1)+'%';
-              }
-            }
-          }
-        },
-        scales: {
-          x: { grid:{display:false}, border:{display:false}, ticks:{font:{size:8.5},color:MUTED,maxRotation:0} },
-          y: { min:0, max:100, grid:{color:GRID}, border:{display:false},
-               ticks:{font:{size:8.5},color:MUTED,callback:v=>v+'%',stepSize:20} }
-        }
-      },
-      plugins: [{
-        id:'bandLabels',
-        afterDraw(chart) {
-          const {ctx} = chart;
-          funnelHist.forEach((row, xi) => {
-            const xPx = chart.scales.x.getPixelForValue(xi);
-            funnelBands.forEach((b, i) => {
-              const cumVal = b.cum(row);
-              const prevVal = i === 0 ? 0 : funnelBands[i-1].cum(row);
-              const band = cumVal - prevVal;
-              if (band < 6) return;
-              const midY = chart.scales.y.getPixelForValue(prevVal + band/2);
-              ctx.save();
-              ctx.font = '600 7.5px Inter,sans-serif';
-              ctx.fillStyle = b.lightText ? 'rgba(255,255,255,0.92)' : '#334155';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText(band.toFixed(1)+'%', xPx, midY);
-              ctx.restore();
-            });
-          });
-        }
-      }]
-    });
-    /* ── RIGHT: top-20 SoW table ── */
-    const sow    = {{ metrics.gtm.supercontadores.sow     | tojson | safe }};
-    const sowTot = {{ metrics.gtm.supercontadores.sow_tot | tojson | safe }};
+    (function(){
+     const m=D.M[cur],ch=D.CH[cur]||{};
+     const iQ=Math.max(0,D.mos.length-4), prevQ=D.mos[iQ], mQ=D.M[prevQ]||{};
+     const dws=(rg)=>{const d=m[rg],dq=mQ[rg]; if(!d||!dq||!d.cartera||!dq.cartera) return '<span style="color:#94a3b8">—</span>'; const dd=100*d.migrada/d.cartera-100*dq.migrada/dq.cartera; const col=dd>0.5?'#2f9e78':(dd<-0.5?'#c96a80':'#9aa7b0'); const s=Math.abs(dd)<0.5?'● 0pp':((dd>0?'▲ +':'▼ ')+Math.round(dd)+'pp'); return `<span style="color:${col};font-weight:700">${s}</span>`;};
+     let h='<thead><tr><th>Declared Portfolio</th><th>Accountants</th><th>Total Portfolio</th><th>Migrated Portfolio</th><th>% Wallet Share</th><th>Δ WS vs Prev Q</th><th>2+ Logos</th><th>Churn</th></tr></thead><tbody>';
+     D.order.forEach(rg=>{const d=m[rg]||{};const e=d.entes||0;const ca=d.cartera||0;const mi=d.migrada||0;const nm=d.nm||0;
+       const ws=ca? Math.round(100*mi/ca)+'%':'—';const c=ch[rg];const chr=c&&c.base? (100*c.churned/c.base).toFixed(1)+'%':'—';
+       const p=(x)=>e? Math.round(100*x/e)+'%':'—';
+       h+=`<tr><td><span class="atb-dot" style="background:${RC[rg]}"></span>${RL[rg]}</td><td>${nf(e)}</td><td>${ca?nf(ca):'—'}</td><td>${nf(mi)}</td>`+
+          `<td class="atb-ws" style="color:${ca?RC[rg]:'inherit'}">${ws}</td><td>${dws(rg)}</td>`+
+          `<td>${nf(nm)} <span style="color:#94a3b8">(${p(nm)})</span></td><td>${chr}</td></tr>`;});
+     h+='</tbody>';$s4c('#s4c_res').innerHTML=h;
+    })();
 
-    function fmtDelta(v) {
-      if (v == null) return '<span style="color:#94a3b8">—</span>';
-      const sign  = v > 0 ? '+' : '';
-      const color = v > 0 ? '#16a34a' : v < 0 ? '#dc2626' : '#94a3b8';
-      const arrow = v > 0 ? '↑ ' : v < 0 ? '↓ ' : '→ ';
-      return `<span style="color:${color}">${arrow}${sign}${v.toFixed(1)}pp</span>`;
+    $s4c('#s4c_sel').innerHTML=ORDER.map((k,i)=>`<button class="atb-pill${i==0?' on':''}" data-k="${k}">${MET[k].label}</button>`).join('');
+    $s4c('#s4c_sel').querySelectorAll('button').forEach(b=>b.onclick=()=>{$s4c('#s4c_sel').querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');drawS4c(b.dataset.k);});
+
+    function drawS4c(k){
+     const M=MET[k],fmt=M.fmt;$s4c('#s4c_ctitle').textContent=M.label;
+     const n=D.mos.length;
+     const series=D.order.map(rg=>({rg,vals:D.mos.map(mo=>M.f(D.M[mo]&&D.M[mo][rg], (D.CH[mo]||{})[rg]))})).filter(s=>s.vals.some(v=>v!=null));
+     $s4c('#s4c_leg').innerHTML=series.map(s=>`<span><i style="border-color:${RC[s.rg]}"></i>${RL[s.rg]}</span>`).join('');
+     const all=series.flatMap(s=>s.vals).filter(v=>v!=null);const mx=Math.max(...all)*1.12,mn=fmt=='%'?0:Math.min(...all)*0.9;
+     const W=900,H=225,mL=fmt=='%'?32:48,mR=44,mT=10,mB=22;
+     const x=i=>mL+(W-mL-mR)*i/(n-1),y=v=>mT+(H-mT-mB)*(1-(v-mn)/((mx-mn)||1));
+     const fv=v=>fmt=='%'?Math.round(v)+'%':nf(v);
+     let g=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">`;
+     [mn,(mn+mx)/2,mx].forEach(f=>g+=`<line x1="${mL}" y1="${y(f)}" x2="${W-mR}" y2="${y(f)}" stroke="#e7edf1"/><text x="${mL-5}" y="${y(f)+3}" text-anchor="end" style="font-size:8px;fill:#94a3b8">${fv(f)}</text>`);
+     series.forEach(s=>{const pts=s.vals.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
+       g+=`<path d="${pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')}" fill="none" stroke="${RC[s.rg]}" stroke-width="2.2" stroke-linejoin="round"/>`;
+       const lv=s.vals[n-1];if(lv!=null)g+=`<text x="${W-mR+4}" y="${y(lv)+3}" style="font-size:9px;font-weight:800;fill:${RC[s.rg]}">${fv(lv)}</text>`;});
+     D.mlbl.forEach((mo,i)=>{if(i%3==0||i==n-1)g+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle" style="font-size:7.5px;fill:#94a3b8">${mo}</text>`;});
+     D.mos.forEach((mo,i)=>g+=`<rect x="${(x(i)-8).toFixed(1)}" y="${mT}" width="16" height="${H-mT-mB}" fill="transparent" data-i="${i}"/>`);
+     g+=`</svg>`;$s4c('#s4c_chart').innerHTML=g;
+     $s4c('#s4c_chart').querySelectorAll('rect[data-i]').forEach(r=>{r.onmousemove=e=>{const i=+r.dataset.i;let h=`<b>${D.mlbl[i]} · ${M.label}</b>`;series.forEach(s=>{const v=s.vals[i];h+=`<div>${RL[s.rg]}: ${v==null?'—':fv(v)}</div>`;});tipOn(e,h);};r.onmouseleave=tipOff;});
     }
-    function sowBar(pct, color) {
-      const w = Math.min(pct || 0, 100);
-      return `<div style="display:flex;align-items:center;gap:5px;">
-        <div style="flex:1;height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
-          <div style="width:${w}%;height:100%;background:${color};border-radius:3px;"></div>
-        </div>
-        <span style="font-size:8.5px;font-weight:700;color:${color};min-width:32px;text-align:right;">${w.toFixed(0)}%</span>
-      </div>`;
-    }
+    drawS4c('ws');
 
-    const tbl = document.getElementById('s4c_sow_tbl');
-    tbl.innerHTML = `<thead><tr style="border-bottom:2px solid #e2e8f0;">
-      <th style="text-align:left;font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 4px 3px 2px;text-transform:uppercase;letter-spacing:.06em;">Contador</th>
-      <th style="font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 8px 3px 4px;text-transform:uppercase;letter-spacing:.06em;">% Capturado</th>
-      <th style="text-align:right;font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 4px;text-transform:uppercase;letter-spacing:.06em;">Cartera</th>
-      <th style="text-align:right;font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 4px;text-transform:uppercase;letter-spacing:.06em;">vs Mes Ant</th>
-      <th style="text-align:right;font-size:7.5px;font-weight:700;color:#94a3b8;padding:3px 2px 3px 4px;text-transform:uppercase;letter-spacing:.06em;">vs Año Ant</th>
-    </tr></thead>`;
-
-    const tbody = document.createElement('tbody');
-
-    /* total row */
-    const totTr = document.createElement('tr');
-    totTr.style.cssText = 'border-bottom:2px solid #e2e8f0;background:#f8fafc;';
-    totTr.innerHTML = `
-      <td style="font-size:8.5px;font-weight:700;color:#334155;padding:3px 4px 3px 2px;">Total top 20</td>
-      <td style="padding:3px 8px 3px 4px;">${sowBar(sowTot.sow_asoc, NAVY)}</td>
-      <td style="text-align:right;font-size:8.5px;font-weight:700;color:#334155;padding:3px 4px;">${sowTot.real}</td>
-      <td style="text-align:right;font-size:8px;padding:3px 4px;">${fmtDelta(sowTot.delta_mom)}</td>
-      <td style="text-align:right;font-size:8px;padding:3px 2px 3px 4px;">${fmtDelta(sowTot.delta_yoy)}</td>`;
-    tbody.appendChild(totTr);
-
-    sow.forEach((r, i) => {
-      const tr = document.createElement('tr');
-      tr.style.cssText = 'border-bottom:1px solid #f1f5f9;' + (i % 2 === 1 ? 'background:#fafbfc;' : '');
-      tr.innerHTML = `
-        <td style="font-size:8px;font-weight:600;color:#334155;padding:2px 4px 2px 2px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.contador}</td>
-        <td style="padding:2px 8px 2px 4px;">${sowBar(r.sow_asoc, NAVY)}</td>
-        <td style="text-align:right;font-size:8.5px;font-weight:600;color:#334155;padding:2px 4px;">${r.real}</td>
-        <td style="text-align:right;font-size:8px;padding:2px 4px;">${fmtDelta(r.delta_mom)}</td>
-        <td style="text-align:right;font-size:8px;padding:2px 2px 2px 4px;">${fmtDelta(r.delta_yoy)}</td>`;
-      tbody.appendChild(tr);
-    });
-
-    tbl.appendChild(tbody);
-
+    $s4c('#s4c_take').innerHTML=`<b>Wallet share drops with portfolio size (41% for 1–5 → 13% for 15+), but the large accountants are the most valuable:</b> more multi-client (56% with 2+ logos) and lower churn (3.2%). The lever is capturing more of the large portfolios. And there are <b>6,674 "Not declared" accountants</b> — more than all the others combined — that we can't even measure wallet share on. <i>Pick a metric above to see its trend by range.</i>`;
   })();
   </script>
 

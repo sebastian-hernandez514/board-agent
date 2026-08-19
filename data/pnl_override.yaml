@@ -2,6 +2,71 @@
 # Fuente: dashboard financiero Finance (capturas SS).
 # Formato: YYYY-MM → variables exactas que se inyectan en metrics.yaml.
 
+"2026-07":
+  # Fuente: alegra_finance_july_2026_board.html (Sofía Maldonado, recibido 2026-08-17),
+  # también copiado a templates/4_financial_performance.j2 (Template 4). El parser
+  # automático (load_finance_pnl_html) no pudo leer este archivo solo: la tabla de este mes
+  # viene con columnas por MES ("Jun/2026"/"Jul/2026") en vez de por QUARTER ("2Q26 Act"),
+  # que es lo único que _QTR_LABEL_RE reconoce — por eso se calcularon estos valores a mano
+  # desde la Slide 1 (P&L Monthly · vs Prior Year) y Slide 2 (P&L Monthly · vs Budget) de
+  # ese HTML. Filas $ en kUSD, Jun/26→Jul/26 para MoM, Jul/26 vs Jul/26-Budget para vs
+  # Budget mensual, YTD26A vs YTD26B (columna "Var Bud" ya calculada por Finance) para vs
+  # Budget YTD, YTD2025A vs YTD2026A (columna "YoY Δ" ya calculada por Finance) para YoY YTD.
+  # ── Monthly Performance (slide 4) ──────────────────────────────────────────
+  net_revenue:                      "$2.8M"
+  net_revenue_mom:                  "+7.4%"
+  net_revenue_mom_positive:         true
+  net_revenue_vs_budget:            "+13.7%"
+  net_revenue_vs_budget_positive:   true
+  net_revenue_yoy:                  "+40.4%"
+  net_revenue_yoy_positive:         true
+
+  gross_margin:                     "83.5%"
+  gross_margin_mom:                 "+2.5pp"
+  gross_margin_mom_positive:        true
+  gross_margin_vs_budget:           "+1.7pp"
+  gross_margin_vs_budget_positive:  true
+  gross_margin_yoy:                 "+2.2pp"
+  gross_margin_yoy_positive:        true
+
+  ebitda_margin:                    "17.4%"
+  ebitda_margin_mom:                "+6.8pp"
+  ebitda_margin_mom_positive:       true
+  ebitda_margin_vs_budget:          "+11.0pp"
+  ebitda_margin_vs_budget_positive: true
+  ebitda_margin_yoy:                "+20.7pp"
+  ebitda_margin_yoy_positive:       true
+
+  # ── YTD Performance (slide 5) ───────────────────────────────────────────────
+  net_revenue_ytd:                       "$17.1M"
+  net_revenue_ytd_vs_budget:             "+7.9%"
+  net_revenue_ytd_vs_budget_positive:    true
+  net_revenue_ytd_yoy:                   "+33.0%"
+  net_revenue_ytd_yoy_positive:          true
+
+  gross_margin_ytd:                      "81.8%"
+  gross_margin_ytd_vs_budget:            "+0.6pp"
+  gross_margin_ytd_vs_budget_positive:   true
+  gross_margin_ytd_yoy:                  "+0.5pp"
+  gross_margin_ytd_yoy_positive:         true
+
+  # EBITDA $ (no margen %) vs Budget/YoY: Finance marca ambos como "n/m" en su propio HTML
+  # porque el Budget YTD de EBITDA es solo $52K (denominador casi cero) y YTD 2025 fue
+  # negativo vs 2026 positivo (cruce de signo) — el % relativo sobre el dólar (+3,580.8% /
+  # +250.7%, ver historial de este comentario) sale absurdo por el mismo motivo, igual que
+  # abril (+485.6%) y mayo (+721.8%) más abajo. 2026-08-19, a pedido del usuario: en vez del
+  # % sobre el dólar, se muestra el delta en PUNTOS PORCENTUALES del margen EBITDA (EBITDA /
+  # Revenue), mismo criterio que ya usa gross_margin_ytd — coincide con el texto ya aprobado
+  # del CEO Highlights ("YTD EBITDA margin swung from -9.9% to +11.2% (+21pp YoY)").
+  #   margen actual = 1,914 / 17,100 * 100        = 11.19%
+  #   margen budget = 52 / (17,100/1.079) * 100   = 0.33%   → vs budget = +10.9pp
+  #   margen 2025   = -1,270 / (17,100/1.330) * 100 = -9.88% → YoY      = +21.1pp
+  ebitda_ytd:                            "$1.9M"
+  ebitda_ytd_vs_budget:                  "+10.9pp"
+  ebitda_ytd_vs_budget_positive:         true
+  ebitda_ytd_yoy:                        "+21.1pp"
+  ebitda_ytd_yoy_positive:               true
+
 "2026-04":
   # ── Monthly Performance (slide 4) ──────────────────────────────────────────
   net_revenue:                      "$2.4M"

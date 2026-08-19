@@ -347,13 +347,17 @@ TOL_SEG_STOCK = 5_000  # margen de redondeo del pull mensual, no de la lógica e
 def _check_r20_seg_stock_sums(metrics: dict) -> CheckResult:
     """R20 (2026-07-24) — guardrail de regresión: el STOCK de MRR ("mrr_eop", lo que
     alimenta ARR EoP/BoP) de Core + Lite debe sumar exacto al de "all" (GLO) en TODOS los
-    meses, no solo en el de corte. A diferencia del FLUJO (New/Churn/Upsell/Downsell, que
-    NO cuadra por diseño — las migraciones de compañías entre Lite y Core mueven plata
-    entre esos buckets sin que sea plata nueva real, ver memory/project_board_agent.md
-    sección 2026-07-24 y R2 retirada por la misma razón), el stock SIEMPRE debe cuadrar
-    porque "all" se construye literalmente como la suma de los segmentos
-    (build_seg_metrics() en fetch_metrics.py) — este check no debería fallar nunca en la
-    práctica; si falla, es una regresión real en esa construcción, no un caso esperado."""
+    meses, no solo en el de corte. El stock SIEMPRE debe cuadrar porque "all" se construye
+    literalmente como la suma de los segmentos (build_seg_metrics() en fetch_metrics.py) —
+    este check no debería fallar nunca en la práctica; si falla, es una regresión real en
+    esa construcción, no un caso esperado.
+
+    Nota 2026-08-17: hasta el refactor de ARR Walk v2 del 27-jul, el FLUJO (New/Churn/
+    Upsell/Downsell) SÍ podía no cuadrar por diseño (migraciones Lite↔Core). Desde ese
+    refactor el flujo también debe cuadrar exacto mes a mes — ver R22 más abajo, que es el
+    guardrail equivalente a este pero para los buckets de flujo ADITIVOS (no para las tasas
+    compuestas como logo_churn_core/lite/global%, que nunca deben sumar — ver docstring de
+    R22)."""
     label = "Stock Core+Lite = GLO, mes a mes"
     rows = metrics.get("seg_stock_by_month")
     if not rows:
@@ -372,6 +376,89 @@ def _check_r20_seg_stock_sums(metrics: dict) -> CheckResult:
         return CheckResult("R20", label, "FAIL",
                             f"{len(peores)}/{len(rows)} meses no cuadran — {detalle}")
     return CheckResult("R20", label, "PASS", f"{len(rows)} meses verificados, todos cuadran")
+
+
+TOL_SEG_FLOW_LOGOS = 1     # conteos de logos — enteros, tolera solo redondeo de 1
+TOL_SEG_FLOW_MRR   = 500   # buckets de flujo en USD — mucho más chico que TOL_SEG_STOCK
+                            # porque son montos de movimiento (no el stock completo)
+
+# Claves ADITIVAS puras (conteos/montos que SÍ deben sumar Core+Lite=GLO exacto, desde el
+# refactor de ARR Walk v2 del 27-jul) — NO incluye ninguna tasa/% compuesta a propósito.
+#
+# mrr_upsell/mrr_downsell quedan EXCLUIDAS a propósito (hallazgo 2026-08-17, ver docstring
+# de _check_r22_seg_flow_sums): a diferencia de New/Recovered/Reactivated/Churn (que son
+# clasificaciones "todo o nada" por compañía), Upsell/Downsell se calculan como el DELTA de
+# monto local mes-a-mes DENTRO de cada segmento — cuando una compañía migra de Core↔Lite en
+# el mismo mes, el segmento nuevo registra el monto COMPLETO como upsell puro (no hay
+# `prev_seg` de ese segmento para restar) mientras el segmento viejo no registra nada (no
+# tiene fila este mes, no es "churn" porque la compañía sigue activa) — el monto que
+# "desaparece" del segmento viejo no es downsell en ningún lado, y el monto que "aparece"
+# en el nuevo se cuenta de más como upsell. GLO no tiene este problema (ve el delta neto
+# de la compañía completa). Confirmado en jul-2026: ~1,686 compañías migraron de segmento
+# ese mes — consistente con el gap observado (~$82K en Upsell). No es un bug nuevo (no lo
+# introdujo el fix del churn) y es más difícil de resolver que el churn (requeriría separar
+# "salida de un segmento" de "entrada al otro" en vez de tratarlas como delta puro) —
+# pendiente como ítem separado, no forzar esta regla sobre esos dos buckets mientras tanto.
+_R22_ADDITIVE_KEYS = [
+    ("logos_new",   "Logos New",        TOL_SEG_FLOW_LOGOS),
+    ("logos_recov", "Logos Recovered",  TOL_SEG_FLOW_LOGOS),
+    ("logos_react", "Logos Reactivated",TOL_SEG_FLOW_LOGOS),
+    ("logos_churn", "Logos Churn",      TOL_SEG_FLOW_LOGOS),
+    ("mrr_new",     "MRR New",          TOL_SEG_FLOW_MRR),
+    ("mrr_recov",   "MRR Recovered",    TOL_SEG_FLOW_MRR),
+    ("mrr_react",   "MRR Reactivated",  TOL_SEG_FLOW_MRR),
+    ("mrr_churn",   "MRR Churn",        TOL_SEG_FLOW_MRR),
+]
+
+
+def _check_r22_seg_flow_sums(metrics: dict) -> list[CheckResult]:
+    """R22 (2026-08-17) — guardrail de regresión hermano de R20, pero para el FLUJO
+    (New/Recovered/Reactivated/Churn/Upsell/Downsell) en vez del stock. Nace de un bug real
+    encontrado en vivo el 2026-08-17 en `_split_arr_walk_bucket_by_segment()`
+    (scripts/fetch_metrics.py): esa función comparte UN SOLO diccionario de historial entre
+    Core y Lite sin filtrar por segmento en el loop de detección de churn, así que ambas
+    llamadas devolvían el mismo total que GLO (Core=Lite=3624 en vez de 941/2683 en
+    jul-2026) — nada en el Validator lo detectaba porque R20 solo cubre stock. Corregido en
+    el mismo hallazgo (filtro `if _seg != seg_label`, ver docstring de la función).
+
+    IMPORTANTE — por qué esto NO aplica a las TASAS/porcentajes: `logo_churn_core` +
+    `logo_churn_lite` NO tiene por qué sumar `logo_churn_global` — son promedios ponderados
+    (churn/BoP) de bases distintas, no cantidades aditivas. Ese es el comportamiento
+    ESPERADO y no se valida acá (ni debería agregarse una regla que lo exija). Esta regla
+    solo cubre los conteos/montos ADITIVOS puros (`_R22_ADDITIVE_KEYS`).
+
+    IMPORTANTE — por qué solo el MES DE CORTE, no todo el histórico (a diferencia de R20):
+    `metrics["seg_flow_by_month"]` trae un solo mes (el de corte), no toda
+    `arr_walk_v2_monthly_history.json`. Los meses históricos (2022-10→2026-06) se sembraron
+    con un backfill SQL directo contra RS que clasificaba Core/Lite con su PROPIO historial
+    por segmento (metodología previa al refactor del 27-jul) — ahí Core+Lite NO tiene por
+    qué sumar exacto a GLO, y no es un bug (confirmado en vivo: extender esta regla a todo
+    el histórico da ~30/31 meses en FAIL, todos anteriores a jul-2026). La garantía de
+    Core+Lite=GLO en el flujo solo nace de `_apply_arr_walk_v2()` corriendo en vivo con la
+    clasificación compartida — eso pasa únicamente para el mes de corte de cada corrida."""
+    label_base = "Flujo Core+Lite = GLO, mes a mes (aditivo)"
+    rows = metrics.get("seg_flow_by_month")
+    if not rows:
+        return [CheckResult("R22", label_base, "SKIP", "seg_flow_by_month no está en metrics.yaml")]
+
+    results = []
+    for key, name, tol in _R22_ADDITIVE_KEYS:
+        peores = []
+        for row in rows:
+            expected = row.get(f"core_{key}", 0.0) + row.get(f"lite_{key}", 0.0)
+            actual = row.get(f"all_{key}", 0.0)
+            diff = actual - expected
+            if abs(diff) > tol:
+                peores.append((row.get("m"), diff))
+        label = f"{label_base} — {name}"
+        if peores:
+            detalle = ", ".join(f"{m}: diff={diff:,.0f}" for m, diff in peores[:5])
+            results.append(CheckResult("R22", label, "FAIL",
+                                        f"{len(peores)}/{len(rows)} meses no cuadran — {detalle}"))
+        else:
+            results.append(CheckResult("R22", label, "PASS",
+                                        f"{len(rows)} meses verificados, todos cuadran"))
+    return results
 
 
 _R21_COUNTRIES = [
@@ -740,5 +827,6 @@ def run(metrics_path: Path = paths.METRICS_YAML, html_path: Path = paths.BOARD_S
     results.append(_check_r19_arr_slide_consistency(html_path))
     results.append(_check_r20_seg_stock_sums(metrics))
     results.extend(_check_r21_country_stock_vs_arr_walk_v2(metrics))
+    results.extend(_check_r22_seg_flow_sums(metrics))
 
     return results

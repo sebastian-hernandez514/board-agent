@@ -9,15 +9,34 @@
 # ("Performance NPS Alegra All products", appId 496026 "Alegra - Production")
 #
 # Estructura por mes (YYYY-MM):
-#   score: NPS global del mes (chart "Evolutivo NPS general", te3hpyxp)
-#   responses: total de respuestas del mes (solo si se consulta ese mes puntual — opcional)
-#   distribution: {promoters_pct/n, passives_pct/n, detractors_pct/n} (chart 1yhusamz, solo mes de corte)
+#   score: NPS global del mes (chart "Evolutivo NPS general", te3hpyxp) — null si no hay dato.
+#   responses: total de respuestas del mes (opcional, solo si se consultó ese mes puntual).
+#   distribution: {promoters_pct/n, passives_pct/n, detractors_pct/n} (chart 1yhusamz).
 #   by_country: {colombia, mexico, dom_rep, costa_rica} — NPS score por país
 #     (charts o1t24q2y=Colombia, sx2n44r0=Mexico, 6rkocooq=Dom.Rep, k67mnwk8=Costa Rica)
+#   by_country_n: {mexico, dom_rep, costa_rica} — SOLO cuando se documentó el n real de ese
+#     país ese mes (Colombia nunca se marca, es siempre la muestra grande/de referencia). El
+#     template usa esto para el badge "n=X" + barra rayada — no implica automáticamente que
+#     sea una muestra "chica" en términos estadísticos, solo que el n quedó documentado.
+#   context: nota editorial corta (1 frase) — el "por qué" cualitativo detrás del número, para
+#     meses sin mes anterior comparable o con algo que el delta solo no explica. El delta
+#     (flecha + pp vs mes anterior) SIEMPRE se calcula solo de los scores, nunca a mano —
+#     "context" es un complemento, no reemplaza el cálculo. Puede quedar "" si no hace falta.
 #
-# Solo el mes de corte necesita responses/distribution completos (se muestran en el Hero y
-# la Distribution de la slide) — los meses anteriores solo se usan para el trend MoM/vs-3-meses,
-# que únicamente necesita "score" y "by_country".
+# REDISEÑO 2026-08-18 — tendencia histórica interactiva (antes: solo el mes de corte + 4
+# tarjetas MoM estáticas). Ver `templates/6_rd.j2` y `_build_nps()` en `fetch_metrics.py`.
+# Feedback recibido: la slide vieja mostraba un solo número grande sin contexto de para dónde
+# iba. Ahora la slide es interactiva — tabs por mes (ventana móvil de los últimos 7 meses
+# hasta el mes de corte), con un gráfico de tendencia y un panel de detalle que se actualiza al
+# hacer click en cualquier tab. Consecuencia importante: un mes SIN dato real (como julio-26,
+# ver abajo) ya NO se maneja omitiendo la entrada del YAML — se escribe explícita con los
+# campos en null, así aparece su propio tab mostrando el hueco ("sin dato") en vez de tapar
+# toda la slide con un overlay. F0.10/F3.7 (`month in snap`) siguen funcionando igual sin
+# tocar código — pasan en cuanto existe la entrada, aunque sea en null.
+#
+# Distribution/responses completos hacen falta para CUALQUIER mes que se quiera poder abrir
+# en un tab con el detalle completo (antes solo hacía falta para el mes de corte) — por eso
+# ene/feb-26 ya se trajeron completos también (ver más abajo), no solo el score.
 #
 # CÓMO SACAR ESTO DE AMPLITUDE (2026-07-24, ya 100% automatizable, sin screenshots):
 # Los charts de este dashboard usan metric="formula" (NPS = %promotores - %detractores vía
@@ -39,6 +58,48 @@
 # (mismos filtros que los charts o1t24q2y/sx2n44r0/6rkocooq/k67mnwk8, ver sus definiciones).
 # Validado contra la UI de Amplitude con el filtro Jun 1-30 2026 puesto a mano: coincide.
 
+"2026-01":
+  score: 62.1
+  responses: 306
+  distribution:
+    promoters_pct: 72.9
+    promoters_n: 223
+    passives_pct: 16.3
+    passives_n: 50
+    detractors_pct: 10.8
+    detractors_n: 33
+  by_country:
+    colombia: 65.4
+    mexico: 57.1
+    dom_rep: 76.2
+    costa_rica: 25.0
+  by_country_n:
+    mexico: 21
+    dom_rep: 42
+    costa_rica: 16
+  context: "Primer mes con registro en este store — sin mes anterior para comparar. Casi 100% canal G&S (Bandeja/inbox aún no arrancaba)."
+
+"2026-02":
+  score: 68.8
+  responses: 640
+  distribution:
+    promoters_pct: 79.4
+    promoters_n: 508
+    passives_pct: 10.0
+    passives_n: 64
+    detractors_pct: 10.6
+    detractors_n: 68
+  by_country:
+    colombia: 70.9
+    mexico: 72.2
+    dom_rep: 67.1
+    costa_rica: 57.1
+  by_country_n:
+    mexico: 54
+    dom_rep: 73
+    costa_rica: 28
+  context: "Todavía sin volumen en canal Bandeja — mismo mix de enero."
+
 "2026-03":
   score: 48.8
   by_country:
@@ -46,6 +107,7 @@
     mexico: 30.8
     dom_rep: 62.5
     costa_rica: null   # sin dato ese mes
+  context: "Cambia el mix de canal: arranca Bandeja/inbox este mes — ya no es 1:1 comparable con ene-feb."
 
 "2026-04":
   score: 41.6
@@ -54,6 +116,7 @@
     mexico: 45.5
     dom_rep: 55.9
     costa_rica: 21.4
+  context: "Sin distribution ese mes — no se puede diagnosticar la causa de la caída con este dato."
 
 "2026-05":
   score: 46.5
@@ -70,6 +133,7 @@
     mexico: 52.4
     dom_rep: 54.3
     costa_rica: 30.2
+  context: ""
 
 "2026-06":
   score: 60.9
@@ -83,6 +147,34 @@
     detractors_n: 50
   by_country:
     colombia: 60.6
-    mexico: 100.0    # muestra chica: 2 respuestas, ambas promotoras
+    mexico: 100.0
     dom_rep: 50.0
-    costa_rica: 100.0  # muestra chica: 3 respuestas, todas promotoras
+    costa_rica: 100.0
+  by_country_n:
+    mexico: 2      # muestra chica: 2 respuestas, ambas promotoras
+    costa_rica: 3  # muestra chica: 3 respuestas, todas promotoras
+  context: "impulsado por Colombia (60.6 vs 47.4 en may)."
+
+# "2026-07": SIN DATO REAL — verificado 2026-08-17 vía el mismo método de arriba (metodología
+# re-validada contra junio: reproduce 60.9/414/302/62/50 exacto antes de confiar en julio).
+# Julio da A=0,B=2,C=2,D=0,E=0,F=0 — solo 2 respuestas en TODO el mes (vs 414 en junio),
+# incluso sin el filtro de rango de respuesta (0 en el canal inbox por completo). No es un bug
+# de la query ni de instrumentación rota silenciosa: confirmado en el canal de Google Chat
+# "pr-nps-alegra" (Yasmín Alcántara, 2026-06-05/2026-08-11) que la NPS vieja se pausó a
+# propósito a mediados de junio (sesgo conocido en las respuestas) — Loyalty está construyendo
+# una "NPS relacional" nueva (para AC/POS/Contador/Nómina), lanza recién este mes (agosto-26).
+# Julio cae exactamente en el hueco entre ambas encuestas.
+#
+# Con el rediseño de 2026-08-18 esto SÍ lleva entrada explícita (antes se dejaba sin entrada
+# a propósito) — así el tab de julio aparece en la tendencia mostrando el hueco real ("sin
+# dato") en vez de tapar toda la slide. No se inventa un score con n=2.
+"2026-07":
+  score: null
+  responses: null
+  distribution: null
+  by_country:
+    colombia: null
+    mexico: null
+    dom_rep: null
+    costa_rica: null
+  context: "Encuesta pausada por Loyalty desde mediados de junio (sesgo conocido en las respuestas) — la NPS relacional nueva arranca en agosto-26."
