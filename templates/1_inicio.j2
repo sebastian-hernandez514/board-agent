@@ -315,10 +315,23 @@
         <div>
           <div class="hl-col-title negative">▼ &nbsp;Lowlights</div>
           {% for l in editorial.lowlights %}
+          {% if l is mapping %}
+          <div class="hl-item">
+            <span class="hl-dot negative"></span>
+            <span><b>{{ l.label }}</b></span>
+          </div>
+          {% for c in l.children %}
+          <div class="hl-item hl-subitem">
+            <span class="hl-dot negative hl-dot-sub"></span>
+            <span>{{ c }}</span>
+          </div>
+          {% endfor %}
+          {% else %}
           <div class="hl-item">
             <span class="hl-dot negative"></span>
             <span>{{ l }}</span>
           </div>
+          {% endif %}
           {% endfor %}
           {% if editorial.financial_update %}
           <div class="hl-financial">
@@ -332,10 +345,23 @@
         <div>
           <div class="hl-col-title positive">✦ &nbsp;Highlights</div>
           {% for h in editorial.highlights %}
+          {% if h is mapping %}
+          <div class="hl-item">
+            <span class="hl-dot positive"></span>
+            <span><b>{{ h.label }}</b></span>
+          </div>
+          {% for c in h.children %}
+          <div class="hl-item hl-subitem">
+            <span class="hl-dot positive hl-dot-sub"></span>
+            <span>{{ c }}</span>
+          </div>
+          {% endfor %}
+          {% else %}
           <div class="hl-item">
             <span class="hl-dot positive"></span>
             <span>{{ h }}</span>
           </div>
+          {% endif %}
           {% endfor %}
         </div>
 

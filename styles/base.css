@@ -312,6 +312,21 @@ body {
 .hl-dot.positive { background: var(--color-positive); }
 .hl-dot.negative { background: var(--color-negative); }
 
+/* Sub-bullets (agregado 2026-08-19): un ítem de highlights/lowlights puede venir agrupado
+   ({label, children}) en vez de un string plano — ver templates/1_inicio.j2 y
+   skills/ceo-highlights/SKILL.md. El label se ve como un .hl-item normal (bullet lleno); los
+   children quedan indentados con un bullet hueco ("○"), mismo criterio visual que una lista
+   anidada de Word/Docs. */
+.hl-subitem { margin-left: 14px; }
+.hl-dot.hl-dot-sub.positive,
+.hl-dot.hl-dot-sub.negative {
+  background: transparent;
+  border: 1.2px solid;
+  box-sizing: border-box;
+}
+.hl-dot.hl-dot-sub.positive { border-color: var(--color-positive); }
+.hl-dot.hl-dot-sub.negative { border-color: var(--color-negative); }
+
 /* =============================================
    Pill / Badge
    ============================================= */

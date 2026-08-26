@@ -57,7 +57,8 @@ MERGE_SCRIPT = SCRIPTS_DIR / "merge_standalone.py"
 PDF_SCRIPT = SCRIPTS_DIR / "generate_pdf.py"
 
 # Selector real usado por generate_pdf.py para contar slides — confirmado: 47 elementos en board_May_2026_v37
-SLIDE_CLASS_TOKENS = {"slide", "gtm-slide", "hc-slide", "board-slide", "dt-slide", "dtmx-slide", "dttax-board-slide"}
+SLIDE_CLASS_TOKENS = {"slide", "gtm-slide", "hc-slide", "board-slide", "dt-slide", "dtmx-slide", "dttax-board-slide",
+                      "dtexp-board-slide", "dtca-board-slide"}
 EXPECTED_SLIDE_COUNT = 47
 MIN_SLIDE_COUNT_WARNING = 40
 

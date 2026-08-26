@@ -86,6 +86,23 @@ def _check_pnl_actual(month: str) -> CheckResult:
                         f"— el flujo sigue igual, pero R17 del Validator va a FAIL si Net Revenue/Gross Margin/EBITDA salen vacíos")
 
 
+def _flatten_editorial_items(items):
+    """highlights/lowlights son casi siempre listas de strings, pero desde 2026-08-19 pueden
+    traer un ítem agrupado ({'label': 'Commercial:', 'children': [...]}) para renderizar
+    sub-bullets en 1_inicio.j2 (ver skills/ceo-highlights/SKILL.md). Aplana ambas formas a
+    texto plano para los checks de este módulo, que solo necesitan el contenido, no la
+    estructura — sin esto, ' '.join(...) revienta con TypeError en cuanto aparece un dict."""
+    out = []
+    for item in items:
+        if isinstance(item, dict):
+            if item.get("label"):
+                out.append(str(item["label"]))
+            out.extend(str(c) for c in (item.get("children") or []))
+        else:
+            out.append(str(item))
+    return out
+
+
 def _check_ceo_yaml(month: str) -> CheckResult:
     """F0.5 daba un falso PASS hasta 2026-07-08: solo revisaba que highlights/lowlights no
     estuvieran vacíos, nunca que fueran del mes correcto — se descubrió simulando el flujo de
@@ -100,7 +117,7 @@ def _check_ceo_yaml(month: str) -> CheckResult:
     lowlights = data.get("lowlights") or []
     label = _month_label_es(month)
     title = (data.get("ceo_title") or "").lower()
-    text_blob = " ".join(highlights + lowlights).lower()
+    text_blob = " ".join(_flatten_editorial_items(highlights) + _flatten_editorial_items(lowlights)).lower()
     has_placeholder = any(m in text_blob for m in PLACEHOLDER_MARKERS)
     empty = not highlights or not lowlights
     updated_for_month = data.get("updated_for_month")

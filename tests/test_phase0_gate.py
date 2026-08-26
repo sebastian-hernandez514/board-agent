@@ -140,6 +140,24 @@ def test_ceo_yaml_pass_notes_month_unverified_when_field_missing(isolated_paths)
     assert "sin campo 'updated_for_month'" in r.detail
 
 
+def test_ceo_yaml_handles_grouped_highlight_without_crashing(isolated_paths):
+    """highlights puede traer un ítem agrupado ({label, children}) para sub-bullets en
+    1_inicio.j2 (agregado 2026-08-19, ver skills/ceo-highlights/SKILL.md) — F0.5 no debe
+    reventar con TypeError al construir el text_blob, y debe seguir viendo el contenido de
+    los children para la detección de placeholders."""
+    _seed_all_pass(isolated_paths)
+    _write_yaml(isolated_paths / "ceo.yaml", {
+        "ceo_title": "CEO Highlights",
+        "highlights": ["a", {"label": "Commercial:", "children": ["pendiente de confirmar", "c"]}],
+        "lowlights": ["b"],
+        "updated_for_month": MONTH,
+    })
+    results = _by_id(phase0_gate.run(MONTH))
+    r = results["F0.5"]
+    assert r.status == "WARN"  # detecta el placeholder dentro de un child
+    assert "placeholder_detectado=True" in r.detail
+
+
 def test_discussion_topics_warns_when_sentinel_is_for_a_different_month(isolated_paths):
     """Reproduce el bug real: F0.6 reescrita 2026-07-08 para leer el sentinel
     'updated_for_month' de 2_discussion_topic.j2 (antes revisaba un YAML desconectado del

@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/base.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     /* ── Section cover ── */
     .section-divider {
@@ -37,21 +38,25 @@
 
   <!-- ================================================================
        DISCUSSION TOPIC — Expansion
-       (fuente: expansion-discussion-topic.html recibido 2026-08-18, clases con
-       prefijo dtexp-; portada construida acá con el patrón section-divider
-       existente, el archivo original no traía portada — mismo criterio que el
-       topic de Tax/TP/M&A de arriba)
+       (fuente: expansion-discussion-topic-v2.html recibido 2026-08-19 — actualiza el
+       topic "Cross-Sell & Up-Sell" (fuente original: expansion-discussion-topic.html,
+       2026-08-18). Cambios de contenido en esta v2: mensajes 1 y 3 reescritos, tabla del
+       slide 1 ahora con filtro por país (ALL/COL/MEX/DOM/CRI) y filas colapsables (Net
+       Upselling / Net Cross-selling / Net Discounts con hijos plegados por default vía
+       .dtexp-exp + .dtexp-child/.dtexp-open), Pricing separado en tarifa (list price) vs.
+       descuentos dados/terminados. Mismo prefijo dtexp- y misma portada (título ya
+       renombrado en la sesión anterior, sin cambios acá).)
        ================================================================ -->
   <div class="slide section-divider">
     <div class="eyebrow">Growth</div>
-    <div class="section-title">Expansion</div>
+    <div class="section-title">Cross-Sell &amp; Up-Sell:<br>What Is Actually Driving Expansion</div>
     <div class="topic-label">{{ config.month_label }}</div>
   </div>
 
   <div class="slide-divider">↓</div>
 
 <style>
-/* ── Discussion Topic: Expansion (recibido 2026-08-18) ── */
+/* ── Discussion Topic: Expansion (actualizado 2026-08-19, v2) ── */
 .dtexp-vars{
   --dtexp-navy:#0f2b45;--dtexp-teal:#3aa88f;--dtexp-mint2:#e7f6f0;--dtexp-gold:#bf9b57;
   --dtexp-ink:#17262f;--dtexp-ink2:#3d505c;--dtexp-muted:#7d8d98;--dtexp-line:#e7edf1;
@@ -62,19 +67,26 @@
 .dtexp-head h2{margin:0;font-size:17px;font-weight:700}
 .dtexp-head .dtexp-per{color:#8fd8c6;font-size:11.5px;font-weight:600}
 .dtexp-body{padding:14px 26px 16px;flex:1;overflow:hidden;font-family:'Inter',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--dtexp-ink)}
-.dtexp-eye{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dtexp-teal);font-weight:700;margin:0 0 8px}
+.dtexp-eye{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dtexp-teal);font-weight:700;margin:0 0 6px}
+.dtexp-cfilt{display:flex;align-items:center;gap:6px;margin:0 0 6px;flex-wrap:wrap}
+.dtexp-cfilt .dtexp-cfl{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--dtexp-muted);font-weight:700;margin-right:2px}
+.dtexp-cbtn{font:inherit;font-size:10.5px;font-weight:600;color:var(--dtexp-ink2);background:#fff;border:1px solid var(--dtexp-line);border-radius:20px;padding:1px 10px;cursor:pointer;transition:.1s}
+.dtexp-cbtn:hover{border-color:var(--dtexp-teal);color:var(--dtexp-navy)}
+.dtexp-cbtn.dtexp-on{background:var(--dtexp-navy);color:#fff;border-color:var(--dtexp-navy)}
 table.dtexp-wk{width:100%;border-collapse:collapse;font-size:11.5px}
-table.dtexp-wk th{font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--dtexp-muted);font-weight:700;text-align:right;padding:4px 10px;border-bottom:1px solid var(--dtexp-line)}
+table.dtexp-wk th{font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--dtexp-muted);font-weight:700;text-align:right;padding:3px 10px;border-bottom:1px solid var(--dtexp-line)}
 table.dtexp-wk th:first-child{text-align:left}
-table.dtexp-wk td{padding:4px 10px;border-bottom:1px solid #f0f4f6;text-align:right;font-variant-numeric:tabular-nums}
+table.dtexp-wk td{padding:3px 10px;border-bottom:1px solid #f0f4f6;text-align:right;font-variant-numeric:tabular-nums}
 table.dtexp-wk td:first-child{text-align:left}
 tr.dtexp-row{cursor:pointer}tr.dtexp-row:hover td{background:#f6f9fa}tr.dtexp-sel td{background:var(--dtexp-mint2)!important}
 .dtexp-lv0 td:first-child{font-weight:700;color:var(--dtexp-navy)}.dtexp-lv1 td:first-child{padding-left:26px;color:var(--dtexp-ink2);font-weight:500}
+tr.dtexp-child{display:none}tr.dtexp-child.dtexp-open{display:table-row}
+.dtexp-exp{display:inline-block;width:11px;cursor:pointer;color:var(--dtexp-muted);font-size:9px;margin-right:1px;user-select:none}
 .dtexp-tot td{border-top:2px solid var(--dtexp-navy);border-bottom:none}.dtexp-tot td:first-child{font-weight:800}
 .dtexp-dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px;vertical-align:0}
 .dtexp-note{font-size:9px;color:var(--dtexp-muted);font-weight:500;margin-left:5px}
-.dtexp-hint{font-size:10px;color:var(--dtexp-teal);font-weight:600;margin:8px 0 2px}
-.dtexp-leg{display:flex;flex-wrap:wrap;gap:14px;font-size:10px;font-weight:600;color:var(--dtexp-ink2);margin:4px 0 2px}
+.dtexp-hint{font-size:10px;color:var(--dtexp-teal);font-weight:600;margin:5px 0 2px}
+.dtexp-leg{display:flex;flex-wrap:wrap;gap:14px;font-size:10px;font-weight:600;color:var(--dtexp-ink2);margin:3px 0 2px}
 .dtexp-leg span{display:flex;align-items:center;gap:5px}.dtexp-leg i{width:15px;height:0;border-top:2.8px solid;display:inline-block}
 .dtexp-two{display:grid;grid-template-columns:1.35fr 1fr;gap:20px;align-items:center}
 .dtexp-stat{font-size:12px;color:var(--dtexp-ink2);line-height:1.5}.dtexp-stat .dtexp-big{font-size:28px;font-weight:800;color:var(--dtexp-navy);line-height:1}.dtexp-stat .dtexp-big span{font-size:13px;color:var(--dtexp-muted);font-weight:600}
@@ -84,7 +96,7 @@ tr.dtexp-row{cursor:pointer}tr.dtexp-row:hover td{background:#f6f9fa}tr.dtexp-se
 .dtexp-card .dtexp-t .dtexp-num{display:inline-block;width:20px;height:20px;border-radius:5px;background:var(--dtexp-teal);color:#fff;font-size:11px;text-align:center;line-height:20px;margin-right:7px;vertical-align:1px}
 .dtexp-card .dtexp-d{font-size:11.5px;color:var(--dtexp-ink2);line-height:1.45}.dtexp-card .dtexp-tag{display:inline-block;font-size:10px;font-weight:700;color:#9c3f52;background:#f7e6ea;border-radius:20px;padding:2px 9px;margin-top:8px}
 .dtexp-lead{font-size:13.5px;color:var(--dtexp-ink);font-weight:600;line-height:1.4;margin:0 0 4px}.dtexp-lead b{color:var(--dtexp-navy)}
-.dtexp-take{background:var(--dtexp-mint2);border-left:3px solid var(--dtexp-teal);border-radius:0 8px 8px 0;padding:9px 14px;font-size:11.5px;color:var(--dtexp-ink2);margin-top:10px;line-height:1.5}.dtexp-take b{color:var(--dtexp-ink)}
+.dtexp-take{background:var(--dtexp-mint2);border-left:3px solid var(--dtexp-teal);border-radius:0 8px 8px 0;padding:7px 14px;font-size:11px;color:var(--dtexp-ink2);margin-top:8px;line-height:1.4}.dtexp-take b{color:var(--dtexp-ink)}
 .dtexp-foot{background:#f8fafc;border-top:1px solid var(--dtexp-line);display:flex;justify-content:space-between;color:var(--dtexp-muted);font-size:9.5px;padding:8px 26px}
 #dtexp-tip{position:fixed;pointer-events:none;background:#0f172a;color:#fff;font-size:11.5px;padding:8px 11px;border-radius:8px;opacity:0;transition:.08s;z-index:9}
 #dtexp-tip b{color:#8fd8c6}#dtexp-tip .r{display:flex;justify-content:space-between;gap:14px;margin-top:2px}#dtexp-tip .v{font-weight:700}
@@ -94,48 +106,49 @@ tr.dtexp-row{cursor:pointer}tr.dtexp-row:hover td{background:#f6f9fa}tr.dtexp-se
 
 <!-- SLIDE 1 -->
 <div class="dtexp-board-slide">
- <div class="dtexp-head"><h2>Expansion of the base is fading</h2><span class="dtexp-per">Discussion topic · 1/3 · durable Δ, budget TRM</span></div>
+ <div class="dtexp-head"><h2>Expansion is down — largely a deliberate pricing pullback</h2><span class="dtexp-per">Discussion topic · 1/3 · Pricing · budget TRM</span></div>
  <div class="dtexp-body">
   <div class="dtexp-eye">Structural movement of the existing base · by semester · % of start MRR · <b style="color:#3aa88f">budget TRM (FX-neutral)</b> · excl. new logos &amp; churn</div>
+  <div class="dtexp-cfilt"><span class="dtexp-cfl">Country</span><button class="dtexp-cbtn dtexp-on" data-cc="ALL">All</button><button class="dtexp-cbtn" data-cc="COL">Colombia</button><button class="dtexp-cbtn" data-cc="MEX">Mexico</button><button class="dtexp-cbtn" data-cc="DOM">Dominican Rep.</button><button class="dtexp-cbtn" data-cc="CRI">Costa Rica</button></div>
   <table class="dtexp-wk" id="dtexp-tbl"></table>
   <div class="dtexp-hint">↑ Click a row — the chart shows its components, monthly, to reveal the trend</div>
   <div class="dtexp-leg" id="dtexp-leg"></div>
   <div id="dtexp-chart"></div>
   <div class="dtexp-take" id="dtexp-take1"></div>
  </div>
- <div class="dtexp-foot"><span>Alegra · Confidential · table = durable semester Δ · chart = monthly flow · Pricing incl. discounts</span><span>Expansion · 1/3</span></div>
+ <div class="dtexp-foot"><span>Alegra · Confidential · table = durable semester Δ · chart = monthly flow · Pricing split: tariff (list price) + discounts given/ended (via coupon gap)</span><span>Expansion · 1/3</span></div>
 </div>
 
 <!-- SLIDE 2 -->
 <div class="dtexp-board-slide">
- <div class="dtexp-head"><h2>The driver of net upsell is the customer's income — not us</h2><span class="dtexp-per">Discussion topic · 2/3</span></div>
+ <div class="dtexp-head"><h2>Our upsell isn't strategic yet — it rides the customer's income</h2><span class="dtexp-per">Discussion topic · 2/3 · Upsell</span></div>
  <div class="dtexp-body">
   <div class="dtexp-eye">What moves net upsell · plan changes vs. customer income (FX-neutral)</div>
   <div class="dtexp-two">
     <div id="dtexp-chart2"></div>
     <div class="dtexp-stat">
       <div class="dtexp-big">~6 in 10<span> of upsell reverses</span></div>
-      <p style="margin:9px 0 0">The scatter shows net upsell <b>rising in high-income months and falling in low-income ones</b> — plan changes track the customer's income, which is seasonal (peaks in <b>December</b>, drops in <b>January</b>).</p>
+      <p style="margin:9px 0 0">The scatter shows net upsell <b>rising in high-income months and falling in low-income ones</b> — much of it is customers <b>crossing a billing threshold</b> in a strong month, not us delivering more value. It's seasonal (peaks in <b>December</b>, drops in <b>January</b>).</p>
       <p>So the same accounts bounce up and back down: <b>most upsell comes from accounts that also downgrade later</b> (chronic oscillators). It's oscillation on the customer's income cycle — not durable expansion.</p>
     </div>
   </div>
-  <div class="dtexp-take"><b>Net upsell is a real, deliberate customer decision — but it's driven by the customer's own income, which is seasonal and outside our control.</b> That's why it doesn't compound into structural expansion; it just rides the customer's revenue up and back down.</div>
+  <div class="dtexp-take"><b>Today's upsell isn't something we drive — it's the customer's income cycle.</b> They upgrade when they cross a billing limit in a good month, then revert when income drops. The strategic shift: move from <b>upsell by billing</b> to <b>upsell by value</b> — tie upgrades to features and usage, not the customer's revenue.</div>
  </div>
  <div class="dtexp-foot"><span>Alegra · Confidential · fact_customers_mrr (plan moves) × income_by_logo (FX-neutralized)</span><span>Expansion · 2/3</span></div>
 </div>
 
 <!-- SLIDE 3 -->
 <div class="dtexp-board-slide">
- <div class="dtexp-head"><h2>What the 3-ICP model attacks</h2><span class="dtexp-per">Discussion topic · 3/3 · the strategy</span></div>
+ <div class="dtexp-head"><h2>We need to build the expansion machine</h2><span class="dtexp-per">Discussion topic · 3/3 · The strategy</span></div>
  <div class="dtexp-body">
-  <div class="dtexp-eye">The strategy · turning expansion into a lever we control</div>
-  <p class="dtexp-lead">Each weak spot in today's expansion maps to a design choice in the 3-ICP model — expansion tied to <b>value and usage</b>, not the customer's income cycle.</p>
+  <div class="dtexp-eye">The strategy · pricing + product + process, working together</div>
+  <p class="dtexp-lead">No single lever fixes this. Expansion has to become a <b>system</b> — pricing, product and the commercial team giving and using clear value levers, not one-off reactions.</p>
   <div class="dtexp-cards">
-    <div class="dtexp-card"><div class="dtexp-t"><span class="dtexp-num">1</span>Today's upsell is seasonal — not ours</div><div class="dtexp-d">Plan changes just follow the customer's own income — they upgrade in December's peak and downgrade in January. It's their business cycle, which we don't control, and it nets to zero over a year.</div><span class="dtexp-tag">net upsell → negative in 1H26</span></div>
-    <div class="dtexp-card"><div class="dtexp-t"><span class="dtexp-num">2</span>Move upsell to real value</div><div class="dtexp-d">Tie upgrades to usage the customer controls and we can meter: <b>more users, warehouses, API, storage, inventory items, AI</b>. Then upsell becomes a lever <b>we</b> drive — structural expansion, not the income cycle.</div><span class="dtexp-tag" style="color:#2f9e78;background:#e7f6f0">usage-based · steerable</span></div>
-    <div class="dtexp-card"><div class="dtexp-t"><span class="dtexp-num">3</span>Clearer initial offer + cross-sell bundles</div><div class="dtexp-d">Two things to fix together: the <b>over-bundled initial sale unwinds</b> (−1%/sem), and genuine cross-sell is still modest (+1%/sem, room to grow). The 3-ICP model makes the entry offer <b>clearer per profile</b> — right-sized first, then <b>attractive cross-product bundles</b> to grow the second product.</div><span class="dtexp-tag">cross +1% · initial unwind −1%</span></div>
+    <div class="dtexp-card"><div class="dtexp-t"><span class="dtexp-num">1</span>Be intentional with pricing</div><div class="dtexp-d">Our strongest lever. Easing this year was a <b>deliberate call</b> — and the data says the churn we feared from price increases does not necessarily stick. So there's room to push. The question is <b>when and how much</b>, not whether.</div><span class="dtexp-tag" style="color:#8a6d2e;background:#f6efe0">biggest lever · room to push</span></div>
+    <div class="dtexp-card"><div class="dtexp-t"><span class="dtexp-num">2</span>Give the team value to sell</div><div class="dtexp-d">Upsell tied to usage the customer keeps — <b>users, warehouses, API, storage, AI</b> — and a second product that <b>sticks</b>: today customers buy Payroll/POS then drop it and keep Accounting, costing ~1pt of expansion. Without value levers from pricing &amp; product, a CS quota alone is empty.</div><span class="dtexp-tag">2nd product = ~1pt at stake</span></div>
+    <div class="dtexp-card"><div class="dtexp-t"><span class="dtexp-num">3</span>Build a real expansion process</div><div class="dtexp-d">Today it's <b>reactive</b> — we sell when the customer asks. Build systematic account identification, <b>triggers</b>, qualification, offers and follow-up — the KAM / Account Management + CS motion. That turns upsell/cross-sell into something we generate, not something we wait for.</div><span class="dtexp-tag" style="color:#2f9e78;background:#e7f6f0">proactive · KAM + CS</span></div>
   </div>
-  <div class="dtexp-take"><b>The goal: move expansion from passive (income cycle + a fading tariff bump) to structural (value + usage the customer keeps).</b> Separately, the biggest leak is still churn — the retention agenda (annual billing, onboarding, accountant multi-logo lock), distinct from the expansion levers above.</div>
+  <div class="dtexp-take"><b>None of these levers work alone — expansion becomes structural only when pricing, product and process move together.</b> That's the shift: from ad hoc pushes to a system the commercial team can run every quarter.</div>
  </div>
  <div class="dtexp-foot"><span>Alegra · Confidential · pricing strategy — expansion</span><span>Expansion · 3/3</span></div>
 </div>
@@ -144,50 +157,62 @@ tr.dtexp-row{cursor:pointer}tr.dtexp-row:hover td{background:#f6f9fa}tr.dtexp-se
 <div id="dtexp-tip"></div>
 <script>
 (function(){
-const A={"sem":{"periods":["1H24","2H24","1H25","2H25","1H26"],"bop":[1190181.8749913303,1370955.735706457,1706802.8294286556,1931259.325276041,2123160.796746945],"comp":{"upselling":[62623.81569064208,121402.51120440794,78967.68645942246,130273.87553538053,83049.10646588476],"downselling":[-51873.41694537278,-39963.7862439996,-64826.92857990885,-54081.68233027041,-102171.55239032093],"cross_up":[23878.218252813564,29767.03874757367,26741.426102722744,28698.493469142002,26640.34123322191],"cross_down":[-19172.761667900635,-21613.875201146286,-26239.117738317153,-26116.57619778004,-33342.81231141449],"pricing":[71057.1909252614,111315.2912480562,188403.92166801772,29122.134470180456,62780.434480019736],"cross_down_t0":[-11833.704788962117,-13382.051692274832,-16488.894692223435,-16090.59056261103,-20773.419956994097],"cross_down_later":[-7339.056878938482,-8231.823508871448,-9750.223046093699,-10025.985635168981,-12569.392354420364]}},"mon":{"mos":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],"bop":[1190182.0,1214220.0,1245662.0,1287523.0,1323762.0,1367920.0,1370956.0,1438302.0,1566295.0,1574275.0,1613871.0,1635517.0,1706803.0,1689854.0,1779414.0,1902266.0,1907235.0,1926761.0,1931259.0,1952564.0,1959261.0,1982149.0,2004662.0,2044161.0,2123161.0,2108289.0,2087856.0,2146143.0,2181513.0,2208580.0,2265155.0],"comp":{"upsell":[19285.0,20485.0,18641.0,21432.0,24564.0,23935.0,25158.0,30306.0,26212.0,25979.0,28284.0,52320.0,21438.0,24893.0,29370.0,26744.0,29105.0,26071.0,30758.0,28895.0,27135.0,26502.0,31013.0,64997.0,23240.0,26662.0,33410.0,29076.0,32336.0,29674.0,30276.0],"downsell":[-23079.0,-19750.0,-14138.0,-11977.0,-13696.0,-15459.0,-16041.0,-16527.0,-17735.0,-17414.0,-16146.0,-16100.0,-34918.0,-25394.0,-18721.0,-23850.0,-20077.0,-20220.0,-20737.0,-22553.0,-20163.0,-19282.0,-19965.0,-19913.0,-44377.0,-34387.0,-25030.0,-25712.0,-25046.0,-24785.0,-27995.0],"pricing":[19156.0,33517.0,39012.0,11167.0,11473.0,6518.0,43276.0,93316.0,10650.0,10592.0,11428.0,16603.0,14506.0,114523.0,112469.0,21284.0,13199.0,9079.0,14993.0,14801.0,16604.0,12823.0,26173.0,20995.0,23161.0,11624.0,27865.0,16910.0,12218.0,43892.0,57994.0],"cross_up":[8360.0,8395.0,8824.0,10381.0,15657.0,8012.0,9669.0,10874.0,8827.0,6596.0,6565.0,7503.0,6556.0,6016.0,6843.0,6225.0,5924.0,6888.0,6179.0,6181.0,7165.0,5426.0,5281.0,7064.0,5963.0,7261.0,6860.0,5738.0,8450.0,8226.0,8234.0],"cross_down":[-8640.0,-9812.0,-9467.0,-13104.0,-7428.0,-7918.0,-9585.0,-10248.0,-9504.0,-8498.0,-5777.0,-5817.0,-7680.0,-8028.0,-8825.0,-8436.0,-9128.0,-7342.0,-7261.0,-7733.0,-8096.0,-6320.0,-7215.0,-6885.0,-11005.0,-9108.0,-9328.0,-8594.0,-7165.0,-10483.0,-10912.0],"cross_down_t0":[-5540.0,-6288.0,-6397.0,-8953.0,-4590.0,-5257.0,-6495.0,-6819.0,-6384.0,-5106.0,-3460.0,-3743.0,-4537.0,-4997.0,-5677.0,-5475.0,-5649.0,-4588.0,-4246.0,-4825.0,-4696.0,-3896.0,-4448.0,-4015.0,-6756.0,-5801.0,-5646.0,-5277.0,-4515.0,-7282.0,-7947.0],"cross_down_later":[-3101.0,-3524.0,-3070.0,-4151.0,-2838.0,-2660.0,-3090.0,-3429.0,-3120.0,-3392.0,-2316.0,-2074.0,-3144.0,-3031.0,-3148.0,-2961.0,-3479.0,-2754.0,-3015.0,-2908.0,-3400.0,-2425.0,-2766.0,-2870.0,-4248.0,-3307.0,-3682.0,-3317.0,-2650.0,-3201.0,-2966.0]}},"inc":{"mos":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-04","2026-05"],"net_up":[-0.319,0.061,0.361,0.734,0.821,0.62,0.665,0.958,0.541,0.544,0.752,2.215,-0.79,-0.03,0.598,0.152,0.473,0.304,0.519,0.325,0.356,0.364,0.551,2.206,-0.996,-0.366,0.157,0.334],"inc_med":[-16.1,4.01,-0.12,2.81,0.6,-5.09,5.36,0.35,-0.81,1.23,3.39,9.34,-14.45,-1.73,4.43,-0.46,3.79,-4.28,3.82,-0.97,0.01,1.53,1.14,12.03,-18.2,-0.99,-7.12,2.29],"inc_med_usd":[-17.92,3.85,2.1,1.99,0.73,-8.76,5.47,-0.36,-3.13,0.0,0.06,9.69,-13.4,1.66,4.33,-3.11,5.51,-2.62,5.3,-1.22,3.19,2.43,3.58,12.02,-16.59,-0.05,-5.05,0.14]}};const SEM=A.sem,MON=A.mon,INC=A.inc;const $=s=>document.querySelector(s),tip=$('#dtexp-tip');
+const A={"byc":{"ALL":{"sem":{"periods":["1H24","2H24","1H25","2H25","1H26"],"bop":[1190181.8699999999,1370955.75,1706802.84,1931259.32,2123160.77],"comp":{"upselling":[62623.8,121402.51,78967.69,130273.88,83049.12],"downselling":[-51873.42999999999,-39963.79,-64826.93,-54081.68,-102171.55],"cross_up":[23878.21,29767.03,26741.429999999997,28698.500000000004,26640.35],"cross_down":[-19172.76,-21613.86,-26239.129999999997,-26116.57,-33342.83],"cross_down_t0":[-11872.32,-13292.96,-16475.62,-16109.25,-20745.41],"cross_down_later":[-7300.44,-8320.9,-9763.51,-10007.32,-12597.42],"pricing":[71057.19,111315.29,188403.93000000002,29122.129999999997,62780.44],"pricing_tarifa":[57554.09,103400.26,180719.385,18827.589999999997,49943.799999999996],"disc_ending":[18709.100000000002,11414.19,12649.345000000001,13884.5,17761.74],"disc_given":[-5206.0,-3499.1600000000003,-4964.8,-3589.9599999999996,-4925.099999999999]}},"mon":{"mos":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],"bop":[1190181.8699999999,1214220.06,1245662.22,1287522.76,1323762.3900000001,1367919.59,1370955.75,1438301.8,1566295.0799999998,1574274.8599999999,1613871.0000000002,1635517.17,1706802.84,1689853.69,1779413.74,1902265.92,1907234.82,1926760.5899999999,1931259.32,1952563.9999999998,1959260.5199999998,1982148.63,2004662.3800000001,2044160.93,2123160.77,2108289.24,2087856.35,2146143.05,2181512.6100000003,2208579.59,2265155.25],"comp":{"upsell":[19284.97,20484.95,18640.53,21432.36,24563.99,23934.87,25158.100000000002,30306.300000000003,26211.5,25978.719999999998,28283.74,52319.59,21437.5,24892.79,29370.01,26744.47,29105.15,26070.97,30757.79,28895.3,27134.66,26502.06,31012.9,64996.49,23240.23,26662.120000000003,33410.329999999994,29075.76,32336.129999999997,29674.32,30283.399999999998],"downsell":[-23079.02,-19750.41,-14137.86,-11976.93,-13695.55,-15459.34,-16040.839999999998,-16527.329999999998,-17735.21,-17414.31,-16146.169999999998,-16100.089999999998,-34918.28,-25393.66,-18721.440000000002,-23849.899999999998,-20076.69,-20219.64,-20737.170000000002,-22553.289999999997,-20162.559999999998,-19281.79,-19964.56,-19912.600000000002,-44377.479999999996,-34386.59,-25030.47,-25712.15,-25046.120000000003,-24784.91,-27995.159999999996],"cross_up":[8359.99,8394.769999999999,8823.77,10380.75,15656.829999999998,8011.7,9669.08,10873.53,8827.43,6596.219999999999,6564.950000000001,7503.47,6555.78,6015.5199999999995,6843.099999999999,6225.110000000001,5924.37,6888.419999999999,6179.31,6181.36,7165.0,5426.34,5280.96,7063.99,5963.34,7260.65,6860.150000000001,5738.0199999999995,8449.74,8225.789999999999,8333.64],"cross_down":[-8640.19,-9812.1,-9467.189999999999,-13104.239999999998,-7428.280000000001,-7917.5599999999995,-9585.36,-10247.880000000001,-9503.89,-8498.05,-5776.74,-5816.870000000001,-7680.47,-8027.869999999999,-8825.5,-8435.86,-9128.029999999999,-7341.799999999999,-7260.82,-7733.17,-8095.69,-6320.48,-7214.5,-6884.68,-11004.939999999999,-9108.13,-9327.58,-8593.96,-7164.67,-10483.1,-10912.460000000001],"cross_down_t0":[-5600.3,-6274.09,-6366.5199999999995,-8886.789999999999,-4595.29,-5323.849999999999,-6568.139999999999,-6685.51,-6401.51,-5000.389999999999,-3428.71,-3704.7000000000003,-4526.79,-4944.78,-5581.06,-5532.21,-5645.169999999999,-4645.29,-4246.01,-4858.96,-4671.07,-3890.74,-4421.5599999999995,-4001.2299999999996,-6756.469999999999,-5801.25,-5668.02,-5280.83,-4514.910000000001,-7265.400000000001,-7946.670000000001],"cross_down_later":[-3039.8900000000003,-3538.01,-3100.67,-4217.45,-2832.9900000000002,-2593.71,-3017.2200000000003,-3562.3700000000003,-3102.38,-3497.66,-2348.0299999999997,-2112.17,-3153.6800000000003,-3083.0899999999997,-3244.4400000000005,-2903.65,-3482.86,-2696.5099999999998,-3014.81,-2874.21,-3424.62,-2429.74,-2792.94,-2883.4500000000003,-4248.47,-3306.8799999999997,-3659.5599999999995,-3313.13,-2649.7599999999998,-3217.7000000000003,-2965.79],"pricing":[19156.15,33517.2,39011.92,11167.42,11472.96,6517.72,43275.61,93316.14,10649.619999999999,10591.68,11427.779999999999,16602.66,14505.58,114523.09999999999,112469.29,21284.2,13198.96,9078.869999999999,14993.14,14800.87,16604.07,12823.21,26173.43,20995.12,23160.74,11623.95,27865.4,16910.32,12217.96,43892.0,57994.469999999994],"pricing_tarifa":[1100.6700000000014,27043.82,33941.53,3999.0699999999993,1615.4199999999987,-1018.4899999999991,34887.26,89550.2,7747.779999999999,7982.49,9097.759999999998,14301.090000000002,13118.970000000001,112425.51999999999,91775.71999999999,19095.98,12725.964999999998,5640.9,9145.05,11031.34,10793.150000000001,9724.359999999999,13543.690000000002,15613.5,16909.760000000002,8790.27,13572.210000000001,13712.4,10168.41,40670.91,48359.189999999995],"disc_ending":[21294.59,8989.96,7742.000000000001,9324.45,12205.11,9492.64,10128.210000000001,5993.299999999999,5016.75,4482.76,4027.4500000000003,4074.4399999999996,3965.04,5249.610000000001,23150.91,3890.92,4610.645,5330.37,7340.95,5241.93,7734.55,4880.32,14042.529999999999,7181.91,8391.19,5094.91,16320.03,5489.18,4688.69,5724.5599999999995,12301.22],"disc_given":[-3239.11,-2516.58,-2671.61,-2156.1,-2347.57,-1956.43,-1739.86,-2227.36,-2114.91,-1873.57,-1697.43,-1772.8700000000001,-2578.43,-3152.0299999999997,-2457.34,-1702.6999999999998,-4137.65,-1892.4,-1492.8600000000001,-1472.3999999999999,-1923.63,-1781.47,-1412.79,-1800.29,-2140.21,-2261.23,-2026.84,-2291.26,-2639.14,-2503.47,-2665.94]}}},"COL":{"sem":{"periods":["1H24","2H24","1H25","2H25","1H26"],"bop":[764396.52,881421.76,1147458.8,1244468.08,1379031.74],"comp":{"upselling":[43910.29,91978.11,52761.81,97847.27,58611.06],"downselling":[-39406.92,-29224.62,-54568.05,-34928.56,-71647.32],"cross_up":[17849.78,23337.66,18950.17,19209.58,18197.89],"cross_down":[-13977.91,-14749.27,-18102.63,-15138.25,-23501.73],"cross_down_t0":[-8382.08,-8343.99,-10948.58,-9036.98,-15328.58],"cross_down_later":[-5595.83,-6405.28,-7154.05,-6101.27,-8173.15],"pricing":[57553.32,96693.85,110694.46,17545.16,50124.56],"pricing_tarifa":[49023.97,91419.83,105374.88000000002,10965.95,41017.30999999999],"disc_ending":[11307.94,7922.94,8502.289999999999,9081.64,12754.52],"disc_given":[-2778.59,-2648.92,-3182.71,-2502.43,-3647.27]}},"mon":{"mos":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],"bop":[764396.52,772476.98,794005.5700000001,825832.6,847573.55,881396.68,881421.76,934628.96,1042583.45,1042039.4199999999,1070942.56,1085569.72,1147458.8,1125578.28,1181516.65,1241652.27,1233778.98,1243606.92,1244468.08,1256994.92,1259959.3599999999,1276201.91,1290646.1,1312400.69,1379031.74,1354681.05,1332978.5,1358796.16,1374156.1800000002,1385201.8699999999,1426025.31],"comp":{"upsell":[14990.29,15230.86,13809.8,16215.45,17460.48,17697.93,19150.95,21569.74,19522.75,20334.87,22801.62,45326.64,17052.7,17672.74,21080.11,19736.16,20511.53,19343.55,21919.87,20877.47,21441.56,19832.38,23280.83,54796.53,16835.53,18864.83,24180.55,22579.29,26076.92,23401.34,24349.35],"downsell":[-18567.97,-15877.34,-11263.41,-9669.3,-10961.01,-12022.14,-12288.83,-13491.63,-13975.47,-13620.62,-13171.21,-12465.13,-30661.81,-22287.47,-15497.49,-17569.8,-15132.21,-15324.49,-14323.04,-17335.89,-13818.81,-13963.35,-14912.8,-14488.53,-35696.64,-26186.3,-18129.15,-17676.88,-17937.4,-19160.54,-18912.67],"cross_up":[7021.65,7144.69,7349.28,8368.31,14330.71,6768.25,8297.76,8876.76,7144.28,5273.74,4851.52,6181.38,4853.24,4215.44,5442.12,4431.0,4157.85,4795.32,3637.83,4112.78,4080.11,3683.52,3577.13,5619.34,4670.36,4943.88,4921.39,3799.86,5732.06,5020.11,5824.43],"cross_down":[-7070.610000000001,-7290.200000000001,-7004.17,-11873.189999999999,-6208.9400000000005,-6855.789999999999,-7519.52,-7450.88,-7821.380000000001,-5606.67,-4546.55,-4338.1900000000005,-5429.85,-6134.67,-5977.200000000001,-5954.33,-6908.67,-5004.04,-4355.94,-4826.16,-5170.129999999999,-3998.24,-4659.43,-4051.92,-7946.2,-6737.16,-6353.46,-6265.5599999999995,-4833.9400000000005,-7386.860000000001,-7884.43],"cross_down_t0":[-4648.29,-4797.14,-4569.65,-8016.19,-3945.18,-4612.32,-5066.41,-5260.29,-5135.81,-2919.99,-2638.98,-2710.4,-2867.3,-3655.7,-3718.01,-3748.98,-4351.48,-3150.52,-2550.22,-2922.65,-2924.91,-2401.37,-2843.22,-2708.91,-5250.49,-4366.21,-3968.07,-3784.29,-3013.86,-5318.29,-6017.05],"cross_down_later":[-2422.32,-2493.06,-2434.52,-3857.0,-2263.76,-2243.47,-2453.11,-2190.59,-2685.57,-2686.68,-1907.57,-1627.79,-2562.55,-2478.97,-2259.19,-2205.35,-2557.19,-1853.52,-1805.72,-1903.51,-2245.22,-1596.87,-1816.21,-1343.01,-2695.71,-2370.95,-2385.39,-2481.27,-1820.08,-2068.57,-1867.38],"pricing":[12038.1,27803.87,30500.76,6418.04,7276.44,3729.57,34802.74,85515.69,6778.32,6520.95,7699.74,10445.23,10872.01,78989.12,59216.2,9907.83,4883.29,6524.48,7549.1,8278.29,11014.33,8345.49,10790.03,12082.05,15580.36,7014.03,16328.7,10987.19,8965.64,39041.34,50621.14],"pricing_tarifa":[-172.53999999999974,23984.69,27385.329999999994,2016.9099999999999,1697.1899999999996,-876.1400000000001,28266.1,82426.56,4496.98,4848.889999999999,6129.04,9055.519999999999,10132.53,77856.82999999999,46908.49,9132.96,5192.075000000001,3270.01,4653.370000000001,6341.9400000000005,7712.05,6276.0,7600.51,10547.82,12238.42,5013.94,8516.210000000001,8704.94,7673.709999999999,36761.43,44217.92],"disc_ending":[13047.84,4994.09,4419.1,5428.71,6759.17,5732.6,7491.3,4651.94,3776.21,3080.8,2939.71,2886.93,2766.42,3445.94,13842.39,2006.38,3256.535,4506.69,4050.94,2990.16,4505.96,2982.99,4143.09,2765.99,4734.43,3580.67,9242.8,3738.69,2943.7,4105.28,8153.99],"disc_given":[-837.2,-1174.91,-1303.67,-1027.58,-1179.92,-1126.89,-954.66,-1562.81,-1494.87,-1408.74,-1369.01,-1497.22,-2026.94,-2313.65,-1534.68,-1231.51,-3565.32,-1252.22,-1155.21,-1053.81,-1203.68,-913.5,-953.57,-1231.76,-1392.49,-1580.58,-1430.31,-1456.44,-1651.77,-1825.37,-1750.77]}}},"MEX":{"sem":{"periods":["1H24","2H24","1H25","2H25","1H26"],"bop":[108507.45,127512.01,143583.61,177599.33,190876.39],"comp":{"upselling":[6663.84,4379.98,4298.57,3948.67,6072.09],"downselling":[-2580.03,-3634.99,-2366.96,-4690.12,-7551.45],"cross_up":[2527.4,2493.25,2561.43,3778.82,4287.08],"cross_down":[-1922.2199999999998,-3622.21,-3200.1499999999996,-4626.67,-3983.3099999999995],"cross_down_t0":[-1619.35,-3090.21,-2222.74,-3211.51,-2358.47],"cross_down_later":[-302.87,-532.0,-977.41,-1415.16,-1624.84],"pricing":[8589.5,3775.72,13933.58,2699.8,3101.79],"pricing_tarifa":[6490.86,2928.31,13167.435,1738.9200000000003,2386.8999999999996],"disc_ending":[2507.46,1002.06,1144.5549999999998,1287.05,1024.4],"disc_given":[-408.82,-154.65,-378.41,-326.17,-309.51]}},"mon":{"mos":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],"bop":[108507.45,111250.06,114969.24,120328.97,124353.86,127791.42,127512.01,130482.23,134894.49,134875.32,139487.16,140609.63,143583.61,143020.78,151764.25,166096.55,169764.58,173729.19,177599.33,182973.42,182708.53,185500.95,187194.28,189034.89,190876.39,193054.84,192918.77,200017.25,203997.61,207965.09,214453.15],"comp":{"upsell":[1170.89,777.03,1158.94,901.45,2765.3,2330.25,1564.02,667.72,950.61,1115.52,713.83,845.81,833.77,975.4,1158.51,1261.27,1430.17,625.46,1162.38,987.68,639.44,1203.69,812.64,1080.22,1664.07,978.21,2189.49,1500.55,1780.96,2018.42,1873.51],"downsell":[-1352.98,-537.52,-755.21,-586.81,-501.62,-796.87,-1029.25,-886.29,-1112.58,-790.18,-551.43,-754.75,-849.25,-344.86,-332.97,-1114.49,-966.58,-632.06,-852.04,-979.3,-1302.18,-901.95,-858.54,-1053.54,-1362.43,-1750.28,-1754.76,-1643.83,-1678.95,-1285.57,-2301.72],"cross_up":[388.12,282.71,303.58,532.99,431.45,546.01,479.34,805.67,657.75,450.63,345.02,298.76,638.07,831.78,330.58,1105.31,407.8,775.91,1177.58,906.15,755.82,615.43,362.13,753.72,534.26,634.01,1004.98,915.84,1109.53,768.56,655.15],"cross_down":[-255.29000000000002,-451.24,-871.1,-199.52,-465.65,-391.52,-853.06,-485.02,-608.32,-595.3599999999999,-596.4300000000001,-555.95,-995.41,-731.73,-1389.2800000000002,-671.7,-693.1800000000001,-704.41,-1232.13,-939.3800000000001,-722.34,-754.78,-797.2,-1455.0300000000002,-1572.26,-643.95,-816.5899999999999,-801.7900000000001,-994.71,-918.5600000000001,-1079.1100000000001],"cross_down_t0":[-188.53,-265.89,-791.12,-127.54,-326.0,-270.71,-701.15,-269.14,-527.34,-301.96,-416.48,-398.93,-771.24,-484.46,-1191.4,-406.08,-383.12,-490.69,-937.36,-671.57,-567.22,-601.5,-420.11,-660.45,-709.37,-446.15,-420.94,-571.82,-618.36,-676.23,-382.22],"cross_down_later":[-66.76,-185.35,-79.98,-71.98,-139.65,-120.81,-151.91,-215.88,-80.98,-293.4,-179.95,-157.02,-224.17,-247.27,-197.88,-265.62,-310.06,-213.72,-294.77,-267.81,-155.12,-153.28,-377.09,-794.58,-862.89,-197.8,-395.65,-229.97,-376.35,-242.33,-696.89],"pricing":[1924.61,2622.08,6479.96,2017.65,1370.13,1461.8,3835.34,655.16,191.54,1114.27,1188.82,880.18,160.1,5870.79,12137.8,1225.6,716.32,630.76,2027.24,850.54,2683.55,1063.35,2618.79,2260.39,2056.85,1056.71,2819.34,906.88,1019.44,688.36,785.89],"pricing_tarifa":[61.419999999999845,1829.76,5983.58,1185.38,346.6100000000002,171.73999999999987,3522.46,647.78,97.39000000000001,770.2399999999999,927.9399999999998,653.89,66.4,5675.34,9398.039999999999,869.8199999999999,398.9650000000001,425.9,813.6,438.44,1439.8600000000001,923.8199999999999,1126.29,1316.0299999999997,1416.22,1060.75,1322.1600000000003,824.04,760.2,635.17,287.46000000000004],"disc_ending":[2510.98,1112.02,879.47,1058.5,1357.82,1426.4,607.15,176.74,340.4,407.17,313.18,317.18,225.56,327.47,2929.01,579.93,420.405,260.88,1319.03,559.41,1345.19,424.78,1638.48,993.95,745.02,197.24,1665.86,248.62,524.18,164.05,773.53],"disc_given":[-647.79,-319.7,-383.09,-226.23,-334.3,-136.34,-294.27,-169.36,-246.25,-63.14,-52.3,-90.89,-131.86,-132.02,-189.25,-224.15,-103.05,-56.02,-105.39,-147.31,-101.5,-285.25,-145.98,-49.59,-104.39,-201.28,-168.68,-165.78,-264.94,-110.86,-275.1]}}},"DOM":{"sem":{"periods":["1H24","2H24","1H25","2H25","1H26"],"bop":[204512.08,229839.24,256495.91,328357.34,362642.08],"comp":{"upselling":[8406.91,18020.44,16488.03,24191.77,12024.93],"downselling":[-6565.33,-5195.97,-4906.86,-10256.79,-18683.28],"cross_up":[2007.54,2150.53,3256.93,2946.31,2553.0],"cross_down":[-1898.4499999999998,-1802.41,-1920.2400000000002,-2911.1,-3687.0],"cross_down_t0":[-966.78,-941.19,-1135.92,-1706.48,-1452.74],"cross_down_later":[-931.67,-861.22,-784.32,-1204.62,-2234.26],"pricing":[1773.12,2067.11,41378.26,5676.4,4970.92],"pricing_tarifa":[-876.91,1049.33,40106.64000000001,3773.74,2868.12],"disc_ending":[3375.89,1498.18,1959.4499999999998,2420.72,2791.11],"disc_given":[-725.86,-480.4,-687.83,-518.06,-688.31]}},"mon":{"mos":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],"bop":[204512.08,214599.31,217341.65,218267.21,224508.52,228472.25,229839.24,235630.61,242898.98,247268.07,248890.51,253423.81,256495.91,259373.46,283807.18,321763.27,321445.75,327879.98,328357.34,333033.43,335838.06,338370.04,343022.08,354654.15,362642.08,365068.32,365764.26,385152.21,397258.71,405328.0,406893.64],"comp":{"upsell":[2182.75,3553.01,2461.31,3166.39,3289.7,2832.3,3323.25,6294.44,3627.34,3217.55,3343.42,3903.07,2081.9,5110.67,5518.97,4446.52,5721.13,5389.43,6417.98,6204.93,3866.91,4583.54,6219.47,7601.17,3040.19,5581.57,5565.48,3706.24,2965.82,2964.02,2395.14],"downsell":[-2024.42,-2118.25,-1666.52,-1230.01,-1850.4,-1947.73,-2212.87,-1638.79,-1693.61,-2445.35,-1928.25,-2323.31,-2579.1,-1925.95,-2090.8,-3910.28,-2306.4,-3577.32,-4052.14,-3362.9,-4280.19,-3464.44,-3264.46,-2776.82,-6084.82,-5335.86,-4523.48,-5604.49,-4740.06,-3606.27,-4763.95],"cross_up":[530.72,570.16,652.49,706.24,376.8,436.92,342.98,561.03,574.92,336.28,911.98,581.02,529.32,653.16,795.7,435.68,1015.85,544.32,865.69,707.63,829.2,692.88,784.66,397.65,410.88,1140.55,445.03,682.85,1374.66,1791.28,1044.57],"cross_down":[-809.03,-1213.57,-649.0899999999999,-500.9,-488.54,-441.69,-672.49,-1486.08,-458.03,-844.46,-327.5,-416.11,-575.46,-536.4100000000001,-958.1100000000001,-742.02,-1160.99,-545.61,-1053.76,-1344.49,-533.23,-781.52,-949.4,-472.02,-1285.3899999999999,-1063.5900000000001,-1551.17,-1122.27,-779.48,-1632.62,-1514.79],"cross_down_t0":[-471.17,-826.03,-305.01,-396.9,-110.37,-285.0,-514.88,-574.85,-259.18,-476.8,-136.7,-221.95,-352.98,-341.97,-401.66,-580.96,-632.15,-178.75,-436.35,-991.8,-90.17,-360.25,-635.0,-245.44,-684.4,-425.15,-909.78,-567.02,-580.38,-769.11,-1363.29],"cross_down_later":[-337.86,-387.54,-344.08,-104.0,-378.17,-156.69,-157.61,-911.23,-198.85,-367.66,-190.8,-194.16,-222.48,-194.44,-556.45,-161.06,-528.84,-366.86,-617.41,-352.69,-443.06,-421.27,-314.4,-226.58,-600.99,-638.44,-641.39,-555.25,-199.1,-863.51,-151.5],"pricing":[3462.06,814.69,654.53,1111.3,2617.82,604.2,3042.37,2134.69,1473.94,1688.93,1300.81,1938.59,1942.12,22435.46,30942.02,1853.86,2729.68,637.12,3740.39,4094.97,2184.26,2353.09,8455.49,4135.9,3953.14,2139.9,7740.23,3184.71,1098.89,223.98,3998.54],"pricing_tarifa":[46.410000000000196,-48.48000000000002,-314.02,-135.34000000000003,133.13,-518.3499999999999,2172.35,1695.5900000000001,1247.8600000000001,1390.2,938.1899999999998,1483.0299999999997,1640.82,21964.39,27740.54,1259.95,2469.35,757.11,2294.7,3066.3199999999997,1220.23,1743.6800000000003,3056.69,2542.55,2228.11,1617.3200000000002,3448.709999999999,2942.02,806.7300000000001,-22.899999999999977,1700.5],"disc_ending":[4075.74,1496.71,1500.25,1775.55,2818.55,1411.23,1250.96,694.03,466.3,640.75,499.44,590.69,592.04,718.79,3517.8,735.11,495.62,256.13,1552.27,1228.58,1437.68,1007.79,5575.36,2021.61,2185.91,800.8,4542.68,742.09,729.8,756.0,2596.42],"disc_given":[-660.09,-633.54,-531.7,-528.91,-333.86,-288.68,-380.94,-254.93,-240.22,-342.02,-136.82,-135.13,-290.74,-247.72,-316.32,-141.2,-235.29,-376.12,-106.58,-199.93,-473.65,-398.38,-176.56,-428.26,-460.88,-278.22,-251.16,-499.4,-437.64,-509.12,-298.38]}}},"CRI":{"sem":{"periods":["1H24","2H24","1H25","2H25","1H26"],"bop":[35630.96,41165.39,47836.33,53480.29,63398.18],"comp":{"upselling":[996.73,1883.13,1718.6,1685.78,1967.71],"downselling":[-1667.18,-760.6,-972.29,-1715.41,-1964.03],"cross_up":[767.29,834.92,519.31,1837.25,266.73],"cross_down":[-553.1199999999999,-669.8499999999999,-990.3399999999999,-1905.06,-791.38],"cross_down_t0":[-292.78,-449.96,-522.06,-1222.92,-477.98],"cross_down_later":[-260.34,-219.89,-468.28,-682.14,-313.4],"pricing":[325.57,1224.25,1012.89,959.43,757.56],"pricing_tarifa":[496.37000000000006,1006.18,825.31,709.8399999999999,354.0299999999999],"disc_ending":[582.8,285.49,344.76,404.03,480.67],"disc_given":[-753.6,-67.42,-157.18,-154.44,-77.14]}},"mon":{"mos":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],"bop":[35630.96,36666.17,36732.85,38288.62,39365.64,40005.41,41165.39,42611.1,44140.27,47013.42,49093.11,47525.73,47836.33,48793.88,48182.89,50704.34,52300.29,52767.21,53480.29,53164.45,55073.63,57112.54,58375.74,61487.95,63398.18,64591.02,64893.09,66249.24,68935.46,71601.87,75272.23],"comp":{"upsell":[324.67,351.64,331.31,283.52,265.98,449.79,358.34,716.64,1261.98,551.18,654.93,820.1,581.46,205.21,511.62,410.3,466.7,250.32,519.47,408.19,419.05,406.92,498.12,605.24,630.64,159.13,420.41,406.41,603.48,488.01,614.71],"downsell":[-458.97,-750.31,-242.15,-188.29,-223.52,-278.41,-220.14,-108.25,-295.58,-260.77,-196.46,-209.48,-272.42,-218.37,-202.77,-188.13,-851.13,-160.44,-894.39,-311.7,-191.2,-400.05,-246.35,-332.68,-545.53,-440.24,-300.35,-209.05,-171.58,-235.03,-810.93],"cross_up":[170.16,134.64,210.36,236.67,187.39,99.44,181.79,352.99,328.17,145.02,177.23,253.13,151.43,115.16,77.21,148.19,104.34,72.59,150.15,200.54,1273.21,207.53,410.23,129.65,83.95,199.52,126.2,31.43,56.69,276.4,297.93],"cross_down":[-296.82,-365.29,-227.01999999999998,-147.44,-135.18,-78.07,-272.75,-504.14,-237.39000000000001,-1216.37,-171.7,-309.9,-186.99,-196.95,-173.26,-317.38,-167.51,-210.64,-147.95,-319.83,-1410.1599999999999,-433.49,-538.8199999999999,-175.98,-160.31,-275.44,-240.71,-70.99,-213.83,-188.84,-225.44],"cross_down_t0":[-156.93,-45.86,-163.95,-107.46,-135.18,-40.97,-122.63,-422.76,-204.27,-1137.61,-171.7,-223.93,-104.53,-100.97,-119.98,-114.08,-117.83,-154.7,-39.8,-107.27,-973.67,-252.86,-339.9,-35.98,-80.42,-183.97,-180.72,-29.99,-177.84,-166.24,-106.87],"cross_down_later":[-139.89,-319.43,-63.07,-39.98,0.0,-37.1,-150.12,-81.38,-33.12,-78.76,0.0,-85.97,-82.46,-95.98,-53.28,-203.3,-49.68,-55.94,-108.15,-212.56,-436.49,-180.63,-198.92,-140.0,-79.89,-91.47,-59.99,-41.0,-35.99,-22.6,-118.57],"pricing":[762.35,312.1,290.94,288.33,431.97,293.24,656.43,264.99,1467.3,-498.34,227.95,349.1,631.31,306.26,1783.93,852.44,46.53,76.98,296.94,921.5,791.21,265.37,2423.61,1310.71,379.34,612.94,998.35,793.62,671.32,782.95,774.3],"pricing_tarifa":[834.6,96.47000000000003,-2.1799999999999784,87.17999999999998,-55.860000000000014,176.34000000000003,479.71999999999997,170.43,1464.03,-569.81,193.20999999999998,352.76,453.7699999999999,207.4,735.8900000000001,749.39,63.68500000000002,82.68,235.98000000000002,643.9,541.76,172.86,485.85000000000014,666.39,138.49999999999994,327.63000000000005,316.52000000000004,378.4,501.40000000000003,421.86000000000007,320.79999999999995],"disc_ending":[745.95,485.1,444.89,350.61,597.21,272.83,214.5,173.37,40.22,89.68,48.6,13.36,189.05,114.39,1054.54,111.11,114.205,117.3,170.23,283.1,311.18,196.21,1966.78,690.33,351.1,359.38,704.79,497.1,333.18,361.09,539.59],"disc_given":[-818.2,-269.47,-151.77,-149.46,-109.38,-155.93,-37.79,-78.81,-36.95,-18.21,-13.86,-17.02,-11.51,-15.53,-6.5,-8.06,-131.36,-123.0,-109.27,-5.5,-61.73,-103.7,-29.02,-46.01,-110.26,-74.07,-22.96,-81.88,-163.26,0.0,-86.09]}}}},"inc":{"mos":["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-04","2026-05"],"net_up":[-0.319,0.061,0.361,0.734,0.821,0.62,0.665,0.958,0.541,0.544,0.752,2.215,-0.79,-0.03,0.598,0.152,0.473,0.304,0.519,0.325,0.356,0.364,0.551,2.206,-0.996,-0.366,0.157,0.334],"inc_med":[-16.1,4.01,-0.12,2.81,0.6,-5.09,5.36,0.35,-0.81,1.23,3.39,9.34,-14.45,-1.73,4.43,-0.46,3.79,-4.28,3.82,-0.97,0.01,1.53,1.14,12.03,-18.2,-0.99,-7.12,2.29],"inc_med_usd":[-17.92,3.85,2.1,1.99,0.73,-8.76,5.47,-0.36,-3.13,0.0,0.06,9.69,-13.4,1.66,4.33,-3.11,5.51,-2.62,5.3,-1.22,3.19,2.43,3.58,12.02,-16.59,-0.05,-5.05,0.14]}};const BYC=A.byc,INC=A.inc;let SEM,MON,SEMD,SEMP,MOND,MONP,CUR='net_expansion',CCUR='ALL';const $=s=>document.querySelector(s),tip=$('#dtexp-tip');
 const nfp=v=>(v>=0?'+':'')+v.toFixed(1)+'%';const nf$=v=>(v<0?'-':'')+'$'+Math.abs(Math.round(v)).toLocaleString('en-US');
 function tipOn(e,html){tip.innerHTML=html;tip.style.opacity=1;let x=e.clientX+14;if(x>innerWidth-200)x=e.clientX-200;tip.style.left=x+'px';tip.style.top=(e.clientY+8)+'px';}
 const tipOff=()=>tip.style.opacity=0;
-const COL={upselling:'#2f9e78',downselling:'#c96a80',cross_up:'#4aa88c',cross_down_later:'#9c3f52',initial_unwind:'#b07d9a',pricing:'#bf9b57',net_upselling:'#2f9e78',crosselling:'#4aa88c',net_expansion:'#0f2b45'};
-const LBL={upselling:'Upselling',downselling:'Downselling',cross_up:'Cross up',cross_down_later:'Cross down',initial_unwind:'Cross-sell down · initial sale',pricing:'Pricing',net_upselling:'Net Upselling',crosselling:'Cross-selling',net_expansion:'Net Expansion'};
+const COL={upselling:'#2f9e78',downselling:'#c96a80',cross_up:'#4aa88c',cross_down_later:'#9c3f52',initial_unwind:'#b07d9a',pricing:'#bf9b57',pricing_tarifa:'#bf9b57',net_discounts:'#8a6d9c',disc_ending:'#5b9e88',disc_given:'#c96a80',pricing_pror:'#9aa7b0',net_upselling:'#2f9e78',crosselling:'#3d7ea6',net_expansion:'#0f2b45'};
+const LBL={upselling:'Upselling',downselling:'Downselling',cross_up:'Cross up',cross_down_later:'Cross down',initial_unwind:'Cross-sell down · initial sale',pricing:'Pricing',pricing_tarifa:'Pricing (list price)',net_discounts:'Net Discounts',disc_ending:'Discounts ended (+)',disc_given:'Discounts given (−)',pricing_pror:'Billing / proration',net_upselling:'Net Upselling',crosselling:'Cross-selling',net_expansion:'Net Expansion'};
 // ---- SLIDE 1 table (semester durable %) ----
 const add=(a,b)=>a.map((v,i)=>v+b[i]);
-const SEMD={upselling:SEM.comp.upselling,downselling:SEM.comp.downselling,cross_up:SEM.comp.cross_up,cross_down_later:SEM.comp.cross_down_later,initial_unwind:SEM.comp.cross_down_t0,pricing:SEM.comp.pricing};
-SEMD.net_upselling=add(SEMD.upselling,SEMD.downselling);SEMD.crosselling=add(SEMD.cross_up,SEMD.cross_down_later);
-SEMD.net_expansion=add(add(add(SEMD.net_upselling,SEMD.crosselling),SEMD.initial_unwind),SEMD.pricing);
-const SEMP={};for(const k in SEMD)SEMP[k]=SEMD[k].map((v,i)=>100*v/SEM.bop[i]);
+function computeSem(){
+SEMD={upselling:SEM.comp.upselling,downselling:SEM.comp.downselling,cross_up:SEM.comp.cross_up,cross_down_later:SEM.comp.cross_down_later,initial_unwind:SEM.comp.cross_down_t0,pricing:SEM.comp.pricing,pricing_tarifa:SEM.comp.pricing_tarifa,disc_ending:SEM.comp.disc_ending,disc_given:SEM.comp.disc_given};
+SEMD.net_upselling=add(SEMD.upselling,SEMD.downselling);SEMD.crosselling=add(add(SEMD.cross_up,SEMD.cross_down_later),SEMD.initial_unwind);SEMD.net_discounts=add(SEMD.disc_ending,SEMD.disc_given);
+SEMD.net_expansion=add(add(SEMD.net_upselling,SEMD.crosselling),SEMD.pricing);
+SEMP={};for(const k in SEMD)SEMP[k]=SEMD[k].map((v,i)=>100*v/SEM.bop[i]);
+}
 const ROWS=[
  {id:'net_upselling',label:'Net Upselling',lv:0,lines:['net_upselling','upselling','downselling']},
  {id:'upselling',label:'Upselling',lv:1,lines:['upselling']},
  {id:'downselling',label:'Downselling',lv:1,lines:['downselling']},
- {id:'crosselling',label:'Cross-selling',lv:0,note:'genuine · post-initial',lines:['crosselling','cross_up','cross_down_later']},
+ {id:'crosselling',label:'Net Cross-selling',lv:0,lines:['crosselling','cross_up','cross_down_later','initial_unwind']},
  {id:'cross_up',label:'Cross up',lv:1,lines:['cross_up']},
  {id:'cross_down_later',label:'Cross down',lv:1,lines:['cross_down_later']},
- {id:'initial_unwind',label:'Cross-sell down · from initial sale',lv:0,lines:['initial_unwind']},
- {id:'pricing',label:'Pricing',lv:0,note:'incl. discounts',lines:['pricing']},
- {id:'net_expansion',label:'Net Expansion MRR',lv:0,tot:true,lines:['net_expansion','net_upselling','crosselling','initial_unwind','pricing']}
+ {id:'initial_unwind',label:'Cross-sell down · from initial sale',lv:1,lines:['initial_unwind']},
+ {id:'net_discounts',label:'Net Discounts',lv:0,lines:['net_discounts','disc_ending','disc_given']},
+ {id:'disc_ending',label:'Discounts ended (+)',lv:1,lines:['disc_ending']},
+ {id:'disc_given',label:'Discounts given (−)',lv:1,lines:['disc_given']},
+ {id:'pricing_tarifa',label:'Pricing',lv:0,lines:['pricing_tarifa']},
+ {id:'net_expansion',label:'Net Expansion MRR',lv:0,tot:true,lines:['net_expansion','net_upselling','crosselling','net_discounts','pricing_tarifa']}
 ];
+ROWS.forEach((r,i)=>{if(r.lv==1){for(let j=i-1;j>=0;j--){if(ROWS[j].lv==0){r._p=ROWS[j].id;ROWS[j]._kids=1;break;}}}});
+function buildTable(){
 let h='<thead><tr><th>MRR movement</th>'+SEM.periods.map(p=>'<th>'+p+'</th>').join('')+'</tr></thead><tbody>';
-ROWS.forEach(r=>{h+='<tr class="dtexp-row dtexp-lv'+r.lv+(r.tot?' dtexp-tot':'')+'" data-id="'+r.id+'"><td>'+
-  (r.lv==0&&!r.tot?'<span class="dtexp-dot" style="background:'+COL[r.id]+'"></span>':'')+r.label+(r.note?'<span class="dtexp-note">'+r.note+'</span>':'')+'</td>'+
+ROWS.forEach(r=>{const cls='dtexp-row dtexp-lv'+r.lv+(r.tot?' dtexp-tot':'')+(r.lv==1?' dtexp-child':'');
+  const lead=(r.lv==0&&!r.tot)?('<span class="dtexp-exp"'+(r._kids?' data-exp="'+r.id+'"':' style="visibility:hidden"')+'>▸</span><span class="dtexp-dot" style="background:'+COL[r.id]+'"></span>'):'';
+  h+='<tr class="'+cls+'" data-id="'+r.id+'"'+(r.lv==1?' data-parent="'+r._p+'"':'')+'><td>'+lead+r.label+(r.note?'<span class="dtexp-note">'+r.note+'</span>':'')+'</td>'+
   SEMP[r.id].map(v=>'<td style="color:'+(v>=0?'var(--dtexp-pos)':'var(--dtexp-neg)')+';font-weight:'+(r.tot?800:r.lv==0?700:500)+'">'+nfp(v)+'</td>').join('')+'</tr>';});
 h+='</tbody>';$('#dtexp-tbl').innerHTML=h;
 $('#dtexp-tbl').querySelectorAll('tr.dtexp-row').forEach(tr=>tr.onclick=()=>sel(tr.dataset.id));
+$('#dtexp-tbl').querySelectorAll('.dtexp-exp[data-exp]').forEach(e=>e.onclick=(ev)=>{ev.stopPropagation();const op=e.textContent=='▾';e.textContent=op?'▸':'▾';$('#dtexp-tbl').querySelectorAll('tr.dtexp-child[data-parent="'+e.dataset.exp+'"]').forEach(c=>c.classList.toggle('dtexp-open',!op));});
+$('#dtexp-tbl').querySelectorAll('tr.dtexp-row').forEach(tr=>tr.classList.toggle('dtexp-sel',tr.dataset.id==CUR));
+}
 // ---- monthly series ----
 const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const fmtM=m=>MN[+m.slice(5,7)-1]+"'"+m.slice(2,4);
-const MOND={upselling:MON.comp.upsell,downselling:MON.comp.downsell,cross_up:MON.comp.cross_up,cross_down_later:MON.comp.cross_down_later,initial_unwind:MON.comp.cross_down_t0,pricing:MON.comp.pricing};
-MOND.net_upselling=add(MOND.upselling,MOND.downselling);MOND.crosselling=add(MOND.cross_up,MOND.cross_down_later);
-MOND.net_expansion=add(add(add(MOND.net_upselling,MOND.crosselling),MOND.initial_unwind),MOND.pricing);
-const MONP={};for(const k in MOND)MONP[k]=MOND[k].map((v,i)=>100*v/MON.bop[i]);
-let CUR='net_expansion';
+function computeMon(){
+MOND={upselling:MON.comp.upsell,downselling:MON.comp.downsell,cross_up:MON.comp.cross_up,cross_down_later:MON.comp.cross_down_later,initial_unwind:MON.comp.cross_down_t0,pricing:MON.comp.pricing,pricing_tarifa:MON.comp.pricing_tarifa,disc_ending:MON.comp.disc_ending,disc_given:MON.comp.disc_given};
+MOND.net_upselling=add(MOND.upselling,MOND.downselling);MOND.crosselling=add(add(MOND.cross_up,MOND.cross_down_later),MOND.initial_unwind);MOND.net_discounts=add(MOND.disc_ending,MOND.disc_given);
+MOND.net_expansion=add(add(MOND.net_upselling,MOND.crosselling),MOND.pricing);
+MONP={};for(const k in MOND)MONP[k]=MOND[k].map((v,i)=>100*v/MON.bop[i]);
+}
 function sel(id){CUR=id;$('#dtexp-tbl').querySelectorAll('tr.dtexp-row').forEach(tr=>tr.classList.toggle('dtexp-sel',tr.dataset.id==id));draw();}
 function draw(){
  const row=ROWS.find(r=>r.id==CUR),lines=row.lines,n=MON.mos.length;
  $('#dtexp-leg').innerHTML=lines.map(k=>'<span><i style="border-color:'+COL[k]+'"></i>'+LBL[k]+'</span>').join('')+'<span style="color:var(--dtexp-muted)">· monthly</span>';
  let all=[];lines.forEach(k=>all=all.concat(MONP[k]));
  let mx=Math.max(...all,0.5)*1.1,mn=Math.min(...all,-0.5)*1.12;
- const W=908,H=170,mL=40,mR=14,mT=10,mB=24;
+ const W=908,H=140,mL=40,mR=14,mT=10,mB=22;
  const y=v=>mT+(H-mT-mB)*(1-(v-mn)/(mx-mn)),step=(W-mL-mR)/(n-1),X=i=>mL+step*i;
  let g='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
  for(let t=Math.ceil(mn);t<=Math.floor(mx);t++){g+='<line x1="'+mL+'" y1="'+y(t)+'" x2="'+(W-mR)+'" y2="'+y(t)+'" stroke="'+(t==0?'#c7d2d9':'#eef2f4')+'"/><text x="'+(mL-5)+'" y="'+(y(t)+3)+'" text-anchor="end" style="font-size:9px;fill:var(--dtexp-muted)">'+t+'%</text>';}
@@ -201,8 +226,10 @@ function draw(){
    lines.forEach(k=>{html+='<div class="r"><span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+COL[k]+';margin-right:5px"></i>'+LBL[k]+'</span><span class="v">'+nfp(MONP[k][i])+' <span style="color:#9fb2bd">'+nf$(MOND[k][i])+'</span></span></div>';});
    tipOn(e,html);};r.onmouseleave=tipOff;});
 }
-sel('net_expansion');
-$('#dtexp-take1').innerHTML='<b>Durable net expansion collapsed from ~15% per semester (2H24) to 1.7% (1H26).</b> Net upsell turned <b>negative</b> in 1H26; genuine cross-sell is a real small positive (+~1%) but offset by a <b>growing initial-sale unwind</b> (−1%); and the tariff bump is fading. Nothing compounds.';
+function applyCountry(cc){CCUR=cc;SEM=BYC[cc].sem;MON=BYC[cc].mon;computeSem();computeMon();buildTable();draw();document.querySelectorAll('.dtexp-cbtn').forEach(b=>b.classList.toggle('dtexp-on',b.dataset.cc==cc));}
+document.querySelectorAll('.dtexp-cbtn').forEach(b=>b.onclick=()=>applyCountry(b.dataset.cc));
+applyCountry('ALL');
+$('#dtexp-take1').innerHTML='<b>Most of the ~15%→~2% decline is deliberate: we eased off pricing, our strongest lever.</b> Genuine tariff drove ~+6–10% per semester through 1H25; we chose to raise less this year (~+2% in 1H26). The learning: the churn we feared from price increases does not necessarily stick, so we likely have <b>room to be more intentional</b> — a strategic call, not a miss. Easing it, though, exposed the real gap: upsell and cross-sell are not picking up the slack.';
 // ---- SLIDE 2 scatter ----
 (function(){
  const xs=INC.inc_med,ys=INC.net_up,mos=INC.mos,n=xs.length;
@@ -222,6 +249,551 @@ $('#dtexp-take1').innerHTML='<b>Durable net expansion collapsed from ~15% per se
  g+='<text x="12" y="'+((mT+H-mB)/2)+'" transform="rotate(-90 12 '+((mT+H-mB)/2)+')" text-anchor="middle" style="font-size:9px;fill:var(--dtexp-muted)">net upsell (% MRR)</text>';
  $('#dtexp-chart2').innerHTML=g;
 })();
+})();
+</script>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- ================================================================
+       DISCUSSION TOPIC — Core Acquisition
+       (fuente: "MQL Core COL y MEX.html" recibido 2026-08-19 — deck original de 11
+       secciones con navegación propia de una-slide-a-la-vez (position:absolute +
+       botones prev/next), SIN nuestra estructura de slide-shell fija. Convertido a 11
+       slides fijas 960x540 con header/footer propios (clases dtca-), mismo criterio que
+       Expansion/Tax arriba — portada con el patrón section-divider existente. Datos
+       reales embebidos tal como llegaron, sin reconstruir vía Metabase.)
+       ================================================================ -->
+  <div class="slide section-divider">
+    <div class="eyebrow">Growth</div>
+    <div class="section-title">Core Acquisition: Channel Mix,<br>Conversion Efficiency and Retention</div>
+    <div class="topic-label">{{ config.month_label }}</div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+<style>
+/* ── Discussion Topic: Core Acquisition (recibido 2026-08-19) ── */
+.dtca-vars{
+  --dtca-ink:#273E50; --dtca-ink-soft:#55697b; --dtca-ink-muted:#8a9aa8;
+  --dtca-paper:#f7fbfa; --dtca-line:#dfeae8;
+  --dtca-core:#00A896; --dtca-core-bright:#00E0C7; --dtca-core-soft:#d9f7f1; --dtca-core-deep:#045c50;
+  --dtca-paid:#c25b3c; --dtca-warn-bg:#fbe9e3; --dtca-navy-bg:#273E50;
+}
+.dtca-board-slide{width:960px;height:540px;background:var(--dtca-paper);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(16,40,60,.10),0 8px 24px rgba(16,40,60,.06);display:flex;flex-direction:column;flex-shrink:0}
+.dtca-board-slide.dark{background:var(--dtca-navy-bg)}
+.dtca-head{background:var(--dtca-navy-bg);color:#fff;padding:14px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-shrink:0}
+.dtca-head h2{margin:0;font-size:15px;font-weight:700;line-height:1.28;max-width:640px}
+.dtca-head .dtca-per{color:var(--dtca-core-bright);font-size:10.5px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.dtca-body{padding:12px 26px 8px;flex:1;overflow:hidden;color:var(--dtca-ink);display:flex;flex-direction:column;min-height:0;font-family:'Inter',-apple-system,'Segoe UI',Roboto,Arial,sans-serif}
+.dtca-board-slide.dark .dtca-body{color:#fff}
+.dtca-lede{color:var(--dtca-ink-soft);font-size:10px;line-height:1.4;margin:0 0 8px;flex-shrink:0}
+.dtca-board-slide.dark .dtca-lede{color:#b9c9d3}
+.dtca-body-area{flex:1;display:flex;gap:16px;min-height:0}
+.dtca-col{flex:1;display:flex;flex-direction:column;min-height:0}
+.dtca-chart-card{background:#fff;border:1px solid var(--dtca-line);border-radius:9px;padding:9px 12px;flex:1;display:flex;flex-direction:column;min-height:0}
+.dtca-chart-card h3{font-size:8px;font-weight:700;margin:0 0 5px;color:var(--dtca-ink-soft);text-transform:uppercase;letter-spacing:.03em;flex-shrink:0}
+.dtca-chart-wrap{position:relative;flex:1;min-height:0}
+table.dtca-tbl{width:100%;border-collapse:collapse;font-size:10px;flex-shrink:0}
+table.dtca-tbl th{text-align:left;font-size:7.3px;text-transform:uppercase;letter-spacing:.03em;color:var(--dtca-ink-muted);border-bottom:2px solid var(--dtca-ink);padding:4px 6px}
+table.dtca-tbl td{padding:5px 6px;border-bottom:1px solid var(--dtca-line);font-size:9.5px}
+table.dtca-tbl tr:last-child td{border-bottom:none}
+table.dtca-tbl td.num, table.dtca-tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.dtca-tbl tr.hl td{background:var(--dtca-warn-bg);color:var(--dtca-paid);font-weight:700}
+.dtca-pos{color:var(--dtca-core-deep);font-weight:700}
+.dtca-neg{color:var(--dtca-paid);font-weight:700}
+.dtca-callout{border-left:3px solid var(--dtca-core);background:var(--dtca-core-soft);border-radius:0 7px 7px 0;padding:7px 11px;margin:0 0 5px;font-size:8.6px;color:var(--dtca-core-deep);line-height:1.38;flex-shrink:0}
+.dtca-callout.warn{border-left-color:var(--dtca-paid);background:var(--dtca-warn-bg);color:var(--dtca-paid)}
+.dtca-callout.note{font-size:7.8px;padding:5px 11px;color:var(--dtca-ink-soft);background:var(--dtca-paper);border-left-color:var(--dtca-ink-muted)}
+.dtca-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:auto;flex-shrink:0}
+.dtca-kpi{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 14px}
+.dtca-kpi .dtca-label{font-size:8px;color:#9fb4c4;text-transform:uppercase;letter-spacing:.03em;margin:0 0 5px}
+.dtca-kpi .dtca-value{font-size:16px;font-weight:700;color:#fff}
+.dtca-kpi .dtca-value.co{color:var(--dtca-core-bright)}
+.dtca-kpi .dtca-value.mx{color:#e8896a}
+.dtca-kpi .dtca-value.dtca-vpos{color:var(--dtca-core-bright)}
+.dtca-kpi .dtca-value.dtca-vneg{color:#e8896a}
+.dtca-kpi .dtca-delta{font-size:8px;margin:5px 0 0;color:#cfd8dd}
+.dtca-two-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:0}
+.dtca-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px 22px;flex:1;align-content:center}
+.dtca-action-item{display:flex;gap:10px;align-items:flex-start}
+.dtca-action-bullet{flex:0 0 24px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:10.5px;flex-shrink:0}
+.dtca-action-bullet.co{background:var(--dtca-core)}
+.dtca-action-bullet.mx{background:var(--dtca-paid)}
+.dtca-action-body h4{margin:0 0 2px;font-size:10.5px;color:#fff}
+.dtca-action-body p{margin:0;color:#dbe6e2;font-size:8.8px;line-height:1.4}
+.dtca-action-list{display:flex;flex-direction:column;gap:9px;flex:1;justify-content:center}
+.dtca-foot{background:#f8fafc;border-top:1px solid var(--dtca-line);display:flex;justify-content:space-between;color:var(--dtca-ink-muted);font-size:8.5px;padding:6px 26px;flex-shrink:0}
+.dtca-board-slide.dark .dtca-foot{background:#1e3049;border-top-color:rgba(255,255,255,.12);color:#8093a3}
+</style>
+
+<div class="dtca-vars" style="display:contents">
+
+<!-- SLIDE 1 — Headline KPIs -->
+<div class="dtca-board-slide dark">
+  <div class="dtca-head">
+    <h2>Colombia &amp; Mexico: Core channel behavior and strategy</h2>
+    <span class="dtca-per">Discussion topic · 1/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">Colombia does more with less: nearly the same Core logo volume with 26% fewer MQL — a real efficiency gain, not a decline. Mexico grows in volume, but without improving its conversion. (January 2025 to July 2026)</div>
+    <div class="dtca-kpi-row">
+      <div class="dtca-kpi"><div class="dtca-label">Colombia efficiency</div><div class="dtca-value dtca-vneg">-26.4% MQL</div><div class="dtca-delta">for -3.6% in logos (nearly same output)</div></div>
+      <div class="dtca-kpi"><div class="dtca-label">Mexico growth</div><div class="dtca-value dtca-vpos">+11.7% logos</div><div class="dtca-delta">with +10.5% MQL (no efficiency gain)</div></div>
+      <div class="dtca-kpi"><div class="dtca-label">Paid Media Colombia</div><div class="dtca-value co">53.8% → 41.0%</div><div class="dtca-delta">shift in Dec-2025</div></div>
+      <div class="dtca-kpi"><div class="dtca-label">Conversion Mexico</div><div class="dtca-value dtca-vpos">21.5% → 20.9%</div><div class="dtca-delta">stagnant, -0.6pp</div></div>
+    </div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 1/11</span></div>
+</div>
+
+<!-- SLIDE 2 — Colombia didn't decline -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>Colombia didn't decline — it got more efficient. Lite outpaces Core in both countries.</h2>
+    <span class="dtca-per">Discussion topic · 2/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">New logo growth, H1 2026 vs. H2 2025. Core's declining share of the total isn't because Core stalled — it's because Lite advanced faster in both countries.</div>
+    <div class="dtca-body-area">
+      <div class="dtca-col">
+        <div class="dtca-chart-card">
+          <h3>New logo growth, Core vs. Lite (%)</h3>
+          <div class="dtca-chart-wrap"><canvas id="dtcaGrowth"></canvas></div>
+        </div>
+      </div>
+      <div class="dtca-col" style="flex:0 0 36%;justify-content:center;">
+        <table class="dtca-tbl">
+          <tr><th></th><th class="num">Core</th><th class="num">Lite</th></tr>
+          <tr><td><b>Colombia</b></td><td class="num">-3.6%</td><td class="num dtca-pos">+9.2%</td></tr>
+          <tr class="hl"><td><b>Mexico</b></td><td class="num dtca-pos">+11.7%</td><td class="num dtca-pos">+32.6%</td></tr>
+        </table>
+        <div class="dtca-callout warn" style="margin-top:9px;">So what: Colombia achieves nearly the same Core logo volume (-3.6%) with 26.4% fewer MQL — not a decline, a real efficiency gain. In Mexico both segments grow, but Lite nearly 3x faster than Core (+32.6% vs +11.7%), without Core improving its conversion.</div>
+      </div>
+    </div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 2/11</span></div>
+</div>
+
+<!-- SLIDE 3 — Channel strategy -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>Both countries adjusted Paid Media investment — the result looks different in each</h2>
+    <span class="dtca-per">Discussion topic · 3/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">In both countries, the only action taken was cutting Paid Media to look for efficiencies. In Colombia, the cutback revealed the brand strength the market already had — Direct Traffic filled the gap on its own. Mexico doesn't have that brand cushion yet.</div>
+    <div class="dtca-body-area">
+      <div class="dtca-col">
+        <div class="dtca-chart-card">
+          <h3>Paid Media as % of Core MQL</h3>
+          <div class="dtca-chart-wrap"><canvas id="dtcaShare"></canvas></div>
+        </div>
+      </div>
+      <div class="dtca-col" style="flex:0 0 36%;justify-content:center;">
+        <table class="dtca-tbl">
+          <tr><th></th><th class="num">Jan-Nov 25</th><th class="num">Dec 25-Jul 26</th></tr>
+          <tr><td><b>Colombia</b></td><td class="num">53.8%</td><td class="num dtca-pos">41.0%</td></tr>
+          <tr class="hl"><td><b>Mexico</b></td><td class="num">59.8%</td><td class="num">55.9%</td></tr>
+        </table>
+        <div class="dtca-callout warn" style="margin-top:9px;">So what: in Colombia, the mix shifted on its own (-12.8pp all at once, Dec-2025) — the market already knew to search for Alegra directly. In Mexico the mix barely moved (-3.9pp); the effect stayed contained within Paid itself, as an efficiency gain, not a mix change.</div>
+      </div>
+    </div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 3/11</span></div>
+</div>
+
+<!-- SLIDE 4 — Volume by channel -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>Volume behavior confirms the same pattern</h2>
+    <span class="dtca-per">Discussion topic · 4/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">Core MQL by channel, month by month. Different scales by market size — what matters is the shape of the curve.</div>
+    <div class="dtca-two-charts">
+      <div class="dtca-chart-card">
+        <h3>Colombia — MQL by channel</h3>
+        <div class="dtca-chart-wrap"><canvas id="dtcaVolCO"></canvas></div>
+      </div>
+      <div class="dtca-chart-card">
+        <h3>Mexico — MQL by channel</h3>
+        <div class="dtca-chart-wrap"><canvas id="dtcaVolMX"></canvas></div>
+      </div>
+    </div>
+    <div class="dtca-callout" style="margin-top:8px;">So what: in Colombia, Direct Traffic crosses above Paid Media starting January 2026 — organic takes the lead. In Mexico, Paid Media stays above the other channels throughout, without a single reversal in order.</div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 4/11</span></div>
+</div>
+
+<!-- SLIDE 5 — New logos by channel -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>New logos, not just MQL, confirm the brand effect</h2>
+    <span class="dtca-per">Discussion topic · 5/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">New Core logos by channel, month by month — what actually converts into a customer, not just what enters the funnel.</div>
+    <div class="dtca-two-charts">
+      <div class="dtca-chart-card">
+        <h3>Colombia — Core logos by channel</h3>
+        <div class="dtca-chart-wrap"><canvas id="dtcaLogoCO"></canvas></div>
+      </div>
+      <div class="dtca-chart-card">
+        <h3>Mexico — Core logos by channel</h3>
+        <div class="dtca-chart-wrap"><canvas id="dtcaLogoMX"></canvas></div>
+      </div>
+    </div>
+    <div class="dtca-callout warn" style="margin-top:8px;">So what: in Colombia, Direct Traffic posts its highest jump of the period in January 2026 (296 logos, the peak) — the same month as the Paid cutback. In Mexico, Paid Media leads in logos throughout, with neither Direct nor SEO able to take off.</div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 5/11</span></div>
+</div>
+
+<!-- SLIDE 6 — Total logo trend -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>Colombia holds steady with less MQL. Mexico grows by feeding in more MQL.</h2>
+    <span class="dtca-per">Discussion topic · 6/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">Total Core logos, month by month (all channels combined). Each country on its own scale.</div>
+    <div class="dtca-two-charts" style="flex:0 0 42%;">
+      <div class="dtca-chart-card">
+        <h3>Colombia — total Core logos per month</h3>
+        <div class="dtca-chart-wrap"><canvas id="dtcaLogoTotalCO"></canvas></div>
+      </div>
+      <div class="dtca-chart-card">
+        <h3>Mexico — total Core logos per month</h3>
+        <div class="dtca-chart-wrap"><canvas id="dtcaLogoTotalMX"></canvas></div>
+      </div>
+    </div>
+    <table class="dtca-tbl" style="margin-top:8px;">
+      <tr><th></th><th class="num">Logos H2'25 (avg/mo)</th><th class="num">Logos H1'26 (avg/mo)</th><th class="num">MQL H2'25 (avg/mo)</th><th class="num">MQL H1'26 (avg/mo)</th></tr>
+      <tr><td><b>Colombia</b></td><td class="num">562.5</td><td class="num">542.3 (-3.6%)</td><td class="num">1,609.5</td><td class="num dtca-pos">1,185.1 (-26.4%)</td></tr>
+      <tr class="hl"><td><b>Mexico</b></td><td class="num">64.2</td><td class="num">71.7 (+11.7%)</td><td class="num">314.0</td><td class="num">347.1 (+10.5%)</td></tr>
+    </table>
+    <div class="dtca-callout warn" style="margin-top:7px;">So what: Colombia holds nearly the same logo volume (-3.6%) with 26.4% fewer MQL — a real efficiency gain. Mexico grows logos (+11.7%) by feeding in 10.5% more MQL — volume-driven growth, not better conversion.</div>
+    <div class="dtca-callout note">Note: May 2026 is the lowest point in Colombia's entire series (395 logos) — coincides with the presidential election and the eve of the World Cup, likely seasonal/situational noise rather than a structural signal.</div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 6/11</span></div>
+</div>
+
+<!-- SLIDE 7 — Churn by channel -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>Which channel does departing Core come from — and is it changing over time?</h2>
+    <span class="dtca-per">Discussion topic · 7/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">Direct Traffic and Paid Media's share of Core churn, H2 2025 vs. H1 2026. Churn data availability starts in June 2025.</div>
+    <div class="dtca-body-area">
+      <div class="dtca-col">
+        <table class="dtca-tbl">
+          <tr><th></th><th class="num">Direct H2'25</th><th class="num">Direct H1'26</th><th class="num">Paid H2'25</th><th class="num">Paid H1'26</th></tr>
+          <tr><td><b>Colombia</b></td><td class="num">46.0%</td><td class="num">40.5%</td><td class="num">33.5%</td><td class="num dtca-neg">38.5%</td></tr>
+          <tr class="hl"><td><b>Mexico</b></td><td class="num">29.4%</td><td class="num">33.3%</td><td class="num">49.5%</td><td class="num dtca-pos">43.0%</td></tr>
+        </table>
+        <div class="dtca-callout warn" style="margin-top:9px;">So what: in Mexico, Paid's share of churn dropped (49.5%→43.0%) while its acquisition weight stayed flat — campaign iteration genuinely improving quality. In Colombia, Paid's churn share rose (33.5%→38.5%) even as its acquisition weight dropped sharply — worth investigating.</div>
+        <div class="dtca-callout note">Method note: both periods are 200-company samples due to a query tool limit. Directionally correct, not an exact count.</div>
+      </div>
+      <div class="dtca-col">
+        <div class="dtca-chart-card">
+          <h3>Direct and Paid's share of Core churn (%)</h3>
+          <div class="dtca-chart-wrap"><canvas id="dtcaChurnChannel"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 7/11</span></div>
+</div>
+
+<!-- SLIDE 8 — Conversion -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>The same Paid cutback produced different results depending on each market's brand</h2>
+    <span class="dtca-per">Discussion topic · 8/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">Core MQL → Logo conversion rate, month by month. The decision was the same in both countries — the result depended on how much brand-driven demand already existed to absorb the cut.</div>
+    <div class="dtca-body-area">
+      <div class="dtca-col">
+        <div class="dtca-chart-card">
+          <h3>Core MQL → Logo, month by month (%)</h3>
+          <div class="dtca-chart-wrap"><canvas id="dtcaConv"></canvas></div>
+        </div>
+      </div>
+      <div class="dtca-col" style="flex:0 0 36%;justify-content:center;">
+        <table class="dtca-tbl">
+          <tr><th></th><th class="num">Jan-Nov 25</th><th class="num">Dec 25-Jul 26</th></tr>
+          <tr><td><b>Colombia</b></td><td class="num">35.9%</td><td class="num dtca-pos">45.2%</td></tr>
+          <tr class="hl"><td><b>Mexico</b></td><td class="num">21.5%</td><td class="num">20.9%</td></tr>
+        </table>
+        <div class="dtca-callout warn" style="margin-top:9px;">So what: in Colombia, Direct Traffic filled the room Paid left — blended conversion rose +9.3pp, without this being a deliberate mix strategy. In Mexico, without that brand cushion, blended conversion stays flat (21-22%).</div>
+      </div>
+    </div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 8/11</span></div>
+</div>
+
+<!-- SLIDE 9 — Churn -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>Churn isn't where the difference between the two markets lies</h2>
+    <span class="dtca-per">Discussion topic · 9/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">Monthly Core churn rate, Alegra Contabilidad product only (not consolidated across all Alegra products) — here both countries behave similarly and stably.</div>
+    <div class="dtca-body-area">
+      <div class="dtca-col">
+        <div class="dtca-chart-card">
+          <h3>Monthly Core churn (%)</h3>
+          <div class="dtca-chart-wrap"><canvas id="dtcaChurn"></canvas></div>
+        </div>
+      </div>
+      <div class="dtca-col" style="flex:0 0 36%;justify-content:center;">
+        <table class="dtca-tbl">
+          <tr><th></th><th class="num">Jan-Nov 25</th><th class="num">Dec 25-Jul 26</th></tr>
+          <tr><td><b>Colombia</b></td><td class="num">3.28%</td><td class="num">3.21%</td></tr>
+          <tr><td><b>Mexico</b></td><td class="num">2.67%</td><td class="num">2.66%</td></tr>
+        </table>
+        <div class="dtca-callout" style="margin-top:9px;">So what: both countries retain equally stable before and after the period — churn barely moves either way. The differentiating story is entirely on the acquisition side, not retention.</div>
+      </div>
+    </div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 9/11</span></div>
+</div>
+
+<!-- SLIDE 10 — Cross-market action plan -->
+<div class="dtca-board-slide dark">
+  <div class="dtca-head">
+    <h2>The cross-market action items still hold</h2>
+    <span class="dtca-per">Discussion topic · 10/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">Focusing on Colombia and Mexico doesn't change what we already knew by channel — it confirms it with more evidence.</div>
+    <div class="dtca-action-grid">
+      <div class="dtca-action-item"><div class="dtca-action-bullet co">1</div><div class="dtca-action-body"><h4>Audit Paid Media</h4><p>Still the largest channel and the weakest converter — Mexico is the clearest case of this.</p></div></div>
+      <div class="dtca-action-item"><div class="dtca-action-bullet co">2</div><div class="dtca-action-body"><h4>Review marketing strategy</h4><p>Assess targeting and creative by Core before assuming it's a Sales-only problem.</p></div></div>
+      <div class="dtca-action-item"><div class="dtca-action-bullet co">3</div><div class="dtca-action-body"><h4>Reinforce SEO content</h4><p>Colombia already did this and it lifted conversion — the direct evidence to scale it in Mexico.</p></div></div>
+      <div class="dtca-action-item"><div class="dtca-action-bullet co">4</div><div class="dtca-action-body"><h4>Scale Lead Nurturing</h4><p>Still a low-volume, high-conversion channel in both countries — underutilized in both.</p></div></div>
+      <div class="dtca-action-item"><div class="dtca-action-bullet mx">5</div><div class="dtca-action-body"><h4>Reallocate Paid budget</h4><p>Colombia already shifted ~13 points from Paid to Direct/SEO in December 2025 — the precedent to replicate in Mexico.</p></div></div>
+      <div class="dtca-action-item"><div class="dtca-action-bullet mx">6</div><div class="dtca-action-body"><h4>Validate targeting alignment</h4><p>Confirm current targeting is aligned with performance data before scaling any channel further.</p></div></div>
+    </div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 10/11</span></div>
+</div>
+
+<!-- SLIDE 11 — Action plan, country-specific -->
+<div class="dtca-board-slide">
+  <div class="dtca-head">
+    <h2>Action plan — country-specific</h2>
+    <span class="dtca-per">Discussion topic · 11/11</span>
+  </div>
+  <div class="dtca-body">
+    <div class="dtca-lede">The decision was the same in both countries — cut Paid Media to look for efficiencies. Colombia benefited because it already had the brand for Direct Traffic to fill the gap. Mexico needs to build that same brand cushion first.</div>
+    <div class="dtca-two-charts">
+      <div class="dtca-chart-card" style="border-top:3px solid var(--dtca-core);">
+        <h3 style="color:var(--dtca-core-deep);">Colombia — protect and understand the brand asset</h3>
+        <div class="dtca-action-list">
+          <div class="dtca-action-item"><div class="dtca-action-bullet co" style="color:#fff">1</div><div class="dtca-action-body"><p style="color:var(--dtca-ink-soft)">Confirm the December 2025 Paid cutback was the trigger — and that the Direct Traffic gain really comes from brand awareness, not another coinciding cause.</p></div></div>
+          <div class="dtca-action-item"><div class="dtca-action-bullet co">2</div><div class="dtca-action-body"><p style="color:var(--dtca-ink-soft)">Document the level of brand/PR/positioning investment sustaining that Direct Traffic — it's the real asset behind the result.</p></div></div>
+          <div class="dtca-action-item"><div class="dtca-action-bullet co">3</div><div class="dtca-action-body"><p style="color:var(--dtca-ink-soft)">Watch that the current Paid level (35-45%) is sustainable — if Direct Traffic depends on brand investment that gets cut, the effect could reverse.</p></div></div>
+        </div>
+      </div>
+      <div class="dtca-chart-card" style="border-top:3px solid var(--dtca-paid);">
+        <h3 style="color:var(--dtca-paid);">Mexico — build brand before replicating the cutback</h3>
+        <div class="dtca-action-list">
+          <div class="dtca-action-item"><div class="dtca-action-bullet mx">1</div><div class="dtca-action-body"><p style="color:var(--dtca-ink-soft)">Diagnose Mexico's current brand awareness/positioning versus Colombia's — the variable that explains why the same cutback didn't produce the same mix effect.</p></div></div>
+          <div class="dtca-action-item"><div class="dtca-action-bullet mx">2</div><div class="dtca-action-body"><p style="color:var(--dtca-ink-soft)">Evaluate an investment in brand building (PR, presence, awareness) before expecting Direct Traffic to absorb a larger Paid reduction.</p></div></div>
+          <div class="dtca-action-item"><div class="dtca-action-bullet mx">3</div><div class="dtca-action-body"><p style="color:var(--dtca-ink-soft)">In the meantime, keep documenting the efficiency gain within Paid itself — it's a real win, even if it's not the same lever that worked in Colombia.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dtca-foot"><span>Alegra · Confidential</span><span>Core Acquisition · 11/11</span></div>
+</div>
+
+</div>
+<script>
+(function(){
+const NAVY='#273E50', NAVY_SOFT='#55697b', TEAL='#00A896', TERRA='#c25b3c', GRID='#e3e2da';
+const months = ['Jan25','Feb25','Mar25','Apr25','May25','Jun25','Jul25','Aug25','Sep25','Oct25','Nov25','Dec25','Jan26','Feb26','Mar26','Apr26','May26','Jun26','Jul26'];
+
+new Chart(document.getElementById('dtcaGrowth'), {
+  type: 'bar',
+  data: { labels: ['Colombia','Mexico'],
+    datasets: [
+      { label:'Core', data:[-3.6,11.7], backgroundColor: TEAL, borderRadius:4 },
+      { label:'Lite', data:[9.2,32.6], backgroundColor:'#c9cfcd', borderRadius:4 }
+    ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:9},boxWidth:12} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+(c.parsed.y>=0?'+':'')+c.parsed.y+'%' } } },
+    scales:{ y:{ ticks:{ font:{size:9}, callback:(v)=>(v>=0?'+':'')+v+'%' }, grid:{ color:GRID } }, x:{ grid:{ display:false }, ticks:{font:{size:10}} } } }
+});
+
+const paidShareCO = [52.8,52.8,49.5,53.8,53.4,51.6,51.8,55.0,59.1,57.6,54.5,37.8,35.1,44.3,45.5,45.6,42.1,38.3,39.2];
+const paidShareMX = [58.3,62.0,61.5,61.6,68.2,52.6,47.4,49.1,58.9,70.6,67.3,50.5,49.8,54.9,59.0,56.9,51.5,63.0,61.2];
+
+new Chart(document.getElementById('dtcaShare'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Colombia', data: paidShareCO, borderColor: TEAL, backgroundColor: TEAL, tension:0.25, borderWidth:2.5, pointRadius:2 },
+    { label:'Mexico', data: paidShareMX, borderColor: TERRA, backgroundColor: TERRA, tension:0.25, borderWidth:2.5, pointRadius:2 }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:9},boxWidth:12} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+c.parsed.y+'%' } } },
+    scales:{ y:{ ticks:{ font:{size:8.5}, callback:(v)=>v+'%' }, grid:{ color:GRID }, suggestedMin:30, suggestedMax:75 }, x:{ grid:{ display:false }, ticks:{font:{size:7.5}} } } }
+});
+
+const directCO=[432,388,372,366,420,366,497,397,383,380,361,408,460,469,352,351,313,422,465];
+const paidCO=[679,677,616,683,742,639,892,818,866,853,713,455,398,524,506,417,363,459,518];
+const seoCO=[174,218,257,220,228,233,332,272,216,249,235,341,276,190,254,147,187,317,337];
+const lnCO=[38,40,95,77,64,49,66,49,288,36,39,47,48,39,43,39,22,36,43];
+const pmCO=[8,17,18,20,20,17,25,20,12,12,5,14,25,12,15,8,2,10,8];
+const infCO=[13,23,18,11,13,9,24,21,25,162,19,18,16,24,20,18,16,10,22];
+
+new Chart(document.getElementById('dtcaVolCO'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Direct Traffic', data: directCO, borderColor: NAVY, backgroundColor: NAVY, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'Paid Media', data: paidCO, borderColor: TERRA, backgroundColor: TERRA, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'SEO', data: seoCO, borderColor: TEAL, backgroundColor: TEAL, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'Lead Nurturing', data: lnCO, borderColor:'#6a4c93', backgroundColor:'#6a4c93', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] },
+    { label:'Product Marketing', data: pmCO, borderColor:'#c9a227', backgroundColor:'#c9a227', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] },
+    { label:'Influencers', data: infCO, borderColor:'#8a9aa8', backgroundColor:'#8a9aa8', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:7.5},boxWidth:10} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+c.parsed.y } } },
+    scales:{ y:{ ticks:{font:{size:7.5}}, grid:{ color:GRID } }, x:{ grid:{ display:false }, ticks:{font:{size:6.5}} } } }
+});
+
+const directMX=[40,65,54,62,57,77,95,61,53,49,49,47,62,86,60,66,120,54,79];
+const paidMX=[109,163,168,165,227,163,155,134,146,254,181,109,139,179,186,190,186,196,210];
+const seoMX=[38,35,51,41,49,70,77,78,49,57,39,60,78,61,69,78,55,61,54];
+const lnMX=[3,4,5,14,7,5,12,5,60,4,4,2,3,8,4,5,4,8,2];
+const pmMX=[1,3,7,3,6,5,9,3,4,2,6,2,6,7,0,7,2,5,2];
+const infMX=[7,6,5,4,2,3,6,9,3,33,5,0,1,14,5,4,12,13,21];
+
+new Chart(document.getElementById('dtcaVolMX'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Direct Traffic', data: directMX, borderColor: NAVY, backgroundColor: NAVY, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'Paid Media', data: paidMX, borderColor: TERRA, backgroundColor: TERRA, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'SEO', data: seoMX, borderColor: TEAL, backgroundColor: TEAL, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'Lead Nurturing', data: lnMX, borderColor:'#6a4c93', backgroundColor:'#6a4c93', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] },
+    { label:'Product Marketing', data: pmMX, borderColor:'#c9a227', backgroundColor:'#c9a227', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] },
+    { label:'Influencers', data: infMX, borderColor:'#8a9aa8', backgroundColor:'#8a9aa8', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:7.5},boxWidth:10} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+c.parsed.y } } },
+    scales:{ y:{ ticks:{font:{size:7.5}}, grid:{ color:GRID } }, x:{ grid:{ display:false }, ticks:{font:{size:6.5}} } } }
+});
+
+const directLogoCO=[193,196,177,169,218,189,243,188,197,190,185,187,296,242,226,165,145,209,218];
+const paidLogoCO=[212,207,226,213,185,175,228,200,198,218,243,203,203,217,210,169,142,156,162];
+const seoLogoCO=[66,76,93,95,74,81,103,100,89,77,109,111,136,107,102,90,76,144,105];
+const lnLogoCO=[18,18,31,32,33,20,29,30,26,24,19,16,29,23,23,19,14,19,19];
+const pmLogoCO=[4,8,9,18,9,5,10,9,8,8,1,6,16,7,9,2,1,4,3];
+const infLogoCO=[3,4,6,3,3,4,5,5,2,53,18,8,8,10,9,13,12,2,4];
+
+new Chart(document.getElementById('dtcaLogoCO'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Direct Traffic', data: directLogoCO, borderColor: NAVY, backgroundColor: NAVY, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'Paid Media', data: paidLogoCO, borderColor: TERRA, backgroundColor: TERRA, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'SEO', data: seoLogoCO, borderColor: TEAL, backgroundColor: TEAL, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'Lead Nurturing', data: lnLogoCO, borderColor:'#6a4c93', backgroundColor:'#6a4c93', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] },
+    { label:'Product Marketing', data: pmLogoCO, borderColor:'#c9a227', backgroundColor:'#c9a227', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] },
+    { label:'Influencers', data: infLogoCO, borderColor:'#8a9aa8', backgroundColor:'#8a9aa8', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:7.5},boxWidth:10} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+c.parsed.y } } },
+    scales:{ y:{ ticks:{font:{size:7.5}}, grid:{ color:GRID } }, x:{ grid:{ display:false }, ticks:{font:{size:6.5}} } } }
+});
+
+const directLogoMX=[15,11,21,17,22,22,19,26,22,17,9,18,18,12,17,15,15,22,16];
+const paidLogoMX=[36,16,24,33,34,34,29,24,27,26,28,16,31,21,26,33,39,41,45];
+const seoLogoMX=[9,9,12,16,5,18,17,14,17,10,11,11,25,16,12,19,19,13,17];
+const lnLogoMX=[3,2,3,6,3,4,6,2,0,1,3,0,3,1,4,0,3,2,3];
+const pmLogoMX=[1,2,2,2,2,0,3,2,1,2,0,1,2,1,0,1,0,3,1];
+const infLogoMX=[2,2,0,1,1,0,0,2,0,8,3,0,1,0,0,1,0,1,1];
+
+new Chart(document.getElementById('dtcaLogoMX'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Direct Traffic', data: directLogoMX, borderColor: NAVY, backgroundColor: NAVY, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'Paid Media', data: paidLogoMX, borderColor: TERRA, backgroundColor: TERRA, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'SEO', data: seoLogoMX, borderColor: TEAL, backgroundColor: TEAL, tension:0.25, borderWidth:1.6, pointRadius:1.2 },
+    { label:'Lead Nurturing', data: lnLogoMX, borderColor:'#6a4c93', backgroundColor:'#6a4c93', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] },
+    { label:'Product Marketing', data: pmLogoMX, borderColor:'#c9a227', backgroundColor:'#c9a227', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] },
+    { label:'Influencers', data: infLogoMX, borderColor:'#8a9aa8', backgroundColor:'#8a9aa8', tension:0.25, borderWidth:1.4, pointRadius:0, borderDash:[3,2] }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:7.5},boxWidth:10} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+c.parsed.y } } },
+    scales:{ y:{ ticks:{font:{size:7.5}}, grid:{ color:GRID } }, x:{ grid:{ display:false }, ticks:{font:{size:6.5}} } } }
+});
+
+const totalLogoCO=[503,513,546,533,526,480,619,536,523,582,580,535,691,611,583,462,395,539,515];
+const totalLogoMX=[68,44,62,77,69,79,78,72,68,65,55,47,80,51,59,69,77,83,83];
+
+new Chart(document.getElementById('dtcaLogoTotalCO'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Colombia', data: totalLogoCO, borderColor: TEAL, tension:0.3, borderWidth:2.4, pointRadius:1.6, fill:true, backgroundColor:'rgba(0,168,150,0.08)' }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>'Logos: '+c.parsed.y } } },
+    scales:{ y:{ ticks:{font:{size:7.5}}, grid:{ color:GRID }, suggestedMin:0 }, x:{ grid:{ display:false }, ticks:{font:{size:6.5}} } } }
+});
+
+new Chart(document.getElementById('dtcaLogoTotalMX'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Mexico', data: totalLogoMX, borderColor: TERRA, tension:0.3, borderWidth:2.4, pointRadius:1.6, fill:true, backgroundColor:'rgba(194,91,60,0.08)' }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>'Logos: '+c.parsed.y } } },
+    scales:{ y:{ ticks:{font:{size:7.5}}, grid:{ color:GRID }, suggestedMin:0 }, x:{ grid:{ display:false }, ticks:{font:{size:6.5}} } } }
+});
+
+new Chart(document.getElementById('dtcaChurnChannel'), {
+  type: 'bar',
+  data: { labels: ['CO Direct','CO Paid','MX Direct','MX Paid'],
+    datasets: [
+      { label:"H2'25", data:[46.0,33.5,29.4,49.5], backgroundColor:'#c9cfcd', borderRadius:4 },
+      { label:"H1'26", data:[40.5,38.5,33.3,43.0], backgroundColor: TEAL, borderRadius:4 }
+    ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:9},boxWidth:12} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+c.parsed.y+'%' } } },
+    scales:{ y:{ ticks:{ font:{size:9}, callback:(v)=>v+'%' }, grid:{ color:GRID } }, x:{ grid:{ display:false }, ticks:{font:{size:9}} } } }
+});
+
+const convCO=[36.7,37.3,39.8,37.6,34.3,35.9,33.4,32.8,33.0,32.7,41.0,41.6,56.0,47.8,48.4,46.3,42.1,42.5,36.7];
+const convMX=[32.1,13.7,20.9,24.6,18.3,23.9,19.9,23.4,26.6,14.7,17.8,20.8,26.5,15.0,17.5,20.1,20.2,24.4,22.7];
+
+new Chart(document.getElementById('dtcaConv'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Colombia', data: convCO, borderColor: TEAL, backgroundColor: TEAL, tension:0.25, borderWidth:2.5, pointRadius:2 },
+    { label:'Mexico', data: convMX, borderColor: TERRA, backgroundColor: TERRA, tension:0.25, borderWidth:2.5, pointRadius:2 }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:9},boxWidth:12} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+c.parsed.y+'%' } } },
+    scales:{ y:{ ticks:{ font:{size:8.5}, callback:(v)=>v+'%' }, grid:{ color:GRID } }, x:{ grid:{ display:false }, ticks:{font:{size:7.5}} } } }
+});
+
+const churnCO=[3.68,4.46,3.17,3.91,3.16,3.28,2.54,3.14,3.17,2.89,2.72,2.69,4.38,4.19,3.45,2.90,3.12,2.54,2.40];
+const churnMX=[3.44,1.57,2.50,2.38,1.86,2.46,2.90,3.79,3.13,2.82,2.56,2.51,2.87,3.16,2.61,3.33,2.51,2.09,2.20];
+
+new Chart(document.getElementById('dtcaChurn'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Colombia', data: churnCO, borderColor: TEAL, backgroundColor: TEAL, tension:0.25, borderWidth:2.5, pointRadius:2 },
+    { label:'Mexico', data: churnMX, borderColor: TERRA, backgroundColor: TERRA, tension:0.25, borderWidth:2.5, pointRadius:2 }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'bottom', labels:{font:{size:9},boxWidth:12} }, tooltip:{ callbacks:{ label:(c)=>c.dataset.label+': '+c.parsed.y+'%' } } },
+    scales:{ y:{ ticks:{ font:{size:8.5}, callback:(v)=>v+'%' }, grid:{ color:GRID }, suggestedMin:0 }, x:{ grid:{ display:false }, ticks:{font:{size:7.5}} } } }
+});
 })();
 </script>
 
