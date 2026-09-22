@@ -23,23 +23,26 @@ CRÍTICO — Selector de slides:
     .gtm-slide  → 5_go_to_market
     .hc-slide   → 7_headcount
     .dtmx-slide / .dttax-board-slide / .dtexp-board-slide / .dtca-board-slide → discussion
-      topics con clases prefijadas (ver board_agent/paths.py::SLIDE_CLASS_TOKENS — mismo mapa,
-      agregado 2026-07-27 tras un bug real: el PDF salió con 42/56 slides porque este selector
-      tiene su propia lista, separada de la del Validator, y no se había actualizado. Mismo
-      bug se repitió 2026-08-19 con dtexp-/dtca- — agregados los 4 tokens a la vez)
-  Si se agrega un nuevo template (o un discussion topic con clases propias prefijadas),
-  verificar su clase y añadirla ACÁ y en board_agent/paths.py::SLIDE_CLASS_TOKENS — son dos
-  listas independientes que deben mantenerse en sync a mano.
+      topics con clases prefijadas
+  CONSOLIDADO 2026-09-22: este selector antes vivía hardcodeado ACÁ, en una lista separada
+  de board_agent/paths.py::SLIDE_CLASS_TOKENS — eso rompió el PDF dos veces por
+  desincronización (2026-07-27: salió con 42/56 slides; 2026-08-19: mismo bug con
+  dtexp-/dtca-). Ahora este archivo IMPORTA paths.SLIDE_CLASS_TOKENS — una sola lista.
+  Si se agrega un discussion topic nuevo con su propia clase prefijada, agregala SOLO en
+  board_agent/paths.py::SLIDE_CLASS_TOKENS (ver skills/discussion-topic/references/layouts.md
+  paso final, "Registrar la clase nueva").
 """
 
-import asyncio, io, os
+import asyncio, io, os, sys
 from pathlib import Path
 from playwright.async_api import async_playwright
 from PIL import Image
 
 ROOT       = Path(__file__).resolve().parent.parent
-HTML_FILE = ROOT / "boards" / "2026-08" / "board_Aug_2026_v8.html"
-PDF_OUT = ROOT / "boards" / "2026-08" / "board_Aug_2026_v8.pdf"
+sys.path.insert(0, str(ROOT))
+from board_agent.paths import SLIDE_CLASS_TOKENS  # noqa: E402
+HTML_FILE = ROOT / "boards" / "2026-08" / "board_Aug_2026_v11.html"
+PDF_OUT = ROOT / "boards" / "2026-08" / "board_Aug_2026_v11.pdf"
 SCALE      = 4   # 4x → 3840x2160px por slide (4K/UHD, ~384 DPI — sobre el estándar de impresión 300 DPI)
 WAIT_MS    = 4000  # tiempo para que Chart.js termine de renderizar
 
@@ -54,11 +57,10 @@ async def main():
         await page.goto(url)
         await page.wait_for_timeout(WAIT_MS)
 
-        # Incluye todos los tipos de slide: .slide, .gtm-slide (go_to_market), .hc-slide (headcount),
-        # .board-slide (financial_performance), .dt-slide (discussion_topic), .dtmx-slide/.dttax-board-slide
-        # (discussion topics México/Tax), .dtexp-board-slide/.dtca-board-slide (Expansion/Core
-        # Acquisition, agregados 2026-08-19) — mismos tokens que paths.SLIDE_CLASS_TOKENS
-        slides = await page.query_selector_all(".slide, .gtm-slide, .hc-slide, .board-slide, .dt-slide, .dtmx-slide, .dttax-board-slide, .dtexp-board-slide, .dtca-board-slide")
+        # Selector armado desde board_agent.paths.SLIDE_CLASS_TOKENS — única fuente de verdad
+        # (ver docstring del módulo, "CRÍTICO — Selector de slides").
+        selector = ", ".join(f".{cls}" for cls in sorted(SLIDE_CLASS_TOKENS))
+        slides = await page.query_selector_all(selector)
         print(f"Capturando {len(slides)} slides a {SCALE}x resolución...")
 
         images = []

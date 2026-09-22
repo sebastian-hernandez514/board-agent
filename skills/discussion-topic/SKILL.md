@@ -43,38 +43,55 @@ existe pero está **desconectado**: tiene un schema propio que el `.j2` nunca le
 abandonado — **no pierdas tiempo llenándolo**, no hace nada.
 
 Esto significa que "agregar un discussion topic" = escribir HTML nuevo dentro de
-`2_discussion_topic.j2`, siguiendo los patrones visuales que ya existen ahí. Ver
-`references/layouts.md` para los 5 patrones reales extraídos del archivo (cover, lista de insights,
-dos columnas, imagen full-bleed, chart+tablas).
+`2_discussion_topic.j2`. **Corrección importante (2026-09-22):** no hay un sistema de "5
+patrones genéricos" reutilizables — eso se documentó una vez pero nunca se construyó de
+verdad (un compañero lo confirmó con grep: esas clases no existen en ningún CSS del repo).
+Lo que existe de verdad: cada topic real (Expansion, Core Acquisition) es un mini-sitio
+autocontenido con su propio prefijo CSS (`dtexp-`, `dtca-`) escrito a mano — agregar un topic
+nuevo es **copiar uno existente completo y adaptarlo**, no rellenar una plantilla genérica.
+Ver `references/layouts.md` para el recipe exacto y por qué.
 
 ---
 
 ## Auto-pilot
 
 1. Preguntar en lenguaje simple: título del topic, cuántas slides de contenido tiene (normalmente
-   1-3), y para cada una qué layout encaja mejor (ver `references/layouts.md`) — si la persona no
-   sabe, mostrarle los 5 patrones con una frase de "úsalo cuando..." cada uno y que elija.
+   1-3), y si la historia necesita interactividad (filtros, tablas que se expanden — como
+   Expansion/`dtexp-`) o es una secuencia lineal de gráficos+texto (como Core Acquisition/`dtca-`)
+   — eso decide cuál de los 2 topics existentes conviene copiar como base (ver `references/layouts.md`).
 2. Leer `2_discussion_topic.j2` completo para ver cuántos topics y slides ya existen ese mes (no
-   asumir que está vacío — normalmente ya hay 1-2 topics de meses anteriores o del mismo mes).
-3. Escribir el HTML nuevo **al final**, antes de `</body>`, copiando el patrón exacto de
-   `references/layouts.md` y reemplazando los placeholders `{{...}}` con el contenido real.
-4. Insertar `<div class="slide-divider">↓ &nbsp; N / M</div>` entre cada slide nueva (ver regla
-   de numeración en `references/layouts.md` sección 0).
+   asumir que está vacío — normalmente ya hay 1-2 topics de meses anteriores o del mismo mes), y
+   qué prefijos CSS ya están en uso (para no elegir un prefijo nuevo que choque).
+3. **Copiar el bloque COMPLETO** del topic de referencia elegido (su `<style>`, sus
+   `<div class="{prefijo}-board-slide">`, su `<script>` si tiene) al final del `<body>`, **renombrar
+   el prefijo en TODAS las ocurrencias**, y reemplazar el contenido con el real. Ver
+   `references/layouts.md` para el recipe completo — no es rellenar placeholders de un patrón, es
+   adaptar una implementación real.
+4. Insertar `<div class="slide-divider">↓ &nbsp; N / M</div>` entre cada slide nueva (ver
+   `references/layouts.md`).
 5. Si hay imágenes nuevas: pedirlas, convertirlas a base64, y ponerlas directo en el `src` — nunca
    como referencia a archivo (ver Regla de oro #4, es el bug que más ha dolido en este template).
-6. Avisar al usuario qué se agregó y en qué líneas, y recordarle correr `generate.py --template
+6. **Registrar `"{prefijo}-board-slide"` en `board_agent/paths.py::SLIDE_CLASS_TOKENS` — paso
+   OBLIGATORIO, no opcional.** Sin este paso el Validator y el PDF cuentan mal las slides del
+   board (ya pasó 2 veces por saltarse esto: 2026-07-27 y 2026-08-19, ver el comentario en
+   `paths.py` para el historial). No hay que tocar nada más — desde 2026-09-22
+   `scripts/generate_pdf.py` importa esta misma lista, ya no mantiene una copia separada.
+7. Avisar al usuario qué se agregó y en qué líneas, y recordarle correr `generate.py --template
    2_discussion_topic` para ver el resultado.
 
 ---
 
 ## Reglas de oro
 
-1. **Nunca inventes una clase CSS nueva sin confirmar primero.** Los 5 patrones de
-   `references/layouts.md` cubren la enorme mayoría de casos. Si de verdad no encaja ninguno,
-   dile al usuario "esto no encaja en los layouts existentes, ¿lo armamos con un patrón nuevo o lo
-   ajustamos a uno de los 5?" — no improvises CSS sin avisar.
-2. **Dimensiones fijas: 960×540px** (`--slide-width`/`--slide-height` de `styles/base.css`). Nunca
-   fijar `width`/`height` manualmente en una slide — `.slide` o `.dt-slide` ya lo hacen.
+1. **No escribas CSS desde cero — copiá un topic existente (`dtexp-` o `dtca-`) y adaptalo.**
+   No hay un catálogo de patrones genéricos para elegir; los 2 topics reales de
+   `2_discussion_topic.j2` son la referencia. Si de verdad ninguno de los dos se parece a lo
+   que necesitás, decile al usuario "esto es bastante distinto a lo que ya existe, ¿lo armamos
+   igual copiando el más parecido y ajustando bastante, o preferís que lo revisemos juntos
+   antes?" — no improvises sin avisar.
+2. **Dimensiones fijas: 960×540px** (`--slide-width`/`--slide-height` de `styles/base.css`, o
+   el `width:960px;height:540px` fijo dentro de cada `-board-slide` prefijado). Nunca fijar
+   `width`/`height` manualmente en una slide suelta — copiá esa regla del topic de referencia.
 3. **Usa los tokens de color de `base.css`, nunca hex nuevos.** `--color-navy`, `--color-teal`,
    `--color-surface`, `--color-border`, `--color-text-primary`, `--color-text-secondary`. Si
    necesitas un color que no está en la paleta, pregunta antes de inventar uno.
@@ -90,23 +107,25 @@ dos columnas, imagen full-bleed, chart+tablas).
    confirmar con el usuario primero.
 6. **`data/editorial/discussion_topics.yaml` no se usa — ignóralo.** No lo llenes pensando que
    alimenta el template; hoy no hace nada (ver Contexto arriba).
-7. **Los colores de delta en la tabla de resultados (patrón 4) son verde/gris, no verde/rojo.**
-   Este template es narrativo, no financiero — no le apliques la lógica de semáforo rojo/verde de
-   R13-15 del Validator (`board_agent/phase4_validator.py`), es un dominio distinto.
+7. **Los colores de delta son semánticos (verde=bien, rojo/coral=mal), no el semáforo del board
+   financiero.** Este template es narrativo, no financiero — no le apliques la lógica invertida
+   de Churn/CAC (R13-15 del Validator, `board_agent/phase4_validator.py`), es un dominio distinto.
+8. **Registrá la clase `-board-slide` nueva en `board_agent/paths.py::SLIDE_CLASS_TOKENS` —
+   siempre, sin excepción.** Es el paso que ya se olvidó 2 veces (2026-07-27, 2026-08-19) y
+   rompió el conteo de slides del PDF/Validator ambas veces. No hace falta tocar
+   `scripts/generate_pdf.py` — desde 2026-09-22 importa esta misma lista.
 
 ---
 
-## Layouts disponibles
+## Topics de referencia disponibles hoy
 
-| # | Patrón | Úsalo cuando... |
+| Prefijo | Topic | Úsalo como base cuando... |
 |---|---|---|
-| 0 | Cover (section-divider) | Siempre, al iniciar un topic nuevo — 1 por topic |
-| 1 | Numbered insights list | 3-5 hallazgos/aprendizajes cualitativos con texto |
-| 2 | Two-column: bullets + visual | 3-4 cambios/decisiones + un mockup o imagen de apoyo |
-| 3 | Full-bleed image | Una sola imagen/diagrama que ya trae su propio contexto |
-| 4 | Chart + comparison tables | Un resultado con evolución en el tiempo (antes/después) |
+| `dtexp-` | Expansion / Cross-Sell & Up-Sell | necesitás interactividad — filtros por país, filas de tabla que se expanden, tooltips |
+| `dtca-` | Core Acquisition | historia lineal de slides con gráficos (Chart.js) + callouts + KPIs, sin interactividad |
 
-Snippets copy-paste completos de los 5 → `references/layouts.md`.
+Más la portada compartida `section-divider` (siempre, ver arriba). El recipe completo (copiar,
+renombrar prefijo, adaptar, registrar la clase) está en `references/layouts.md`.
 
 ---
 
@@ -128,14 +147,15 @@ y `config.month_label`.
 
 | Pregunta / pedido | Qué hacer |
 |---|---|
-| "Quiero agregar un discussion topic sobre X" | Auto-pilot completo: preguntar contenido, elegir layout, escribir HTML |
-| "¿Qué layouts hay disponibles?" | Mostrar la tabla de 5 patrones de arriba, con 1 frase de cuándo usar cada uno |
-| "Tengo estos bullets y esta imagen, ¿cómo los meto?" | Patrón 2 (two-column) si hay bullets + visual, patrón 3 si es solo imagen |
-| "Quiero mostrar cómo mejoró X desde que hicimos Y" | Patrón 4 (chart + tablas) |
+| "Quiero agregar un discussion topic sobre X" | Auto-pilot completo: preguntar contenido, elegir topic de referencia, copiar+adaptar, registrar clase |
+| "¿Qué layouts/patrones hay disponibles?" | No hay un catálogo genérico — mostrar los 2 topics reales (`dtexp-`/`dtca-`) como referencia, ver tabla de arriba |
+| "Tengo estos bullets y esta imagen, ¿cómo los meto?" | Copiar `dtca-` (más simple, sin interactividad) y adaptar una de sus slides de gráfico+callout |
+| "Quiero mostrar cómo mejoró X desde que hicimos Y" | Copiar `dtca-` — ya tiene el patrón de KPI de portada + gráfico de evolución |
 | "¿Edito el discussion_topics.yaml?" | No — está desconectado, no hace nada. Ver Contexto. |
-| "¿Cómo numero los slides?" | Ver `references/layouts.md` sección 0 — depende de cuántas slides tiene el topic |
-| "Quiero un layout que no está en la lista" | Preguntar si conviene ajustar a uno de los 5 antes de crear CSS nueva (Regla de oro #1) |
+| "¿Cómo numero los slides?" | Ver `references/layouts.md` — depende de cuántas slides tiene el topic |
+| "Quiero un layout muy distinto a los 2 que existen" | Avisar que es más trabajo (no hay un tercer patrón listo) antes de improvisar CSS nueva (Regla de oro #1) |
 | "La imagen no se ve en el board final" | Casi siempre es el bug de re-embed (Regla de oro #4) — revisar si el `src` es base64 o referencia a archivo |
+| "El PDF/Validator cuenta mal las slides" | Revisar si se registró la clase `-board-slide` nueva en `paths.py::SLIDE_CLASS_TOKENS` (Regla de oro #8) |
 | "¿Puedo borrar un topic de un mes anterior?" | Confirmar con el usuario primero — no es parte del auto-pilot por defecto |
 | "¿Necesito correr el pipeline completo de RS?" | No — solo `generate.py --template 2_discussion_topic`, ver Ejecución |
 
@@ -143,10 +163,14 @@ y `config.month_label`.
 
 ## Recursos
 
-- **`references/layouts.md`** — los 5 patrones de slide con HTML copy-paste, gotchas de cada uno, y checklist antes de agregar un topic.
+- **`references/layouts.md`** — el recipe real (copiar/renombrar/adaptar/registrar), los 2 topics
+  de referencia, convenciones de nombres, y checklist antes de agregar un topic.
 
 ## Limitantes
 
 - Esta skill no valida contenido editorial (ortografía, tono, precisión de los datos que trae el usuario) — eso sigue siendo criterio humano.
-- No genera gráficos SVG complejos automáticamente — para el patrón 4 (chart), ver la nota en `references/layouts.md` sobre generar coordenadas de `<polyline>` a partir de una serie de números.
+- No genera gráficos complejos automáticamente — si el topic necesita un SVG a mano (como el
+  scatter de `dtexp-`), ver la nota en `references/layouts.md` sobre generar coordenadas de
+  `<polyline>`/`<canvas>` a partir de una serie de números, o directamente usar Chart.js como
+  hace `dtca-` (más simple).
 - No corre ni valida el pipeline del Board Agent (Fases 0-6) — esta skill solo escribe la slide; el Validator y el Diff siguen corriendo aparte cuando se genera el board completo.

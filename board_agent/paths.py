@@ -56,7 +56,18 @@ GENERATE_SCRIPT = SCRIPTS_DIR / "generate.py"
 MERGE_SCRIPT = SCRIPTS_DIR / "merge_standalone.py"
 PDF_SCRIPT = SCRIPTS_DIR / "generate_pdf.py"
 
-# Selector real usado por generate_pdf.py para contar slides — confirmado: 47 elementos en board_May_2026_v37
+# Selector real usado por generate_pdf.py para contar slides — confirmado: 47 elementos en board_May_2026_v37.
+# ÚNICA fuente de verdad (consolidado 2026-09-22): antes generate_pdf.py mantenía su PROPIA
+# copia hardcodeada de este set — ya rompió el PDF 2 veces por desincronización (2026-07-27:
+# 42/56 slides; 2026-08-19: mismo bug con dtexp-/dtca-, ver historial en generate_pdf.py).
+# generate_pdf.py ahora IMPORTA este set en vez de mantener su propia lista — si agregás un
+# discussion topic nuevo con su propia clase prefijada (ej. "dtnew-board-slide"), agregala
+# ACÁ y solo acá. "dt-slide" queda por compatibilidad con boards viejos aunque ya no se
+# genera (el bug de Discussion Topics superpuesto, corregido 2026-09-18, usaba esa clase
+# para los placeholders de "contenido pendiente" — ahora usa "slide"). "dtmx-slide" y
+# "dttax-board-slide" también quedan solo por boards viejos (México/Tax se removieron de
+# 2_discussion_topic.j2 el 2026-08-18) — sin esos tokens, regenerar el PDF de un mes viejo
+# que todavía los tenga (ej. julio-26) subcontaría slides.
 SLIDE_CLASS_TOKENS = {"slide", "gtm-slide", "hc-slide", "board-slide", "dt-slide", "dtmx-slide", "dttax-board-slide",
                       "dtexp-board-slide", "dtca-board-slide"}
 EXPECTED_SLIDE_COUNT = 47
