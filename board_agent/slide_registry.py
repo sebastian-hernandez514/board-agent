@@ -105,7 +105,7 @@ def _replace_stale_body_with_placeholder(html: str, section: str, old_label: str
         '<div class="slide-divider">↓</div>'
     )
     placeholders = "".join(
-        f'<div class="dt-slide stale-slide">{overlay}</div>'
+        f'<div class="slide stale-slide">{overlay}</div>'
         for _ in range(n_placeholder_slides)
     )
     new_body = f"<body>{cover}{placeholders}</body>"

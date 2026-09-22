@@ -1,7 +1,11 @@
 # Board configuration — update each month
-period:            "2026-07"       # YYYY-MM del período activo
-month_label:       "July 2026"     # Mes en inglés, largo
-prev_month_label:  "June 2026"     # Mes anterior (para comparaciones MoM)
+period:            "2026-08"       # YYYY-MM del período activo
+month:             "August"        # Mes corto, usado por 1_inicio.j2 ("net adds {{ config.month }}") —
+                                    # bug preexistente encontrado 2026-09-18: esta key nunca existió,
+                                    # el campo rendereaba en blanco desde siempre (verificado en v1 de
+                                    # agosto y en el git history de este archivo, nunca se agregó antes)
+month_label:       "August 2026"   # Mes en inglés, largo
+prev_month_label:  "July 2026"     # Mes anterior (para comparaciones MoM)
 quarter_label:     "3Q26"          # Quarter del período activo
 prev_year:         "2025"          # Año anterior (para comparaciones YoY)
 year:              2026            # Año actual

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Financial Performance · July 2026</title>
+<title>Financial Performance · August 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -16,13 +16,14 @@
   --slide-pad-x:32px;--slide-pad-y:20px;
 }
 body{font-family:'Inter',sans-serif;background:#dde3ea;display:flex;flex-direction:column;align-items:center;padding:24px 16px;min-height:100vh;color:var(--color-text-primary)}
-/* Regla .slide{...} removida (2026-08-17, mismo hallazgo que 2026-07-27/2026-07-21 — Finance
-   vuelve a regenerar este archivo desde cero cada mes con su propia herramienta, así que el
+/* Regla .slide{...} removida (2026-09-18, mismo hallazgo que 2026-07-21/2026-07-27/2026-08-17
+   — Finance regenera este archivo desde cero cada mes con su propia herramienta, así que el
    CSS muerto reaparece cada vez): ningún elemento de este archivo usa class="slide" (todos
    usan "board-slide"). Al fusionarse con los otros 7 templates en un solo <style> global
    (merge_standalone.py), esta regla pisaba el background navy de .slide-cover (1_inicio.j2)
    por empate de especificidad + orden en la cascada — la portada del board quedaba
-   blanco-sobre-blanco. */
+   blanco-sobre-blanco. Si vuelve a aparecer el próximo mes al pegar el HTML nuevo de
+   Finance, aplicar el mismo fix: borrar la línea `.slide{...}` de este archivo. */
 
 /* slide-header */
 .slide-header{background:var(--color-navy);padding:14px var(--slide-pad-x);display:flex;justify-content:space-between;align-items:center}
@@ -236,29 +237,29 @@ body{padding-top:56px}
 .board-slide .arrow-chip{color:#cbd5e1;font-size:16px}
 @media print{.app-tabbar{display:none}.tab-page{display:block!important}#tab-board{background:#fff}.board-slide{box-shadow:none;page-break-after:always}}
 
-/* Board Agent override (2026-08-18) — .app-tabbar es la barra de navegación del HTML
+/* Board Agent override (2026-09-18) — .app-tabbar es la barra de navegación del HTML
    standalone que pega Finance (título + botón "Export PDF" que llama a window.print()),
    pensada para su propia herramienta, no para el board mergeado. Antes solo se ocultaba
    en @media print, por eso aparecía en el board normal (y en screenshots/PDF vía
    Playwright, que no emula print) — se oculta siempre, y se anula el padding-top que
-   compensaba su altura fija. */
+   compensaba su altura fija. Mismo fix aplicado cada mes desde 2026-08-18 (Finance
+   regenera este archivo desde cero con su propia herramienta cada vez).*/
 .app-tabbar{display:none!important}
 body{padding-top:0!important}
 </style>
 </head>
 <body>
 <div class="app-tabbar">
-  <span class="brand">Alegra · Finance — July 2026 · Board</span>
+  <span class="brand">Alegra · Finance — August 2026 · Board</span>
   <span class="spacer"></span>
   <button class="pdf" onclick="exportPDF()">⬇ Export PDF</button>
 </div>
 <div id="tab-board" class="tab-page active">
 
-
 <!-- SLIDE 1 — Recent Performance Monthly -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">EBITDA margin improved from −9.9% in YTD Jul 2025 to +11.2% in YTD Jul 2026 — +21.0pp expansion</div>
+    <div class="sh-title">EBITDA margin improved from −17.1% in YTD Aug 2025 to +4.9% in YTD Aug 2026 — +22.0pp expansion</div>
     <div class="sh-right">
       <div class="sh-period">P&amp;L Monthly · vs Prior Year</div>
       <div class="sh-num">01 / 06</div>
@@ -269,70 +270,70 @@ body{padding-top:0!important}
       <thead>
         <tr>
           <th style="min-width:148px">(kUSD)</th>
-          <th class="thh">Jun/2025</th><th class="thh">Jul/2025</th>
-          <th class="thb">Jun/2026</th><th class="thb">Jul/2026</th>
+          <th class="thh">Jul/2025</th><th class="thh">Aug/2025</th>
+          <th class="thb">Jul/2026</th><th class="thb">Aug/2026</th>
           <th class="tha">YTD 2025A</th><th class="tha">YTD 2026A</th>
           <th class="tha">YoY Δ</th>
         </tr>
       </thead>
       <tbody>
         <tr class="rs"><td colspan="8">ARR &amp; FX</td></tr>
-        <tr class="rca"><td><span class="dot dot-teal"></span>ARR EoP ($M)*</td><td>$23.4</td><td>$24.1</td><td style="color:#0f172b">$30.72</td><td style="color:#0f172b">$33.3</td><td>$24.1</td><td style="color:#0f172b">$33.3</td><td><span class="db p">+38.1%</span></td></tr>
-        <tr class="rp"><td>Y-o-Y Growth</td><td>+42%</td><td>+35.8%</td><td style="color:#0f172b">+31.3%</td><td style="color:#0f172b">+38.1%</td><td>+35.8%</td><td style="color:#0f172b">+38.1%</td><td>—</td></tr>
+        <tr class="rca"><td><span class="dot dot-teal"></span>ARR EoP ($M)*</td><td>$24.0</td><td>$24.0</td><td style="color:#0f172b">$33.3</td><td style="color:#0f172b">$34.7</td><td>$24.0</td><td style="color:#0f172b">$34.7</td><td><span class="db p">+44.6%</span></td></tr>
+        <tr class="rp"><td>Y-o-Y Growth</td><td>+36.5%</td><td>+26.8%</td><td style="color:#0f172b">+38.6%</td><td style="color:#0f172b">+44.6%</td><td>+26.8%</td><td style="color:#0f172b">+44.6%</td><td>—</td></tr>
         <tr class="rsp"><td colspan="8"></td></tr>
         <tr class="rs"><td colspan="8">P&amp;L</td></tr>
         <tr class="rb">
           <td><span class="dot dot-teal"></span><b>Revenue</b></td>
-          <td>1,894</td><td>1,986</td>
-          <td><b>2,596</b></td><td style="color:#0f172b"><b>2,789</b></td>
-          <td>12,875</td><td style="color:#0f172b"><b>17,126</b></td>
-          <td><span class="db p">+33.0%</span></td>
+          <td>1,986</td><td>2,012</td>
+          <td><b>2,789</b></td><td style="color:#0f172b"><b>2,861</b></td>
+          <td>13,767</td><td style="color:#0f172b"><b>18,553</b></td>
+          <td><span class="db p">+34.8%</span></td>
         </tr>
-        <tr class="rp"><td>Y-o-Y Growth</td><td>—</td><td>—</td><td style="color:#0f172b">+37.0%</td><td style="color:#0f172b">+40.4%</td><td>—</td><td style="color:#0f172b">+33.0%</td><td>—</td></tr>
+        <tr class="rp"><td>Y-o-Y Growth</td><td>+35.6%</td><td>n/a</td><td style="color:#0f172b">+40.4%</td><td style="color:#0f172b">+42.2%</td><td>n/a</td><td style="color:#0f172b">+34.8%</td><td>—</td></tr>
         <tr class="rb">
           <td><span class="dot dot-teal"></span><b>Gross Profit</b></td>
-          <td>1,538</td><td>1,615</td>
-          <td><b>2,102</b></td><td style="color:#0f172b"><b>2,330</b></td>
-          <td>10,462</td><td style="color:#0f172b"><b>14,008</b></td>
-          <td><span class="db p">+33.9%</span></td>
+          <td>1,615</td><td>1,635</td>
+          <td><b>2,330</b></td><td style="color:#0f172b"><b>2,329</b></td>
+          <td>10,977</td><td style="color:#0f172b"><b>14,968</b></td>
+          <td><span class="db p">+36.3%</span></td>
         </tr>
-        <tr class="rp"><td>Gross Margin %</td><td>81.2%</td><td>81.3%</td><td style="color:#0f172b">81.0%</td><td style="color:#0f172b">83.5%</td><td>81.3%</td><td style="color:#0f172b">81.8%</td><td><span class="db p">+0.5pp</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td>808</td><td>843</td><td style="color:#0f172b">790</td><td style="color:#0f172b">810</td><td>5,920</td><td style="color:#0f172b">5,108</td><td><span class="db p">−13.7%</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td>531</td><td>544</td><td style="color:#0f172b">680</td><td style="color:#0f172b">674</td><td>3,572</td><td style="color:#0f172b">4,534</td><td><span class="db n">+27.0%</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td>307</td><td>294</td><td style="color:#0f172b">358</td><td style="color:#0f172b">360</td><td>2,240</td><td style="color:#0f172b">2,451</td><td><span class="db n">+9.4%</span></td></tr>
-        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td>1,646</td><td>1,681</td><td><b>1,828</b></td><td style="color:#0f172b"><b>1,844</b></td><td>11,732</td><td style="color:#0f172b"><b>12,094</b></td><td><span class="db n">+3.1%</span></td></tr>
-        <tr class="rp"><td>S&amp;M % Rev</td><td>42.7%</td><td>42.5%</td><td style="color:#0f172b">30.4%</td><td style="color:#0f172b">29.1%</td><td>46.0%</td><td style="color:#0f172b">29.8%</td><td><span class="db pp">−16.2pp</span></td></tr>
-        <tr class="rp"><td>R&amp;D % Rev</td><td>28.0%</td><td>27.4%</td><td style="color:#0f172b">26.2%</td><td style="color:#0f172b">24.2%</td><td>27.7%</td><td style="color:#0f172b">26.5%</td><td><span class="db pp">−1.3pp</span></td></tr>
-        <tr class="rp"><td>G&amp;A % Rev</td><td>16.2%</td><td>14.8%</td><td style="color:#0f172b">13.8%</td><td style="color:#0f172b">12.9%</td><td>17.4%</td><td style="color:#0f172b">14.3%</td><td><span class="db pp">−3.1pp</span></td></tr>
-        <tr class="rt"><td>Total OpEx % Rev</td><td>86.9%</td><td>84.6%</td><td style="color:#0f172b">70.4%</td><td style="color:#0f172b">66.1%</td><td>91.1%</td><td style="color:#0f172b">70.6%</td><td><span class="db pp">−20.5pp</span></td></tr>
+        <tr class="rp"><td>Gross Margin %</td><td>81.3%</td><td>81.3%</td><td style="color:#0f172b">83.5%</td><td style="color:#0f172b">81.4%</td><td>79.7%</td><td style="color:#0f172b">80.7%</td><td><span class="db p">+1.0pp</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td>843</td><td>741</td><td style="color:#0f172b">810</td><td style="color:#0f172b">830</td><td>6,667</td><td style="color:#0f172b">5,897</td><td><span class="db p">−11.6%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td>544</td><td>536</td><td style="color:#0f172b">674</td><td style="color:#0f172b">746</td><td>4,105</td><td style="color:#0f172b">5,305</td><td><span class="db n">+29.2%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td>294</td><td>313</td><td style="color:#0f172b">360</td><td style="color:#0f172b">399</td><td>2,552</td><td style="color:#0f172b">2,850</td><td><span class="db n">+11.7%</span></td></tr>
+        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td>1,681</td><td>1,589</td><td><b>1,844</b></td><td style="color:#0f172b"><b>1,974</b></td><td>13,324</td><td style="color:#0f172b"><b>14,052</b></td><td><span class="db n">+5.5%</span></td></tr>
+        <tr class="rp"><td>S&amp;M % Rev</td><td>42.5%</td><td>36.8%</td><td style="color:#0f172b">29.1%</td><td style="color:#0f172b">29.0%</td><td>48.4%</td><td style="color:#0f172b">31.8%</td><td><span class="db pp">−16.6pp</span></td></tr>
+        <tr class="rp"><td>R&amp;D % Rev</td><td>27.4%</td><td>26.6%</td><td style="color:#0f172b">24.2%</td><td style="color:#0f172b">26.1%</td><td>29.8%</td><td style="color:#0f172b">28.6%</td><td><span class="db pp">−1.2pp</span></td></tr>
+        <tr class="rp"><td>G&amp;A % Rev</td><td>14.8%</td><td>15.5%</td><td style="color:#0f172b">12.9%</td><td style="color:#0f172b">13.9%</td><td>18.5%</td><td style="color:#0f172b">15.4%</td><td><span class="db pp">−3.1pp</span></td></tr>
+        <tr class="rt"><td>Total OpEx % Rev</td><td>84.6%</td><td>79.0%</td><td style="color:#0f172b">66.1%</td><td style="color:#0f172b">69.0%</td><td>96.8%</td><td style="color:#0f172b">75.7%</td><td><span class="db pp">−21.1pp</span></td></tr>
         <tr class="re">
           <td><b>EBITDA</b></td>
-          <td style="color:#E87722">−108</td><td style="color:#E87722">−66</td>
-          <td style="color:#4ade80;font-weight:700">+274</td><td style="color:#4ade80;font-weight:700">+486</td>
-          <td style="color:#f97316">−1,270</td><td style="color:#4ade80;font-weight:700">+1,914</td>
+          <td style="color:#E87722">−66</td><td style="color:#4ade80;font-weight:700">+46</td>
+          <td style="color:#4ade80;font-weight:700">+486</td><td style="color:#4ade80;font-weight:700">+355</td>
+          <td style="color:#f97316">−2,347</td><td style="color:#4ade80;font-weight:700">+916</td>
           <td><span class="db p">n/m</span></td>
         </tr>
         <tr class="rem">
           <td>EBITDA Margin %</td>
-          <td style="color:#E87722">−5.7%</td><td style="color:#E87722">−3.3%</td>
-          <td style="color:#4ade80">+10.6%</td><td style="color:#4ade80">+17.4%</td>
-          <td style="color:#f97316">−9.9%</td><td style="color:#4ade80">+11.2%</td>
-          <td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+21.0pp</td>
+          <td style="color:#E87722">−3.3%</td><td style="color:#4ade80">+2.3%</td>
+          <td style="color:#4ade80">+17.4%</td><td style="color:#4ade80">+12.4%</td>
+          <td style="color:#f97316">−17.1%</td><td style="color:#4ade80">+4.9%</td>
+          <td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+22.0pp</td>
         </tr>
-        <tr class="rca"><td><b>R-40</b></td><td>36.3%</td><td>32.5%</td><td style="color:#0f172b">41.9%</td><td style="color:#0f172b">36.0%</td><td>25.9%</td><td style="color:#0f172b">44.2%</td><td><span class="db p">—</span></td></tr>
+        <tr class="rca"><td><b>R-40</b></td><td>33.2%</td><td>29.1%</td><td style="color:#0f172b">56.0%</td><td style="color:#0f172b">55.2%</td><td>9.8%</td><td style="color:#0f172b">47.7%</td><td><span class="db p">—</span></td></tr>
         <tr class="rsp"><td colspan="8"></td></tr>
-        <tr class="rca"><td><span class="dot dot-teal"></span>Cash Balance ($K)</td><td>5,086</td><td>4,587</td><td style="color:#0f172b">4,446</td><td style="color:#0f172b">4,679</td><td>4,587</td><td style="color:#0f172b">4,679</td><td><span class="db p">+2.0%</span></td></tr>
-        <tr class="rca"><td>Delta MoM</td><td style="color:#E87722">−203</td><td style="color:#E87722">−499</td><td style="color:#14b8a6">+31</td><td style="color:#14b8a6">+233</td><td style="color:#E87722">−$1,388K</td><td style="color:#14b8a6">+$456K</td><td>—</td></tr>
+        <tr class="rca"><td><span class="dot dot-teal"></span>Cash Balance ($K)</td><td>4,587</td><td>4,776</td><td style="color:#0f172b">4,679</td><td style="color:#0f172b">4,979</td><td>4,776</td><td style="color:#0f172b">4,979</td><td><span class="db p">+4.3%</span></td></tr>
+        <tr class="rca"><td>Delta MoM</td><td style="color:#E87722">−499</td><td style="color:#14b8a6">+189</td><td style="color:#14b8a6">+177</td><td style="color:#14b8a6">+300</td><td style="color:#E87722">−$1,199K</td><td style="color:#14b8a6">+$756K</td><td>—</td></tr>
       </tbody>
     </table>
-    <div style="font-family:'Inter',sans-serif;font-size:8.5px;color:#94a3b8;margin-top:4px">*ARR EoP for Jun/2025 and Jun/2026 as published in alegra_finance_june_2026.html (Alegra + Alanube). Jul/2025 and Jul/2026 updated 2026-08-17 to include Alanube (Board Agent ARR Walk — Alegra + Alanube = $33.3M, vs $27.79M Alegra-only originally sent by Finance).</div>
+    <div style="font-family:'Inter',sans-serif;font-size:8.5px;color:#94a3b8;margin-top:4px">*ARR EoP for Jul/2025, Aug/2025 and Jul/2026 as published/corrected in prior boards (Alegra + Alanube). Aug/2026 corrected 2026-09-18 to match Board Agent's validated ARR Walk (Alegra + Alanube = $34.7M) — Finance's HTML originally sent $34.3M for this cell, source of the $0.4M gap not confirmed (possibly partial/lagged Alanube or FX timing, unlike Jul/2026's fully Alegra-only original figure).</div>
   </div>
   <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">1</span></div>
 </div>
 <!-- SLIDE 2 — Budget -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">July 2026 beats Budget — EBITDA +$486K vs budget $156K (+$330K, 3.1x), YTD OpEx −5.7% vs Budget</div>
+    <div class="sh-title">August 2026 beats Budget — EBITDA +$355K vs budget $123K (+$232K, 2.9x), YTD OpEx −4.8% vs Budget</div>
     <div class="sh-right">
       <div class="sh-period">P&amp;L Monthly · vs Budget 2026</div>
       <div class="sh-num">02 / 06</div>
@@ -343,8 +344,8 @@ body{padding-top:0!important}
       <thead>
         <tr>
           <th style="min-width:148px">(kUSD)</th>
-          <th class="thb">Jun/26A</th><th class="thb">Jul/26A</th>
-          <th class="thh">Jun/26B</th><th class="thh">Jul/26B</th>
+          <th class="thb">Jul/26A</th><th class="thb">Aug/26A</th>
+          <th class="thh">Jul/26B</th><th class="thh">Aug/26B</th>
           <th class="tha">YTD 26A</th><th class="tha">YTD 26B</th>
           <th class="tha">Var Bud</th>
         </tr>
@@ -353,49 +354,49 @@ body{padding-top:0!important}
         <tr class="rs"><td colspan="8">P&amp;L</td></tr>
         <tr class="rb">
           <td><span class="dot dot-teal"></span><b>Revenue</b></td>
-          <td><b>2,596</b></td><td><b>2,789</b></td>
-          <td style="background:#f1f5f9;color:#64748b">2,384</td><td style="background:#f1f5f9;color:#64748b">2,453</td>
-          <td><b>17,126</b></td><td style="background:#f1f5f9;color:#64748b">15,870</td>
-          <td><span class="db p">+7.9%</span></td>
+          <td><b>2,789</b></td><td><b>2,861</b></td>
+          <td style="background:#f1f5f9;color:#64748b">2,453</td><td style="background:#f1f5f9;color:#64748b">2,520</td>
+          <td><b>18,553</b></td><td style="background:#f1f5f9;color:#64748b">18,390</td>
+          <td><span class="db p">+0.9%</span></td>
         </tr>
         <tr class="rb">
           <td><span class="dot dot-teal"></span><b>Gross Profit</b></td>
-          <td><b>2,102</b></td><td><b>2,330</b></td>
-          <td style="background:#f1f5f9;color:#64748b">1,943</td><td style="background:#f1f5f9;color:#64748b">2,006</td>
-          <td><b>14,008</b></td><td style="background:#f1f5f9;color:#64748b">12,879</td>
-          <td><span class="db p">+8.8%</span></td>
+          <td><b>2,330</b></td><td><b>2,329</b></td>
+          <td style="background:#f1f5f9;color:#64748b">2,006</td><td style="background:#f1f5f9;color:#64748b">2,063</td>
+          <td><b>14,968</b></td><td style="background:#f1f5f9;color:#64748b">14,941</td>
+          <td><span class="db p">+0.2%</span></td>
         </tr>
-        <tr class="rp"><td>Gross Margin %</td><td style="color:#0f172b">81.0%</td><td style="color:#0f172b">83.5%</td><td style="background:#f1f5f9">81.5%</td><td style="background:#f1f5f9">81.8%</td><td style="color:#0f172b">81.8%</td><td style="background:#f1f5f9">81.2%</td><td><span class="db pp">+0.6pp</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td style="color:#0f172b">790</td><td style="color:#0f172b">810</td><td style="background:#f1f5f9;color:#64748b">788</td><td style="background:#f1f5f9;color:#64748b">814</td><td style="color:#0f172b">5,108</td><td style="background:#f1f5f9;color:#64748b">5,649</td><td><span class="db p">−9.6%</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td style="color:#0f172b">680</td><td style="color:#0f172b">674</td><td style="background:#f1f5f9;color:#64748b">674</td><td style="background:#f1f5f9;color:#64748b">676</td><td style="color:#0f172b">4,534</td><td style="background:#f1f5f9;color:#64748b">4,604</td><td><span class="db p">−1.5%</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td style="color:#0f172b">358</td><td style="color:#0f172b">360</td><td style="background:#f1f5f9;color:#64748b">400</td><td style="background:#f1f5f9;color:#64748b">360</td><td style="color:#0f172b">2,451</td><td style="background:#f1f5f9;color:#64748b">2,573</td><td><span class="db p">−4.7%</span></td></tr>
-        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td><b>1,828</b></td><td><b>1,844</b></td><td style="background:#f1f5f9;color:#64748b">1,861</td><td style="background:#f1f5f9;color:#64748b">1,850</td><td><b>12,094</b></td><td style="background:#f1f5f9;color:#64748b">12,826</td><td><span class="db p">−5.7%</span></td></tr>
-        <tr class="rp"><td>S&amp;M % Rev</td><td style="color:#0f172b">30.4%</td><td style="color:#0f172b">29.1%</td><td style="background:#f1f5f9">33.1%</td><td style="background:#f1f5f9">33.2%</td><td style="color:#0f172b">29.8%</td><td style="background:#f1f5f9">35.6%</td><td><span class="db pp">−5.8pp</span></td></tr>
-        <tr class="rp"><td>R&amp;D % Rev</td><td style="color:#0f172b">26.2%</td><td style="color:#0f172b">24.2%</td><td style="background:#f1f5f9">28.3%</td><td style="background:#f1f5f9">27.6%</td><td style="color:#0f172b">26.5%</td><td style="background:#f1f5f9">29.0%</td><td><span class="db pp">−2.5pp</span></td></tr>
-        <tr class="rp"><td>G&amp;A % Rev</td><td style="color:#0f172b">13.8%</td><td style="color:#0f172b">12.9%</td><td style="background:#f1f5f9">16.8%</td><td style="background:#f1f5f9">14.7%</td><td style="color:#0f172b">14.3%</td><td style="background:#f1f5f9">16.2%</td><td><span class="db pp">−1.9pp</span></td></tr>
-        <tr class="rt"><td>Total OpEx % Rev</td><td style="color:#0f172b">70.4%</td><td style="color:#0f172b">66.1%</td><td style="background:#f1f5f9">78.1%</td><td style="background:#f1f5f9">75.4%</td><td style="color:#0f172b">70.6%</td><td style="background:#f1f5f9">80.8%</td><td><span class="db pp">−10.2pp</span></td></tr>
-        <tr class="re"><td><b>EBITDA</b></td><td style="color:#4ade80;font-weight:700">+274</td><td style="color:#4ade80;font-weight:700">+486</td><td style="color:#4ade80">+82</td><td style="color:#4ade80">+156</td><td style="color:#4ade80;font-weight:700">+1,914</td><td style="color:#f97316">+52</td><td><span class="db p">n/m</span></td></tr>
-        <tr class="rem"><td>EBITDA Margin %</td><td style="color:#4ade80">+10.6%</td><td style="color:#4ade80">+17.4%</td><td style="color:#4ade80">+3.4%</td><td style="color:#4ade80">+6.4%</td><td style="color:#4ade80">+11.2%</td><td style="color:#f97316">+0.3%</td><td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+10.8pp</td></tr>
+        <tr class="rp"><td>Gross Margin %</td><td style="color:#0f172b">83.5%</td><td style="color:#0f172b">81.4%</td><td style="background:#f1f5f9">81.8%</td><td style="background:#f1f5f9">81.9%</td><td style="color:#0f172b">80.7%</td><td style="background:#f1f5f9">81.3%</td><td><span class="db pp">−0.6pp</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td style="color:#0f172b">810</td><td style="color:#0f172b">830</td><td style="background:#f1f5f9;color:#64748b">814</td><td style="background:#f1f5f9;color:#64748b">881</td><td style="color:#0f172b">5,897</td><td style="background:#f1f5f9;color:#64748b">6,530</td><td><span class="db p">−9.7%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td style="color:#0f172b">674</td><td style="color:#0f172b">746</td><td style="background:#f1f5f9;color:#64748b">676</td><td style="background:#f1f5f9;color:#64748b">688</td><td style="color:#0f172b">5,305</td><td style="background:#f1f5f9;color:#64748b">5,293</td><td><span class="db n">+0.2%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td style="color:#0f172b">360</td><td style="color:#0f172b">399</td><td style="background:#f1f5f9;color:#64748b">360</td><td style="background:#f1f5f9;color:#64748b">371</td><td style="color:#0f172b">2,850</td><td style="background:#f1f5f9;color:#64748b">2,944</td><td><span class="db p">−3.2%</span></td></tr>
+        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td><b>1,844</b></td><td><b>1,974</b></td><td style="background:#f1f5f9;color:#64748b">1,850</td><td style="background:#f1f5f9;color:#64748b">1,940</td><td><b>14,052</b></td><td style="background:#f1f5f9;color:#64748b">14,766</td><td><span class="db p">−4.8%</span></td></tr>
+        <tr class="rp"><td>S&amp;M % Rev</td><td style="color:#0f172b">29.1%</td><td style="color:#0f172b">29.0%</td><td style="background:#f1f5f9">33.2%</td><td style="background:#f1f5f9">35.0%</td><td style="color:#0f172b">31.8%</td><td style="background:#f1f5f9">35.5%</td><td><span class="db pp">−3.7pp</span></td></tr>
+        <tr class="rp"><td>R&amp;D % Rev</td><td style="color:#0f172b">24.2%</td><td style="color:#0f172b">26.1%</td><td style="background:#f1f5f9">27.6%</td><td style="background:#f1f5f9">27.3%</td><td style="color:#0f172b">28.6%</td><td style="background:#f1f5f9">28.8%</td><td><span class="db pp">−0.2pp</span></td></tr>
+        <tr class="rp"><td>G&amp;A % Rev</td><td style="color:#0f172b">12.9%</td><td style="color:#0f172b">13.9%</td><td style="background:#f1f5f9">14.7%</td><td style="background:#f1f5f9">14.7%</td><td style="color:#0f172b">15.4%</td><td style="background:#f1f5f9">16.0%</td><td><span class="db pp">−0.6pp</span></td></tr>
+        <tr class="rt"><td>Total OpEx % Rev</td><td style="color:#0f172b">66.1%</td><td style="color:#0f172b">69.0%</td><td style="background:#f1f5f9">75.4%</td><td style="background:#f1f5f9">77.0%</td><td style="color:#0f172b">75.7%</td><td style="background:#f1f5f9">80.3%</td><td><span class="db pp">−4.6pp</span></td></tr>
+        <tr class="re"><td><b>EBITDA</b></td><td style="color:#4ade80;font-weight:700">+486</td><td style="color:#4ade80;font-weight:700">+355</td><td style="color:#4ade80">+156</td><td style="color:#4ade80">+123</td><td style="color:#4ade80;font-weight:700">+916</td><td style="color:#f97316">+175</td><td><span class="db p">+422.9%</span></td></tr>
+        <tr class="rem"><td>EBITDA Margin %</td><td style="color:#4ade80">+17.4%</td><td style="color:#4ade80">+12.4%</td><td style="color:#4ade80">+6.4%</td><td style="color:#4ade80">+4.9%</td><td style="color:#4ade80">+4.9%</td><td style="color:#f97316">+1.0%</td><td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+4.0pp</td></tr>
         <tr class="rsp"><td colspan="8"></td></tr>
-        <tr class="rca"><td><span class="dot dot-teal"></span>Cash Balance ($K)</td><td style="color:#0f172b">4,446</td><td style="color:#0f172b">4,679</td><td style="background:#f1f5f9;color:#64748b">1,967</td><td style="background:#f1f5f9;color:#64748b">1,784</td><td style="color:#0f172b">4,679</td><td style="background:#f1f5f9;color:#64748b">1,784</td><td><span class="db p">+162.3%</span></td></tr>
+        <tr class="rca"><td><span class="dot dot-teal"></span>Cash Balance ($K)</td><td style="color:#0f172b">4,679</td><td style="color:#0f172b">4,979</td><td style="background:#f1f5f9;color:#64748b">1,784</td><td style="background:#f1f5f9;color:#64748b">2,089</td><td style="color:#0f172b">4,979</td><td style="background:#f1f5f9;color:#64748b">2,089</td><td><span class="db p">+138.4%</span></td></tr>
       </tbody>
     </table>
   </div>
   <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">2</span></div>
 </div>
-<!-- SLIDE 3 — OpEx YTD July -->
+<!-- SLIDE 3 — OpEx YTD August -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">S&amp;M tracking 9.6% below budget YTD — Paid Media and Team efficiencies release $541K of OpEx</div>
+    <div class="sh-title">S&amp;M tracking 9.7% below budget YTD — Paid Media and Team efficiencies release $632K of OpEx</div>
     <div class="sh-right">
-      <div class="sh-period">OpEx YTD July 2026 · S&amp;M · R&amp;D · G&amp;A</div>
+      <div class="sh-period">OpEx YTD August 2026 · S&amp;M · R&amp;D · G&amp;A</div>
       <div class="sh-num">03 / 06</div>
     </div>
   </div>
   <div class="slide-body" style="gap:8px">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;height:420px;overflow:hidden">
       <div style="display:flex;flex-direction:column;gap:6px;overflow:hidden;height:100%">
-        <div class="sec-label">Actuals · Budget · Y-1 ($K YTD July)</div>
+        <div class="sec-label">Actuals · Budget · Y-1 ($K YTD August)</div>
         <div class="chart-wrap" style="height:320px;width:100%"><canvas id="bd-opex-stacked" width="420" height="320" style="display:block"></canvas></div>
         <div style="display:flex;gap:12px">
           <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:8px;height:8px;background:#1D9E75;border-radius:2px;display:inline-block"></span>S&amp;M</span>
@@ -406,22 +407,22 @@ body{padding-top:0!important}
       <div style="display:flex;flex-direction:column;gap:8px;padding-top:20px;overflow:hidden">
         <div class="sec-label">Comments</div>
         <div class="comments-box">
-          <div class="comment-item"><span class="comment-dot" style="background:#1D9E75"></span><span><b>S&amp;M represents 29.8% of Revenue YTD</b> — a 16.2pp reduction vs YTD Jul 2025 (46.0%). Spend declined 13.7% YoY while Revenue grew 33.0%, driven by continued Paid Media and Team efficiencies.</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#94a3b8"></span><span><b>R&amp;D represents 26.5% of Revenue</b>, tracking close to budget (−1.5%) with YoY growth of 27.0% reflecting sustained product investment — well below the 33% revenue growth.</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#14b8a6"></span><span><b>G&amp;A represents 14.3% of Revenue</b>, below budget (−4.7%) and down 3.1pp YoY as a share of revenue, even as G&amp;A dollars grew 9.4% — well below the 33% revenue growth.</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#334155"></span><span><b>Total OpEx % of Revenue dropped from 91.1% to 70.6%</b> YoY — a 20.5pp improvement driving EBITDA expansion from −9.9% to +11.2%.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#1D9E75"></span><span><b>S&amp;M represents 31.8% of Revenue YTD</b> — a 16.6pp reduction vs YTD Aug 2025 (48.4%). Spend declined 11.6% YoY while Revenue grew 34.8%, driven by continued Paid Media and Team efficiencies ($632K below budget YTD).</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#94a3b8"></span><span><b>R&amp;D represents 28.6% of Revenue</b>, essentially on budget (+0.2%) with YoY growth of 29.2% reflecting sustained product investment — below the 34.8% revenue growth.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#14b8a6"></span><span><b>G&amp;A represents 15.4% of Revenue</b>, below budget (−3.2%) and down 3.1pp YoY as a share of revenue, even as G&amp;A dollars grew 11.7% — well below the 34.8% revenue growth.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#334155"></span><span><b>Total OpEx % of Revenue dropped from 96.8% to 75.7%</b> YoY — a 21.1pp improvement driving EBITDA expansion from −17.1% to +4.9%.</span></div>
         </div>
       </div>
     </div>
   </div>
   <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">3</span></div>
 </div>
-<!-- SLIDE 4 — Revenue Bridge July (Collections/Recaudo view) -->
+<!-- SLIDE 4 — Revenue Bridge August (Collections/Recaudo view) -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">July collections +$246K (+9.8%) — New Logos (+$197K), Pricing (+$133K) and FX Rate (+$122K) the main drivers; Efficiencies (−$149K) and Opened Cycles in DOM from Banreservas (−$144K) the main detractors</div>
+    <div class="sh-title">August collections $2.81M, +$63.8K (+2.3%) MoM and +41.8% YoY — New Logos (+$190K) and FX Rate (+$84K) the main drivers; Churn (−$131K), Downselling (−$136K) and Opened Cycles (−$131K) the main detractors (Colombia earthquake effects included)</div>
     <div class="sh-right">
-      <div class="sh-period">GLO Collections Bridge · July 2026</div>
+      <div class="sh-period">GLO Collections Bridge · August 2026</div>
       <div class="sh-num">04 / 06</div>
     </div>
   </div>
@@ -435,54 +436,54 @@ body{padding-top:0!important}
   </div>
   <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">4</span></div>
 </div>
-<!-- SLIDE 5 — Cash Position July -->
+<!-- SLIDE 5 — Cash Position August -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">Cash Balance closes July at $4,679K — +162% vs Budget, Net Operating CF +$215K vs a budgeted −$183K</div>
+    <div class="sh-title">Cash Balance closes August at $4,979K — +138% vs Budget, Net Operating CF +$360K vs a budgeted −$44K</div>
     <div class="sh-right">
-      <div class="sh-period">July 2026 · Cash Flow · Actual vs Budget</div>
+      <div class="sh-period">August 2026 · Cash Flow · Actual vs Budget</div>
       <div class="sh-num">05 / 06</div>
     </div>
   </div>
   <div class="slide-body" style="gap:8px">
     <div style="display:grid;grid-template-columns:3fr 2fr;gap:14px;height:420px;overflow:hidden">
       <div style="overflow:hidden">
-        <div class="sec-label" style="margin-bottom:3px">July 2026 · ($K USD)</div>
+        <div class="sec-label" style="margin-bottom:3px">August 2026 · ($K USD)</div>
         <table class="cf-table">
-          <thead><tr><th style="width:40%">Category</th><th class="tha">Jul Act</th><th class="tha">Jul Bud</th><th class="tha">Var $</th><th class="tha">Var %</th></tr></thead>
+          <thead><tr><th style="width:40%">Category</th><th class="tha">Aug Act</th><th class="tha">Aug Bud</th><th class="tha">Var $</th><th class="tha">Var %</th></tr></thead>
           <tbody>
-            <tr class="sub"><td>(+) Inflows</td><td>2,896</td><td style="color:#64748b">2,453</td><td><span class="db p">+444</span></td><td><span class="db p">+18.1%</span></td></tr>
-            <tr class="ind"><td>Subscriptions</td><td>2,886</td><td style="color:#64748b">2,453</td><td><span class="db p">+433</span></td><td><span class="db p">+17.7%</span></td></tr>
-            <tr class="sub"><td>(−) Outflows</td><td>2,681</td><td style="color:#64748b">2,636</td><td><span class="db n">+45</span></td><td><span class="db n">+1.7%</span></td></tr>
-            <tr class="ind"><td>Bank Expenses</td><td>2</td><td style="color:#64748b">12</td><td><span class="db p">−10</span></td><td><span class="db p">−83.7%</span></td></tr>
-            <tr class="ind"><td>Billing Fees</td><td>75</td><td style="color:#64748b">68</td><td><span class="db n">+7</span></td><td><span class="db n">+10.7%</span></td></tr>
-            <tr class="ind"><td>Computing Services</td><td>204</td><td style="color:#64748b">151</td><td><span class="db n">+52</span></td><td><span class="db n">+34.5%</span></td></tr>
-            <tr class="ind"><td>Depreciation/Amortization</td><td>0</td><td style="color:#64748b">10</td><td><span class="db p">−10</span></td><td><span class="db p">−100%</span></td></tr>
-            <tr class="ind"><td>Experiments</td><td>0</td><td style="color:#64748b">12</td><td><span class="db p">−12</span></td><td><span class="db p">−100%</span></td></tr>
-            <tr class="ind"><td>Freelance</td><td>57</td><td style="color:#64748b">45</td><td><span class="db n">+12</span></td><td><span class="db n">+26.4%</span></td></tr>
-            <tr class="ind"><td>General</td><td>80</td><td style="color:#64748b">239</td><td><span class="db p">−158</span></td><td><span class="db p">−66.3%</span></td></tr>
-            <tr class="ind"><td>Paid Media</td><td>296</td><td style="color:#64748b">312</td><td><span class="db p">−16</span></td><td><span class="db p">−5.2%</span></td></tr>
-            <tr class="ind"><td>People Development</td><td>8</td><td style="color:#64748b">8</td><td><span class="db z">0</span></td><td><span class="db z">+2.9%</span></td></tr>
-            <tr class="ind"><td>Publicidad no Web</td><td>101</td><td style="color:#64748b">59</td><td><span class="db n">+41</span></td><td><span class="db n">+69.6%</span></td></tr>
-            <tr class="ind"><td>Software &amp; Tools</td><td>125</td><td style="color:#64748b">119</td><td><span class="db n">+7</span></td><td><span class="db n">+6.0%</span></td></tr>
-            <tr class="ind"><td>Taxes</td><td>265</td><td style="color:#64748b">221</td><td><span class="db n">+44</span></td><td><span class="db n">+20.0%</span></td></tr>
-            <tr class="ind"><td>Payroll</td><td>1,235</td><td style="color:#64748b">1,377</td><td><span class="db p">−142</span></td><td><span class="db p">−10.0%</span></td></tr>
-            <tr class="ind"><td>Travel</td><td>0</td><td style="color:#64748b">3</td><td><span class="db p">−3</span></td><td><span class="db p">−100%</span></td></tr>
-            <tr class="ind"><td>Credit Card</td><td>233</td><td style="color:#64748b">0</td><td><span class="db n">+233</span></td><td><span class="db z">n/a</span></td></tr>
-            <tr class="tot"><td>Net Operating CF</td><td>215</td><td style="color:#64748b">−183</td><td><span class="db p">+398</span></td><td><span class="db z">n/m</span></td></tr>
-            <tr class="ind"><td>Non-operating adj. (Debt/Interco/FX, net)*</td><td>18</td><td style="color:#64748b">0</td><td><span class="db p">+18</span></td><td><span class="db z">n/a</span></td></tr>
-            <tr class="sub"><td>Net Increase in Cash</td><td>233</td><td style="color:#64748b">−183</td><td><span class="db p">+416</span></td><td><span class="db z">n/a</span></td></tr>
-            <tr class="closing"><td><b>Closing Balance</b></td><td><b>4,679</b></td><td style="color:#93c5fd">1,784</td><td><span class="db p" style="color:#7dd3fc;background:#1e3a5f">+2,895</span></td><td><span class="db p" style="color:#7dd3fc;background:#1e3a5f">+162.3%</span></td></tr>
+            <tr class="sub"><td>(+) Inflows</td><td>2,487</td><td style="color:#64748b">2,197</td><td><span class="db p">+290</span></td><td><span class="db p">+13.2%</span></td></tr>
+            <tr class="ind"><td>Subscriptions</td><td>2,476</td><td style="color:#64748b">2,197</td><td><span class="db p">+279</span></td><td><span class="db p">+12.7%</span></td></tr>
+            <tr class="sub"><td>(−) Outflows</td><td>2,127</td><td style="color:#64748b">2,241</td><td><span class="db p">−114</span></td><td><span class="db p">−5.1%</span></td></tr>
+            <tr class="ind"><td>Bank Expenses</td><td>3</td><td style="color:#64748b">11</td><td><span class="db p">−8</span></td><td><span class="db p">−72.7%</span></td></tr>
+            <tr class="ind"><td>Billing Fees</td><td>61</td><td style="color:#64748b">61</td><td><span class="db z">0</span></td><td><span class="db z">0.0%</span></td></tr>
+            <tr class="ind"><td>Computing Services</td><td>140</td><td style="color:#64748b">140</td><td><span class="db z">0</span></td><td><span class="db z">0.0%</span></td></tr>
+            <tr class="ind"><td>Depreciation/Amortization</td><td>0</td><td style="color:#64748b">0</td><td><span class="db z">0</span></td><td><span class="db z">n/a</span></td></tr>
+            <tr class="ind"><td>Experiments</td><td>0</td><td style="color:#64748b">16</td><td><span class="db p">−16</span></td><td><span class="db p">−100%</span></td></tr>
+            <tr class="ind"><td>Freelance</td><td>85</td><td style="color:#64748b">57</td><td><span class="db n">+28</span></td><td><span class="db n">+49.1%</span></td></tr>
+            <tr class="ind"><td>General</td><td>43</td><td style="color:#64748b">71</td><td><span class="db p">−28</span></td><td><span class="db p">−39.4%</span></td></tr>
+            <tr class="ind"><td>Paid Media</td><td>244</td><td style="color:#64748b">346</td><td><span class="db p">−102</span></td><td><span class="db p">−29.5%</span></td></tr>
+            <tr class="ind"><td>People Development</td><td>3</td><td style="color:#64748b">4</td><td><span class="db p">−1</span></td><td><span class="db p">−25.0%</span></td></tr>
+            <tr class="ind"><td>Publicidad no Web</td><td>45</td><td style="color:#64748b">63</td><td><span class="db p">−18</span></td><td><span class="db p">−28.6%</span></td></tr>
+            <tr class="ind"><td>Software &amp; Tools</td><td>52</td><td style="color:#64748b">159</td><td><span class="db p">−107</span></td><td><span class="db p">−67.3%</span></td></tr>
+            <tr class="ind"><td>Taxes</td><td>160</td><td style="color:#64748b">38</td><td><span class="db n">+122</span></td><td><span class="db n">+321.1%</span></td></tr>
+            <tr class="ind"><td>Payroll</td><td>1,143</td><td style="color:#64748b">1,225</td><td><span class="db p">−82</span></td><td><span class="db p">−6.7%</span></td></tr>
+            <tr class="ind"><td>Travel</td><td>1</td><td style="color:#64748b">49</td><td><span class="db p">−48</span></td><td><span class="db p">−98.0%</span></td></tr>
+            <tr class="ind"><td>Credit Card</td><td>149</td><td style="color:#64748b">0</td><td><span class="db n">+149</span></td><td><span class="db z">n/a</span></td></tr>
+            <tr class="tot"><td>Net Operating CF</td><td>360</td><td style="color:#64748b">−44</td><td><span class="db p">+404</span></td><td><span class="db z">n/m</span></td></tr>
+            <tr class="ind"><td>Non-operating adj. (Debt/Interco/FX, net)*</td><td>−60</td><td style="color:#64748b">0</td><td><span class="db n">−60</span></td><td><span class="db z">n/a</span></td></tr>
+            <tr class="sub"><td>Net Increase in Cash</td><td>300</td><td style="color:#64748b">−44</td><td><span class="db p">+344</span></td><td><span class="db z">n/a</span></td></tr>
+            <tr class="closing"><td><b>Closing Balance</b></td><td><b>4,979</b></td><td style="color:#93c5fd">2,089</td><td><span class="db p" style="color:#7dd3fc;background:#1e3a5f">+2,890</span></td><td><span class="db p" style="color:#7dd3fc;background:#1e3a5f">+138.4%</span></td></tr>
           </tbody>
         </table>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;padding-top:20px;overflow:hidden">
         <div class="sec-label">Comments</div>
         <div class="comments-box">
-          <div class="comment-item"><span class="comment-dot" style="background:#14b8a6"></span><span>Cash balance closed July at <b>$4,679K</b>, exceeding Budget by <b>+$2,895K (+162%)</b> — the highest balance of 2026, 7th consecutive month above budget.</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#1D9E75"></span><span><b>Net Operating CF +$215K</b> vs a budgeted −$183K (+$398K swing) — Inflows +$444K over budget (subscriptions collection ahead of plan) more than covered a modest +$45K Outflows overage.</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#E87722"></span><span><b>General −$158K vs budget</b> (biggest single saving) and <b>Payroll −$142K</b> below budget offset <b>Computing Services +$52K</b> (cloud consumption), <b>Taxes +$44K</b> and <b>Publicidad no Web +$41K</b>.</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#94a3b8"></span><span><b>Credit Card +$233K</b> has no budget line (unbudgeted spend category). June's closing balance was also revised from $4,502K to <b>$4,446K</b> in the latest tracker version.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#14b8a6"></span><span>Cash balance closed August at <b>$4,979K</b>, exceeding Budget by <b>+$2,890K (+138%)</b> — the highest balance of 2026, 8th consecutive month above budget.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#1D9E75"></span><span><b>Net Operating CF +$360K</b> vs a budgeted −$44K (+$404K swing) — Inflows +$290K over budget (subscriptions collection ahead of plan, consistent with the +13.5% revenue beat) more than covered a favorable −$114K Outflows underspend.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#E87722"></span><span><b>Software &amp; Tools −$107K vs budget</b> and <b>Paid Media −$102K</b> the biggest savings, alongside Payroll −$82K, more than offsetting <b>Taxes +$122K</b> (tracks the higher COL/MEX revenue, per Collections' notes) and <b>Freelance +$28K</b>.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#94a3b8"></span><span><b>Credit Card +$149K</b> has no budget line (unbudgeted spend category). Jun 26's closing balance was revised from $4,446K to <b>$4,502K</b> in the latest tracker version — see Slide 1 footnote.</span></div>
         </div>
       </div>
     </div>
@@ -492,7 +493,7 @@ body{padding-top:0!important}
 <!-- SLIDE 6 — Cash Balance 13M -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">Cash recovery continues — Net Change positive 5 of the last 7 months, closing July at $4,679K (highest of 2026)</div>
+    <div class="sh-title">Cash recovery continues — 7 straight months of positive Net Change since the January low, closing August at $4,979K (highest of 2026)</div>
     <div class="sh-right">
       <div class="sh-period">Cash Balance &amp; Net CF · Monthly 13M</div>
       <div class="sh-num">06 / 06</div>
@@ -501,27 +502,27 @@ body{padding-top:0!important}
   <div class="slide-body" style="gap:8px">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;height:380px;overflow:hidden">
       <div style="display:flex;flex-direction:column;gap:6px;overflow:hidden;height:100%">
-        <div class="sec-label">Cash Balance — Monthly July 2025–July 2026 ($K)</div>
+        <div class="sec-label">Cash Balance — Monthly August 2025–August 2026 ($K)</div>
         <div class="chart-wrap" style="height:195px;width:100%"><canvas id="bd-saldo" width="420" height="185"></canvas></div>
         <div style="display:flex;gap:12px">
           <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:14px;height:2px;background:#14b8a6;display:inline-block;border-radius:1px"></span>Actual</span>
           <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="display:inline-block;width:14px;border-top:2px dashed #534AB7"></span>Budget 2026</span>
         </div>
         <div class="comments-box" style="margin-top:2px">
-          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#14b8a6"></span><span>Jul 26 closes at <b>$4,679K</b>, <b>+$2,895K above budget ($1,784K, +162%)</b>. Highest balance of 2026.</span></div>
-          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#E87722"></span><span><b>Recovery from Jan 26 low of $3,279K</b>: 5 of the last 7 months closed with positive Net Change, including +$31K in June and +$233K in July.</span></div>
+          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#14b8a6"></span><span>Aug 26 closes at <b>$4,979K</b>, <b>+$2,890K above budget ($2,089K, +138%)</b>. Highest balance of 2026.</span></div>
+          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#E87722"></span><span><b>Recovery from Jan 26 low of $3,279K</b>: 7 consecutive months of positive Net Change since then, including +$177K in July and +$300K in August.</span></div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;overflow:hidden;height:100%">
-        <div class="sec-label">Net Change MoM — Monthly July 2025–July 2026 ($K)</div>
+        <div class="sec-label">Net Change MoM — Monthly August 2025–August 2026 ($K)</div>
         <div class="chart-wrap" style="height:195px;width:100%"><canvas id="bd-burn" width="420" height="185"></canvas></div>
         <div style="display:flex;gap:12px">
           <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:8px;height:8px;background:#1D9E75;border-radius:2px;display:inline-block"></span>Net accumulation</span>
           <span style="display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:8.5px;color:#64748b"><span style="width:8px;height:8px;background:#E87722;border-radius:2px;display:inline-block"></span>Net burn</span>
         </div>
         <div class="comments-box" style="margin-top:2px">
-          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#1D9E75"></span><span><b>Jun +$31K → Jul +$233K</b> — second consecutive positive month, accelerating vs June.</span></div>
-          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#14b8a6"></span><span><b>YTD July Net Change: +$456K</b> vs a budgeted −$2,439K (Dec25 4,223 → Jul26B 1,784) — well ahead of plan, tracking the EBITDA beat.</span></div>
+          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#1D9E75"></span><span><b>Jul +$177K → Aug +$300K</b> — accelerating for the second month running.</span></div>
+          <div class="comment-item" style="font-size:10px"><span class="comment-dot" style="background:#14b8a6"></span><span><b>YTD August Net Change: +$756K</b> vs a budgeted −$2,134K (Dec25 4,223 → Aug26B 2,089) — well ahead of plan, tracking the EBITDA beat.</span></div>
         </div>
       </div>
     </div>
@@ -532,7 +533,7 @@ body{padding-top:0!important}
 </div><!--/tab-board-->
 
 <script>
-const BD={"opex":{"sam":[5108293.93606346,5648884,5920147.82],"rnd":[4534409.75999999,4604340,3571762.93],"gna":[2451090.199999999,2572887,2239955.22]},"cashLabels":["Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"cashAct":[4587,4776,4811,4741,4914,4223,3279,3734,4097,4321,4415,4446,4679],"cashBud":[null,null,null,null,null,null,2430,2143,2099,2016,2019,1967,1784],"burnLabels":["Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"burnDelta":[-499,189,35,-70,173,-690,-944,455,363,224,94,31,233]};
+const BD={"opex":{"sam":[5897267.466063457,6529681,6667356.873226707],"rnd":[5305003.739999989,5292517,4104774.0712966425],"gna":[2849681.659999997,2943958,2552365.7299999995]},"cashLabels":["Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"cashAct":[4776,4811,4741,4914,4223,3279,3734,4097,4321,4414,4502,4679,4979],"cashBud":[null,null,null,null,null,2430,2145,2100,2000,2018,2021,1784,2089],"burnLabels":["Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"burnDelta":[189,35,-70,173,-690,-944,455,363,224,93,88,177,300]};
 
 function initBoardCharts(){
   if(window._boardInit) return;
@@ -553,11 +554,11 @@ function initBoardCharts(){
   // Slide 4 — Revenue Bridge
   (function(){
     var steps=[
-      {l:'Net Rev Jun',v:2499,t:'base'},{l:'Rec. P-1',v:100,t:'pos'},{l:'Pricing',v:133,t:'pos'},
-      {l:'New Logos',v:197,t:'pos'},{l:'Reactivated',v:44,t:'pos'},{l:'Recovered',v:21,t:'pos'},
-      {l:'Upgrades',v:39,t:'pos'},{l:'Efficiencies',v:-149,t:'neg'},{l:'Churn',v:-96,t:'neg'},
-      {l:'Downselling',v:-100,t:'neg'},{l:'Opened cycles',v:-144,t:'neg'},
-      {l:'FX Rate',v:122,t:'pos'},{l:'Subs. plans',v:81,t:'pos'},{l:'Net Rev Jul',v:2745,t:'close'}
+      {l:'Net Rev Jul',v:2746,t:'base'},{l:'Rec. P-1',v:91,t:'pos'},{l:'Pricing',v:0,t:'pos'},
+      {l:'New Logos',v:190,t:'pos'},{l:'Reactivated',v:44,t:'pos'},{l:'Recovered',v:21,t:'pos'},
+      {l:'Upgrades',v:47,t:'pos'},{l:'Efficiencies',v:8,t:'pos'},{l:'Churn',v:-131,t:'neg'},
+      {l:'Downselling',v:-136,t:'neg'},{l:'Opened cycles',v:-131,t:'neg'},
+      {l:'FX Rate',v:84,t:'pos'},{l:'Subs. plans',v:-23,t:'neg'},{l:'Net Rev Aug',v:2810,t:'close'}
     ];
     var run=0,fd=[],colors=[],labels=steps.map(function(s){return s.l;});
     steps.forEach(function(s){
@@ -575,7 +576,7 @@ function initBoardCharts(){
           callbacks:{label:function(ctx){var s=steps[ctx.dataIndex];return(s.v>=0?'+':'')+s.v+'K';}}}},
         scales:{
           x:{grid:{display:false},border:{display:false},ticks:{font:{size:7.5},color:'#94a3b8',maxRotation:40}},
-          y:{grid:{color:'rgba(0,0,0,.05)'},border:{display:false},ticks:{font:{size:8,family:'monospace'},color:'#94a3b8',callback:function(v){return'$'+v+'K';}},min:2400,max:3100}
+          y:{grid:{color:'rgba(0,0,0,.05)'},border:{display:false},ticks:{font:{size:8,family:'monospace'},color:'#94a3b8',callback:function(v){return'$'+v+'K';}},min:2650,max:3200}
         }
       }
     });
