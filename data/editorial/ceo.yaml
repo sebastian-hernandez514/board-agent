@@ -1,28 +1,30 @@
-# CEO Highlights & Lowlights — Julio 2026 (Q3 2026)
-updated_for_month: "2026-07"
+# CEO Highlights & Lowlights — Agosto 2026 (September MBR)
+updated_for_month: "2026-08"
 
 ceo_title: "CEO Highlights & Lowlights"
 
 highlights:
-  - "Overall churn held at 3.9% in July (Core 2.4%, Lite 4.9%) — the results demonstrate the effectiveness of our adoption strategy despite challenges in specific markets."
-  - "Sales leadership is now in place after a period of interim coverage. The incoming Head of Sales restores dedicated ownership of commercial execution and attainment, completing the Revenue leadership structure."
-  - "AI-driven optimization reduced Support headcount by 17% versus January while sustaining service volume — the team now handles more customer demand per person, a step-change in cost-to-serve and scalability."
-  - label: "Commercial:"
-    children:
-      - "AI-powered quality assurance now covers 100% of sales calls, up from 30% reviewed manually."
-      - "Apex Academy cut time-to-first-deal for new reps from 30 days to 7."
-      - "ICP-focused targeting in Costa Rica lifted the qualified-client mix from 54% to 68%."
-  - "The demand engine had its strongest month of the year in July. Sign-ups grew +25.4% (36,061) and MQLs +14.0% (18,556) — the best traffic month of 2026 — with direct traffic stabilizing after two soft months and lead nurturing rebounding to its best conversion in weeks."
+  - "Global logo churn improved to 3.8% from 3.9%, sustaining the favorable trend of recent months with a projected reduction in Churn MRR."
+  - "Organic channels are now growing on their own, with SEO, Direct Traffic and Lead Nurturing expanding logos in parallel (+13%, +5%, +21%), shifting organic from a fallback to a primary growth engine."
+  - "Mexico's ICP is now defined, focusing product and go-to-market priorities in a market where paid acquisition efficiency is the binding constraint."
+  - "Catalog migration is now fully covered in Mexico. Aspel and Contalink were closed with AI that rebuilds and corrects the accounting catalog, completing the three migration routes of the market alongside Contapaq."
+  - "Alegra won the Digital Transformation category at Premios Portafolio 2026, one of Colombia's most established business awards, with 10 tier-1 press placements reinforcing our positioning as a technology-led platform in the market."
+  - "Customer Success strategy launched with a pilot in Mexico, with over 50 users through the model in its first three weeks and a focus on reducing churn within the first 3 months of the lifecycle."
 
 lowlights:
-  - "SMB came in well below the month's targets, reaching 54.9% of the New MRR goal ($38.8K) and 60.9% of New Logos (1,519). The largest gap sat in the Dominican Republic, which closed at 25% of its revenue target while still ramping ahead of the upcoming e-invoicing mandate."
-  - "DR's high CAC ($510 blended, >$1,100 paid) reflects the DGII e-CF mandate not yet being enforced, not channel inefficiency. The signal: keep budget mitigated until obligation kicks in, then ramp aggressively, leveraging the newly enabled ICP segmentation to direct spend toward converting segments. Goal: bring paid CAC back to $400 USD and blended CAC to $300 USD, improving both further from there."
-  - "Several POS outages during the month weighed on the customer experience, with POS Support CSAT falling 25 points. Restoring and safeguarding POS stability is a priority as we scale the product; the team is working to prevent recurrence."
-  - "Mexico grew below budget despite improved acquisition efficiency. Contactability remains the binding constraint — outbound numbers flagged as spam and low answer rates are compressing MQL-to-logo conversion. Dialing experiments and a local trust-building strategy are now underway."
-  - "A magnitude 7.4 earthquake struck Colombia — our largest market — on August 10, prompting a national state of disaster. Our immediate priority is the safety and support of team members and their families. As an external force-majeure event, some short-term commercial impact is expected; the full effect is still being assessed as response efforts continue."
+  - "Accountant activation dropped 10 pp, from 43% to 33%, as newly onboarded accountants are not being activated immediately within the Alegra Impulsa flow."
+  - "Top-of-funnel volume is not translating into logos. Colombia delivered 86% of its Contactables target but only 54% of Logos, while Mexico delivered 150% of Contactables and 71% of Logos."
+  - "Global Agent adoption remains close to zero after two months in beta, with limited movement during August and only a partial recovery in the final week."
+  - "Nurturing flow activation and lead scoring errors disrupted conversation assignment during the first two weeks of August, running close to $3K USD below the weekly average before recovering."
 
-financial_update: "July closed strong: revenue reached $2.79M, +13.7% vs budget and +40.4% YoY, though roughly half of that beat is FX (COP appreciation) rather than organic growth — real local-currency growth was closer to 5–6%. Gross margin expanded to 83.5% (+1.7pp vs budget), helped by a one-off AWS accrual reversal and a favorable payment-processor mix. EBITDA hit $486K — 3.1x budget and the best month of the year — as the revenue beat flowed straight through with OpEx essentially on plan (-0.3%). Cash closed at $4.68M, +162% vs budget and the highest balance of 2026, the 7th straight month above plan. YTD EBITDA margin swung from -9.9% to +11.2% (+21pp YoY), putting the full year on track to beat budget meaningfully ($3.2M EBITDA projected vs $1.3M budgeted). Bottom line: a genuinely healthy month operationally, with FX acting as a tailwind worth flagging rather than banking on going forward."
+financial_update: "August delivered another strong month, with revenue of $2.86M coming in 13.4% ahead of budget and up 42.1% year over year, while gross margin held steady at 81.4%. EBITDA reached $353K, nearly three times the budgeted $123K, for a 12.3% margin. Cash closed at $4.98M, the highest balance of the year and well above plan, supported by seven straight months of positive net change. Year to date, operating expenses have fallen to 70.4% of revenue from 89.5% a year ago, and ARR now stands at $34.7M, growing 44.4% year over year. Holding budget through year end, we project FY26 revenue of $30.8M and EBITDA of $3.4M, both comfortably ahead of plan."
 
 gtm_new_logos_title: "New Logos"
 gtm_acq_title: "Customer Acquisition"
 gtm_funnel_title: "Acquisition Funnel: conversion signups to Logo"
+
+# Título de la slide "People & Talent" (7_headcount.j2) — nunca se había llenado (F3.9
+# lo reportaba en blanco en cualquier mes, no era un olvido puntual de agosto). Redactado
+# 2026-09-22 con los números reales de agosto (metrics.hc/pt de metrics.yaml); ajustar el
+# tono/foco cada mes según lo que el dueño real (People & Talent) quiera destacar.
+pt_action_title: "Headcount eases to 500 (-2.0% MoM) as attrition (17) outpaces new hires (8) — turnover rises to 3.40%, above FY25's 2.87% average"

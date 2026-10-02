@@ -48,13 +48,21 @@ def parse_money_cell(raw) -> float:
 
 def find_row(rows: list[dict], label: str) -> list:
     """Busca una fila por 'label' exacto en una lista de rows de arr_walk_table.sections[i]['rows'].
+    También busca en 'extra_sub' (2026-09-29): una fila puede traer una TERCERA sub-línea
+    anidada (ej. "Net New ARR" ya no es su propia fila — vive como extra_sub de "ARR EoP",
+    ver fetch_metrics.py::_aw_row) con sus propias 'cells' ya formateadas igual que una fila
+    normal — así R3/R4/R6/R8 siguen encontrándola sin cambiar su lógica.
     Lanza KeyError con las labels disponibles si no la encuentra — mejor fallar
     ruidoso que devolver silenciosamente una fila equivocada.
     """
     for row in rows:
         if row.get("label") == label:
             return row["cells"]
+        extra = row.get("extra_sub")
+        if extra and extra.get("label") == label:
+            return extra["cells"]
     available = [r.get("label") for r in rows]
+    available += [r["extra_sub"]["label"] for r in rows if r.get("extra_sub")]
     raise KeyError(f"fila '{label}' no encontrada. Disponibles: {available}")
 
 

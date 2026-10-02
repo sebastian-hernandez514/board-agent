@@ -78,10 +78,14 @@ def _load_metrics(metrics_path: Path) -> dict:
 
 
 def _arr_walk_glo_rows(metrics: dict) -> list:
-    """Sección 'ARR BoP ... ARR EoP (Constant Currency)' de arr_walk_table (GLO)."""
+    """Sección 'ARR BoP ... ARR EoP (Constant Currency)' de arr_walk_table (GLO).
+
+    Ancla en "ARR BoP" + "ARR EoP" (2026-09-29, antes era "ARR BoP" + "Net New ARR" —
+    dejó de servir cuando "Net New ARR" pasó a vivir como extra_sub de "ARR EoP" en vez
+    de ser su propia fila, ver fetch_metrics.py::_aw_row / find_row en parsing.py)."""
     for section in metrics["arr_walk_table"]["sections"]:
         labels = {r["label"] for r in section["rows"]}
-        if "ARR BoP" in labels and "Net New ARR" in labels:
+        if "ARR BoP" in labels and "ARR EoP" in labels:
             return section["rows"]
     raise KeyError("no se encontró la sección del ARR Walk GLO en arr_walk_table")
 

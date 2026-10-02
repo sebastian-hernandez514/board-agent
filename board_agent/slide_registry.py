@@ -59,14 +59,22 @@ def _overlay_stale_slides(html: str, slide_classes, section: str, old_label: str
     overlay = _STALE_OVERLAY_HTML.format(section=section, old_label=old_label)
     total = 0
     for slide_class in slide_classes:
-        open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'"[^>]*>')
+        # El grupo opcional captura modificadores extra pegados a la clase (ej.
+        # class="dtca-board-slide dark") — sin esto, un regex que exigiera la clase exacta
+        # ("...slide_class + '"'") dejaba pasar sin tapar cualquier slide con una clase
+        # adicional (2026-09-23, hallazgo real: 2 de las 11 slides de dtca- usan " dark" y
+        # se colaban sin overlay).
+        open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'((?:\s[^"]*)?)"[^>]*>')
         n = len(open_re.findall(html))
         if n == 0:
             continue
         total += n
 
         def _inject(m, _cls=slide_class):
-            tag = m.group(0).replace(f'class="{_cls}"', f'class="{_cls} stale-slide"', 1)
+            modifiers = m.group(1) or ""
+            old_attr = f'class="{_cls}{modifiers}"'
+            new_attr = f'class="{_cls}{modifiers} stale-slide"'
+            tag = m.group(0).replace(old_attr, new_attr, 1)
             return tag + overlay
 
         html = open_re.sub(_inject, html)
@@ -115,6 +123,56 @@ def _replace_stale_body_with_placeholder(html: str, section: str, old_label: str
     else:
         html = _STALE_OVERLAY_STYLE + html
     return html, n_placeholder_slides
+
+
+_DIV_TAG_RE = re.compile(r'<div\b[^>]*>|</div>')
+
+
+def _find_matching_div_close(html: str, open_tag_start: int) -> int:
+    """Dado el índice de inicio de un `<div ...>` de apertura, devuelve el índice justo
+    después de su `</div>` correspondiente (contando profundidad de anidamiento) — o -1 si el
+    HTML está mal balanceado. Usado por `_remove_slide_by_marker()` para saber dónde termina
+    una slide completa antes de borrarla."""
+    depth = 0
+    for m in _DIV_TAG_RE.finditer(html, open_tag_start):
+        if m.group(0).startswith('</div'):
+            depth -= 1
+            if depth == 0:
+                return m.end()
+        else:
+            depth += 1
+    return -1
+
+
+def _remove_slide_by_marker(html: str, marker_text: str, slide_class: str) -> tuple[str, int]:
+    """Elimina POR COMPLETO (sin dejar overlay ni ningún rastro) el PRÓXIMO
+    `<div class="slide_class">...</div>` que aparece después de `marker_text`, junto con el
+    `<div class="slide-divider">...</div>` inmediatamente anterior si existe — para decisiones
+    EDITORIALES de "esta sección no va este mes" (ej. NPS pausado a propósito), distinto de
+    "está desactualizada" (que sí deja el aviso "contenido pendiente", ver
+    `_overlay_single_slide_by_marker`). Devuelve (html_modificado, 1 o 0)."""
+    idx = html.find(marker_text)
+    if idx == -1:
+        return html, 0
+
+    open_re = re.compile(r'<div class="' + re.escape(slide_class) + r'"[^>]*>')
+    m = open_re.search(html, idx, idx + _MARKER_SEARCH_WINDOW)
+    if not m:
+        return html, 0
+
+    close_idx = _find_matching_div_close(html, m.start())
+    if close_idx == -1:
+        return html, 0
+
+    start = m.start()
+    divider_re = re.compile(r'<div class="slide-divider">.*?</div>\s*', re.DOTALL)
+    last_divider = None
+    for dm in divider_re.finditer(html, 0, start):
+        last_divider = dm
+    if last_divider and html[last_divider.end():start].strip() == "":
+        start = last_divider.start()
+
+    return html[:start] + html[close_idx:], 1
 
 
 def _overlay_single_slide_by_marker(html: str, marker_text: str, slide_class: str,
@@ -180,7 +238,25 @@ def _financial_performance_freshness(html: str, month: str):
     return ("pass", label) if m == month else ("stale", label)
 
 
+def _hidden_slides_this_month() -> list:
+    """Lee `data/config.yaml → hide_slides` (lista opcional, ej. ["nps"]) — mecanismo para
+    decisiones EDITORIALES de "esta sección no va este mes" (no un dato desactualizado, algo
+    que alguien decidió a propósito). Vive en config.yaml porque ese archivo ya se reescribe
+    entero cada mes (period/month_label/etc.) — así el flag nunca "sobrevive" sin querer a
+    septiembre: quien arme el config.yaml del mes siguiente simplemente no lo copia. No usar
+    nps_snapshot.yaml para esto: `_build_nps()` (fetch_metrics.py) asume que TODAS las keys de
+    ese YAML son meses (`min(snap.keys())`), una key no-mes ahí rompería esa función."""
+    try:
+        with open(paths.CONFIG_YAML, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+    except Exception:
+        return []
+    return cfg.get("hide_slides") or []
+
+
 def _nps_freshness(html: str, month: str):
+    if "nps" in _hidden_slides_this_month():
+        return "hidden", "decisión editorial (config.yaml → hide_slides) — NPS no se publica este mes"
     try:
         with open(paths.NPS_SNAPSHOT_YAML, encoding="utf-8") as f:
             snap = yaml.safe_load(f) or {}
@@ -201,6 +277,8 @@ class StaleSlideSpec:
     section_label: str
     slide_classes: Optional[list] = None  # requerido si scope == "file"
     marker: Optional[str] = None  # requerido si scope == "marker"
+    marker_slide_class: str = "slide"  # clase del <div> que sigue al marker (scope == "marker")
+                                        # — "slide" para CEO/NPS, "hc-slide" para Headcount, etc.
     notify: str = ""
 
 
@@ -214,7 +292,16 @@ SLIDE_SPECS = [
     StaleSlideSpec(
         check_id="F3.5", label="Discussion Topics — ocultar visualmente si están desactualizados",
         output_filename="2_discussion_topic.html", check_freshness=_discussion_topics_freshness,
-        scope="body_replace", section_label="Discussion Topics",
+        # scope="file" (NO "body_replace") desde 2026-09-23: el reemplazo de body completo
+        # asumía que TODOS los topics del archivo eran del mismo mes (todos vigentes o todos
+        # viejos) — dejó de ser cierto cuando NDR (agosto-26, clase genérica "slide") se
+        # agregó junto a Expansion/Core Acquisition (viejos, sin actualizar desde antes,
+        # clases propias dtexp-/dtca-board-slide). Reemplazar todo el body tapaba también
+        # NDR, que sí es contenido vigente. Ahora tapa SOLO las clases de los topics viejos
+        # conocidos — si se agrega un topic nuevo con su propia clase prefijada y también
+        # queda desactualizado en algún mes futuro, hay que agregar su clase acá a mano.
+        scope="file", slide_classes=["dtexp-board-slide", "dtca-board-slide"],
+        section_label="Discussion Topics (Expansion / Core Acquisition)",
     ),
     StaleSlideSpec(
         check_id="F3.4", label="Template 4 — ocultar visualmente si está desactualizado",
@@ -228,9 +315,21 @@ SLIDE_SPECS = [
         scope="marker", marker="SLIDE 3 — NPS Alegra", section_label="NPS",
     ),
     StaleSlideSpec(
-        check_id="F3.8", label="Headcount — ocultar visualmente si está desactualizado",
+        check_id="F3.8", label="Headcount (People & Talent) — ocultar visualmente si está desactualizado",
         output_filename="7_headcount.html", check_freshness=_headcount_freshness,
-        scope="file", slide_classes=["hc-slide"], section_label="Headcount",
+        # scope="marker" (NO "file") a propósito, desde 2026-09-22: hasta el 2026-08-19 este
+        # check tapaba las 2 slides de hc-slide juntas (Headcount by Team + People & Talent)
+        # con un solo marcador global. Ese día se le quitó el bloque "Comments" (editorial) a
+        # "Headcount by Team" — desde entonces esa slide es 100% data de RS (metrics.hc.*),
+        # sin nada que pueda quedar desactualizado, pero seguía tapándose igual junto con
+        # "People & Talent" (que sí sigue con editorial.pt_action_title). Bug real: escondía
+        # data fresca de RS sin motivo. El marcador incluye el prefijo "<!-- ====" exacto para
+        # no confundirse con el comentario CSS idéntico ("SLIDE 3 — People & Talent" también
+        # aparece como docblock /* ══... */ más arriba en el mismo archivo).
+        scope="marker",
+        marker="<!-- ============================================================\n       SLIDE 3 — People & Talent",
+        marker_slide_class="hc-slide",
+        section_label="Headcount (People & Talent)",
         notify="Avisar a People & Talent.",
     ),
 ]
@@ -250,10 +349,22 @@ def check_stale_slide(spec: StaleSlideSpec, month: str) -> CheckResult:
         return CheckResult(spec.check_id, spec.label, "SKIP", info)
     if status == "pass":
         return CheckResult(spec.check_id, spec.label, "PASS", f"'{info}' coincide con {month}, no se oculta nada")
+    if status == "hidden":
+        if spec.scope != "marker":
+            return CheckResult(spec.check_id, spec.label, "SKIP",
+                                f"modo 'hidden' solo soportado para scope='marker' por ahora (spec.scope='{spec.scope}')")
+        new_html, n = _remove_slide_by_marker(html, spec.marker, spec.marker_slide_class)
+        if n == 0:
+            return CheckResult(spec.check_id, spec.label, "SKIP",
+                                f"no se encontró la slide de {spec.section_label} para eliminarla — {info}")
+        html_path.write_text(new_html, encoding="utf-8")
+        return CheckResult(spec.check_id, spec.label, "WARN",
+                            f"{spec.section_label} removida POR COMPLETO esta corrida ({info}) — "
+                            "distinto de 'desactualizada': no queda ni overlay ni rastro visual")
 
     old_label = info
     if spec.scope == "marker":
-        new_html, n = _overlay_single_slide_by_marker(html, spec.marker, "slide", spec.section_label, old_label)
+        new_html, n = _overlay_single_slide_by_marker(html, spec.marker, spec.marker_slide_class, spec.section_label, old_label)
     elif spec.scope == "body_replace":
         new_html, n = _replace_stale_body_with_placeholder(html, spec.section_label, old_label)
     else:

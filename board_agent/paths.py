@@ -69,7 +69,7 @@ PDF_SCRIPT = SCRIPTS_DIR / "generate_pdf.py"
 # 2_discussion_topic.j2 el 2026-08-18) — sin esos tokens, regenerar el PDF de un mes viejo
 # que todavía los tenga (ej. julio-26) subcontaría slides.
 SLIDE_CLASS_TOKENS = {"slide", "gtm-slide", "hc-slide", "board-slide", "dt-slide", "dtmx-slide", "dttax-board-slide",
-                      "dtexp-board-slide", "dtca-board-slide"}
+                      "dtexp-board-slide", "dtca-board-slide", "ndr-slide"}
 EXPECTED_SLIDE_COUNT = 47
 MIN_SLIDE_COUNT_WARNING = 40
 

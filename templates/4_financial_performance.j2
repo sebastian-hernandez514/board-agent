@@ -16,14 +16,14 @@
   --slide-pad-x:32px;--slide-pad-y:20px;
 }
 body{font-family:'Inter',sans-serif;background:#dde3ea;display:flex;flex-direction:column;align-items:center;padding:24px 16px;min-height:100vh;color:var(--color-text-primary)}
-/* Regla .slide{...} removida (2026-09-18, mismo hallazgo que 2026-07-21/2026-07-27/2026-08-17
-   — Finance regenera este archivo desde cero cada mes con su propia herramienta, así que el
-   CSS muerto reaparece cada vez): ningún elemento de este archivo usa class="slide" (todos
-   usan "board-slide"). Al fusionarse con los otros 7 templates en un solo <style> global
-   (merge_standalone.py), esta regla pisaba el background navy de .slide-cover (1_inicio.j2)
-   por empate de especificidad + orden en la cascada — la portada del board quedaba
-   blanco-sobre-blanco. Si vuelve a aparecer el próximo mes al pegar el HTML nuevo de
-   Finance, aplicar el mismo fix: borrar la línea `.slide{...}` de este archivo. */
+/* Regla .slide{...} removida (2026-09-23, mismo hallazgo recurrente que 2026-07-21/27,
+   2026-08-17, 2026-09-18 — Finance regenera este archivo desde cero cada vez que actualiza
+   su HTML, así que el CSS muerto reaparece cada vez): ningún elemento de este archivo usa
+   class="slide" (todos usan "board-slide"). Al fusionarse con los otros 7 templates en un
+   solo <style> global (merge_standalone.py), esta regla pisaba el background navy de
+   .slide-cover (1_inicio.j2) por empate de especificidad + orden en la cascada — la
+   portada del board quedaba blanco-sobre-blanco. Si vuelve a aparecer la próxima vez que
+   Finance mande un HTML nuevo, aplicar el mismo fix: borrar la línea `.slide{...}`. */
 
 /* slide-header */
 .slide-header{background:var(--color-navy);padding:14px var(--slide-pad-x);display:flex;justify-content:space-between;align-items:center}
@@ -237,13 +237,13 @@ body{padding-top:56px}
 .board-slide .arrow-chip{color:#cbd5e1;font-size:16px}
 @media print{.app-tabbar{display:none}.tab-page{display:block!important}#tab-board{background:#fff}.board-slide{box-shadow:none;page-break-after:always}}
 
-/* Board Agent override (2026-09-18) — .app-tabbar es la barra de navegación del HTML
+/* Board Agent override (2026-09-23) — .app-tabbar es la barra de navegación del HTML
    standalone que pega Finance (título + botón "Export PDF" que llama a window.print()),
    pensada para su propia herramienta, no para el board mergeado. Antes solo se ocultaba
    en @media print, por eso aparecía en el board normal (y en screenshots/PDF vía
    Playwright, que no emula print) — se oculta siempre, y se anula el padding-top que
-   compensaba su altura fija. Mismo fix aplicado cada mes desde 2026-08-18 (Finance
-   regenera este archivo desde cero con su propia herramienta cada vez).*/
+   compensaba su altura fija. Mismo fix aplicado cada vez que Finance regenera este
+   archivo desde cero con su propia herramienta (2026-08-18, 2026-09-18, 2026-09-23).*/
 .app-tabbar{display:none!important}
 body{padding-top:0!important}
 </style>
@@ -259,7 +259,7 @@ body{padding-top:0!important}
 <!-- SLIDE 1 — Recent Performance Monthly -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">EBITDA margin improved from −17.1% in YTD Aug 2025 to +4.9% in YTD Aug 2026 — +22.0pp expansion</div>
+    <div class="sh-title">EBITDA margin improved from −8.3% in YTD Aug 2025 to +11.3% in YTD Aug 2026 — +19.6pp expansion</div>
     <div class="sh-right">
       <div class="sh-period">P&amp;L Monthly · vs Prior Year</div>
       <div class="sh-num">01 / 06</div>
@@ -278,62 +278,65 @@ body{padding-top:0!important}
       </thead>
       <tbody>
         <tr class="rs"><td colspan="8">ARR &amp; FX</td></tr>
-        <tr class="rca"><td><span class="dot dot-teal"></span>ARR EoP ($M)*</td><td>$24.0</td><td>$24.0</td><td style="color:#0f172b">$33.3</td><td style="color:#0f172b">$34.7</td><td>$24.0</td><td style="color:#0f172b">$34.7</td><td><span class="db p">+44.6%</span></td></tr>
-        <tr class="rp"><td>Y-o-Y Growth</td><td>+36.5%</td><td>+26.8%</td><td style="color:#0f172b">+38.6%</td><td style="color:#0f172b">+44.6%</td><td>+26.8%</td><td style="color:#0f172b">+44.6%</td><td>—</td></tr>
+        <!-- ARR YoY pisado a 44.4% (2026-09-25): Finance trae 44.6% en su HTML — no tiene
+             la tasa ARS/USD de agosto corregida de su lado. Se prioriza el número que ya
+             usa el resto del board (arr_yoy en metrics.yaml), para que el deck sea
+             internamente consistente. Si Finance corrige su FX, revisar de nuevo. -->
+        <tr class="rca"><td><span class="dot dot-teal"></span>ARR EoP ($M)*</td><td>$24.0</td><td>$24.0</td><td style="color:#0f172b">$33.3</td><td style="color:#0f172b">$34.7</td><td>$24.0</td><td style="color:#0f172b">$34.7</td><td><span class="db p">+44.4%</span></td></tr>
+        <tr class="rp"><td>Y-o-Y Growth</td><td>+36.5%</td><td>+26.8%</td><td style="color:#0f172b">+38.6%</td><td style="color:#0f172b">+44.4%</td><td>+26.8%</td><td style="color:#0f172b">+44.4%</td><td>—</td></tr>
         <tr class="rsp"><td colspan="8"></td></tr>
         <tr class="rs"><td colspan="8">P&amp;L</td></tr>
         <tr class="rb">
           <td><span class="dot dot-teal"></span><b>Revenue</b></td>
           <td>1,986</td><td>2,012</td>
-          <td><b>2,789</b></td><td style="color:#0f172b"><b>2,861</b></td>
-          <td>13,767</td><td style="color:#0f172b"><b>18,553</b></td>
-          <td><span class="db p">+34.8%</span></td>
+          <td><b>2,789</b></td><td style="color:#0f172b"><b>2,858</b></td>
+          <td>14,883</td><td style="color:#0f172b"><b>19,984</b></td>
+          <td><span class="db p">+34.3%</span></td>
         </tr>
-        <tr class="rp"><td>Y-o-Y Growth</td><td>+35.6%</td><td>n/a</td><td style="color:#0f172b">+40.4%</td><td style="color:#0f172b">+42.2%</td><td>n/a</td><td style="color:#0f172b">+34.8%</td><td>—</td></tr>
+        <tr class="rp"><td>Y-o-Y Growth</td><td>+35.6%</td><td>+26.4%</td><td style="color:#0f172b">+40.4%</td><td style="color:#0f172b">+42.1%</td><td>+37.0%</td><td style="color:#0f172b">+34.3%</td><td>—</td></tr>
         <tr class="rb">
           <td><span class="dot dot-teal"></span><b>Gross Profit</b></td>
           <td>1,615</td><td>1,635</td>
-          <td><b>2,330</b></td><td style="color:#0f172b"><b>2,329</b></td>
-          <td>10,977</td><td style="color:#0f172b"><b>14,968</b></td>
-          <td><span class="db p">+36.3%</span></td>
+          <td><b>2,330</b></td><td style="color:#0f172b"><b>2,325</b></td>
+          <td>12,093</td><td style="color:#0f172b"><b>16,333</b></td>
+          <td><span class="db p">+35.1%</span></td>
         </tr>
-        <tr class="rp"><td>Gross Margin %</td><td>81.3%</td><td>81.3%</td><td style="color:#0f172b">83.5%</td><td style="color:#0f172b">81.4%</td><td>79.7%</td><td style="color:#0f172b">80.7%</td><td><span class="db p">+1.0pp</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td>843</td><td>741</td><td style="color:#0f172b">810</td><td style="color:#0f172b">830</td><td>6,667</td><td style="color:#0f172b">5,897</td><td><span class="db p">−11.6%</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td>544</td><td>536</td><td style="color:#0f172b">674</td><td style="color:#0f172b">746</td><td>4,105</td><td style="color:#0f172b">5,305</td><td><span class="db n">+29.2%</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td>294</td><td>313</td><td style="color:#0f172b">360</td><td style="color:#0f172b">399</td><td>2,552</td><td style="color:#0f172b">2,850</td><td><span class="db n">+11.7%</span></td></tr>
-        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td>1,681</td><td>1,589</td><td><b>1,844</b></td><td style="color:#0f172b"><b>1,974</b></td><td>13,324</td><td style="color:#0f172b"><b>14,052</b></td><td><span class="db n">+5.5%</span></td></tr>
-        <tr class="rp"><td>S&amp;M % Rev</td><td>42.5%</td><td>36.8%</td><td style="color:#0f172b">29.1%</td><td style="color:#0f172b">29.0%</td><td>48.4%</td><td style="color:#0f172b">31.8%</td><td><span class="db pp">−16.6pp</span></td></tr>
-        <tr class="rp"><td>R&amp;D % Rev</td><td>27.4%</td><td>26.6%</td><td style="color:#0f172b">24.2%</td><td style="color:#0f172b">26.1%</td><td>29.8%</td><td style="color:#0f172b">28.6%</td><td><span class="db pp">−1.2pp</span></td></tr>
-        <tr class="rp"><td>G&amp;A % Rev</td><td>14.8%</td><td>15.5%</td><td style="color:#0f172b">12.9%</td><td style="color:#0f172b">13.9%</td><td>18.5%</td><td style="color:#0f172b">15.4%</td><td><span class="db pp">−3.1pp</span></td></tr>
-        <tr class="rt"><td>Total OpEx % Rev</td><td>84.6%</td><td>79.0%</td><td style="color:#0f172b">66.1%</td><td style="color:#0f172b">69.0%</td><td>96.8%</td><td style="color:#0f172b">75.7%</td><td><span class="db pp">−21.1pp</span></td></tr>
+        <tr class="rp"><td>Gross Margin %</td><td>81.3%</td><td>81.3%</td><td style="color:#0f172b">83.5%</td><td style="color:#0f172b">81.4%</td><td>81.3%</td><td style="color:#0f172b">81.7%</td><td><span class="db p">+0.5pp</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td>843</td><td>741</td><td style="color:#0f172b">810</td><td style="color:#0f172b">823</td><td>6,667</td><td style="color:#0f172b">5,932</td><td><span class="db p">−11.0%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td>544</td><td>536</td><td style="color:#0f172b">674</td><td style="color:#0f172b">746</td><td>4,105</td><td style="color:#0f172b">5,280</td><td><span class="db n">+28.6%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td>294</td><td>313</td><td style="color:#0f172b">360</td><td style="color:#0f172b">404</td><td>2,552</td><td style="color:#0f172b">2,855</td><td><span class="db n">+11.9%</span></td></tr>
+        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td>1,681</td><td>1,589</td><td><b>1,844</b></td><td style="color:#0f172b"><b>1,973</b></td><td>13,324</td><td style="color:#0f172b"><b>14,067</b></td><td><span class="db n">+5.6%</span></td></tr>
+        <tr class="rp"><td>S&amp;M % Rev</td><td>42.5%</td><td>36.8%</td><td style="color:#0f172b">29.1%</td><td style="color:#0f172b">28.8%</td><td>44.8%</td><td style="color:#0f172b">29.7%</td><td><span class="db pp">−15.1pp</span></td></tr>
+        <tr class="rp"><td>R&amp;D % Rev</td><td>27.4%</td><td>26.6%</td><td style="color:#0f172b">24.2%</td><td style="color:#0f172b">26.1%</td><td>27.6%</td><td style="color:#0f172b">26.4%</td><td><span class="db pp">−1.2pp</span></td></tr>
+        <tr class="rp"><td>G&amp;A % Rev</td><td>14.8%</td><td>15.5%</td><td style="color:#0f172b">12.9%</td><td style="color:#0f172b">14.1%</td><td>17.1%</td><td style="color:#0f172b">14.3%</td><td><span class="db pp">−2.9pp</span></td></tr>
+        <tr class="rt"><td>Total OpEx % Rev</td><td>84.6%</td><td>79.0%</td><td style="color:#0f172b">66.1%</td><td style="color:#0f172b">69.0%</td><td>89.5%</td><td style="color:#0f172b">70.4%</td><td><span class="db pp">−19.1pp</span></td></tr>
         <tr class="re">
           <td><b>EBITDA</b></td>
           <td style="color:#E87722">−66</td><td style="color:#4ade80;font-weight:700">+46</td>
-          <td style="color:#4ade80;font-weight:700">+486</td><td style="color:#4ade80;font-weight:700">+355</td>
-          <td style="color:#f97316">−2,347</td><td style="color:#4ade80;font-weight:700">+916</td>
+          <td style="color:#4ade80;font-weight:700">+486</td><td style="color:#4ade80;font-weight:700">+353</td>
+          <td style="color:#f97316">−1,231</td><td style="color:#4ade80;font-weight:700">+2,267</td>
           <td><span class="db p">n/m</span></td>
         </tr>
         <tr class="rem">
           <td>EBITDA Margin %</td>
           <td style="color:#E87722">−3.3%</td><td style="color:#4ade80">+2.3%</td>
-          <td style="color:#4ade80">+17.4%</td><td style="color:#4ade80">+12.4%</td>
-          <td style="color:#f97316">−17.1%</td><td style="color:#4ade80">+4.9%</td>
-          <td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+22.0pp</td>
+          <td style="color:#4ade80">+17.4%</td><td style="color:#4ade80">+12.3%</td>
+          <td style="color:#f97316">−8.3%</td><td style="color:#4ade80">+11.3%</td>
+          <td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+19.6pp</td>
         </tr>
-        <tr class="rca"><td><b>R-40</b></td><td>33.2%</td><td>29.1%</td><td style="color:#0f172b">56.0%</td><td style="color:#0f172b">55.2%</td><td>9.8%</td><td style="color:#0f172b">47.7%</td><td><span class="db p">—</span></td></tr>
+        <tr class="rca"><td><b>R-40</b></td><td>33.2%</td><td>29.1%</td><td style="color:#0f172b">56.0%</td><td style="color:#0f172b">56.9%</td><td>18.5%</td><td style="color:#0f172b">55.9%</td><td><span class="db p">—</span></td></tr>
         <tr class="rsp"><td colspan="8"></td></tr>
         <tr class="rca"><td><span class="dot dot-teal"></span>Cash Balance ($K)</td><td>4,587</td><td>4,776</td><td style="color:#0f172b">4,679</td><td style="color:#0f172b">4,979</td><td>4,776</td><td style="color:#0f172b">4,979</td><td><span class="db p">+4.3%</span></td></tr>
         <tr class="rca"><td>Delta MoM</td><td style="color:#E87722">−499</td><td style="color:#14b8a6">+189</td><td style="color:#14b8a6">+177</td><td style="color:#14b8a6">+300</td><td style="color:#E87722">−$1,199K</td><td style="color:#14b8a6">+$756K</td><td>—</td></tr>
       </tbody>
     </table>
-    <div style="font-family:'Inter',sans-serif;font-size:8.5px;color:#94a3b8;margin-top:4px">*ARR EoP for Jul/2025, Aug/2025 and Jul/2026 as published/corrected in prior boards (Alegra + Alanube). Aug/2026 corrected 2026-09-18 to match Board Agent's validated ARR Walk (Alegra + Alanube = $34.7M) — Finance's HTML originally sent $34.3M for this cell, source of the $0.4M gap not confirmed (possibly partial/lagged Alanube or FX timing, unlike Jul/2026's fully Alegra-only original figure).</div>
   </div>
   <div class="slide-footer"><span class="footer-brand">Alegra · Confidential</span><span class="footer-page">1</span></div>
 </div>
 <!-- SLIDE 2 — Budget -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">August 2026 beats Budget — EBITDA +$355K vs budget $123K (+$232K, 2.9x), YTD OpEx −4.8% vs Budget</div>
+    <div class="sh-title">August 2026 beats Budget — EBITDA +$353K vs budget $123K (+$230K, 2.9x), YTD OpEx −4.7% vs Budget</div>
     <div class="sh-right">
       <div class="sh-period">P&amp;L Monthly · vs Budget 2026</div>
       <div class="sh-num">02 / 06</div>
@@ -354,29 +357,29 @@ body{padding-top:0!important}
         <tr class="rs"><td colspan="8">P&amp;L</td></tr>
         <tr class="rb">
           <td><span class="dot dot-teal"></span><b>Revenue</b></td>
-          <td><b>2,789</b></td><td><b>2,861</b></td>
+          <td><b>2,789</b></td><td><b>2,858</b></td>
           <td style="background:#f1f5f9;color:#64748b">2,453</td><td style="background:#f1f5f9;color:#64748b">2,520</td>
-          <td><b>18,553</b></td><td style="background:#f1f5f9;color:#64748b">18,390</td>
-          <td><span class="db p">+0.9%</span></td>
+          <td><b>19,984</b></td><td style="background:#f1f5f9;color:#64748b">18,390</td>
+          <td><span class="db p">+8.7%</span></td>
         </tr>
         <tr class="rb">
           <td><span class="dot dot-teal"></span><b>Gross Profit</b></td>
-          <td><b>2,330</b></td><td><b>2,329</b></td>
+          <td><b>2,330</b></td><td><b>2,325</b></td>
           <td style="background:#f1f5f9;color:#64748b">2,006</td><td style="background:#f1f5f9;color:#64748b">2,063</td>
-          <td><b>14,968</b></td><td style="background:#f1f5f9;color:#64748b">14,941</td>
-          <td><span class="db p">+0.2%</span></td>
+          <td><b>16,333</b></td><td style="background:#f1f5f9;color:#64748b">14,941</td>
+          <td><span class="db p">+9.3%</span></td>
         </tr>
-        <tr class="rp"><td>Gross Margin %</td><td style="color:#0f172b">83.5%</td><td style="color:#0f172b">81.4%</td><td style="background:#f1f5f9">81.8%</td><td style="background:#f1f5f9">81.9%</td><td style="color:#0f172b">80.7%</td><td style="background:#f1f5f9">81.3%</td><td><span class="db pp">−0.6pp</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td style="color:#0f172b">810</td><td style="color:#0f172b">830</td><td style="background:#f1f5f9;color:#64748b">814</td><td style="background:#f1f5f9;color:#64748b">881</td><td style="color:#0f172b">5,897</td><td style="background:#f1f5f9;color:#64748b">6,530</td><td><span class="db p">−9.7%</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td style="color:#0f172b">674</td><td style="color:#0f172b">746</td><td style="background:#f1f5f9;color:#64748b">676</td><td style="background:#f1f5f9;color:#64748b">688</td><td style="color:#0f172b">5,305</td><td style="background:#f1f5f9;color:#64748b">5,293</td><td><span class="db n">+0.2%</span></td></tr>
-        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td style="color:#0f172b">360</td><td style="color:#0f172b">399</td><td style="background:#f1f5f9;color:#64748b">360</td><td style="background:#f1f5f9;color:#64748b">371</td><td style="color:#0f172b">2,850</td><td style="background:#f1f5f9;color:#64748b">2,944</td><td><span class="db p">−3.2%</span></td></tr>
-        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td><b>1,844</b></td><td><b>1,974</b></td><td style="background:#f1f5f9;color:#64748b">1,850</td><td style="background:#f1f5f9;color:#64748b">1,940</td><td><b>14,052</b></td><td style="background:#f1f5f9;color:#64748b">14,766</td><td><span class="db p">−4.8%</span></td></tr>
-        <tr class="rp"><td>S&amp;M % Rev</td><td style="color:#0f172b">29.1%</td><td style="color:#0f172b">29.0%</td><td style="background:#f1f5f9">33.2%</td><td style="background:#f1f5f9">35.0%</td><td style="color:#0f172b">31.8%</td><td style="background:#f1f5f9">35.5%</td><td><span class="db pp">−3.7pp</span></td></tr>
-        <tr class="rp"><td>R&amp;D % Rev</td><td style="color:#0f172b">24.2%</td><td style="color:#0f172b">26.1%</td><td style="background:#f1f5f9">27.6%</td><td style="background:#f1f5f9">27.3%</td><td style="color:#0f172b">28.6%</td><td style="background:#f1f5f9">28.8%</td><td><span class="db pp">−0.2pp</span></td></tr>
-        <tr class="rp"><td>G&amp;A % Rev</td><td style="color:#0f172b">12.9%</td><td style="color:#0f172b">13.9%</td><td style="background:#f1f5f9">14.7%</td><td style="background:#f1f5f9">14.7%</td><td style="color:#0f172b">15.4%</td><td style="background:#f1f5f9">16.0%</td><td><span class="db pp">−0.6pp</span></td></tr>
-        <tr class="rt"><td>Total OpEx % Rev</td><td style="color:#0f172b">66.1%</td><td style="color:#0f172b">69.0%</td><td style="background:#f1f5f9">75.4%</td><td style="background:#f1f5f9">77.0%</td><td style="color:#0f172b">75.7%</td><td style="background:#f1f5f9">80.3%</td><td><span class="db pp">−4.6pp</span></td></tr>
-        <tr class="re"><td><b>EBITDA</b></td><td style="color:#4ade80;font-weight:700">+486</td><td style="color:#4ade80;font-weight:700">+355</td><td style="color:#4ade80">+156</td><td style="color:#4ade80">+123</td><td style="color:#4ade80;font-weight:700">+916</td><td style="color:#f97316">+175</td><td><span class="db p">+422.9%</span></td></tr>
-        <tr class="rem"><td>EBITDA Margin %</td><td style="color:#4ade80">+17.4%</td><td style="color:#4ade80">+12.4%</td><td style="color:#4ade80">+6.4%</td><td style="color:#4ade80">+4.9%</td><td style="color:#4ade80">+4.9%</td><td style="color:#f97316">+1.0%</td><td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+4.0pp</td></tr>
+        <tr class="rp"><td>Gross Margin %</td><td style="color:#0f172b">83.5%</td><td style="color:#0f172b">81.4%</td><td style="background:#f1f5f9">81.8%</td><td style="background:#f1f5f9">81.9%</td><td style="color:#0f172b">81.7%</td><td style="background:#f1f5f9">81.3%</td><td><span class="db pp">+0.5pp</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-green"></span>S&amp;M</td><td style="color:#0f172b">810</td><td style="color:#0f172b">823</td><td style="background:#f1f5f9;color:#64748b">814</td><td style="background:#f1f5f9;color:#64748b">881</td><td style="color:#0f172b">5,932</td><td style="background:#f1f5f9;color:#64748b">6,530</td><td><span class="db p">−9.1%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-gray"></span>R&amp;D</td><td style="color:#0f172b">674</td><td style="color:#0f172b">746</td><td style="background:#f1f5f9;color:#64748b">676</td><td style="background:#f1f5f9;color:#64748b">688</td><td style="color:#0f172b">5,280</td><td style="background:#f1f5f9;color:#64748b">5,293</td><td><span class="db n">−0.2%</span></td></tr>
+        <tr class="rv"><td><span class="dot dot-teal"></span>G&amp;A</td><td style="color:#0f172b">360</td><td style="color:#0f172b">404</td><td style="background:#f1f5f9;color:#64748b">360</td><td style="background:#f1f5f9;color:#64748b">371</td><td style="color:#0f172b">2,855</td><td style="background:#f1f5f9;color:#64748b">2,944</td><td><span class="db p">−3.0%</span></td></tr>
+        <tr class="rb"><td><span class="dot dot-navy"></span><b>Total OpEx</b></td><td><b>1,844</b></td><td><b>1,973</b></td><td style="background:#f1f5f9;color:#64748b">1,850</td><td style="background:#f1f5f9;color:#64748b">1,940</td><td><b>14,067</b></td><td style="background:#f1f5f9;color:#64748b">14,766</td><td><span class="db p">−4.7%</span></td></tr>
+        <tr class="rp"><td>S&amp;M % Rev</td><td style="color:#0f172b">29.1%</td><td style="color:#0f172b">28.8%</td><td style="background:#f1f5f9">33.2%</td><td style="background:#f1f5f9">35.0%</td><td style="color:#0f172b">29.7%</td><td style="background:#f1f5f9">35.5%</td><td><span class="db pp">−5.8pp</span></td></tr>
+        <tr class="rp"><td>R&amp;D % Rev</td><td style="color:#0f172b">24.2%</td><td style="color:#0f172b">26.1%</td><td style="background:#f1f5f9">27.6%</td><td style="background:#f1f5f9">27.3%</td><td style="color:#0f172b">26.4%</td><td style="background:#f1f5f9">28.8%</td><td><span class="db pp">−2.4pp</span></td></tr>
+        <tr class="rp"><td>G&amp;A % Rev</td><td style="color:#0f172b">12.9%</td><td style="color:#0f172b">14.1%</td><td style="background:#f1f5f9">14.7%</td><td style="background:#f1f5f9">14.7%</td><td style="color:#0f172b">14.3%</td><td style="background:#f1f5f9">16.0%</td><td><span class="db pp">−1.7pp</span></td></tr>
+        <tr class="rt"><td>Total OpEx % Rev</td><td style="color:#0f172b">66.1%</td><td style="color:#0f172b">69.0%</td><td style="background:#f1f5f9">75.4%</td><td style="background:#f1f5f9">77.0%</td><td style="color:#0f172b">70.4%</td><td style="background:#f1f5f9">80.3%</td><td><span class="db pp">−9.9pp</span></td></tr>
+        <tr class="re"><td><b>EBITDA</b></td><td style="color:#4ade80;font-weight:700">+486</td><td style="color:#4ade80;font-weight:700">+353</td><td style="color:#4ade80">+156</td><td style="color:#4ade80">+123</td><td style="color:#4ade80;font-weight:700">+2,267</td><td style="color:#f97316">+175</td><td><span class="db p">+1,194.0%</span></td></tr>
+        <tr class="rem"><td>EBITDA Margin %</td><td style="color:#4ade80">+17.4%</td><td style="color:#4ade80">+12.3%</td><td style="color:#4ade80">+6.4%</td><td style="color:#4ade80">+4.9%</td><td style="color:#4ade80">+11.3%</td><td style="color:#f97316">+1.0%</td><td style="color:#4ade80;font-weight:700;font-family:'DM Mono',monospace;text-align:right">+10.4pp</td></tr>
         <tr class="rsp"><td colspan="8"></td></tr>
         <tr class="rca"><td><span class="dot dot-teal"></span>Cash Balance ($K)</td><td style="color:#0f172b">4,679</td><td style="color:#0f172b">4,979</td><td style="background:#f1f5f9;color:#64748b">1,784</td><td style="background:#f1f5f9;color:#64748b">2,089</td><td style="color:#0f172b">4,979</td><td style="background:#f1f5f9;color:#64748b">2,089</td><td><span class="db p">+138.4%</span></td></tr>
       </tbody>
@@ -387,7 +390,7 @@ body{padding-top:0!important}
 <!-- SLIDE 3 — OpEx YTD August -->
 <div class="board-slide">
   <div class="slide-header">
-    <div class="sh-title">S&amp;M tracking 9.7% below budget YTD — Paid Media and Team efficiencies release $632K of OpEx</div>
+    <div class="sh-title">S&amp;M tracking 9.1% below budget YTD — Paid Media and Team efficiencies release $598K of OpEx</div>
     <div class="sh-right">
       <div class="sh-period">OpEx YTD August 2026 · S&amp;M · R&amp;D · G&amp;A</div>
       <div class="sh-num">03 / 06</div>
@@ -407,10 +410,10 @@ body{padding-top:0!important}
       <div style="display:flex;flex-direction:column;gap:8px;padding-top:20px;overflow:hidden">
         <div class="sec-label">Comments</div>
         <div class="comments-box">
-          <div class="comment-item"><span class="comment-dot" style="background:#1D9E75"></span><span><b>S&amp;M represents 31.8% of Revenue YTD</b> — a 16.6pp reduction vs YTD Aug 2025 (48.4%). Spend declined 11.6% YoY while Revenue grew 34.8%, driven by continued Paid Media and Team efficiencies ($632K below budget YTD).</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#94a3b8"></span><span><b>R&amp;D represents 28.6% of Revenue</b>, essentially on budget (+0.2%) with YoY growth of 29.2% reflecting sustained product investment — below the 34.8% revenue growth.</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#14b8a6"></span><span><b>G&amp;A represents 15.4% of Revenue</b>, below budget (−3.2%) and down 3.1pp YoY as a share of revenue, even as G&amp;A dollars grew 11.7% — well below the 34.8% revenue growth.</span></div>
-          <div class="comment-item"><span class="comment-dot" style="background:#334155"></span><span><b>Total OpEx % of Revenue dropped from 96.8% to 75.7%</b> YoY — a 21.1pp improvement driving EBITDA expansion from −17.1% to +4.9%.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#1D9E75"></span><span><b>S&amp;M represents 29.7% of Revenue YTD</b> — a 15.1pp reduction vs YTD Aug 2025 (44.8%). Spend declined 11.0% YoY while Revenue grew 34.3%, driven by continued Paid Media and Team efficiencies ($598K below budget YTD).</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#94a3b8"></span><span><b>R&amp;D represents 26.4% of Revenue</b>, essentially on budget (−0.2%) with YoY growth of 28.6% reflecting sustained product investment — below the 34.3% revenue growth.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#14b8a6"></span><span><b>G&amp;A represents 14.3% of Revenue</b>, below budget (−3.0%) and down 2.9pp YoY as a share of revenue, even as G&amp;A dollars grew 11.9% — well below the 34.3% revenue growth.</span></div>
+          <div class="comment-item"><span class="comment-dot" style="background:#334155"></span><span><b>Total OpEx % of Revenue dropped from 89.5% to 70.4%</b> YoY — a 19.1pp improvement driving EBITDA expansion from −8.3% to +11.3%.</span></div>
         </div>
       </div>
     </div>
@@ -533,7 +536,7 @@ body{padding-top:0!important}
 </div><!--/tab-board-->
 
 <script>
-const BD={"opex":{"sam":[5897267.466063457,6529681,6667356.873226707],"rnd":[5305003.739999989,5292517,4104774.0712966425],"gna":[2849681.659999997,2943958,2552365.7299999995]},"cashLabels":["Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"cashAct":[4776,4811,4741,4914,4223,3279,3734,4097,4321,4414,4502,4679,4979],"cashBud":[null,null,null,null,null,2430,2145,2100,2000,2018,2021,1784,2089],"burnLabels":["Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"burnDelta":[189,35,-70,173,-690,-944,455,363,224,93,88,177,300]};
+const BD={"opex":{"sam":[5932448.966063456,6529681,6667356.873226707],"rnd":[5280003.739999989,5292517,4104774.0712966425],"gna":[2855124.2199999974,2943958,2552365.7299999995]},"cashLabels":["Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"cashAct":[4776,4811,4741,4914,4223,3279,3734,4097,4321,4414,4502,4679,4979],"cashBud":[null,null,null,null,null,2430,2145,2100,2000,2018,2021,1784,2089],"burnLabels":["Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"burnDelta":[189,35,-70,173,-690,-944,455,363,224,93,88,177,300]};
 
 function initBoardCharts(){
   if(window._boardInit) return;

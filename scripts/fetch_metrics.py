@@ -2092,6 +2092,7 @@ def load_data(cutoff, refresh=False):
             "logos_react":            float(r.get("logos_react")                or 0),
             "logos_churn":            float(r.get("logos_churn")                or 0),
             "mrr_eop":                float(r.get("mrr_usd_eop")                or 0),
+            "mrr_eop_cc":             float(r.get("mrr_usd_eop_cc")             or 0),
             "mrr_new_base_t0":        float(r.get("mrr_usd_new_base_t0")        or 0),
             "mrr_new_cross_t0":       float(r.get("mrr_usd_new_cross_t0")       or 0),
             "mrr_new":                float(r.get("mrr_usd_new_base_t0") or 0) + float(r.get("mrr_usd_new_cross_t0") or 0),
@@ -2388,6 +2389,16 @@ def _fm1(v):
         return f"${v/1e6:.1f}M"
     return f"${v/1e3:.1f}K"
 
+def _fm_signed(v):
+    """Delta en dólares con signo explícito AFUERA del '$' — "+$937K"/"-$600K" — para filas
+    como Net New ARR donde el MoM/YoY se muestra en dólares crudos, no en % (2026-09-29,
+    mismo criterio que Net Logo Adds: bases chicas o que cruzan de signo hacen el % no
+    interpretable). _fm() sola no sirve para esto: con v negativo pone el signo DESPUÉS
+    del '$' ("$-600K"), formato no estándar."""
+    if v is None: return "—"
+    sign = "+" if v >= 0 else "-"
+    return f"{sign}{_fm(abs(v))}"
+
 def _fl(v):
     """Logos → "X.Xk" """
     if v is None: return "N/A"
@@ -2406,6 +2417,24 @@ def _pct_delta(curr, prev):
     if delta > 9.99: return ">+999%", True
     if delta < -9.99: return "<-999%", False
     return _fp(delta), delta >= 0
+
+def _safe_pct_delta(curr, prev, unit_fmt, small_base_floor=20):
+    """Como _pct_delta, pero evita mostrar un % que no es interpretable como "creció/cayó
+    X%": cruce de signo (prev y curr de signo distinto) o base casi-cero (|prev| por debajo
+    de small_base_floor — pensado para métricas de CONTEO como logos, donde una base chica
+    hace explotar el %). En esos casos devuelve el delta crudo formateado con unit_fmt en
+    vez de un %. Hallazgo real 2026-09-28: "Logos Growth" Lite YoY daba +104.9% viniendo de
+    -285→+14 (no creció 105%, pasó de perder logos netos a ganar unos pocos) y México Core
+    daba +733.3% viniendo de una base de ~6 logos — mismo criterio que ya usa Finance para
+    EBITDA YoY ("n/m") cuando cruza de negativo a positivo, generalizado acá."""
+    if prev is None:
+        return "—", True
+    sign_cross = prev != 0 and curr != 0 and (prev > 0) != (curr > 0)
+    tiny_base = abs(prev) < small_base_floor
+    if prev == 0 or sign_cross or tiny_base:
+        delta = curr - prev
+        return unit_fmt(delta), delta >= 0
+    return _pct_delta(curr, prev)
 
 def _arr_pct_delta(curr_dict, prev_dict, key):
     c = curr_dict.get(key, 0)
@@ -3207,12 +3236,21 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             arr_py   = py.get("mrr_eop", 0) * 12
             mom_s, mom_p = _pct_delta(arr_cur, arr_prev)
             yoy_s, yoy_p = _pct_delta(arr_cur, arr_py)
+            # YoY a moneda constante (2026-09-29): mrr_eop_cc ya viene revaluado al FX del
+            # mes de CORTE para todo el histórico (ver _apply_fx_to_row) — mismo numerador
+            # en moneda local, siempre al tipo de cambio vigente hoy, así que comparar
+            # cur vs py con este campo aísla el crecimiento real del efecto FX.
+            arr_cc_cur = cur.get("mrr_eop_cc", 0) * 12
+            arr_cc_py  = py.get("mrr_eop_cc", 0) * 12
+            cc_yoy_s, cc_yoy_p = _pct_delta(arr_cc_cur, arr_cc_py)
             return {
                 "arr":           _fm(arr_cur),
                 "arr_mom":       mom_s,
                 "arr_mom_positive": mom_p,
                 "arr_yoy":       yoy_s,
                 "arr_yoy_positive": yoy_p,
+                "arr_cc_yoy":       cc_yoy_s,
+                "arr_cc_yoy_positive": cc_yoy_p,
             }
 
         def _butterfly_row(metric_name, key_fn, fmt_fn, color_c, color_l, neg_is_bad=True):
@@ -3345,7 +3383,9 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             return {"metric_name": name, "core": _side("Core", CORE_COLOR), "lite": _side("Lite", LITE_COLOR)}
 
         def _churn_row_q(name, fmt):
-            """Churn Rate Q-aware: promedio de tasas del Q."""
+            """Churn Rate Q-aware: promedio de tasas del Q. MoM/YoY en puntos porcentuales
+            (pp) — 2026-09-29, más interpretable que "% de la tasa" (ej. 2.4%→2.6% es solo
+            +8% relativo pero +0.2pp en términos absolutos, que es lo que importa acá)."""
             def _side(seg, color):
                 if is_quarter_end:
                     v    = _q_churn_avg(seg, _cur_q_ms)
@@ -3355,12 +3395,12 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
                     v    = _churn_rate(seg, latest_m)
                     v_pm = _churn_rate(seg, prev_m)
                     v_py = _churn_rate(seg, prev_yr)
-                mom_s, mom_p = _pct_delta(v, v_pm)
-                yoy_s, yoy_p = _pct_delta(v, v_py)
+                mom_d, yoy_d = v - v_pm, v - v_py
+                pp_fmt = lambda d: f"{d:+.1f}pp"
                 return {
                     "val": fmt(v), "val_negative": v < 0,
-                    "mom": mom_s, "mom_positive": mom_p,
-                    "yoy": yoy_s, "yoy_positive": yoy_p,
+                    "mom": pp_fmt(mom_d), "mom_positive": mom_d >= 0,
+                    "yoy": pp_fmt(yoy_d), "yoy_positive": yoy_d >= 0,
                     "sparkline_svg": _sparkline([_churn_rate(seg, m) for m in _recent12], color),
                 }
             return {"metric_name": name, "core": _side("Core", CORE_COLOR), "lite": _side("Lite", LITE_COLOR)}
@@ -3484,7 +3524,8 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
                     "core": _ts_side("Core", CORE_COLOR, _cac_v, lambda v: f"${v:,.0f}"),
                     "lite": _ts_side("Lite", LITE_COLOR, _cac_v, lambda v: f"${v:,.0f}")}
 
-        # Net New ARR Q-aware
+        # Net New ARR Q-aware — MoM/YoY en dólares crudos, no en % (2026-09-29, mismo
+        # criterio que Net Logo Adds: base chica o cruce de signo hace el % no interpretable).
         def _net_new_arr_row(name):
             def _side(seg, color):
                 if is_quarter_end:
@@ -3495,17 +3536,33 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
                     v    = _net_new_arr(seg, latest_m)
                     v_pm = _net_new_arr(seg, prev_m)
                     v_py = _net_new_arr(seg, prev_yr)
-                mom_s, mom_p = _pct_delta(v, v_pm)
-                yoy_s, yoy_p = _pct_delta(v, v_py)
+                mom_d, yoy_d = v - v_pm, v - v_py
                 return {"val": _fm(v), "val_negative": v < 0,
-                        "mom": mom_s, "mom_positive": mom_p,
-                        "yoy": yoy_s, "yoy_positive": yoy_p,
+                        "mom": _fm_signed(mom_d), "mom_positive": mom_d >= 0,
+                        "yoy": _fm_signed(yoy_d), "yoy_positive": yoy_d >= 0,
                         "sparkline_svg": _sparkline([_net_new_arr(seg, m) for m in _recent12], color)}
             return {"metric_name": name, "core": _side("Core", CORE_COLOR), "lite": _side("Lite", LITE_COLOR)}
 
-        # Logos Growth Q-aware
+        # Total Logos (EoP) — stock, sin Q-awareness (igual criterio que ARPA/_row2)
+        def _logos_eop_row(name):
+            def _side(seg, color):
+                v    = _cd(seg, latest_m).get("logos_eop", 0)
+                v_pm = _cd(seg, prev_m).get("logos_eop", 0)
+                v_py = _cd(seg, prev_yr).get("logos_eop", 0)
+                mom_s, mom_p = _pct_delta(v, v_pm)
+                yoy_s, yoy_p = _pct_delta(v, v_py)
+                return {"val": f"{int(v):,}", "val_negative": False,
+                        "mom": mom_s, "mom_positive": mom_p,
+                        "yoy": yoy_s, "yoy_positive": yoy_p,
+                        "sparkline_svg": _sparkline([_cd(seg, m).get("logos_eop", 0) for m in _recent12], color)}
+            return {"metric_name": name, "core": _side("Core", CORE_COLOR), "lite": _side("Lite", LITE_COLOR)}
+
+        # Logos Growth Q-aware — "Net Logo Adds" (2026-09-29): MoM/YoY en diferencia absoluta
+        # de logos, no en % — mismo motivo que _fm_signed en Net New ARR (base chica o cruce
+        # de signo hace el % no interpretable, ver hallazgo real "Logos Growth" +104.9%).
         def _logos_growth_row(name):
             fmt = lambda v: f"+{int(v):,}" if v >= 0 else f"({int(abs(v)):,})"
+            diff_fmt = lambda d: f"{d:+.0f}"
             def _side(seg, color):
                 if is_quarter_end:
                     v    = _logos_growth_q(seg, _cur_q_ms)
@@ -3515,21 +3572,50 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
                     v    = _logos_growth(seg, latest_m)
                     v_pm = _logos_growth(seg, prev_m)
                     v_py = _logos_growth(seg, prev_yr)
-                mom_s, mom_p = _pct_delta(v, v_pm)
-                yoy_s, yoy_p = _pct_delta(v, v_py)
+                mom_d, yoy_d = v - v_pm, v - v_py
                 return {"val": fmt(v), "val_negative": v < 0,
-                        "mom": mom_s, "mom_positive": mom_p,
-                        "yoy": yoy_s, "yoy_positive": yoy_p,
+                        "mom": diff_fmt(mom_d), "mom_positive": mom_d >= 0,
+                        "yoy": diff_fmt(yoy_d), "yoy_positive": yoy_d >= 0,
                         "sparkline_svg": _sparkline([_logos_growth(seg, m) for m in _recent12], color)}
             return {"metric_name": name, "core": _side("Core", CORE_COLOR), "lite": _side("Lite", LITE_COLOR)}
 
+        # ARPA New Logos / ARPA Churned Logos (2026-09-29) — mismo patrón que la sección
+        # Global (_g_arpa_row): sub-filas adjuntas al dict de la fila "ARPA" como campos
+        # extra (arpa_new_core/lite, arpa_churned_core/lite + _mom/_yoy/_positive), que el
+        # template renderiza en un bloque especial "{% if row.metric_name == 'ARPA' %}".
+        def _arpa_new(seg, m):
+            nl = _cd(seg, m).get("logos_new", 0)
+            return _cd(seg, m).get("mrr_new", 0) / nl if nl > 0 else 0
+
+        def _arpa_churned(seg, m):
+            cl = _cd(seg, m).get("logos_churn", 0)
+            return _cd(seg, m).get("mrr_churn", 0) / cl if cl > 0 else 0
+
+        def _arpa_row_full(name):
+            row = _row2(name, _arpa, lambda v: f"${v:,.0f}")
+            for prefix, fn in [("new", _arpa_new), ("churned", _arpa_churned)]:
+                for side in ("core", "lite"):
+                    seg  = "Core" if side == "core" else "Lite"
+                    curr = fn(seg, latest_m)
+                    pm   = fn(seg, prev_m)
+                    py   = fn(seg, prev_yr)
+                    row[f"arpa_{prefix}_{side}"] = f"${curr:,.0f}" if curr else "N/A"
+                    ms, mp = _pct_delta(curr, pm) if (curr and pm) else ("—", True)
+                    ys, yp = _pct_delta(curr, py) if (curr and py) else ("—", True)
+                    row[f"arpa_{prefix}_{side}_mom"] = ms
+                    row[f"arpa_{prefix}_{side}_mom_positive"] = mp
+                    row[f"arpa_{prefix}_{side}_yoy"] = ys
+                    row[f"arpa_{prefix}_{side}_yoy_positive"] = yp
+            return row
+
         butterfly_rows = [
+            _logos_eop_row("Total Logos (EoP)"),
+            _logos_growth_row("Net Logo Adds"),
+            _row_q("New Logos",       lambda d: d.get("logos_new", 0), "logos_new", lambda v: f"{int(v):,}"),
             _inv_row_q("Investment"),
             _net_new_arr_row("Net New ARR"),
-            _logos_growth_row("Logos Growth"),
-            _row_q("New Logos",       lambda d: d.get("logos_new", 0), "logos_new", lambda v: f"{int(v):,}"),
             _row_q("New ARR",         lambda d: d.get("mrr_new", 0), "mrr_new", lambda v: f"${v*12/1e3:.0f}K"),
-            _row2("ARPA",             _arpa,          lambda v: f"${v:,.0f}"),
+            _arpa_row_full("ARPA"),
             _cac_row_q("CAC"),
             _churn_row_q("Churn Rate",                lambda v: f"{v:.1f}%"),
             _payback_row("Payback"),
@@ -3582,6 +3668,11 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         new_mrr = d.get("mrr_new_base_t0", 0) + d.get("mrr_new_cross_t0", 0)
         return new_mrr / nl if nl > 0 else 0
 
+    def _g_churned_arpa(seg, m):
+        d  = _graw(seg, m)
+        cl = d.get("logos_churn", 0)
+        return d.get("mrr_churn", 0) / cl if cl > 0 else 0
+
     def _g_churn(seg, m):
         bop   = _graw(seg, _prev_m(m)).get("logos_eop", 0)
         churn = _graw(seg, m).get("logos_churn", 0)
@@ -3613,11 +3704,15 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     _g_na = {"val": "N/A", "val_negative": False, "mom": "—", "mom_positive": True,
              "yoy": "—", "yoy_positive": True, "sparkline_svg": ""}
 
-    def _g_side(seg, v, v_pm, v_py, fmt_fn, neg_is_bad=True):
+    def _g_side(seg, v, v_pm, v_py, fmt_fn, neg_is_bad=True, safe_delta_floor=None):
         if v is None:
             return dict(_g_na)
-        mom_s, mom_p = _pct_delta(v, v_pm) if v_pm is not None else ("—", True)
-        yoy_s, yoy_p = _pct_delta(v, v_py) if v_py is not None else ("—", True)
+        if safe_delta_floor is not None:
+            mom_s, mom_p = _safe_pct_delta(v, v_pm, fmt_fn, safe_delta_floor) if v_pm is not None else ("—", True)
+            yoy_s, yoy_p = _safe_pct_delta(v, v_py, fmt_fn, safe_delta_floor) if v_py is not None else ("—", True)
+        else:
+            mom_s, mom_p = _pct_delta(v, v_pm) if v_pm is not None else ("—", True)
+            yoy_s, yoy_p = _pct_delta(v, v_py) if v_py is not None else ("—", True)
         return {"val": fmt_fn(v), "val_negative": (v < 0) if neg_is_bad else False,
                 "mom": mom_s, "mom_positive": mom_p,
                 "yoy": yoy_s, "yoy_positive": yoy_p, "sparkline_svg": ""}
@@ -3635,23 +3730,43 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         return _g_make("Investment", _s("Core"), _s("Lite"))
 
     def _g_nna_row():
+        """Net New ARR — MoM/YoY en dólares crudos, no en % (2026-09-29): base chica o cruce
+        de signo hace el % no interpretable (mismo criterio que Net Logo Adds)."""
         def _s(seg):
             if is_quarter_end:
                 v, vp, vy = _g_net_new_arr_q(seg,_cur_q_ms), _g_net_new_arr_q(seg,_prev_q_ms), _g_net_new_arr_q(seg,_cur_q_ms_py)
             else:
                 v, vp, vy = _g_net_new_arr(seg,latest_m), _g_net_new_arr(seg,prev_m), _g_net_new_arr(seg,prev_yr)
-            return _g_side(seg, v, vp, vy, _fm, neg_is_bad=True)
+            mom_d, yoy_d = v - vp, v - vy
+            return {"val": _fm(v), "val_negative": v < 0,
+                    "mom": _fm_signed(mom_d), "mom_positive": mom_d >= 0,
+                    "yoy": _fm_signed(yoy_d), "yoy_positive": yoy_d >= 0, "sparkline_svg": ""}
         return _g_make("Net New ARR", _s("Core"), _s("Lite"))
 
+    def _g_logos_eop_row():
+        """Total Logos (EoP) — stock, MoM/YoY en % (nivel, no flujo)."""
+        def _s(seg):
+            v, vp, vy = (_graw(seg,latest_m).get("logos_eop",0), _graw(seg,prev_m).get("logos_eop",0),
+                         _graw(seg,prev_yr).get("logos_eop",0))
+            return _g_side(seg, v, vp, vy, lambda v: f"{int(v):,}", neg_is_bad=False)
+        return _g_make("Total Logos (EoP)", _s("Core"), _s("Lite"))
+
     def _g_logos_growth_row():
+        """Net Logo Adds (2026-09-29, antes "Net Logos Growth") — MoM/YoY en diferencia
+        absoluta de logos, no en % (hallazgo real: Lite YoY daba +104.9% viniendo de
+        -285→+14, no es que "creció 105%", pasó de perder logos netos a ganar unos pocos)."""
         fmt = lambda v: f"+{int(v):,}" if v >= 0 else f"({int(abs(v)):,})"
+        diff_fmt = lambda d: f"{d:+.0f}"
         def _s(seg):
             if is_quarter_end:
                 v, vp, vy = _g_logos_growth_q(seg,_cur_q_ms), _g_logos_growth_q(seg,_prev_q_ms), _g_logos_growth_q(seg,_cur_q_ms_py)
             else:
                 v, vp, vy = _g_logos_growth(seg,latest_m), _g_logos_growth(seg,prev_m), _g_logos_growth(seg,prev_yr)
-            return _g_side(seg, v, vp, vy, fmt, neg_is_bad=True)
-        return _g_make("Logos Growth", _s("Core"), _s("Lite"))
+            mom_d, yoy_d = v - vp, v - vy
+            return {"val": fmt(v), "val_negative": v < 0,
+                    "mom": diff_fmt(mom_d), "mom_positive": mom_d >= 0,
+                    "yoy": diff_fmt(yoy_d), "yoy_positive": yoy_d >= 0, "sparkline_svg": ""}
+        return _g_make("Net Logo Adds", _s("Core"), _s("Lite"))
 
     def _g_row_q(name, m_fn, q_field, fmt_fn):
         def _s(seg):
@@ -3667,20 +3782,22 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             v, vp, vy = _g_arpa(seg,latest_m), _g_arpa(seg,prev_m), _g_arpa(seg,prev_yr)
             return _g_side(seg, v, vp, vy, lambda v: f"${v:,.0f}", neg_is_bad=False)
         row = _g_make("ARPA", _s("Core"), _s("Lite"))
-        _na_core = _g_new_arpa("Core", latest_m)
-        _na_lite = _g_new_arpa("Lite", latest_m)
-        row["arpa_new_core"] = f"${_na_core:,.0f}" if _na_core else "N/A"
-        row["arpa_new_lite"] = f"${_na_lite:,.0f}" if _na_lite else "N/A"
-        # MoM / YoY para ARPA New Logos
-        for side, curr in [("core", _na_core), ("lite", _na_lite)]:
-            pm = _g_new_arpa("Core" if side == "core" else "Lite", prev_m)
-            py = _g_new_arpa("Core" if side == "core" else "Lite", prev_yr)
-            ms, mp = _pct_delta(curr, pm) if (curr and pm) else ("—", True)
-            ys, yp = _pct_delta(curr, py) if (curr and py) else ("—", True)
-            row[f"arpa_new_{side}_mom"] = ms
-            row[f"arpa_new_{side}_mom_positive"] = mp
-            row[f"arpa_new_{side}_yoy"] = ys
-            row[f"arpa_new_{side}_yoy_positive"] = yp
+        # ARPA New Logos / ARPA Churned Logos (2026-09-29) — sub-filas adjuntas como campos
+        # extra (arpa_new_core/lite, arpa_churned_core/lite + _mom/_yoy/_positive), que el
+        # template renderiza en el bloque "{% if row.metric_name == 'ARPA' %}".
+        for prefix, fn in [("new", _g_new_arpa), ("churned", _g_churned_arpa)]:
+            for side in ("core", "lite"):
+                seg  = "Core" if side == "core" else "Lite"
+                curr = fn(seg, latest_m)
+                pm   = fn(seg, prev_m)
+                py   = fn(seg, prev_yr)
+                row[f"arpa_{prefix}_{side}"] = f"${curr:,.0f}" if curr else "N/A"
+                ms, mp = _pct_delta(curr, pm) if (curr and pm) else ("—", True)
+                ys, yp = _pct_delta(curr, py) if (curr and py) else ("—", True)
+                row[f"arpa_{prefix}_{side}_mom"] = ms
+                row[f"arpa_{prefix}_{side}_mom_positive"] = mp
+                row[f"arpa_{prefix}_{side}_yoy"] = ys
+                row[f"arpa_{prefix}_{side}_yoy_positive"] = yp
         return row
 
     def _g_cac_row_q():
@@ -3697,12 +3814,18 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         return _g_make("CAC", _s("Core"), _s("Lite"))
 
     def _g_churn_row_q():
+        """MoM/YoY en puntos porcentuales (pp), no en % de la tasa — 2026-09-29, mismo
+        criterio que la sección por país."""
         def _s(seg):
             if is_quarter_end:
                 v, vp, vy = _g_churn_avg_q(seg,_cur_q_ms), _g_churn_avg_q(seg,_prev_q_ms), _g_churn_avg_q(seg,_cur_q_ms_py)
             else:
                 v, vp, vy = _g_churn(seg,latest_m), _g_churn(seg,prev_m), _g_churn(seg,prev_yr)
-            return _g_side(seg, v, vp, vy, lambda v: f"{v:.1f}%", neg_is_bad=False)
+            mom_d, yoy_d = v - vp, v - vy
+            pp_fmt = lambda d: f"{d:+.1f}pp"
+            return {"val": f"{v:.1f}%", "val_negative": False,
+                    "mom": pp_fmt(mom_d), "mom_positive": mom_d >= 0,
+                    "yoy": pp_fmt(yoy_d), "yoy_positive": yoy_d >= 0, "sparkline_svg": ""}
         return _g_make("Churn Rate", _s("Core"), _s("Lite"))
 
     def _g_payback_row():
@@ -3724,8 +3847,12 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         ac, ap, ayp = cur.get("mrr_eop",0)*12, prv.get("mrr_eop",0)*12, py.get("mrr_eop",0)*12
         ms, mp = _pct_delta(ac, ap)
         ys, yp = _pct_delta(ac, ayp)
+        # YoY a moneda constante (2026-09-29) — ver nota igual en _seg_kpi por país.
+        ac_cc, ayp_cc = cur.get("mrr_eop_cc",0)*12, py.get("mrr_eop_cc",0)*12
+        cc_ys, cc_yp = _pct_delta(ac_cc, ayp_cc)
         return {"arr": _fm(ac), "arr_mom": ms, "arr_mom_positive": mp,
-                "arr_yoy": ys, "arr_yoy_positive": yp}
+                "arr_yoy": ys, "arr_yoy_positive": yp,
+                "arr_cc_yoy": cc_ys, "arr_cc_yoy_positive": cc_yp}
 
     # ── Core vs Lite ARR raw (el % de 3 vías con Alanube se calcula más abajo, una vez
     # que _al_cur está disponible) ───────────────────────────────────────────────
@@ -3756,10 +3883,11 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "core": _g_seg_kpi("Core"),
         "lite": _g_seg_kpi("Lite"),
         "butterfly_rows": [
-            _g_inv_row_q(),
-            _g_nna_row(),
+            _g_logos_eop_row(),
             _g_logos_growth_row(),
             _g_row_q("New Logos", lambda d: d.get("logos_new",0), "logos_new", lambda v: f"{int(v):,}"),
+            _g_inv_row_q(),
+            _g_nna_row(),
             _g_row_q("New ARR", lambda d: d.get("mrr_new_base_t0",0)+d.get("mrr_new_cross_t0",0), "mrr_new_base_t0", lambda v: f"${v*12/1e3:.0f}K"),
             _g_arpa_row(),
             _g_cac_row_q(),
@@ -4103,8 +4231,25 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     def _qraw_py(key):
         return [_all_q_data.get(_py_lbl(q), {}).get(key) or 0 for q in _last5q]
 
-    def _aw_row(label, row_type, dot, raws, fmtfn, raws_py=None, pp=False, invert=False, nv=False):
-        """Construye un dict de fila para arr_walk_table. raws = lista de 5 valores numéricos."""
+    def _aw_row(label, row_type, dot, raws, fmtfn, raws_py=None, pp=False, invert=False, nv=False, ytd_raw=None,
+                extra_sub=None):
+        """Construye un dict de fila para arr_walk_table. raws = lista de 5 valores numéricos.
+
+        extra_sub (2026-09-29, pedido de Luis Caro) = (label, cells) opcional — una TERCERA
+        sub-fila "aw-delta-sub" bajo esta fila, además de MoM/YoY, ya formateada por el
+        caller (ej. Net New ARR como sub-línea de ARR EoP en vez de fila propia). Solo se
+        usa hoy para adjuntar "Net New ARR"/"Net New ARR (Constant Currency)" a
+        "ARR EoP"/"ARR EoP (Constant Currency)" — ver el `{% if row.label in [...] %}` en
+        los templates.
+
+        ytd_raw = (valor_ytd_año_anterior, valor_ytd_año_actual) — bug real corregido
+        (2026-09-25, hallazgo del usuario: 'Logo EoP YTD'25' se veía igual al cierre de
+        abril). Antes esta función no recibía nada acá y hacía `cells[0]`/`cells[-1]` —
+        el primer/último de las 5 columnas MOSTRADAS (ej. Abr-Ago), no un año-a-la-fecha
+        real. Con 5 columnas mensuales eso mostraba literalmente el valor de abril
+        etiquetado como "YTD'25". Ahora cada call site pasa el año-a-la-fecha real
+        (sacado de seg_metrics[...]["ytd"][año] o de un helper equivalente).
+        """
         cells = [fmtfn(r) for r in raws]
         pill_fn = _pill_pp if pp else _pill_pct
         # QoQ por cada quarter: cambio vs quarter anterior (primero = —)
@@ -4124,10 +4269,22 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
                 yoy_cells.append(("—", None))
         qoq, qoq_good = qoq_cells[-1]
         yoy, yoy_good = yoy_cells[-1]
-        if raws[0] and raws[-1] is not None:
-            _ytd_vs, _ytd_vs_good = pill_fn(raws[-1], raws[0], invert=invert)
+        if ytd_raw is not None:
+            _ytd_prev_raw, _ytd_cur_raw = ytd_raw
+            ytd_prev_cell = fmtfn(_ytd_prev_raw) if _ytd_prev_raw is not None else "—"
+            ytd_cur_cell  = fmtfn(_ytd_cur_raw)  if _ytd_cur_raw  is not None else "—"
+            if _ytd_prev_raw and _ytd_cur_raw is not None:
+                _ytd_vs, _ytd_vs_good = pill_fn(_ytd_cur_raw, _ytd_prev_raw, invert=invert)
+            else:
+                _ytd_vs, _ytd_vs_good = "—", None
         else:
-            _ytd_vs, _ytd_vs_good = "—", None
+            # Fallback legacy — no debería dispararse si todos los call sites pasan
+            # ytd_raw; se deja solo como red de seguridad (ver docstring arriba).
+            ytd_prev_cell, ytd_cur_cell = cells[0], cells[-1]
+            if raws[0] and raws[-1] is not None:
+                _ytd_vs, _ytd_vs_good = pill_fn(raws[-1], raws[0], invert=invert)
+            else:
+                _ytd_vs, _ytd_vs_good = "—", None
         return {
             "label": label, "type": row_type, "dot": dot,
             "cells": cells,
@@ -4135,8 +4292,9 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             "yoy": yoy, "yoy_good": yoy_good,
             "qoq_cells": [{"v": v, "good": g} for v, g in qoq_cells],
             "yoy_cells": [{"v": v, "good": g} for v, g in yoy_cells],
-            "ytd_prev": cells[0],
-            "ytd_cur": cells[-1],
+            "extra_sub": {"label": extra_sub[0], "cells": extra_sub[1]} if extra_sub else None,
+            "ytd_prev": ytd_prev_cell,
+            "ytd_cur": ytd_cur_cell,
             "ytd_vs": _ytd_vs,
             "ytd_vs_good": _ytd_vs_good,
             "nv": nv,
@@ -4174,6 +4332,34 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         v = _pb_global.get("Total", {}).get(m_iso)
         return v if v is not None else 0
 
+    # ARPA Adds / ARPA Churn (2026-09-29, pedido de Luis Caro para "SaaS Metrics" del ARR
+    # Walk GLO) — mismo criterio que ARPA New/Churned Logos de Core vs Lite Performance,
+    # pero sumando Core+Lite (segs_raw["all"]).
+    def _arpa_new_for_m_g(m_iso, seg_name=None):
+        d  = segs_raw.get(seg_name or "all", {}).get(m_iso, {})
+        nl = d.get("logos_new", 0)
+        mrr = d.get("mrr_new_base_t0", 0) + d.get("mrr_new_cross_t0", 0)
+        return mrr / nl if nl > 0 else 0
+
+    def _arpa_churn_for_m_g(m_iso, seg_name=None):
+        d  = segs_raw.get(seg_name or "all", {}).get(m_iso, {})
+        cl = d.get("logos_churn", 0)
+        return d.get("mrr_churn", 0) / cl if cl > 0 else 0
+
+    def _arpa_new_for_q(q, seg_name=None):
+        ms  = _q_months_map.get(q, [])
+        seg = segs_raw.get(seg_name or "all", {})
+        mrr = sum(seg.get(m, {}).get("mrr_new_base_t0", 0) + seg.get(m, {}).get("mrr_new_cross_t0", 0) for m in ms)
+        nl  = sum(seg.get(m, {}).get("logos_new", 0) for m in ms)
+        return mrr / nl if nl > 0 else 0
+
+    def _arpa_churn_for_q(q, seg_name=None):
+        ms  = _q_months_map.get(q, [])
+        seg = segs_raw.get(seg_name or "all", {})
+        mrr = sum(seg.get(m, {}).get("mrr_churn", 0) for m in ms)
+        cl  = sum(seg.get(m, {}).get("logos_churn", 0) for m in ms)
+        return mrr / cl if cl > 0 else 0
+
     # 2026-07-27 — hallazgo real del usuario: en modo trimestral, "SaaS Metrics" de las
     # tablas ARR Walk Core/Lite llamaba a _sm_for_q/_payback_for_q (las de arriba, GLO —
     # suman TODOS los segmentos) en vez de una versión propia por segmento. El modo mensual
@@ -4202,6 +4388,95 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         rates = [_fx_rates[(pais, m)] for m in ms if (pais, m) in _fx_rates]
         return sum(rates) / len(rates) if rates else 0
 
+    # ── Helpers YTD (año-a-la-fecha real, Ene→mes de corte) para las filas de
+    #    arr_walk_table que no vienen de _calc()/seg_metrics["ytd"] (S&M spend, CAC
+    #    payback, FX rates) — ver bug corregido 2026-09-25 en _aw_row(). "yr" es int.
+    def _ytd_months(yr):
+        return [f"{yr}-{mm:02d}" for mm in range(1, int(cutoff[5:7]) + 1)]
+
+    def _has_investment_month(m, seg_name=None):
+        for _ci in (investment or {}).values():
+            if seg_name:
+                if m in _ci.get(seg_name, {}):
+                    return True
+            else:
+                for _si in _ci.values():
+                    if m in _si:
+                        return True
+        return False
+
+    # investment (S&M spend) solo trae ~13 meses rolling (verificado 2026-09-25: para el
+    # corte 2026-08 arranca en 2025-08) — un YTD'25 (Ene-Ago 2025) sumando solo el único
+    # mes disponible (Ago) daba un "total" ridículamente bajo vs el YTD'26 real (8 meses),
+    # mostrando un +700% falso. Si no están TODOS los meses del rango, devolver None →
+    # _aw_row lo renderiza como "—" en vez de un número engañoso.
+    def _sm_for_ytd(yr, seg_name=None):
+        months = _ytd_months(yr)
+        if not all(_has_investment_month(m, seg_name) for m in months):
+            return None
+        total = 0.0
+        for m in months:
+            for _ci in (investment or {}).values():
+                if seg_name:
+                    total += _ci.get(seg_name, {}).get(m, {}).get("total", 0)
+                else:
+                    for _si in _ci.values():
+                        total += _si.get(m, {}).get("total", 0)
+        return total
+
+    def _payback_for_ytd(yr, seg_name="Total"):
+        months = _ytd_months(yr)
+        vals = [_pb_global.get(seg_name, {}).get(m) for m in months]
+        if not vals or any(v is None for v in vals):
+            return None
+        return sum(vals) / len(vals)
+
+    # Net New ARR (Constant Currency) (2026-09-29, pedido de Luis Caro) — mismo criterio
+    # que "a_net_new" (EoP - BoP del período, anualizado) pero sobre la serie mrr_eop_cc,
+    # que _apply_fx_to_row ya revaluó al FX del mes de CORTE para todo el histórico — así
+    # el delta aísla el crecimiento real de ARR del efecto FX mes a mes.
+    def _net_new_cc_for_m_g(m_iso, seg_name=None):
+        seg = segs_raw.get(seg_name or "all", {})
+        eop = seg.get(m_iso, {}).get("mrr_eop_cc", 0)
+        bop = seg.get(_prev_m(m_iso), {}).get("mrr_eop_cc", 0)
+        return (eop - bop) * 12
+
+    def _net_new_cc_for_q(q, seg_name=None):
+        ms = _q_months_map.get(q, [])
+        if not ms:
+            return 0
+        seg = segs_raw.get(seg_name or "all", {})
+        eop = seg.get(ms[-1], {}).get("mrr_eop_cc", 0)
+        bop = seg.get(_prev_m(ms[0]), {}).get("mrr_eop_cc", 0)
+        return (eop - bop) * 12
+
+    def _arpa_new_for_ytd(yr, seg_name=None):
+        ms  = _ytd_months(yr)
+        seg = segs_raw.get(seg_name or "all", {})
+        mrr = sum(seg.get(m, {}).get("mrr_new_base_t0", 0) + seg.get(m, {}).get("mrr_new_cross_t0", 0) for m in ms)
+        nl  = sum(seg.get(m, {}).get("logos_new", 0) for m in ms)
+        return mrr / nl if nl > 0 else None
+
+    def _arpa_churn_for_ytd(yr, seg_name=None):
+        ms  = _ytd_months(yr)
+        seg = segs_raw.get(seg_name or "all", {})
+        mrr = sum(seg.get(m, {}).get("mrr_churn", 0) for m in ms)
+        cl  = sum(seg.get(m, {}).get("logos_churn", 0) for m in ms)
+        return mrr / cl if cl > 0 else None
+
+    def _fx_avg_ytd(pais, yr):
+        months = _ytd_months(yr)
+        if not all((pais, m) in _fx_rates for m in months):
+            return None
+        rates = [_fx_rates[(pais, m)] for m in months]
+        return sum(rates) / len(rates)
+
+    # Años de corte para las comparaciones YTD de arr_walk_table (nombre distinto de
+    # _cur_yr/_prev_yr_int usados más arriba para el bloque YTD del slide 5 — esos son
+    # strings, estos quedan como int para _ytd_months()/aritmética de fecha).
+    _awt_cur_yr_i, _awt_prev_yr_i = int(cutoff[:4]), int(cutoff[:4]) - 1
+    _awt_cur_yr_s, _awt_prev_yr_s = str(_awt_cur_yr_i), str(_awt_prev_yr_i)
+
     # ── Rama mensual / trimestral para global arr_walk_table ─────────────────
     if not is_quarter_end:
         _all_m_data_g = seg_metrics.get("all", {}).get("months", {})
@@ -4217,10 +4492,12 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             return f"{mon}-{yr-1:02d}"
 
         _a_eop_py  = [_all_m_data_g.get(_m_py_lbl_g(lbl), {}).get("a_eop") or 0 for lbl in _g5]
+        _a_eop_cc_py = [_all_m_data_g.get(_m_py_lbl_g(lbl), {}).get("a_cc_eop") or 0 for lbl in _g5]
         _a_sm      = [_sm_for_m_g(m) for m in _last5m_iso_g]
         _a_payback = [_payback_for_m_g(m) for m in _last5m_iso_g]
-        _a_cop     = [_fx_rates.get(("colombia", m), 0) for m in _last5m_iso_g]
-        _a_mxn     = [_fx_rates.get(("mexico",   m), 0) for m in _last5m_iso_g]
+        _a_arpa_new   = [_arpa_new_for_m_g(m) for m in _last5m_iso_g]
+        _a_arpa_churn = [_arpa_churn_for_m_g(m) for m in _last5m_iso_g]
+        _a_net_new_cc = [_net_new_cc_for_m_g(m) for m in _last5m_iso_g]
         _g_ytd_labels = [f"YTD'{int(cutoff[:4]) % 100 - 1:02d}", f"YTD'{int(cutoff[:4]) % 100:02d}"]
     else:
         _g5 = _last5q
@@ -4229,10 +4506,12 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             return [_all_q_data[q].get(key) or 0 for q in _g5]
 
         _a_eop_py  = _qraw_py("a_eop")
+        _a_eop_cc_py = _qraw_py("a_cc_eop")
         _a_sm      = [_sm_for_q(q) for q in _g5]
         _a_payback = [_payback_for_q(q) for q in _g5]
-        _a_cop     = [_fx_avg_q("colombia", q) for q in _g5]
-        _a_mxn     = [_fx_avg_q("mexico",   q) for q in _g5]
+        _a_arpa_new   = [_arpa_new_for_q(q) for q in _g5]
+        _a_arpa_churn = [_arpa_churn_for_q(q) for q in _g5]
+        _a_net_new_cc = [_net_new_cc_for_q(q) for q in _g5]
         _g_ytd_labels = [f"YTD'{int(cutoff[:4]) % 100 - 1:02d}", f"YTD'{int(cutoff[:4]) % 100:02d}"]
 
     _l_bop    = _graw("l_bop")
@@ -4278,6 +4557,25 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "a_fx": _a_fx[-1],
     }
 
+    # ── Valores YTD reales (Ene→mes de corte) para las columnas "YTD'XX" — ver
+    #    docstring de _aw_row(). "all" = todo Alegra (Core+Lite), sin dedup de segmento.
+    _ytd_cur_all = seg_metrics.get("all", {}).get("ytd", {}).get(_awt_cur_yr_s, {})
+    _ytd_py_all  = seg_metrics.get("all", {}).get("ytd", {}).get(_awt_prev_yr_s, {})
+
+    def _ytd_g(key):
+        return (_ytd_py_all.get(key, 0), _ytd_cur_all.get(key, 0))
+
+    def _ytd_net_exp_full_g(d):
+        return (d.get("a_upsell", 0) + d.get("a_down", 0) + d.get("a_pricing", 0)
+                + d.get("a_cross_new", 0) + d.get("a_cross_readop", 0) - d.get("a_cross_down", 0))
+
+    # Total EoP (logos): preferir el mismo dedup logos_all que usan las 5 columnas mostradas.
+    _py_cutoff_iso_g = f"{_awt_prev_yr_i}-{cutoff[5:7]}"
+    _ytd_l_eop_g = (
+        (logos_all or {}).get(_py_cutoff_iso_g, {}).get("logos_eop") or _ytd_py_all.get("l_eop", 0),
+        (logos_all or {}).get(cutoff, {}).get("logos_eop") or _ytd_cur_all.get("l_eop", 0),
+    )
+
     out["arr_walk_table"] = {
         "quarters": _g5,
         "ytd_labels": _g_ytd_labels,
@@ -4286,40 +4584,46 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
                 "label": "Logo EoP (000's)",
                 "rows": [
                     _aw_row("Total EoP", "rb", "g",
-                        _l_eop, lambda v: f"{v/1e3:.1f}" if v != 0 else "—"),
+                        _l_eop, lambda v: f"{v/1e3:.1f}" if v != 0 else "—",
+                        ytd_raw=_ytd_l_eop_g),
                     _aw_row("Logo Monthly New Adds %", "rt", None,
                         _l_new_pct, lambda v: f"{v*100:.1f}%" if v != 0 else "—",
-                        pp=True),
+                        pp=True, ytd_raw=_ytd_g("l_new_pct")),
                     _aw_row("Logo Monthly Churn %", "rt", None,
                         _l_churn, lambda v: f"{v*100:.1f}%" if v != 0 else "—",
-                        pp=True, invert=True),
+                        pp=True, invert=True, ytd_raw=_ytd_g("l_churn_pct")),
                 ],
             },
             {
                 "label": "ARR Walk — Spot ($M)",
                 "rows": [
-                    _aw_row("ARR BoP",            "rb", "g", _a_bop,                    lambda v: f"{v/1e6:.1f}" if v != 0 else "—"),
-                    _aw_row("Additions",           "in", "g", _a_additions,            _fa_delta),
-                    _aw_row("Recovered",           "in", "g", _a_recov,                 _fa_delta),
-                    _aw_row("Net Churn",           "in", "r", _a_net_churn,             _fa_delta, nv=True),
-                    _aw_row("Net Expansion",       "in", "a", _a_net_exp_full,          _fa_delta),
-                    _aw_row("(+/−) FX Impact",     "in", "s", _a_fx,                   _fa_delta),
-                    _aw_row("ARR EoP",             "rb", "g", _a_eop,                   lambda v: f"{v/1e6:.1f}" if v != 0 else "—", raws_py=_a_eop_py),
-                    _aw_row("Net New ARR",         "rb", "a", _a_net_new,               _fa_delta),
-                    _aw_row("ARR EoP (Constant Currency)",        "in", "s", _a_eop_cc,                lambda v: f"{v/1e6:.1f}" if v != 0 else "—"),
+                    _aw_row("ARR BoP",            "rb", "g", _a_bop,                    lambda v: f"{v/1e6:.1f}" if v != 0 else "—", ytd_raw=_ytd_g("a_bop")),
+                    _aw_row("Additions",           "in", "g", _a_additions,            _fa_delta, ytd_raw=_ytd_g("a_new")),
+                    _aw_row("Recovered",           "in", "g", _a_recov,                 _fa_delta, ytd_raw=_ytd_g("a_recov")),
+                    _aw_row("Net Churn",           "in", "r", _a_net_churn,             _fa_delta, nv=True, ytd_raw=_ytd_g("a_net_churn")),
+                    _aw_row("Net Expansion",       "in", "a", _a_net_exp_full,          _fa_delta, ytd_raw=(_ytd_net_exp_full_g(_ytd_py_all), _ytd_net_exp_full_g(_ytd_cur_all))),
+                    _aw_row("(+/−) FX Impact",     "in", "s", _a_fx,                   _fa_delta, ytd_raw=_ytd_g("a_fx")),
+                    _aw_row("ARR EoP",             "rb", "g", _a_eop,                   lambda v: f"{v/1e6:.1f}" if v != 0 else "—", raws_py=_a_eop_py, ytd_raw=_ytd_g("a_eop"),
+                        extra_sub=("Net New ARR", [_fa_delta(v) for v in _a_net_new])),
+                    _aw_row("ARR EoP (Constant Currency)", "rb", "g", _a_eop_cc,         lambda v: f"{v/1e6:.1f}" if v != 0 else "—", raws_py=_a_eop_cc_py, ytd_raw=_ytd_g("a_cc_eop"),
+                        extra_sub=("Net New ARR (Constant Currency)", [_fa_delta(v) for v in _a_net_new_cc])),
                 ],
             },
             {
                 "label": "SaaS Metrics",
                 "rows": [
                     _aw_row("S&M Total Spend ($K)", "in", "s", _a_sm,
-                        lambda v: f"${v/1e3:.0f}K" if v else "—", invert=True),
+                        lambda v: f"${v/1e3:.0f}K" if v else "—", invert=True,
+                        ytd_raw=(_sm_for_ytd(_awt_prev_yr_i), _sm_for_ytd(_awt_cur_yr_i))),
                     _aw_row("CAC Payback (meses)", "in", "g", _a_payback,
-                        lambda v: f"{v:.1f}" if v else "—", invert=True),
-                    _aw_row("FX — COP/USD", "rt", "s", _a_cop,
-                        lambda v: f"{v:,.0f}" if v else "—", invert=True),
-                    _aw_row("FX — MXN/USD", "rt", "s", _a_mxn,
-                        lambda v: f"{v:.1f}" if v else "—", invert=True),
+                        lambda v: f"{v:.1f}" if v else "—", invert=True,
+                        ytd_raw=(_payback_for_ytd(_awt_prev_yr_i), _payback_for_ytd(_awt_cur_yr_i))),
+                    _aw_row("ARPA Adds", "in", "g", _a_arpa_new,
+                        lambda v: f"${v:,.0f}" if v else "—",
+                        ytd_raw=(_arpa_new_for_ytd(_awt_prev_yr_i), _arpa_new_for_ytd(_awt_cur_yr_i))),
+                    _aw_row("ARPA Churn", "in", "r", _a_arpa_churn,
+                        lambda v: f"${v:,.0f}" if v else "—", invert=True,
+                        ytd_raw=(_arpa_churn_for_ytd(_awt_prev_yr_i), _arpa_churn_for_ytd(_awt_cur_yr_i))),
                 ],
             },
         ],
@@ -4352,9 +4656,11 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
                            for i in range(len(_s5))]
             _sa_sm      = [_sm_for_q_seg(_seg_name, q) for q in _s5]
             _sa_pb      = [_payback_for_q_seg(_seg_name, q) for q in _s5]
-            _sa_cop     = [_fx_avg_q("colombia", q) for q in _s5]
-            _sa_mxn     = [_fx_avg_q("mexico",   q) for q in _s5]
+            _sa_arpa_new   = [_arpa_new_for_q(q, _seg_name) for q in _s5]
+            _sa_arpa_churn = [_arpa_churn_for_q(q, _seg_name) for q in _s5]
+            _sa_net_new_cc = [_net_new_cc_for_q(q, _seg_name) for q in _s5]
             _sa_eop_py  = [_sq_data.get(_py_lbl(q), {}).get("a_eop") or 0 for q in _s5]
+            _sa_eop_cc_py = [_sq_data.get(_py_lbl(q), {}).get("a_cc_eop") or 0 for q in _s5]
             # Bug real corregido (2026-08-17): usar el año de _s5[0]/_s5[-1] (primer/último
             # período MOSTRADO en la tabla de 5 columnas) daba "YTD'26"/"YTD'26" duplicado
             # cada vez que las 5 columnas caían dentro del mismo año calendario (ej. Mar-26
@@ -4396,9 +4702,11 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
 
             _sa_sm      = [_sm_for_m(m) for m in _s5m_iso]
             _sa_pb      = [_payback_for_m(m) for m in _s5m_iso]
-            _sa_cop     = [_fx_rates.get(("colombia", m), 0) for m in _s5m_iso]
-            _sa_mxn     = [_fx_rates.get(("mexico",   m), 0) for m in _s5m_iso]
+            _sa_arpa_new   = [_arpa_new_for_m_g(m, _seg_name) for m in _s5m_iso]
+            _sa_arpa_churn = [_arpa_churn_for_m_g(m, _seg_name) for m in _s5m_iso]
+            _sa_net_new_cc = [_net_new_cc_for_m_g(m, _seg_name) for m in _s5m_iso]
             _sa_eop_py  = [_sm_data.get(_m_py_lbl(lbl), {}).get("a_eop") or 0 for lbl in _s5]
+            _sa_eop_cc_py = [_sm_data.get(_m_py_lbl(lbl), {}).get("a_cc_eop") or 0 for lbl in _s5]
             # Bug real corregido (2026-08-17): usar el año de _s5[0]/_s5[-1] (primer/último
             # período MOSTRADO en la tabla de 5 columnas) daba "YTD'26"/"YTD'26" duplicado
             # cada vez que las 5 columnas caían dentro del mismo año calendario (ej. Mar-26
@@ -4439,6 +4747,18 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         _sa_net_exp_full= [_sa_upsell[i] + _sa_down[i] + _sa_pricing[i] + _sa_cross_new[i] + _sa_cross_ro[i] - _sa_cross_dn[i]
                                                                                                                   for i in range(len(_s5))]
 
+        # ── Valores YTD reales por segmento (ver bloque análogo GLO más arriba y
+        #    docstring de _aw_row() para el bug corregido 2026-09-25).
+        _ytd_cur_seg = seg_metrics.get(_seg_name, {}).get("ytd", {}).get(_awt_cur_yr_s, {})
+        _ytd_py_seg  = seg_metrics.get(_seg_name, {}).get("ytd", {}).get(_awt_prev_yr_s, {})
+
+        def _ytd_s(key, _yc=_ytd_cur_seg, _yp=_ytd_py_seg):
+            return (_yp.get(key, 0), _yc.get(key, 0))
+
+        def _ytd_net_exp_full_s(d):
+            return (d.get("a_upsell", 0) + d.get("a_down", 0) + d.get("a_pricing", 0)
+                    + d.get("a_cross_new", 0) + d.get("a_cross_readop", 0) - d.get("a_cross_down", 0))
+
         _prod["arr_walk_table"] = {
             "quarters":   _s5,
             "ytd_labels": _ytd_labels,
@@ -4446,36 +4766,44 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
                 {
                     "label": "Logo EoP (000's)",
                     "rows": [
-                        _aw_row("Total EoP", "rb", "g", _sl_eop, lambda v: f"{v/1e3:.1f}" if v != 0 else "—"),
-                        _aw_row("Logo Monthly New Adds %", "rt", None, _sl_new_pct, lambda v: f"{v*100:.1f}%" if v != 0 else "—", pp=True),
-                        _aw_row("Logo Monthly Churn %", "rt", None, _sl_churn, lambda v: f"{v*100:.1f}%" if v != 0 else "—", pp=True, invert=True),
+                        _aw_row("Total EoP", "rb", "g", _sl_eop, lambda v: f"{v/1e3:.1f}" if v != 0 else "—",
+                            ytd_raw=_ytd_s("l_eop")),
+                        _aw_row("Logo Monthly New Adds %", "rt", None, _sl_new_pct, lambda v: f"{v*100:.1f}%" if v != 0 else "—", pp=True,
+                            ytd_raw=_ytd_s("l_new_pct")),
+                        _aw_row("Logo Monthly Churn %", "rt", None, _sl_churn, lambda v: f"{v*100:.1f}%" if v != 0 else "—", pp=True, invert=True,
+                            ytd_raw=_ytd_s("l_churn_pct")),
                     ],
                 },
                 {
                     "label": "ARR Walk — Spot ($M)",
                     "rows": [
-                        _aw_row("ARR BoP",           "rb", "g", _sa_bop,      lambda v: f"{v/1e6:.1f}" if v != 0 else "—"),
-                        _aw_row("Additions",        "in", "g", _sa_additions,    _fa_delta),
-                        _aw_row("Recovered",        "in", "g", _sa_recov,        _fa_delta),
-                        _aw_row("Net Churn",        "in", "r", _sa_net_churn,    _fa_delta, nv=True),
-                        _aw_row("Net Expansion",    "in", "a", _sa_net_exp_full, _fa_delta),
-                        _aw_row("(+/−) FX Impact",  "in", "s", _sa_fx,          _fa_delta),
-                        _aw_row("ARR EoP",                   "rb", "g", _sa_eop,    lambda v: f"{v/1e6:.1f}" if v != 0 else "—", raws_py=_sa_eop_py),
-                        _aw_row("Net New ARR",               "rb", "a", _sa_net_new, _fa_delta),
-                        _aw_row("ARR EoP (Constant Currency)", "in", "s", _sa_eop_cc, lambda v: f"{v/1e6:.1f}" if v != 0 else "—"),
+                        _aw_row("ARR BoP",           "rb", "g", _sa_bop,      lambda v: f"{v/1e6:.1f}" if v != 0 else "—", ytd_raw=_ytd_s("a_bop")),
+                        _aw_row("Additions",        "in", "g", _sa_additions,    _fa_delta, ytd_raw=_ytd_s("a_new")),
+                        _aw_row("Recovered",        "in", "g", _sa_recov,        _fa_delta, ytd_raw=_ytd_s("a_recov")),
+                        _aw_row("Net Churn",        "in", "r", _sa_net_churn,    _fa_delta, nv=True, ytd_raw=_ytd_s("a_net_churn")),
+                        _aw_row("Net Expansion",    "in", "a", _sa_net_exp_full, _fa_delta, ytd_raw=(_ytd_net_exp_full_s(_ytd_py_seg), _ytd_net_exp_full_s(_ytd_cur_seg))),
+                        _aw_row("(+/−) FX Impact",  "in", "s", _sa_fx,          _fa_delta, ytd_raw=_ytd_s("a_fx")),
+                        _aw_row("ARR EoP",                   "rb", "g", _sa_eop,    lambda v: f"{v/1e6:.1f}" if v != 0 else "—", raws_py=_sa_eop_py, ytd_raw=_ytd_s("a_eop"),
+                            extra_sub=("Net New ARR", [_fa_delta(v) for v in _sa_net_new])),
+                        _aw_row("ARR EoP (Constant Currency)", "rb", "g", _sa_eop_cc, lambda v: f"{v/1e6:.1f}" if v != 0 else "—", raws_py=_sa_eop_cc_py, ytd_raw=_ytd_s("a_cc_eop"),
+                            extra_sub=("Net New ARR (Constant Currency)", [_fa_delta(v) for v in _sa_net_new_cc])),
                     ],
                 },
                 {
                     "label": "SaaS Metrics",
                     "rows": [
                         _aw_row("S&M Total Spend ($K)", "in", "s", _sa_sm,
-                            lambda v: f"${v/1e3:.0f}K" if v else "—", invert=True),
+                            lambda v: f"${v/1e3:.0f}K" if v else "—", invert=True,
+                            ytd_raw=(_sm_for_ytd(_awt_prev_yr_i, _seg_name), _sm_for_ytd(_awt_cur_yr_i, _seg_name))),
                         _aw_row("CAC Payback (meses)", "in", "g", _sa_pb,
-                            lambda v: f"{v:.1f}" if v else "—", invert=True),
-                        _aw_row("FX — COP/USD", "rt", "s", _sa_cop,
-                            lambda v: f"{v:,.0f}" if v else "—", invert=True),
-                        _aw_row("FX — MXN/USD", "rt", "s", _sa_mxn,
-                            lambda v: f"{v:.1f}" if v else "—", invert=True),
+                            lambda v: f"{v:.1f}" if v else "—", invert=True,
+                            ytd_raw=(_payback_for_ytd(_awt_prev_yr_i, _seg_name), _payback_for_ytd(_awt_cur_yr_i, _seg_name))),
+                        _aw_row("ARPA Adds", "in", "g", _sa_arpa_new,
+                            lambda v: f"${v:,.0f}" if v else "—",
+                            ytd_raw=(_arpa_new_for_ytd(_awt_prev_yr_i, _seg_name), _arpa_new_for_ytd(_awt_cur_yr_i, _seg_name))),
+                        _aw_row("ARPA Churn", "in", "r", _sa_arpa_churn,
+                            lambda v: f"${v:,.0f}" if v else "—", invert=True,
+                            ytd_raw=(_arpa_churn_for_ytd(_awt_prev_yr_i, _seg_name), _arpa_churn_for_ytd(_awt_cur_yr_i, _seg_name))),
                     ],
                 },
             ],

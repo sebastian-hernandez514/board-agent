@@ -9,3 +9,10 @@ prev_month_label:  "July 2026"     # Mes anterior (para comparaciones MoM)
 quarter_label:     "3Q26"          # Quarter del período activo
 prev_year:         "2025"          # Año anterior (para comparaciones YoY)
 year:              2026            # Año actual
+
+# Decisión editorial 2026-09-22: NPS no se publica este mes (no es un dato desactualizado,
+# es a propósito) — la slide se elimina por completo, sin overlay ni rastro (ver F3.7 en
+# board_agent/slide_registry.py). Quitar esta línea (o el "nps" de la lista) el mes que se
+# quiera volver a mostrar — este archivo se reescribe entero cada mes, así que el flag no
+# sobrevive solo a septiembre.
+hide_slides: ["nps"]

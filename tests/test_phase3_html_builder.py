@@ -24,6 +24,13 @@ def isolated_dirs(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, "OUTPUT_DIR", output_dir)
     monkeypatch.setattr(paths, "CEO_YAML", tmp_path / "ceo.yaml")
     monkeypatch.setattr(paths, "NPS_SNAPSHOT_YAML", tmp_path / "nps_snapshot.yaml")
+    # CONFIG_YAML también aislado (2026-09-22): _hidden_slides_this_month() en
+    # slide_registry.py lo lee para el flag `hide_slides` — sin este monkeypatch, los tests
+    # de NPS/Discussion Topics leían el data/config.yaml REAL del repo (con hide_slides:
+    # ["nps"] cargado esa sesión) y se comportaban distinto según qué hubiera commiteado en
+    # ese momento. Un archivo inexistente acá es intencional: _hidden_slides_this_month()
+    # atrapa la excepción y devuelve [] (sin slides ocultas), el default esperado.
+    monkeypatch.setattr(paths, "CONFIG_YAML", tmp_path / "config.yaml")
     return data_dir, output_dir
 
 
@@ -173,38 +180,50 @@ def test_flag_stale_discussion_topics_pass_when_sentinel_matches(isolated_dirs):
     assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
 
 
-def test_flag_stale_discussion_topics_replaces_body_with_fixed_placeholder(isolated_dirs):
-    """Fix 2026-07-24 (pedido explícito del usuario): el número real de topics/slides varía
-    mes a mes (1, 2 o 3 topics = 3, 6 o 9 slides) — taparlas todas in-place llenaría el board
-    con tantos "contenido pendiente" como topics hubiera el mes anterior. En vez de eso, todo
-    el <body> se reemplaza por un esqueleto FIJO: portada genérica "Discussion Topics" + 2
-    slides vacías tapadas, sin importar cuánto contenido (ni qué títulos) había antes."""
+def test_flag_stale_discussion_topics_overlays_only_old_prefixed_classes(isolated_dirs):
+    """Fix 2026-09-23 (bug real reportado por el usuario): hasta entonces este check
+    reemplazaba TODO el <body> por un esqueleto fijo cuando el marcador global quedaba viejo
+    — asumía que TODOS los topics del archivo eran del mismo mes (todos vigentes o todos
+    desactualizados). Dejó de ser cierto cuando se agregó un topic nuevo (NDR, clase
+    genérica "slide") junto a topics viejos sin actualizar (Expansion/Core Acquisition,
+    clases propias dtexp-/dtca-board-slide) — reemplazar todo el body tapaba también el
+    contenido nuevo y vigente. Ahora tapa SOLO las clases de los topics viejos conocidos
+    (dtexp-/dtca-board-slide), dejando cualquier otro contenido (clase "slide" genérica)
+    intacto, sin overlay ni rastro de haber sido tocado.
+
+    También cubre el gotcha real encontrado en la misma sesión: 2 de las 11 slides reales de
+    dtca- llevan una clase extra pegada (class="dtca-board-slide dark") — sin el fix de
+    regex en _overlay_stale_slides, esas 2 se colaban sin taparse."""
     data_dir, output_dir = isolated_dirs
     html_path = output_dir / "2_discussion_topic.html"
     html_path.write_text(
         '<!-- updated_for_month: 2026-05 --><html><head></head><body>'
-        '<div class="slide section-divider"><div class="section-title">Mexico Strategy</div></div>'
-        '<div class="dt-slide">topic 1 viejo</div>'
-        '<div class="slide section-divider"><div class="section-title">ICP Split Costa Rica Update</div></div>'
-        '<div class="dt-slide">topic 2 viejo</div>'
+        '<div class="slide section-divider"><div class="section-title">NDR</div></div>'
+        '<div class="slide">contenido nuevo — NDR slide 1</div>'
+        '<div class="slide section-divider"><div class="section-title">Expansion</div></div>'
+        '<div class="dtexp-board-slide">topic viejo — Expansion</div>'
+        '<div class="dtca-board-slide dark">topic viejo — Core Acquisition (variante dark)</div>'
+        '<div class="dtca-board-slide">topic viejo — Core Acquisition (normal)</div>'
         '</body></html>', encoding="utf-8")
 
     r = f3._flag_stale_discussion_topics("2026-06")
     assert r.status == "WARN"
     assert "2026-05" in r.detail and "2026-06" in r.detail
-    assert "portada + 2 slide(s)" in r.detail
+    assert "3 slide(s)" in r.detail  # 1 dtexp- + 2 dtca- (incluida la variante dark)
 
     new_html = html_path.read_text(encoding="utf-8")
-    # contenido viejo (de cualquier cantidad de topics que hubiera) ya no aparece
-    assert "Mexico Strategy" not in new_html
-    assert "ICP Split Costa Rica Update" not in new_html
-    assert "topic 1 viejo" not in new_html
-    assert "topic 2 viejo" not in new_html
-    # esqueleto fijo: 1 portada genérica + exactamente 2 slides vacías tapadas
-    assert new_html.count('class="slide section-divider"') == 1
-    assert "Discussion Topic" in new_html
-    assert new_html.count('class="dt-slide stale-slide"') == 2
-    assert new_html.count('class="stale-overlay"') == 2
+    # contenido nuevo (clase "slide" genérica) queda intacto, sin overlay
+    assert "contenido nuevo — NDR slide 1" in new_html
+    assert new_html.count('class="slide stale-slide"') == 0
+    # contenido viejo SÍ queda tapado, las 3 ocurrencias (incluida la variante " dark")
+    assert new_html.count('class="dtexp-board-slide stale-slide"') == 1
+    assert new_html.count('class="dtca-board-slide dark stale-slide"') == 1
+    assert new_html.count('class="dtca-board-slide stale-slide"') == 1
+    assert new_html.count('class="stale-overlay"') == 3
+    # el contenido de las slides viejas NO se borra, solo se tapa con el overlay encima
+    assert "topic viejo — Expansion" in new_html
+    assert "topic viejo — Core Acquisition (variante dark)" in new_html
+    assert "topic viejo — Core Acquisition (normal)" in new_html
 
 
 def test_flag_stale_discussion_topics_skip_when_no_body_found(isolated_dirs):
@@ -373,6 +392,9 @@ def test_flag_stale_nps_skip_when_no_slide_found(tmp_path, isolated_dirs):
 _HEADCOUNT_HTML = '''<html><head></head><body>
   <div class="slide section-cover">portada, clase distinta a "hc-slide", no se toca</div>
   <div class="hc-slide">Headcount by Team de mayo</div>
+  <!-- ============================================================
+       SLIDE 3 — People & Talent
+       ============================================================ -->
   <div class="hc-slide">People &amp; Talent de mayo</div>
 </body></html>'''
 
@@ -398,9 +420,14 @@ def test_flag_stale_headcount_pass_when_sentinel_matches(isolated_dirs):
     assert "stale-overlay" not in html_path.read_text(encoding="utf-8")
 
 
-def test_flag_stale_headcount_warns_and_overlays_both_slides(isolated_dirs):
-    """Mismo hueco que tenía Discussion Topics: comentarios de Headcount desactualizados deben
-    taparse — ambas slides (.hc-slide), no la portada (clase distinta)."""
+def test_flag_stale_headcount_warns_and_overlays_only_people_and_talent(isolated_dirs):
+    """Bug real corregido 2026-09-22: hasta entonces este check tapaba las 2 slides de
+    hc-slide juntas con un solo marcador global (`updated_for_month`) — pero desde que se le
+    quitó el bloque "Comments" a "Headcount by Team" (2026-08-19), esa slide quedó 100% data
+    de RS (metrics.hc.*), sin nada editorial que pueda quedar vieja, y sin embargo se seguía
+    tapando igual que "People & Talent" (que sí tiene editorial.pt_action_title). Ahora solo
+    debe taparse "People & Talent" — "Headcount by Team" queda SIEMPRE visible con su data
+    fresca, sin importar qué tan vieja esté la editorial de la otra slide."""
     data_dir, output_dir = isolated_dirs
     html_path = output_dir / "7_headcount.html"
     html_path.write_text(f"<!-- updated_for_month: 2026-05 -->\n{_HEADCOUNT_HTML}", encoding="utf-8")
@@ -408,12 +435,13 @@ def test_flag_stale_headcount_warns_and_overlays_both_slides(isolated_dirs):
     r = f3._flag_stale_headcount("2026-06")
     assert r.status == "WARN"
     assert "2026-05" in r.detail and "2026-06" in r.detail
+    assert "1 slide" in r.detail  # solo 1, no 2 — la regresión real que motivó este test
 
     new_html = html_path.read_text(encoding="utf-8")
-    assert new_html.count('class="hc-slide stale-slide"') == 2
-    assert 'class="slide section-cover"' in new_html  # portada no tocada
-    assert "Headcount by Team de mayo" in new_html  # conservado, solo tapado
-    assert "People &amp; Talent de mayo" in new_html
+    assert new_html.count('class="hc-slide stale-slide"') == 1
+    assert 'class="hc-slide">Headcount by Team de mayo</div>' in new_html  # NO tapada
+    assert 'class="slide section-cover"' in new_html  # portada tampoco tocada
+    assert "People &amp; Talent de mayo" in new_html  # conservado, solo tapado
 
 
 def test_flag_stale_headcount_skip_when_no_slide_found(isolated_dirs):

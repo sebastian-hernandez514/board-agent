@@ -184,41 +184,57 @@
     .aw-di-t { background:#30b8b7; } .aw-di-b { background:#185FA5; }
     .aw-di-o { background:#E87722; } .aw-di-s { background:#cbd5e1; }
 
-    /* ── Global Country Performance (slide 7) ── */
+    /* ── Global / Country Performance (Core vs Lite) — rediseño 2026-09-29, sin espejo,
+       sin puntos de color, headers agrupados por segmento. Ver memory/project_board_agent.md
+       para el mockup aprobado. Este bloque se mantiene IDÉNTICO en templates/3_arr_walk.j2
+       (países) — no diverger, ambos renderizan al mismo documento final. ── */
     .cp-slide { display: flex; flex-direction: column; }
-    .cp-slide .slide-header { background: #0f172b; padding: 13px 40px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-    .cp-slide .slide-header .title { color: #fff; font-size: 15px; font-weight: 600; }
-    .cp-slide .slide-header .period { color: #14b8a6; font-size: 12px; font-weight: 500; }
+    .cp-slide .slide-header { background: #0f172b; padding: 11px 40px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .cp-slide .slide-header .title { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+    .cp-slide .slide-header .period { color: #14b8a6; font-size: 11.5px; font-weight: 500; }
     .aw-slide .slide-header { padding: 13px 40px; }
     .aw-slide .slide-header .title { font-size: 15px; font-weight: 600; }
     .aw-slide .slide-header .period { font-size: 12px; }
-    .cp-inner { padding: 14px 28px 10px; display: flex; flex-direction: column; gap: 9px; }
-    .bf-cards { display: flex; border-bottom: 1px solid #eaeaea; flex-shrink: 0; }
-    .bf-card { flex: 1; padding: 13px 36px; text-align: center; }
-    .bf-card:first-child { border-right: 1px solid #eaeaea; }
-    .bf-card-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; margin-bottom: 4px; }
+    .cp-inner { padding: 13px 30px 4px; display: flex; flex-direction: column; gap: 9px; flex: 1; min-height: 0; }
+
+    .bf-cards { display: flex; gap: 14px; flex-shrink: 0; }
+    .bf-card { flex: 1; border-radius: 8px; padding: 17px 22px; display: flex; align-items: center; gap: 20px; }
+    .bf-card-id { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 116px; }
+    .bf-card-label { font-size: 11px; font-weight: 800; letter-spacing: .08em; }
     .bf-card-label.c { color: #534AB7; } .bf-card-label.l { color: #1D9E75; }
-    .bf-card-value { font-size: 32px; font-weight: 800; color: #111; margin: 2px 0; letter-spacing: -1.5px; }
-    .bf-card-sub { font-size: 11px; color: #888; }
+    .bf-card-value { font-size: 33px; font-weight: 800; color: #0f172b; letter-spacing: -1px; line-height: 1; }
+    .bf-card-deltas { display: flex; gap: 22px; flex: 1; }
+    .bf-card-delta { display: flex; flex-direction: column; gap: 3px; }
+    .bf-card-delta .k { font-size: 9px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: #94a3b8; }
+    .bf-card-delta .v { font-size: 15px; font-weight: 700; font-family: 'DM Mono', monospace; }
+    .bf-card-delta .v.cc { color: #64748b; font-weight: 600; }
     .bf-pos { color: #1D9E75; } .bf-neg { color: #D85A30; }
-    .bf-table { padding: 4px 14px 0; overflow: hidden; }
+
+    .bf-table { flex: 1; min-height: 0; }
     .bf-table table { width: 100%; border-collapse: collapse; }
-    .bf-table thead th { font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #bbb; padding: 3px 8px 7px; border-bottom: 1px solid #eaeaea; }
+    .bf-table thead .grp th { padding: 0 8px 3px; border-bottom: none; }
+    .bf-table thead .grp .grp-label { display: block; text-align: center; font-size: 9.5px; font-weight: 800; letter-spacing: .1em; padding: 3px 0; border-radius: 4px 4px 0 0; }
+    .bf-table thead .grp .grp-label.core { color: #534AB7; background: rgba(83,74,183,0.06); }
+    .bf-table thead .grp .grp-label.lite { color: #1D9E75; background: rgba(29,158,117,0.06); }
+    .bf-table thead .sub th { font-size: 9px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; padding: 3px 8px 5px; border-bottom: 1px solid #eef0f3; }
+    .bf-table thead .sub th.metric-h { text-align: left; }
     .bf-table th.right { text-align: right; } .bf-table th.left { text-align: left; } .bf-table th.center { text-align: center; }
-    .bf-table tbody tr { border-bottom: 1px solid #f4f4f4; }
+    .bf-table th.core-col { background: rgba(83,74,183,0.06); }
+    .bf-table th.lite-col { background: rgba(29,158,117,0.06); }
+    .bf-table tbody tr { border-bottom: 1px solid #f5f6f8; }
     .bf-table tbody tr:last-child { border-bottom: none; }
-    .bf-table tbody tr.alert-row { background: rgba(216,90,48,0.05); }
-    .bf-table td { padding: 6px 8px; font-size: 11px; vertical-align: middle; }
-    .bf-table .metric-col { text-align: center; border-left: 1px solid #f0f0f0; border-right: 1px solid #f0f0f0; padding: 6px 12px; }
-    .bf-table .metric-name { font-size: 10px; color: #888; font-weight: 500; white-space: nowrap; }
-    .bf-table .metric-name.primary { color: #222; font-weight: 700; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
-    .sd-green { background: #1D9E75; } .sd-red { background: #D85A30; } .sd-amber { background: #E8A020; } .sd-gray { background: #ccc; }
-    .bf-table .val { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; color: #111; white-space: nowrap; }
-    .bf-table .val.alert { color: #D85A30; }
-    .bf-table .delta { font-size: 10px; white-space: nowrap; color: #bbb; }
-    .bf-table .pos { color: #1D9E75; } .bf-table .neg { color: #D85A30; } .bf-table .neutral { color: #444; }
+    .bf-table tbody tr.sub-row .metric-name { font-style: italic; padding-left: 20px; }
+    .bf-table td { padding: 4.8px 8px; font-size: 11.3px; vertical-align: middle; line-height: 1.2; }
     .bf-table td.right { text-align: right; } .bf-table td.left { text-align: left; }
+    .bf-table td.core-col { border-left: 1px solid #eef0f3; }
+    .bf-table td.lite-col { border-left: 1px solid #eef0f3; }
+    .metric-col { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .bf-table .metric-name { font-size: 11.5px; color: #475569; font-weight: 500; white-space: nowrap; }
+    .bf-table .metric-name.primary { color: #0f172b; font-weight: 700; }
+    .bf-table .val { font-family: 'DM Mono', monospace; font-size: 11.5px; font-weight: 700; color: #0f172b; white-space: nowrap; }
+    .bf-table .val.alert { color: #D85A30; }
+    .bf-table .delta { font-family: 'DM Mono', monospace; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+    .bf-table .pos { color: #1D9E75; } .bf-table .neg { color: #D85A30; } .bf-table .neutral { color: #94a3b8; font-weight: 500; }
     /* ============================================================
        HL — Highlights / Lowlights (slide 2, layout expandido)
        ============================================================ */
@@ -228,6 +244,18 @@
       gap: 0 28px;
       flex: 1;
       align-items: start;
+    }
+    /* Menos bullets que lo usual (<=10, sin sub-items) → letra más grande y cómoda.
+       Umbral pensado para que un mes con muchos H&L (con sub-bullets, como jul-26) siga
+       cayendo en el tamaño compacto de base.css y no desborde la slide. */
+    .hl-outer-grid.hl-roomy .hl-item {
+      font-size: 11px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .hl-outer-grid.hl-roomy .hl-financial-text {
+      font-size: 10px;
+      line-height: 1.55;
     }
     .hl-items-2col {
       display: grid;
@@ -309,7 +337,10 @@
       <span class="period">{% if metrics.is_quarter_end %}{{ config.quarter_label }}{% else %}{{ config.month_label }}{% endif %}</span>
     </div>
     <div class="slide-body" style="padding-top: 20px; padding-bottom: 16px;">
-      <div class="hl-outer-grid">
+      {% set _hl_bullets = editorial.highlights|length + editorial.lowlights|length
+         + editorial.highlights|selectattr('children', 'defined')|map(attribute='children')|map('length')|sum
+         + editorial.lowlights|selectattr('children', 'defined')|map(attribute='children')|map('length')|sum %}
+      <div class="hl-outer-grid{{ ' hl-roomy' if _hl_bullets <= 10 else '' }}">
 
         <!-- Lowlights + Financial Update -->
         <div>
@@ -715,7 +746,7 @@
             <td class="aw-ytd{% if row.nv %} aw-nv{% endif %}">{{ row.ytd_cur }}</td>
             <td class="aw-ytd aw-ytd-vs{% if row.nv %} aw-nv{% endif %}">{{ row.ytd_vs if row.ytd_vs is defined else '—' }}</td>
           </tr>
-          {% if row.label == "ARR EoP" %}
+          {% if row.label in ["ARR EoP", "ARR EoP (Constant Currency)"] %}
           <tr class="aw-delta-sub">
             <td>{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</td>
             {% for c in row.qoq_cells %}<td{% if loop.last %} class="aw-cur"{% endif %}>{{ c.v }}</td>{% endfor %}
@@ -726,6 +757,13 @@
             {% for c in row.yoy_cells %}<td{% if loop.last %} class="aw-cur"{% endif %}>{{ c.v }}</td>{% endfor %}
             <td></td><td></td><td></td>
           </tr>
+          {% if row.extra_sub %}
+          <tr class="aw-delta-sub">
+            <td>{{ row.extra_sub.label }}</td>
+            {% for v in row.extra_sub.cells %}<td{% if loop.last %} class="aw-cur"{% endif %}>{{ v }}</td>{% endfor %}
+            <td></td><td></td><td></td>
+          </tr>
+          {% endif %}
           {% endif %}
           {% endfor %}
           {% if not loop.last %}<tr class="aw-gap"><td colspan="{{ metrics.arr_walk_table.quarters|length + 4 }}"></td></tr>{% endif %}
@@ -751,54 +789,74 @@
     <div class="cp-inner">
       <div class="bf-cards">
         <div class="bf-card">
-          <div class="bf-card-label c">● CORE</div>
-          <div class="bf-card-value">{{ metrics.global_country.core.arr }}</div>
-          <div class="bf-card-sub">ARR &nbsp;<span class="{{ 'bf-pos' if metrics.global_country.core.arr_mom_positive else 'bf-neg' }}">{{ metrics.global_country.core.arr_mom }}</span> {% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %} &nbsp;<span class="{{ 'bf-pos' if metrics.global_country.core.arr_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.core.arr_yoy }}</span> YoY</div>
+          <div class="bf-card-id">
+            <span class="bf-card-label c">● CORE</span>
+            <span class="bf-card-value">{{ metrics.global_country.core.arr }}</span>
+          </div>
+          <div class="bf-card-deltas">
+            <div class="bf-card-delta"><span class="k">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="v {{ 'bf-pos' if metrics.global_country.core.arr_mom_positive else 'bf-neg' }}">{{ metrics.global_country.core.arr_mom }}</span></div>
+            <div class="bf-card-delta"><span class="k">YoY (USD)</span><span class="v {{ 'bf-pos' if metrics.global_country.core.arr_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.core.arr_yoy }}</span></div>
+            <div class="bf-card-delta"><span class="k">YoY (C.C)</span><span class="v cc {{ 'bf-pos' if metrics.global_country.core.arr_cc_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.core.arr_cc_yoy }}</span></div>
+          </div>
         </div>
         <div class="bf-card">
-          <div class="bf-card-label l">● LITE</div>
-          <div class="bf-card-value">{{ metrics.global_country.lite.arr }}</div>
-          <div class="bf-card-sub">ARR &nbsp;<span class="{{ 'bf-pos' if metrics.global_country.lite.arr_mom_positive else 'bf-neg' }}">{{ metrics.global_country.lite.arr_mom }}</span> {% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %} &nbsp;<span class="{{ 'bf-pos' if metrics.global_country.lite.arr_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.lite.arr_yoy }}</span> YoY</div>
+          <div class="bf-card-id">
+            <span class="bf-card-label l">● LITE</span>
+            <span class="bf-card-value">{{ metrics.global_country.lite.arr }}</span>
+          </div>
+          <div class="bf-card-deltas">
+            <div class="bf-card-delta"><span class="k">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="v {{ 'bf-pos' if metrics.global_country.lite.arr_mom_positive else 'bf-neg' }}">{{ metrics.global_country.lite.arr_mom }}</span></div>
+            <div class="bf-card-delta"><span class="k">YoY (USD)</span><span class="v {{ 'bf-pos' if metrics.global_country.lite.arr_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.lite.arr_yoy }}</span></div>
+            <div class="bf-card-delta"><span class="k">YoY (C.C)</span><span class="v cc {{ 'bf-pos' if metrics.global_country.lite.arr_cc_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.lite.arr_cc_yoy }}</span></div>
+          </div>
         </div>
       </div>
       <div class="bf-table">
         <table>
           <thead>
-            <tr>
-              <th class="right" style="width:64px;">YoY</th>
-              <th class="right" style="width:56px;">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</th>
-              <th class="right" style="width:80px;">Value</th>
-              <th class="center" style="width:140px;">Metric</th>
-              <th class="left" style="width:80px; padding-left:16px;">Value</th>
-              <th class="right" style="width:56px;">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</th>
-              <th class="right" style="width:64px;">YoY</th>
+            <tr class="grp">
+              <th></th>
+              <th colspan="3" class="core-col"><span class="grp-label core">CORE</span></th>
+              <th colspan="3" class="lite-col"><span class="grp-label lite">LITE</span></th>
+            </tr>
+            <tr class="sub">
+              <th class="metric-h left">Metric</th>
+              <th class="right core-col">Value</th><th class="right core-col">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</th><th class="right core-col">YoY</th>
+              <th class="right lite-col">Value</th><th class="right lite-col">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</th><th class="right lite-col">YoY</th>
             </tr>
           </thead>
           <tbody>
             {% for row in metrics.global_country.butterfly_rows %}
-            {% set is_alert = false %}
-            {% set dot_class = 'sd-red' if row.metric_name in ['Net New ARR', 'Churn Rate'] else ('sd-amber' if row.metric_name in ['CAC', 'Logos Growth'] else ('sd-gray' if row.metric_name == 'ARPA' else 'sd-green')) %}
-            {% set is_primary = row.metric_name in ['New ARR', 'Net New ARR', 'Churn Rate'] %}
+            {% set is_primary = row.metric_name in ['Net Logo Adds', 'Net New ARR', 'New ARR', 'Churn Rate'] %}
             {% set neutral_delta = row.metric_name == 'Investment' %}
             {% set invert_delta = row.metric_name in ['Churn Rate', 'CAC'] %}
-            <tr{% if is_alert %} class="alert-row"{% endif %}>
-              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.core.yoy_positive if invert_delta else row.core.yoy_positive) else 'neg') }} right">{{ row.core.yoy }}</td>
-              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.core.mom_positive if invert_delta else row.core.mom_positive) else 'neg') }} right">{{ row.core.mom }}</td>
-              <td class="val{{ ' alert' if row.core.val_negative else '' }} right">{{ row.core.val }}</td>
-              <td class="metric-col"><span class="status-dot {{ dot_class }}"></span><span class="metric-name{{ ' primary' if is_primary else '' }}">{{ row.metric_name }}</span></td>
-              <td class="val{{ ' alert' if row.lite.val_negative else '' }} left" style="padding-left:16px;">{{ row.lite.val }}</td>
-              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.lite.mom_positive if invert_delta else row.lite.mom_positive) else 'neg') }} right">{{ row.lite.mom }}</td>
-              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.lite.yoy_positive if invert_delta else row.lite.yoy_positive) else 'neg') }} right">{{ row.lite.yoy }}</td>
+            <tr>
+              <td class="metric-col"><span class="metric-name{{ ' primary' if is_primary else '' }}">{{ row.metric_name }}</span></td>
+              <td class="val{{ ' alert' if row.core.val_negative else '' }} right core-col">{{ row.core.val }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.core.mom_positive if invert_delta else row.core.mom_positive) else 'neg') }} right core-col">{{ row.core.mom }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.core.yoy_positive if invert_delta else row.core.yoy_positive) else 'neg') }} right core-col">{{ row.core.yoy }}</td>
+              <td class="val{{ ' alert' if row.lite.val_negative else '' }} right lite-col">{{ row.lite.val }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.lite.mom_positive if invert_delta else row.lite.mom_positive) else 'neg') }} right lite-col">{{ row.lite.mom }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.lite.yoy_positive if invert_delta else row.lite.yoy_positive) else 'neg') }} right lite-col">{{ row.lite.yoy }}</td>
             </tr>
             {% if row.metric_name == 'ARPA' %}
-            <tr class="aw-rt">
-              <td class="delta {{ 'pos' if row.arpa_new_core_yoy_positive else 'neg' }} right">{{ row.arpa_new_core_yoy }}</td>
-              <td class="delta {{ 'pos' if row.arpa_new_core_mom_positive else 'neg' }} right">{{ row.arpa_new_core_mom }}</td>
-              <td class="right">{{ row.arpa_new_core }}</td>
-              <td class="metric-col" style="font-style:italic;">ARPA New logos</td>
-              <td style="padding-left:16px;">{{ row.arpa_new_lite }}</td>
-              <td class="delta {{ 'pos' if row.arpa_new_lite_mom_positive else 'neg' }} right">{{ row.arpa_new_lite_mom }}</td>
-              <td class="delta {{ 'pos' if row.arpa_new_lite_yoy_positive else 'neg' }} right">{{ row.arpa_new_lite_yoy }}</td>
+            <tr>
+              <td class="metric-col" style="font-style:italic; padding-left:20px;">ARPA New Logos</td>
+              <td class="right core-col">{{ row.arpa_new_core }}</td>
+              <td class="delta {{ 'pos' if row.arpa_new_core_mom_positive else 'neg' }} right core-col">{{ row.arpa_new_core_mom }}</td>
+              <td class="delta {{ 'pos' if row.arpa_new_core_yoy_positive else 'neg' }} right core-col">{{ row.arpa_new_core_yoy }}</td>
+              <td class="right lite-col">{{ row.arpa_new_lite }}</td>
+              <td class="delta {{ 'pos' if row.arpa_new_lite_mom_positive else 'neg' }} right lite-col">{{ row.arpa_new_lite_mom }}</td>
+              <td class="delta {{ 'pos' if row.arpa_new_lite_yoy_positive else 'neg' }} right lite-col">{{ row.arpa_new_lite_yoy }}</td>
+            </tr>
+            <tr>
+              <td class="metric-col" style="font-style:italic; padding-left:20px;">ARPA Churned Logos</td>
+              <td class="right core-col">{{ row.arpa_churned_core }}</td>
+              <td class="delta {{ 'neg' if row.arpa_churned_core_mom_positive else 'pos' }} right core-col">{{ row.arpa_churned_core_mom }}</td>
+              <td class="delta {{ 'neg' if row.arpa_churned_core_yoy_positive else 'pos' }} right core-col">{{ row.arpa_churned_core_yoy }}</td>
+              <td class="right lite-col">{{ row.arpa_churned_lite }}</td>
+              <td class="delta {{ 'neg' if row.arpa_churned_lite_mom_positive else 'pos' }} right lite-col">{{ row.arpa_churned_lite_mom }}</td>
+              <td class="delta {{ 'neg' if row.arpa_churned_lite_yoy_positive else 'pos' }} right lite-col">{{ row.arpa_churned_lite_yoy }}</td>
             </tr>
             {% endif %}
             {% endfor %}
