@@ -1,0 +1,3866 @@
+generated_at: 2026-07-10 22:08
+cutoff_month: 2026-05
+arr_total: $29.2M
+is_quarter_end: false
+prev_quarter_label: 1Q26
+arr_mom: '>+999%'
+arr_mom_positive: true
+arr_qoq: 0%
+arr_qoq_positive: true
+arr_vs_budget: +3.6%
+arr_vs_budget_positive: true
+arr_yoy: '>+999%'
+arr_yoy_positive: true
+arr_core_lite_split: Core 59% · Lite 41%
+new_mrr_core_lite_split: Core 34% · Lite 66%
+new_mrr_core_fmt: $24K
+new_mrr_lite_fmt: $47K
+new_mrr: $71K
+new_mrr_mom: 0%
+new_mrr_mom_positive: true
+new_mrr_qoq: 0%
+new_mrr_qoq_positive: true
+new_mrr_vs_budget: -20.1%
+new_mrr_vs_budget_positive: false
+new_mrr_yoy: 0%
+new_mrr_yoy_positive: true
+new_logos: 2.3k
+new_logos_mom: 0%
+new_logos_mom_positive: true
+new_logos_qoq: 0%
+new_logos_qoq_positive: true
+new_logos_vs_budget: -20.8%
+new_logos_yoy: 0%
+new_logos_yoy_positive: true
+net_revenue: $2.4M
+net_revenue_mom: -1.6%
+net_revenue_mom_positive: false
+net_revenue_vs_budget: +3.5%
+net_revenue_vs_budget_positive: true
+net_revenue_yoy: +26.6%
+net_revenue_yoy_positive: true
+gross_margin: 80.9%
+gross_margin_mom: -0.4pp
+gross_margin_vs_budget: -0.3pp
+gross_margin_vs_budget_positive: false
+gross_margin_yoy: -0.7pp
+gross_margin_yoy_positive: false
+ebitda_margin: 7.7%
+ebitda_margin_mom: -3.1pp
+ebitda_margin_mom_positive: false
+ebitda_margin_vs_budget: +4.8pp
+ebitda_margin_vs_budget_positive: true
+ebitda_margin_yoy: +17.9pp
+ebitda_margin_yoy_positive: true
+logo_churn_core: 2.6
+logo_churn_lite: 5.2
+logo_churn_global: 4.2
+logo_churn_vs_budget_pp: '-0.69'
+payback_core: 476.0
+payback_lite: 130.7
+payback_hist: 16
+arr_chart_period_label: 2Q26 – 2Q26
+arr_walk_products:
+- id: core
+  name: Core
+  color: '#534AB7'
+  action_title: ARR Walk Core — 2Q26
+  arr_eop: $16.6M
+  arr_yoy: 0%
+  arr_qoq: 0%
+  logos_eop: 23.4k
+  logos_yoy: 0%
+  logos_qoq: 0%
+  churn_arr: $613K
+  churn_qoq: 0%
+  churn_yoy: 0%
+  net_new_arr: $16.6M
+  net_new_vs: vs $0K en 1Q26
+  net_new_qoq: 0%
+  quarters:
+  - 2Q26
+  arr_new_rec:
+  - 0.33792904632564574
+  arr_expansion:
+  - 0.23672872562992828
+  arr_churn:
+  - 0.6126040504189627
+  arr_contraction:
+  - 0
+  arr_net_new:
+  - 16.582318589575383
+  logos_new:
+  - 757.0
+  logos_expansion:
+  - 0
+  logos_churn:
+  - -22242.0
+  logos_contraction:
+  - 0
+  q_cards:
+  - label: 2Q26
+    bopArr: $0K
+    bopLogos: 0.0
+    eopArr: $0K
+    eopLogos: 0.0
+  y_max: 0.77
+  asks: []
+  arr_walk_table:
+    quarters:
+    - May-26
+    ytd_labels:
+    - YTD'26
+    - YTD'26
+    sections:
+    - label: Logo EoP (000's)
+      rows:
+      - label: Total EoP
+        type: rb
+        dot: g
+        cells:
+        - '23.4'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '23.4'
+        ytd_cur: '23.4'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: Logo Monthly New Adds %
+        type: rt
+        dot: null
+        cells:
+        - —
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: —
+        ytd_cur: —
+        ytd_vs: —
+        ytd_vs_good: null
+        nv: false
+      - label: Logo Monthly Churn %
+        type: rt
+        dot: null
+        cells:
+        - 2.6%
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: 2.6%
+        ytd_cur: 2.6%
+        ytd_vs: +0.0pp
+        ytd_vs_good: false
+        nv: false
+    - label: ARR Walk — Spot ($M)
+      rows:
+      - label: ARR BoP
+        type: rb
+        dot: g
+        cells:
+        - —
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: —
+        ytd_cur: —
+        ytd_vs: —
+        ytd_vs_good: null
+        nv: false
+      - label: Additions
+        type: in
+        dot: g
+        cells:
+        - '0.3'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '0.3'
+        ytd_cur: '0.3'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: Recovered
+        type: in
+        dot: g
+        cells:
+        - '0.0'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '0.0'
+        ytd_cur: '0.0'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: Net Churn
+        type: in
+        dot: r
+        cells:
+        - (0.4)
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: (0.4)
+        ytd_cur: (0.4)
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: true
+      - label: Net Expansion
+        type: in
+        dot: a
+        cells:
+        - '0.1'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '0.1'
+        ytd_cur: '0.1'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: (+/−) FX Impact
+        type: in
+        dot: s
+        cells:
+        - '16.5'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '16.5'
+        ytd_cur: '16.5'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: ARR EoP
+        type: rb
+        dot: g
+        cells:
+        - '16.6'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '16.6'
+        ytd_cur: '16.6'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: Net New ARR
+        type: rb
+        dot: a
+        cells:
+        - '16.6'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '16.6'
+        ytd_cur: '16.6'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: ARR EoP (Constant Currency)
+        type: in
+        dot: s
+        cells:
+        - '16.6'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '16.6'
+        ytd_cur: '16.6'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+    - label: SaaS Metrics
+      rows:
+      - label: S&M Total Spend ($K)
+        type: in
+        dot: s
+        cells:
+        - $0K
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: $0K
+        ytd_cur: $0K
+        ytd_vs: +0%
+        ytd_vs_good: false
+        nv: false
+      - label: CAC Payback (meses)
+        type: in
+        dot: g
+        cells:
+        - '476.0'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '476.0'
+        ytd_cur: '476.0'
+        ytd_vs: +0%
+        ytd_vs_good: false
+        nv: false
+      - label: FX — COP/USD
+        type: rt
+        dot: s
+        cells:
+        - 3,714
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: 3,714
+        ytd_cur: 3,714
+        ytd_vs: +0%
+        ytd_vs_good: false
+        nv: false
+      - label: FX — MXN/USD
+        type: rt
+        dot: s
+        cells:
+        - '17.3'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '17.3'
+        ytd_cur: '17.3'
+        ytd_vs: +0%
+        ytd_vs_good: false
+        nv: false
+- id: lite
+  name: Lite
+  color: '#1D9E75'
+  action_title: ARR Walk Lite — 2Q26
+  arr_eop: $11.6M
+  arr_yoy: 0%
+  arr_qoq: 0%
+  logos_eop: 35.5k
+  logos_yoy: 0%
+  logos_qoq: 0%
+  churn_arr: $830K
+  churn_qoq: 0%
+  churn_yoy: 0%
+  net_new_arr: $11.6M
+  net_new_vs: vs $0K en 1Q26
+  net_new_qoq: 0%
+  quarters:
+  - 2Q26
+  arr_new_rec:
+  - 0.7125227161592017
+  arr_expansion:
+  - 0.17953592505767646
+  arr_churn:
+  - 0.8296405474510058
+  arr_contraction:
+  - 0
+  arr_net_new:
+  - 11.583927700780643
+  logos_new:
+  - 2324.0
+  logos_expansion:
+  - 0
+  logos_churn:
+  - -32245.0
+  logos_contraction:
+  - 0
+  q_cards:
+  - label: 2Q26
+    bopArr: $0K
+    bopLogos: 0.0
+    eopArr: $0K
+    eopLogos: 0.0
+  y_max: 1.04
+  asks: []
+  arr_walk_table:
+    quarters:
+    - May-26
+    ytd_labels:
+    - YTD'26
+    - YTD'26
+    sections:
+    - label: Logo EoP (000's)
+      rows:
+      - label: Total EoP
+        type: rb
+        dot: g
+        cells:
+        - '35.5'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '35.5'
+        ytd_cur: '35.5'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: Logo Monthly New Adds %
+        type: rt
+        dot: null
+        cells:
+        - —
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: —
+        ytd_cur: —
+        ytd_vs: —
+        ytd_vs_good: null
+        nv: false
+      - label: Logo Monthly Churn %
+        type: rt
+        dot: null
+        cells:
+        - 5.2%
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: 5.2%
+        ytd_cur: 5.2%
+        ytd_vs: +0.0pp
+        ytd_vs_good: false
+        nv: false
+    - label: ARR Walk — Spot ($M)
+      rows:
+      - label: ARR BoP
+        type: rb
+        dot: g
+        cells:
+        - —
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: —
+        ytd_cur: —
+        ytd_vs: —
+        ytd_vs_good: null
+        nv: false
+      - label: Additions
+        type: in
+        dot: g
+        cells:
+        - '0.6'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '0.6'
+        ytd_cur: '0.6'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: Recovered
+        type: in
+        dot: g
+        cells:
+        - '0.1'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '0.1'
+        ytd_cur: '0.1'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: Net Churn
+        type: in
+        dot: r
+        cells:
+        - (0.6)
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: (0.6)
+        ytd_cur: (0.6)
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: true
+      - label: Net Expansion
+        type: in
+        dot: a
+        cells:
+        - '0.1'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '0.1'
+        ytd_cur: '0.1'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: (+/−) FX Impact
+        type: in
+        dot: s
+        cells:
+        - '11.3'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '11.3'
+        ytd_cur: '11.3'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: ARR EoP
+        type: rb
+        dot: g
+        cells:
+        - '11.6'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '11.6'
+        ytd_cur: '11.6'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: Net New ARR
+        type: rb
+        dot: a
+        cells:
+        - '11.6'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '11.6'
+        ytd_cur: '11.6'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+      - label: ARR EoP (Constant Currency)
+        type: in
+        dot: s
+        cells:
+        - '11.6'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '11.6'
+        ytd_cur: '11.6'
+        ytd_vs: +0%
+        ytd_vs_good: true
+        nv: false
+    - label: SaaS Metrics
+      rows:
+      - label: S&M Total Spend ($K)
+        type: in
+        dot: s
+        cells:
+        - $0K
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: $0K
+        ytd_cur: $0K
+        ytd_vs: +0%
+        ytd_vs_good: false
+        nv: false
+      - label: CAC Payback (meses)
+        type: in
+        dot: g
+        cells:
+        - '130.7'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '130.7'
+        ytd_cur: '130.7'
+        ytd_vs: +0%
+        ytd_vs_good: false
+        nv: false
+      - label: FX — COP/USD
+        type: rt
+        dot: s
+        cells:
+        - 3,714
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: 3,714
+        ytd_cur: 3,714
+        ytd_vs: +0%
+        ytd_vs_good: false
+        nv: false
+      - label: FX — MXN/USD
+        type: rt
+        dot: s
+        cells:
+        - '17.3'
+        qoq: —
+        qoq_good: null
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        yoy_cells:
+        - v: —
+          good: null
+        ytd_prev: '17.3'
+        ytd_cur: '17.3'
+        ytd_vs: +0%
+        ytd_vs_good: false
+        nv: false
+alanube:
+  arr_bop: N/A
+  arr_eop: N/A
+  arr_delta_display: N/A
+  new_accounts: N/A
+  issuing: N/A
+  onboarding: N/A
+  wf_bop_accounts: N/A
+  wf_new_arr: N/A
+  wf_new_accounts: N/A
+  wf_new_note: Pendiente de fuente RS
+  wf_churn_arr: N/A
+  wf_churn_accounts: N/A
+  wf_churn_note: Pendiente de fuente RS
+  wf_upside_arr: N/A
+  wf_upside_note: Cuentas en onboarding
+  wf_eop_accounts: N/A
+countries:
+- team: CO
+  name: Colombia
+  flag: 🇨🇴
+  action_title: 🇨🇴 Colombia — Core vs Lite Performance
+  core:
+    arr: $10.9M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  lite:
+    arr: $7.1M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  butterfly_rows:
+  - metric_name: Investment
+    core:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Net New ARR
+    core:
+      val: $10.9M
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $7.1M
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: Logos Growth
+    core:
+      val: +17,513
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: +26,916
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: New Logos
+    core:
+      val: '415'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 1,026
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: New ARR
+    core:
+      val: $146K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $252K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: ARPA
+    core:
+      val: $52
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $22
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: CAC
+    core:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Churn Rate
+    core:
+      val: 2.8%
+      val_negative: false
+      mom: +0.7%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 5.1%
+      val_negative: false
+      mom: +4.5%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: Payback
+    core:
+      val: 348.0 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 111.1 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+- team: MX
+  name: México
+  flag: 🇲🇽
+  action_title: 🇲🇽 México — Core vs Lite Performance
+  core:
+    arr: $1.6M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  lite:
+    arr: $1.2M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  butterfly_rows:
+  - metric_name: Investment
+    core:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Net New ARR
+    core:
+      val: $1.6M
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $1.2M
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: Logos Growth
+    core:
+      val: +1,946
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: +2,859
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: New Logos
+    core:
+      val: '84'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: '197'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: New ARR
+    core:
+      val: $49K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $72K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: ARPA
+    core:
+      val: $68
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $34
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: CAC
+    core:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Churn Rate
+    core:
+      val: 2.4%
+      val_negative: false
+      mom: -10.5%
+      mom_positive: false
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 5.4%
+      val_negative: false
+      mom: +22.2%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: Payback
+    core:
+      val: 815.8 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 242.9 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+- team: DR
+  name: Rep. Dominicana
+  flag: 🇩🇴
+  action_title: 🇩🇴 Rep. Dominicana — Core vs Lite Performance
+  core:
+    arr: $2.7M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  lite:
+    arr: $2.2M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  butterfly_rows:
+  - metric_name: Investment
+    core:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Net New ARR
+    core:
+      val: $2.7M
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $2.2M
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: Logos Growth
+    core:
+      val: +1,858
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: +2,974
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: New Logos
+    core:
+      val: '49'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: '319'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: New ARR
+    core:
+      val: $49K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $190K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: ARPA
+    core:
+      val: $120
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $62
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: CAC
+    core:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Churn Rate
+    core:
+      val: 1.9%
+      val_negative: false
+      mom: -35.0%
+      mom_positive: false
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 5.8%
+      val_negative: false
+      mom: +1.8%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: Payback
+    core:
+      val: 1155.3 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 123.1 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+- team: CR
+  name: Costa Rica
+  flag: 🇨🇷
+  action_title: 🇨🇷 Costa Rica — Core vs Lite Performance
+  core:
+    arr: $480K
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  lite:
+    arr: $380K
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  butterfly_rows:
+  - metric_name: Investment
+    core:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Net New ARR
+    core:
+      val: $480K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $380K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: Logos Growth
+    core:
+      val: '+577'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: '+927'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: New Logos
+    core:
+      val: '35'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: '70'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: New ARR
+    core:
+      val: $23K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $23K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: ARPA
+    core:
+      val: $69
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: $34
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: CAC
+    core:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: N/A
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Churn Rate
+    core:
+      val: 3.2%
+      val_negative: false
+      mom: +91.8%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 4.4%
+      val_negative: false
+      mom: -10.1%
+      mom_positive: false
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+  - metric_name: Payback
+    core:
+      val: 458.1 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+    lite:
+      val: 173.7 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"></svg>
+global_country:
+  action_title: 🌎 Global — Core vs Lite Performance
+  core:
+    arr: $16.6M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  lite:
+    arr: $11.6M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+  butterfly_rows:
+  - metric_name: Investment
+    core:
+      val: $0K
+      val_negative: false
+      mom: -99.9%
+      mom_positive: false
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: $0K
+      val_negative: false
+      mom: -100.0%
+      mom_positive: false
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Net New ARR
+    core:
+      val: $16.6M
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: $11.6M
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Logos Growth
+    core:
+      val: +23,444
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: +35,530
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: New Logos
+    core:
+      val: '633'
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: 1,704
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: New ARR
+    core:
+      val: $289K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: $565K
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: ARPA
+    core:
+      val: $59
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: $27
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+    arpa_new_core: $38
+    arpa_new_lite: $28
+    arpa_new_core_mom: —
+    arpa_new_core_mom_positive: true
+    arpa_new_core_yoy: —
+    arpa_new_core_yoy_positive: true
+    arpa_new_lite_mom: —
+    arpa_new_lite_mom_positive: true
+    arpa_new_lite_yoy: —
+    arpa_new_lite_yoy_positive: true
+  - metric_name: CAC
+    core:
+      val: $0
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: $0
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Churn Rate
+    core:
+      val: 0.0%
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: 0.0%
+      val_negative: false
+      mom: 0%
+      mom_positive: true
+      yoy: 0%
+      yoy_positive: true
+      sparkline_svg: ''
+  - metric_name: Payback
+    core:
+      val: 476.0 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+    lite:
+      val: 130.7 mo
+      val_negative: false
+      mom: —
+      mom_positive: true
+      yoy: —
+      yoy_positive: true
+      sparkline_svg: ''
+new_mrr_ytd: $71K
+new_mrr_ytd_yoy: 0%
+new_mrr_ytd_yoy_positive: true
+new_logos_ytd: 2.3k
+new_logos_ytd_yoy: 0%
+new_logos_ytd_yoy_positive: true
+arr_quarters:
+- 2Q26
+arr_new_rec:
+- 1.0504517624848473
+arr_expansion:
+- 0.4162646506876048
+arr_churn:
+- 1.4422445978699685
+arr_contraction:
+- 0
+arr_net_new:
+- 28.166246290356025
+arr_chart_y_max: 1.8
+logos_new:
+- 3081.0
+logos_expansion:
+- 0
+logos_churn:
+- -54487.0
+logos_contraction:
+- 0
+arr_q_cards:
+- label: 2Q26
+  bopArr: $0K
+  bopLogos: 0.0
+  eopArr: $0K
+  eopLogos: 0.0
+arr_eop_qtd: $28.2M
+net_new_arr_qtd: $28.2M
+net_new_arr_prev_qtd: $0K
+net_new_arr_qoq: 0%
+logos_eop_qtd: 59.0k
+logos_qoq: 0%
+logos_yoy: 0%
+smb_logos_eop: 58974
+smb_logos_yoy: 0%
+smb_logos_yoy_positive: true
+smb_logos_net_adds: 57568
+accountant_logos_eop: N/A
+accountant_logos_mom: N/A
+accountant_logos_mom_positive: true
+accountant_logos_yoy: N/A
+accountant_logos_yoy_positive: true
+accountant_logos_net_adds: N/A
+logo_churn_qoq: 0%
+logo_churn_yoy: 0%
+logo_churn_qtd_avg: N/A
+arr_walk_raw_buckets:
+  a_new_base_t0: 777998.7968852934
+  a_new_cross_t0: 76305.2366687715
+  a_recov: 196147.72893078232
+  a_react: 475759.14713518834
+  a_churn: 1442244.5978699685
+  a_upsell: 416264.6506876048
+  a_down: -320190.273415928
+  a_pricing: 157101.5545419006
+  a_cross_new: 68566.08689270704
+  a_cross_readop: 39971.624410932316
+  a_cross_down: 91958.68858851845
+  a_fx: 27812525.02407726
+arr_walk_table:
+  quarters:
+  - May-26
+  ytd_labels:
+  - YTD'25
+  - YTD'26
+  sections:
+  - label: Logo EoP (000's)
+    rows:
+    - label: Total EoP
+      type: rb
+      dot: g
+      cells:
+      - '59.0'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '59.0'
+      ytd_cur: '59.0'
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: false
+    - label: Logo Monthly New Adds %
+      type: rt
+      dot: null
+      cells:
+      - 10.4%
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: 10.4%
+      ytd_cur: 10.4%
+      ytd_vs: +0.0pp
+      ytd_vs_good: true
+      nv: false
+    - label: Logo Monthly Churn %
+      type: rt
+      dot: null
+      cells:
+      - 4.2%
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: 4.2%
+      ytd_cur: 4.2%
+      ytd_vs: +0.0pp
+      ytd_vs_good: false
+      nv: false
+  - label: ARR Walk — Spot ($M)
+    rows:
+    - label: ARR BoP
+      type: rb
+      dot: g
+      cells:
+      - —
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: —
+      ytd_cur: —
+      ytd_vs: —
+      ytd_vs_good: null
+      nv: false
+    - label: Additions
+      type: in
+      dot: g
+      cells:
+      - '0.9'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '0.9'
+      ytd_cur: '0.9'
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: false
+    - label: Recovered
+      type: in
+      dot: g
+      cells:
+      - '0.2'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '0.2'
+      ytd_cur: '0.2'
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: false
+    - label: Net Churn
+      type: in
+      dot: r
+      cells:
+      - (1.0)
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: (1.0)
+      ytd_cur: (1.0)
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: true
+    - label: Net Expansion
+      type: in
+      dot: a
+      cells:
+      - '0.3'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '0.3'
+      ytd_cur: '0.3'
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: false
+    - label: (+/−) FX Impact
+      type: in
+      dot: s
+      cells:
+      - '27.8'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '27.8'
+      ytd_cur: '27.8'
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: false
+    - label: ARR EoP
+      type: rb
+      dot: g
+      cells:
+      - '28.2'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '28.2'
+      ytd_cur: '28.2'
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: false
+    - label: Net New ARR
+      type: rb
+      dot: a
+      cells:
+      - '28.2'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '28.2'
+      ytd_cur: '28.2'
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: false
+    - label: ARR EoP (Constant Currency)
+      type: in
+      dot: s
+      cells:
+      - '28.2'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '28.2'
+      ytd_cur: '28.2'
+      ytd_vs: +0%
+      ytd_vs_good: true
+      nv: false
+  - label: SaaS Metrics
+    rows:
+    - label: S&M Total Spend ($K)
+      type: in
+      dot: s
+      cells:
+      - $0K
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: $0K
+      ytd_cur: $0K
+      ytd_vs: +0%
+      ytd_vs_good: false
+      nv: false
+    - label: CAC Payback (meses)
+      type: in
+      dot: g
+      cells:
+      - '223.4'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '223.4'
+      ytd_cur: '223.4'
+      ytd_vs: +0%
+      ytd_vs_good: false
+      nv: false
+    - label: FX — COP/USD
+      type: rt
+      dot: s
+      cells:
+      - 3,714
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: 3,714
+      ytd_cur: 3,714
+      ytd_vs: +0%
+      ytd_vs_good: false
+      nv: false
+    - label: FX — MXN/USD
+      type: rt
+      dot: s
+      cells:
+      - '17.3'
+      qoq: —
+      qoq_good: null
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      yoy_cells:
+      - v: —
+        good: null
+      ytd_prev: '17.3'
+      ytd_cur: '17.3'
+      ytd_vs: +0%
+      ytd_vs_good: false
+      nv: false
+pp:
+  total_subs: 59.0k
+  total_subs_delta: '>+999%'
+  total_logos: 59.0k
+  total_logos_delta: '>+999%'
+  period_label: May-26 · ARR in USD
+  spark_months:
+  - May-26
+  products:
+  - id: core
+    name: Core
+    color: '#534AB7'
+    arr: $16.6M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+    logos: 23.4k
+    logos_mom: 0%
+    logos_mom_positive: true
+    logos_yoy: 0%
+    logos_yoy_positive: true
+    spark_arr:
+    - 16.582318589575383
+    spark_data:
+    - 16.582318589575383
+    spark_color: '#534AB7'
+    spark_fill: '#534AB733'
+  - id: lite
+    name: Lite
+    color: '#1D9E75'
+    arr: $11.6M
+    arr_mom: 0%
+    arr_mom_positive: true
+    arr_yoy: 0%
+    arr_yoy_positive: true
+    logos: 35.5k
+    logos_mom: 0%
+    logos_mom_positive: true
+    logos_yoy: 0%
+    logos_yoy_positive: true
+    spark_arr:
+    - 11.583927700780643
+    spark_data:
+    - 11.583927700780643
+    spark_color: '#1D9E75'
+    spark_fill: '#1D9E7533'
+gtm:
+  new_logos_core: 633
+  new_logos_core_mom: 0%
+  new_logos_core_mom_positive: true
+  new_logos_core_yoy: 0%
+  new_logos_core_yoy_positive: true
+  new_logos_lite: 1704
+  new_logos_lite_mom: 0%
+  new_logos_lite_mom_positive: true
+  new_logos_lite_yoy: 0%
+  new_logos_lite_yoy_positive: true
+  new_logos_core_co:
+  - 415
+  new_logos_core_mx:
+  - 84
+  new_logos_core_dr:
+  - 49
+  new_logos_core_cr:
+  - 35
+  new_logos_lite_co:
+  - 1026
+  new_logos_lite_mx:
+  - 197
+  new_logos_lite_dr:
+  - 319
+  new_logos_lite_cr:
+  - 70
+  chart_months:
+  - May-26
+  inv_chart_months:
+  - Apr-26
+  - May-26
+  sm_core_total: $0K
+  sm_core_total_cur: $0K
+  sm_core_total_prev: $440K
+  sm_core_total_prev_year: N/A
+  sm_core_people: 77%
+  sm_core_people_prev: 45%
+  sm_core_people_prev_year: 0%
+  sm_core_paid: 0%
+  sm_core_paid_prev: 47%
+  sm_core_paid_prev_year: 0%
+  sm_core_other: 23%
+  sm_core_other_prev: 9%
+  sm_core_other_prev_year: 0%
+  sm_core_var: -99.9%
+  sm_core_var_positive: false
+  sm_lite_total: $0K
+  sm_lite_total_cur: $0K
+  sm_lite_total_prev: $282K
+  sm_lite_total_prev_year: N/A
+  sm_lite_people: 91%
+  sm_lite_people_prev: 32%
+  sm_lite_people_prev_year: 0%
+  sm_lite_paid: 0%
+  sm_lite_paid_prev: 66%
+  sm_lite_paid_prev_year: 0%
+  sm_lite_other: 9%
+  sm_lite_other_prev: 2%
+  sm_lite_other_prev_year: 0%
+  sm_lite_var: -100.0%
+  sm_lite_var_positive: false
+  paid_media_pct_core_series:
+  - 46.6
+  - 0.2
+  paid_media_pct_lite: 0%
+  paid_media_pct_lite_series:
+  - 65.9
+  - 0.1
+  team_pct_core: 77%
+  team_pct_core_series:
+  - 44.5
+  - 77.2
+  sm_core_paid_series:
+  - 205050
+  - 1
+  sm_core_people_series:
+  - 195858
+  - 233
+  sm_core_other_series:
+  - 38784
+  - 68
+  sm_lite_paid_series:
+  - 186005
+  - 0
+  sm_lite_people_series:
+  - 90021
+  - 121
+  sm_lite_other_series:
+  - 6375
+  - 12
+  top2_concentration: 86%
+  funnel_countries:
+    months:
+    - May-26
+    colombia:
+      signups:
+      - 5480
+      logos:
+      - 1441
+      cvr:
+      - 26.3
+    mexico:
+      signups:
+      - 2599
+      logos:
+      - 281
+      cvr:
+      - 10.8
+    republicaDominicana:
+      signups:
+      - 2066
+      logos:
+      - 368
+      cvr:
+      - 17.8
+    costaRica:
+      signups:
+      - 512
+      logos:
+      - 105
+      cvr:
+      - 20.5
+  flywheel:
+    months:
+    - 'May
+
+      2026'
+    ent_new_adds:
+    - 0
+    ent_churn:
+    - 0
+    ent_stock:
+    - 0
+    lg_new_adds:
+    - 782
+    lg_churn:
+    - 576
+    lg_stock:
+    - 15010
+    q_idx: []
+    q_labels: []
+  supercontadores:
+    corte: Mayo 2026
+    eop: 14996
+    clientes: 7929
+    propia: 7067
+    hist:
+    - m: 2026-05
+      clientes: 7929
+      propia: 7067
+      total: 14996
+    fc:
+      denom: 0
+      trabaja: 0
+      trabaja_pct: 0.0
+      contabiliza: 0
+      contabiliza_pct: 0.0
+      acct_ge1: 0
+      acct_ge1_pct: 0.0
+      acct_ge2: 0
+      acct_ge2_pct: 0.0
+      acct_ge3: 0
+      acct_ge3_pct: 0.0
+      eventos:
+      - k: Factura (ac-invoice-submitted)
+        n: 0
+        pct: 0.0
+        attr: false
+      - k: Asiento contable (ac-journal-created)
+        n: 0
+        pct: 0.0
+        attr: true
+      - k: Catálogo de cuentas
+        n: 0
+        pct: 0.0
+        attr: false
+      - k: Saldos contables
+        n: 0
+        pct: 0.0
+        attr: false
+      - k: Admin XML
+        n: 0
+        pct: 0.0
+        attr: true
+    fc_hist: []
+    sow:
+    - rank: 1
+      contador: ISGA (Oscar Garzon)
+      pais: COL
+      mrr: 2743.37
+      real: 56
+      asoc: 56
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 2
+      contador: Adrián De La Cruz
+      pais: DOM
+      mrr: 2321.2
+      real: 21
+      asoc: 21
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 3
+      contador: Jorge Zuluaga Restrepo
+      pais: COL
+      mrr: 1944.75
+      real: 38
+      asoc: 38
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 4
+      contador: Diana Hernandez Contadora
+      pais: DOM
+      mrr: 1885.9
+      real: 15
+      asoc: 15
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 5
+      contador: Melvin Feliz Cont
+      pais: DOM
+      mrr: 1799.5
+      real: 18
+      asoc: 18
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 6
+      contador: Geo Integral Sistem - Juan Arenas/ Luisa
+      pais: COL
+      mrr: 1676.41
+      real: 34
+      asoc: 34
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 7
+      contador: Marisol Jimenez Betancur
+      pais: COL
+      mrr: 1566.09
+      real: 32
+      asoc: 32
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 8
+      contador: Bigapalternativa (Juan Camilo Alvarez)
+      pais: COL
+      mrr: 1485.58
+      real: 38
+      asoc: 38
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 9
+      contador: CONTABILIDADES ABACO - John Eduar Villa
+      pais: COL
+      mrr: 1459.73
+      real: 48
+      asoc: 48
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 10
+      contador: Alexis - contabilidad.medisolutions
+      pais: DOM
+      mrr: 1283.0
+      real: 12
+      asoc: 12
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 11
+      contador: Yenny
+      pais: MEX
+      mrr: 1277.54
+      real: 26
+      asoc: 26
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 12
+      contador: FTAVAREZ Asesores y consultores
+      pais: DOM
+      mrr: 1270.45
+      real: 11
+      asoc: 11
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 13
+      contador: Luis Alejandro Baquero Robledo
+      pais: COL
+      mrr: 1269.19
+      real: 31
+      asoc: 31
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 14
+      contador: Javier Bermon Franco Contador Gesco
+      pais: COL
+      mrr: 1249.91
+      real: 26
+      asoc: 26
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 15
+      contador: Numbi Contadores Expertos
+      pais: COL
+      mrr: 1209.49
+      real: 45
+      asoc: 45
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 16
+      contador: Seiton Consultores
+      pais: DOM
+      mrr: 1130.6
+      real: 8
+      asoc: 8
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 17
+      contador: Jose Cedeño
+      pais: DOM
+      mrr: 1127.65
+      real: 12
+      asoc: 12
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 18
+      contador: Yilmer Alexander Mosquera - CHOCÓ
+      pais: COL
+      mrr: 1126.77
+      real: 22
+      asoc: 22
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 19
+      contador: LUIS ALEJANDRO SUAREZ
+      pais: COL
+      mrr: 1090.97
+      real: 25
+      asoc: 25
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    - rank: 20
+      contador: GRUPCONT - Alejandro Vargas
+      pais: COL
+      mrr: 1082.33
+      real: 40
+      asoc: 40
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: null
+      delta_yoy: null
+    sow_tot:
+      mrr: 30000
+      real: 558
+      asoc: 558
+      pot: null
+      sow_asoc: 100.0
+      sow_pot: null
+      gap: 0
+      delta_mom: null
+      delta_yoy: null
+  value_events: []
+  own_pct: 47
+  client_pct: 53
+  own_ratio_label: May-26
+rd:
+  months:
+  - May-26
+  products:
+  - name: Accounting
+    eop_subs:
+    - '49.84'
+    pct_logos:
+    - 84.5%
+    churn_rate:
+    - 3.89%
+    avg_ticket:
+    - $27.67
+    pct_core:
+    - 42.3%
+  - name: POS
+    eop_subs:
+    - '11.88'
+    pct_logos:
+    - 20.2%
+    churn_rate:
+    - 4.07%
+    avg_ticket:
+    - $17.94
+    pct_core:
+    - 42.4%
+  - name: Payroll
+    eop_subs:
+    - '9.07'
+    pct_logos:
+    - 15.4%
+    churn_rate:
+    - 2.54%
+    avg_ticket:
+    - $17.04
+    pct_core:
+    - 57.1%
+  - name: Invoicing
+    eop_subs:
+    - '0.90'
+    pct_logos:
+    - 1.5%
+    churn_rate:
+    - 6.74%
+    avg_ticket:
+    - $8.47
+    pct_core:
+    - 27.1%
+  total_subs:
+  - '71.70'
+  total_logos_k:
+  - '58.97'
+nps:
+  score: '46.5'
+  responses: 1,295
+  promoters_pct: 65.3
+  promoters_n: 846
+  passives_pct: 15.1
+  passives_n: 195
+  detractors_pct: 19.6
+  detractors_n: 254
+  by_country:
+  - name: Colombia
+    score: '47.4'
+    bar_pct: 63
+  - name: Mexico
+    score: '52.4'
+    bar_pct: 70
+  - name: Dom. Rep.
+    score: '54.3'
+    bar_pct: 72
+  - name: Costa Rica
+    score: '30.2'
+    bar_pct: 40
+  trend:
+  - name: NPS Global
+    v2: '48.8'
+    v1: '41.6'
+    cur: '46.5'
+    mom: ▲ +4.9
+    mom_class: pos
+    vs2: ▼ -2.3
+    vs2_class: neg
+    vs2_note: null
+  - name: Colombia
+    v2: '49.2'
+    v1: '40.9'
+    cur: '47.4'
+    mom: ▲ +6.5
+    mom_class: pos
+    vs2: ▼ -1.8
+    vs2_class: neg
+    vs2_note: null
+  - name: Mexico
+    v2: '30.8'
+    v1: '45.5'
+    cur: '52.4'
+    mom: ▲ +6.9
+    mom_class: pos
+    vs2: ▲ +21.6
+    vs2_class: pos
+    vs2_note: null
+  - name: Dom. Rep.
+    v2: '62.5'
+    v1: '55.9'
+    cur: '54.3'
+    mom: ▼ -1.6
+    mom_class: neg
+    vs2: ▼ -8.2
+    vs2_class: neg
+    vs2_note: null
+  costa_rica_trend:
+    name: Costa Rica
+    v2: —
+    v1: '21.4'
+    cur: '30.2'
+    mom: ▲ +8.8
+    mom_class: pos
+    vs2: —
+    vs2_class: neu
+    vs2_note: 'Mar: no data'
+  trend_period_label: Mar → Apr → May 2026
+hc:
+  slide2_title: Headcount
+  total: 509
+  new_hires: 11
+  new_hires_sub: in May · 11 YTD
+  attrition: 11
+  turnover_rate: 2.16%
+  turnover_rate_sub: 'FY 2025 average: 0.00'
+  dec_label: Dec-25
+  m1_label: Apr-26
+  m12_label: May-25
+  closing_label: May-26
+  categories:
+  - name: Cost of Revenue
+    row:
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 117
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 132
+      actual_vs_fcst: '-15'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 88.6%
+      share: 23%
+    teams:
+    - name: Customer Experience
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 108
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 122
+      actual_vs_fcst: '-14'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 88.5%
+      share: 21%
+    - name: Customer Success
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 0
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '0'
+      actual_vs_fcst_class: hcs-neu
+      pct_pred: —
+      share: 0%
+    - name: Collection
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 9
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 10
+      actual_vs_fcst: '-1'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 90.0%
+      share: 2%
+  - name: Customer Acquisition Costs
+    row:
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 126
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 153
+      actual_vs_fcst: '-27'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 82.4%
+      share: 25%
+    teams:
+    - name: Growth
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 43
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 60
+      actual_vs_fcst: '-17'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 71.7%
+      share: 8%
+    - name: Sales
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 61
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 81
+      actual_vs_fcst: '-20'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 75.3%
+      share: 12%
+    - name: Accountants
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 4
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 5
+      actual_vs_fcst: '-1'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 80.0%
+      share: 1%
+    - name: Strategic Relationships
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 5
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 7
+      actual_vs_fcst: '-2'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 71.4%
+      share: 1%
+    - name: RevOps
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 13
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '+13'
+      actual_vs_fcst_class: hcs-pos
+      pct_pred: —
+      share: 3%
+  - name: Product & Development
+    row:
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 205
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 218
+      actual_vs_fcst: '-13'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 94.0%
+      share: 40%
+    teams:
+    - name: Development
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 145
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 152
+      actual_vs_fcst: '-7'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 95.4%
+      share: 28%
+    - name: Product
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 60
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 66
+      actual_vs_fcst: '-6'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 90.9%
+      share: 12%
+  - name: General & Administration
+    row:
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 58
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 70
+      actual_vs_fcst: '-12'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 82.9%
+      share: 11%
+    teams:
+    - name: Data
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 22
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 30
+      actual_vs_fcst: '-8'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 73.3%
+      share: 4%
+    - name: Finance
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 24
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 25
+      actual_vs_fcst: '-1'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 96.0%
+      share: 5%
+    - name: People
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 10
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 6
+      actual_vs_fcst: '+4'
+      actual_vs_fcst_class: hcs-pos
+      pct_pred: 166.7%
+      share: 2%
+    - name: Strategic Direction
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 2
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 2
+      actual_vs_fcst: '0'
+      actual_vs_fcst_class: hcs-neu
+      pct_pred: 100.0%
+      share: 0%
+    - name: Talent Acquisition
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 0
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 7
+      actual_vs_fcst: '-7'
+      actual_vs_fcst_class: hcs-neg
+      pct_pred: 0.0%
+      share: 0%
+  - name: Alanube
+    row:
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 3
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '+3'
+      actual_vs_fcst_class: hcs-pos
+      pct_pred: —
+      share: 1%
+    teams:
+    - name: Alanube
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 3
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '+3'
+      actual_vs_fcst_class: hcs-pos
+      pct_pred: —
+      share: 1%
+  - name: Other
+    row:
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 0
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '0'
+      actual_vs_fcst_class: hcs-neu
+      pct_pred: —
+      share: 0%
+    teams:
+    - name: CEO
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 0
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '0'
+      actual_vs_fcst_class: hcs-neu
+      pct_pred: —
+      share: 0%
+    - name: CTO
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 0
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '0'
+      actual_vs_fcst_class: hcs-neu
+      pct_pred: —
+      share: 0%
+    - name: Design
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 0
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '0'
+      actual_vs_fcst_class: hcs-neu
+      pct_pred: —
+      share: 0%
+    - name: Product Manager
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 0
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '0'
+      actual_vs_fcst_class: hcs-neu
+      pct_pred: —
+      share: 0%
+    - name: Talent
+      dec25: 0
+      m1: 0
+      m12: 0
+      closing: 0
+      mom_pct: —
+      mom_class: hcs-neu
+      yoy_pct: —
+      yoy_class: hcs-neu
+      var_ly: —
+      var_ly_class: hcs-neu
+      fcst: 0
+      actual_vs_fcst: '0'
+      actual_vs_fcst_class: hcs-neu
+      pct_pred: —
+      share: 0%
+  active_team_row:
+    dec25: 0
+    m1: 0
+    m12: 0
+    closing: 509
+    share: 100%
+    mom_pct: —
+    mom_class: hcs-neu
+    yoy_pct: —
+    yoy_class: hcs-neu
+    var_ly: —
+    var_ly_class: hcs-neu
+    fcst: 573
+    actual_vs_fcst: '-64'
+    actual_vs_fcst_class: hcs-neg
+    pct_pred: 88.8%
+pt:
+  months:
+  - May
+  - Jun
+  - Jul
+  - Aug
+  - Sep
+  - Oct
+  - Nov
+  - Dec
+  - Jan
+  - Feb
+  - Mar
+  - Apr
+  - May
+  hc_eop:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 509
+  hires:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 11
+  attrition:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 11
+  attrition_pct: &id001
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 2.16
+  turnover_pct: *id001
+  ya_max: 11
+  yhead_max: 509
+  yhead_min: 0
+  ylines_max: 2.16
+  yt_max: 2.16
+churn_tenure:
+  months:
+  - Jan 25
+  - Feb
+  - Mar
+  - Apr
+  - May
+  - Jun
+  - Jul
+  - Aug
+  - Sep
+  - Oct
+  - Nov
+  - Dec
+  - Jan 26
+  - Feb
+  - Mar
+  - Apr
+  - May
+  data:
+    Global:
+      M1-M3:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M4-M6:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M7-M9:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M10-M12:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M13+:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    Core:
+      M1-M3:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M4-M6:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M7-M9:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M10-M12:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M13+:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    Lite:
+      M1-M3:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M4-M6:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M7-M9:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M10-M12:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      M13+:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+chart_arr_history:
+  months:
+  - May-26
+  alegra_spot:
+  - 28.17
+  alegra_cc:
+  - 28.17
+  alanube_spot:
+  - 1011769.62
+  alanube_cc:
+  - 1011769.62
+  new_adds:
+  - 1050
+  net_churn:
+  - -966
+  net_expansion:
+  - 270
+  fx_impact:
+  - 27813
+  net_new:
+  - 28166
+alanube_walk:
+  current_labels:
+  - Apr-26
+  - May-26
+  is_quarter_end: false
+  current_header_label: MoM A%
+  logos:
+    bop:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    new:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    recovered:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    churned:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    eop:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+  arr:
+    bop:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    new:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    recovered:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    expansion:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    contraction:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    churned:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    fx:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    eop:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    otr:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+  finance:
+    growth_pct:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    growth_yoy_pct:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    arr_per_logo:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    churn_rate_pct:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+  operation:
+    docs_mm:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    docs_per_logo_k:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+    price_per_doc:
+      quarters:
+      - —
+      - —
+      - —
+      - —
+      current:
+      - —
+      - —
+      ytd_py: —
+      ytd_cy: —
+      current_delta: —
+      ytd_delta: —
+gross_margin_mom_positive: false
+net_revenue_ytd: $11.7M
+net_revenue_ytd_vs_budget: +6.4%
+net_revenue_ytd_vs_budget_positive: true
+net_revenue_ytd_yoy: +30.5%
+net_revenue_ytd_yoy_positive: true
+gross_margin_ytd: 81.5%
+gross_margin_ytd_vs_budget: +0.6pp
+gross_margin_ytd_vs_budget_positive: true
+gross_margin_ytd_yoy: +0.3pp
+gross_margin_ytd_yoy_positive: true
+ebitda_ytd: $1.2M
+ebitda_ytd_vs_budget: +721.8%
+ebitda_ytd_vs_budget_positive: true
+ebitda_ytd_yoy: +205.2%
+ebitda_ytd_yoy_positive: true
+payback_global: 223.4

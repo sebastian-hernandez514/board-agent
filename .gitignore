@@ -26,13 +26,6 @@ data/.raw_cache.yaml
 # versionado.
 data/.company_mrr_history.json
 
-# boards/ (versiones publicadas) es salida derivada igual que output/ — versioning.py y
-# phase5_diff.py leen del disco local, no de git, así que no le aporta nada a la
-# herramienta. Ponerlo en git sí tiene costo real: HTML de varios MB por versión, cifras
-# financieras reales, para siempre en el historial. El archivo histórico compartido para
-# el equipo va a vivir en Drive (pendiente de integrar), no acá.
-boards/
-
 # csv/ SÍ se versiona a propósito (decisión 2026-07-14): es el insumo real que Finance
 # entrega vía PR (P&L, y Budget hasta que se migre a Metabase) — mismo criterio que
 # data/editorial/*.yaml. Payback.csv y paises_fx.csv NO están acá porque son basura muerta
