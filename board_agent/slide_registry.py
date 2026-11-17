@@ -300,8 +300,23 @@ SLIDE_SPECS = [
         # NDR, que sí es contenido vigente. Ahora tapa SOLO las clases de los topics viejos
         # conocidos — si se agrega un topic nuevo con su propia clase prefijada y también
         # queda desactualizado en algún mes futuro, hay que agregar su clase acá a mano.
-        scope="file", slide_classes=["dtexp-board-slide", "dtca-board-slide"],
-        section_label="Discussion Topics (Expansion / Core Acquisition)",
+        #
+        # Actualizado 2026-10-20 (bug real encontrado en vivo): el topic de agosto ("Alegra's
+        # NRR") reemplazó a Expansion/Core Acquisition/NDR por completo, con clase propia
+        # "ndr-slide" para sus 4 slides de contenido (las 2 originales + las 2 reconstruidas
+        # 2026-09-25, esta última normalizada a la misma clase en templates/2_discussion_
+        # topic.j2 para que quedaran taggeable — antes usaban "slide" genérico, igual que el
+        # contenido NUEVO del caso NDR de abajo, así que F3.5 no las encontraba: 0 slides
+        # tapadas, el contenido de agosto se publicaba tal cual para septiembre sin overlay).
+        # NO se agrega "slide" genérico acá a propósito — taparía también cualquier topic
+        # futuro vigente que la reutilice (ver test
+        # test_flag_stale_discussion_topics_overlays_only_old_prefixed_classes). La portada
+        # del topic (class="slide section-divider") queda sin tapar a propósito, mismo
+        # criterio que ya aplicaba a las portadas de Expansion/Core Acquisition — solo
+        # muestra el nombre del topic, no cifras.
+        scope="file",
+        slide_classes=["dtexp-board-slide", "dtca-board-slide", "ndr-slide"],
+        section_label="Discussion Topics (NRR)",
     ),
     StaleSlideSpec(
         check_id="F3.4", label="Template 4 — ocultar visualmente si está desactualizado",

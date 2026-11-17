@@ -182,6 +182,10 @@
     </div>
   </div>
 
+  {% if False %}{# Oculta 2026-10-23: pedido explícito del usuario — ocultar la slide de NPS.
+       Incluye el divider de entrada y el <script> de esta slide (más abajo, antes de </body>)
+       para que no quede corriendo contra un DOM que ya no existe. Código intacto, reversible
+       cambiando False por True. #}
   <div class="slide-divider">↓</div>
 
   <!-- ============================================================
@@ -456,6 +460,8 @@
   setMonth(DEFAULT_MONTH);
 })();
 </script>
+
+  {% endif %}{# /SLIDE 3 — NPS Alegra, oculta 2026-10-23 #}
 
 </body>
 </html>
