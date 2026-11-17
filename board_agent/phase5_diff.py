@@ -17,12 +17,19 @@ from . import paths, versioning
 from .parsing import find_row, last, parse_cell, parse_money_cell
 from .report import CheckResult
 
-_SLIDE_DIV_RE = re.compile(r'<div class="([^"]*)"')
+_SLIDE_DIV_RE = re.compile(r'class="([^"]*)"')
 
 
 def _slide_chunks(html: str) -> list[str]:
     """Divide el HTML en slides usando los mismos class tokens que R12 (phase4_validator.py) —
-    una lista de substrings, uno por slide, en orden de aparición."""
+    una lista de substrings, uno por slide, en orden de aparición.
+
+    CORREGIDO 2026-10-23: el regex estaba anclado a '<div class="..."', por lo que
+    cualquier slide montada como <section class="slide ..."> (las Growth Slides de
+    3_arr_walk.j2 y las 4 slides de Pricing for Size en 2_discussion_topic.j2) quedaba
+    invisible para D7 — ni se contaba ni se comparaba por cambios, aunque R12
+    (_count_slides en phase4_validator.py, que sí es agnóstico a la etiqueta) las contaba
+    bien. Mismo patrón que R12 ahora: solo class="...", sin exigir la etiqueta <div>."""
     starts = [m.start() for m in _SLIDE_DIV_RE.finditer(html)
               if set(m.group(1).split()) & paths.SLIDE_CLASS_TOKENS]
     return [html[start:(starts[i + 1] if i + 1 < len(starts) else len(html))]

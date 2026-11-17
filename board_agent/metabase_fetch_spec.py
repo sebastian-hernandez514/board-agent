@@ -100,6 +100,26 @@ QUERIES = [
                  "MBQL sea mecánicamente simple (mismo patrón que 'logos consolidados').",
     },
     {
+        "label": "New MRR local por mes (event_logo=NEW)",
+        "sql_const": "_SQL_NEW_MRR_LOCAL",
+        "metabase_tables": ["dm_strategic.fact_customers_mrr"],
+        "status": "exact",
+        "notes": "Agregado 2026-10-23 — pedido de Luis Caro (\"New MRR cc\" en las slides "
+                 "3Q26 Performance / YTD Performance). MRR nuevo en moneda LOCAL por "
+                 "país/mes (event_logo='NEW', Core/Lite, últimos 16 meses rolling desde el "
+                 "mes de corte), para poder revaluarlo a la tasa del mes de corte (mismo "
+                 "criterio que a_cc_eop) y calcular YoY/QoQ en moneda constante. "
+                 "event_logo (NO event_product) es el filtro correcto — verificado contra "
+                 "RS: event_logo='NEW' da $2.63M para 3Q26 (diff 1.3% vs el bucket oficial "
+                 "\"Additions\" del ARR Walk v2, $2.6M); event_product='NEW' da $2.88M "
+                 "(diff ~11%) porque también marca 'NEW' cuando un cliente YA existente "
+                 "adopta un producto nuevo (cross-sell) — event_logo es a nivel de compañía "
+                 "completa, event_product a nivel de fila de producto. La query trae "
+                 "SUM(amount_mrr), SUM(amount_usd_real_mrr) y SUM(amount_usd_mrr) por "
+                 "separado (sin CASE en MBQL) — la selección local-vs-USD por país "
+                 "(_FX_PAISES) se hace en Python, en load_new_mrr_local().",
+    },
+    {
         "label": "logos consolidados",
         "sql_const": "_SQL_LOGOS_ALL",
         "metabase_tables": ["dm_strategic.fact_customers_mrr"],
@@ -153,17 +173,38 @@ QUERIES = [
         "notes": "Grano cliente×mes completo (~3.5K filas), 0 diff (spot-check CLOUDYA SRL). "
                  "Re-verificado 2026-07-10 (mayo-2026, agregado por event_type): 297 filas "
                  "totales, 6 categorías (C/D/N/R/U/vacío), count+sum exactos en las 6 — 0 "
-                 "diferencias. Nota: Metabase representa el event_type vacío como NULL, "
-                 "Redshift como string vacío '' — mismo dato, solo distinta representación del "
-                 "vacío entre motores, no afecta la agregación.",
+                 "diferencias. Metabase representa el event_type vacío como NULL, Redshift "
+                 "como string vacío '' — mismo dato, pero NO es inofensivo: cualquier SQL que "
+                 "filtre con `event_type <> 'C'` (sin COALESCE) excluye en silencio TODAS las "
+                 "filas NULL, porque `NULL <> 'C'` evalúa a NULL, no a TRUE — bug real "
+                 "encontrado en vivo 2026-10-20, 266 de 374 filas de sept-2026 vía Metabase "
+                 "tenían NULL y se perdían $312,873 de ARR (total $1,149,767 en vez de "
+                 "$1,151,978 — confirmado exacto contra CSV y Redshift). Los meses ya cerrados "
+                 "no mostraron el problema (0 filas NULL); aparece en los meses recientes, "
+                 "sugiere que el sync a Metabase convierte '' a NULL solo para la cola más "
+                 "nueva de datos. _SQL_ALANUBE_ARR (fetch_metrics.py) ya se corrigió con "
+                 "`COALESCE(event_type,'') <> 'C'` — cualquier query nueva sobre esta tabla, "
+                 "corrida vía Metabase, debe usar el mismo patrón NULL-safe. El consumidor en "
+                 "Python (_build_alanube_monthly, compara `!= \"C\"` sobre el valor ya traído) "
+                 "no tiene este problema — `None != \"C\"` es True en Python, a diferencia de "
+                 "SQL.",
     },
     {
         "label": "Payback (bi_strategic.payback_cohort_results)",
         "sql_const": "load_payback (SQL inline)",
         "metabase_tables": ["dm_strategic.payback_cohort_results"],
-        "status": "exact",
+        "status": "exact_with_data_lag",
         "notes": "15 dimensiones, filtro model='nc', 0 diff. Re-verificado 2026-07-10: las 15 "
-                 "dimensiones, COUNT(*)=54 y SUM(pb_base) cada una, 0 diferencias en todas.",
+                 "dimensiones, COUNT(*)=54 y SUM(pb_base) cada una, 0 diferencias en todas. "
+                 "Degradado a exact_with_data_lag el 2026-10-22: el usuario corrió "
+                 "CALL bi_strategic.refresh_payback() y Redshift quedó con generated_at=2026-10-22 "
+                 "en las 855 filas (model='nc'), septiembre con datos reales (antes 0.0 en las "
+                 "15 dimensiones — ver memory/feedback_...payback_ytd... o project_board_agent.md). "
+                 "dm_strategic.payback_cohort_results vía Metabase seguía en el snapshot anterior "
+                 "(generated_at=2026-10-16, septiembre en cero) varias horas después del refresh — "
+                 "mismo patrón de desfase de sync que fact_cac_version_segments (investment), antes "
+                 "no documentado para esta tabla. Verificar freshness (MAX(generated_at) del mes de "
+                 "corte) antes de confiar en el cache de Metabase, igual que con investment.",
     },
     {
         "label": "Headcount EoP (fact_headcount_eop)",

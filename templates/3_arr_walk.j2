@@ -6,7 +6,7 @@
   <title>Alegra Board — ARR Walk</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/base.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
@@ -70,6 +70,60 @@
     .aw-di { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:5px; vertical-align:middle; }
     .aw-di-g { background:#30b8b7; } .aw-di-b { background:#185FA5; }
     .aw-di-r { background:#E87722; } .aw-di-a { background:#f59e0b; } .aw-di-s { background:#cbd5e1; }
+
+    /* ── Slide "ARR Walk — Core & Lite (Combined View)" (2026-10-21, pedido Lucas Vassalo) —
+       tabla fusionada, columna de labels compartida (Core y Lite tienen las mismas filas),
+       con bloques Core/Lite agrupados. Paleta limpia: fondo blanco, el color de cada
+       producto queda solo en el texto "Core"/"Lite" + borde inferior — la separación entre
+       bloques se marca con borde vertical, no con relleno de color. ── */
+    .aw-merged { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .aw-merged thead th { text-align: center; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #94a3b8; padding: 3px 2px; white-space: nowrap; background: #fff; overflow: hidden; }
+    tr.awg-group th.awg-core { color: #534AB7; font-size: 12px; font-weight: 700; letter-spacing: 0.3px; text-transform: none; padding: 4px; border-bottom: 3px solid #534AB7; }
+    tr.awg-group th.awg-lite { color: #1D9E75; font-size: 12px; font-weight: 700; letter-spacing: 0.3px; text-transform: none; padding: 4px; border-bottom: 3px solid #1D9E75; border-left: 1px solid #e2e8f0; }
+    tr.awg-sub th { font-size: 7.5px; color: #94a3b8; border-bottom: 1px solid #e2e8f0; }
+    tr.awg-sub th.awg-lite-actual { border-left: 1px solid #e2e8f0; }
+    tr.awg-q th { font-size: 8.5px; color: #475569; border-bottom: 1.5px solid #e2e8f0; padding: 3px 2px 4px; }
+    tr.awg-q th.awg-core-ytd { font-weight: 700; border-left: 1px dashed #cbd5e1; }
+    tr.awg-q th.awg-core-ytd + th.awg-lite-actual { border-left: 1px solid #e2e8f0; }
+    tr.awg-q th.awg-lite-ytd { font-weight: 700; border-left: 1px dashed #cbd5e1; }
+    /* 2026-10-23 — altura de fila bajada de 14.5px a 13px: Luis Caro pidió sumar las
+       filas CAC y ARPA (base total) a "SaaS Metrics" (ver fetch_metrics.py), lo que agregó
+       2 filas más a esta tabla ya ajustada y causó overflow silencioso (+18px, R18). Un
+       primer ajuste a 13.5px lo dejó en 0px de margen real (sin cambiar el HTML, una
+       corrida mostró +5px de overflow por variación de renderizado entre corridas de
+       Playwright/Chromium headless) — bajado a 13px para dejar margen de verdad. */
+    .aw-merged tbody td { text-align: right; padding: 0 3px; height: 13px; font-family: 'DM Mono', monospace; font-size: 9px; color: #475569; white-space: nowrap; border-bottom: 1px solid #f1f5f9; }
+    .aw-merged tbody td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 9.5px; color: #475569; white-space: normal; }
+    .aw-merged tbody td.awg-core-ytd { font-weight: 600; border-left: 1px dashed #cbd5e1; }
+    .aw-merged tbody td.awg-core-ytd + td.awg-lite-actual { border-left: 1px solid #e2e8f0; }
+    .aw-merged tbody td.awg-lite-ytd { font-weight: 600; border-left: 1px dashed #cbd5e1; }
+    tr.aw-rb td { font-weight: 700 !important; color: #1e293b !important; font-family: 'DM Sans', sans-serif !important; font-size: 9.5px !important; border-bottom: 1.5px solid #e2e8f0 !important; }
+    tr.aw-rb td:first-child { color: #0f172b !important; }
+    tr.aw-in td:first-child { padding-left: 12px; font-weight: 400; color: #64748b; }
+    tr.aw-sh td { height: 13px !important; font-family: 'DM Sans', sans-serif !important; font-weight: 700 !important; font-size: 7.5px !important; text-transform: uppercase; letter-spacing: 1px; color: #0f172b !important; border-top: 1.5px solid #e2e8f0 !important; border-bottom: none !important; background: #f8fafc !important; }
+
+    /* ── Slide "ARR by Country — Version Comparison" (2026-10-21, pedido Lucas Vassalo) ── */
+    .cv-table { width: 100%; border-collapse: collapse; }
+    .cv-table thead tr.cv-group th { background: #0f172b; color: #fff; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; padding: 4px 3px; text-align: center; border-left: 1px solid rgba(255,255,255,0.25); }
+    .cv-table thead tr.cv-group th:first-child { border-left: none; background: #0f172b; }
+    .cv-table thead tr:not(.cv-group) th { font-size: 8px; font-weight: 600; color: #475569; text-align: right; padding: 3px 5px; border-bottom: 1.5px solid #cbd5e1; background:#f1f5f9; }
+    .cv-table thead tr:not(.cv-group) th:first-child { text-align: left; background:#fff; border-bottom: 1.5px solid #cbd5e1;}
+    .cv-table tbody td { text-align: right; padding: 3.5px 5px; font-family: 'DM Mono', monospace; font-size: 9.5px; color: #334155; border-bottom: 1px solid #f1f5f9; }
+    .cv-table tbody td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 10px; color: #0f172b; }
+    /* 2026-10-23 — pedido del usuario (ver tabla de referencia compartida): delimitar
+       visualmente cada grupo de 3 columnas (una por período) con una línea vertical que
+       baja desde el header hasta la última fila, y reforzar el contraste del total con un
+       fondo gris sólido (antes solo tenía un borde superior, casi no se distinguía de las
+       filas de países). Los grupos son de a 3 columnas (1 etiqueta + 4 grupos de 3) — el
+       primer <th>/<td> de cada grupo (columnas 2, 5, 8, 11) lleva el borde izquierdo. */
+    .cv-table thead tr:not(.cv-group) th:nth-child(2), .cv-table thead tr:not(.cv-group) th:nth-child(5),
+    .cv-table thead tr:not(.cv-group) th:nth-child(8), .cv-table thead tr:not(.cv-group) th:nth-child(11),
+    .cv-table tbody td:nth-child(2), .cv-table tbody td:nth-child(5),
+    .cv-table tbody td:nth-child(8), .cv-table tbody td:nth-child(11) { border-left: 1px solid #cbd5e1; }
+    .cv-table tbody tr.cv-total td { font-weight: 700; color: #0f172b; background: #e2e8f0; border-top: 1.5px solid #94a3b8; border-bottom: none; padding-top: 5px; padding-bottom: 5px; }
+    .cv-table tbody tr.cv-total td:nth-child(2), .cv-table tbody tr.cv-total td:nth-child(5),
+    .cv-table tbody tr.cv-total td:nth-child(8), .cv-table tbody tr.cv-total td:nth-child(11) { border-left: 1px solid #94a3b8; }
+    .cv-cc.cv-flag { color: #C2410C; font-weight: 700; }
 
     /* ── Layout tabla + comentarios ── */
     .aw-body-row { flex: 1; display: flex; overflow: hidden; }
@@ -402,6 +456,159 @@
       letter-spacing: -0.3px; font-family: 'DM Mono', monospace; text-align: center;
     }
     .aw-q-logos { font-size: 9px; color: var(--aw-text-tertiary); font-family: 'DM Mono', monospace; text-align: center; }
+
+    /* ════════════════════════════════════════════════════════════════════
+       Growth Slides (2026-10-23) — diseño nuevo pedido por el equipo para
+       "ARR & Logo Walk GLO", "Core vs Lite Quarterly Performance", "ARR by
+       Country" y "ARR by Country · Three-Year Detail". TODO escopado bajo
+       .gw-slide — el diseño original (board_3Q26_growth_slides_review.html)
+       define .slide/.hd/.body/.ft/.k/.t/.ct/etc. a nivel bare, que YA
+       colisiona con styles/base.css (.slide) y con .k ya usado dentro de
+       .bf-card-delta en este mismo archivo — mismo problema que resolvió
+       4_financial_performance.j2 con su namespace .board-slide (ver ese
+       archivo, líneas 1-48). Nunca agregar una regla bare .slide/.hd/.t/.k/
+       etc. acá — todo va ".gw-slide .loquesea{...}". ════════════════════ */
+    .gw-slide{
+      --gw-navy:#0f172b; --gw-ink:#0f172b; --gw-ink-2:#334155; --gw-soft:#64748b; --gw-muted:#94a3b8; --gw-faint:#cbd5e1;
+      --gw-hair:#edf0f4; --gw-rule:#e2e8f0; --gw-band:#f1f5f9;
+      --gw-teal:#14b8a6; --gw-teal-ink:#1a7e7f; --gw-wash:rgba(48,184,183,.09);
+      --gw-core:#534AB7; --gw-lite:#1D9E75; --gw-pos:#15803d; --gw-neg:#C2410C; --gw-neg-h:#d9774f;
+      background:#fff;color:var(--gw-ink);
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-variant-numeric:tabular-nums;font-feature-settings:"tnum","cv11";
+      -webkit-font-smoothing:antialiased;
+    }
+    .gw-slide .gw-hd{background:var(--gw-navy);height:38px;padding:0 40px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+    .gw-slide .gw-hd h2{margin:0;color:#fff;font:700 15px/1 'Inter',sans-serif;letter-spacing:-.3px}
+    .gw-slide .gw-hd span{color:var(--gw-teal);font:600 13px/1 'Inter',sans-serif;letter-spacing:.5px}
+    .gw-slide .gw-body{flex:1;display:flex;flex-direction:column;gap:8px;padding:10px 40px 0;min-height:0}
+
+    .gw-slide .gw-ft{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:6px 40px 9px;font-size:7.5px;line-height:1.5;color:var(--gw-muted);flex-shrink:0}
+    .gw-slide .gw-ft p{margin:0}
+    .gw-slide .gw-ft b{color:var(--gw-soft);font-weight:600}
+    .gw-slide .gw-key{display:flex;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap}
+    .gw-slide .gw-key div{display:flex;gap:12px;font-weight:500;color:var(--gw-soft)}
+    .gw-slide .gw-key span{display:inline-flex;align-items:center;gap:4px}
+    .gw-slide .gw-key i{width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--gw-neg)}
+    .gw-slide .gw-key i.sw{width:12px;height:8px;border-radius:1px;background:rgba(48,184,183,.18)}
+    .gw-slide .gw-key em{font-style:normal;color:var(--gw-faint);letter-spacing:.3px}
+
+    .gw-slide .gw-ks{display:grid;border-bottom:1px solid var(--gw-hair)}
+    .gw-slide .gw-ks.gw-c3{grid-template-columns:repeat(3,1fr)}
+    .gw-slide .gw-ks.gw-c5{grid-template-columns:repeat(5,1fr);border-top:1px solid var(--gw-hair)}
+    .gw-slide .gw-k{padding:8px 18px 10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+    .gw-slide .gw-k:first-child{padding-left:0}
+    .gw-slide .gw-k:last-child{padding-right:0}
+    .gw-slide .gw-k + .gw-k{border-left:1px solid var(--gw-hair)}
+    .gw-slide .gw-k-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+    .gw-slide .gw-k-lbl{font:700 9.5px/1 'DM Sans','Inter',sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:var(--gw-ink-2);display:flex;align-items:center;gap:6px}
+    .gw-slide .gw-k-lbl i{width:7px;height:7px;border-radius:50%;display:inline-block}
+    .gw-slide .gw-k-mix{font:500 9px/1 'Inter',sans-serif;color:var(--gw-muted)}
+    .gw-slide .gw-k-mid{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .gw-slide .gw-k-val{font:700 27px/1 'Inter',sans-serif;letter-spacing:-1px;color:var(--gw-navy)}
+    .gw-slide .gw-ks.gw-c5 .gw-k-val{font-size:24px}
+    .gw-slide .gw-k-val small{font-size:12px;font-weight:600;letter-spacing:0;color:var(--gw-soft);margin-left:3px}
+    .gw-slide .gw-k-dl{display:flex;gap:13px;flex-wrap:nowrap;white-space:nowrap}
+    .gw-slide .gw-k-dl div{display:flex;flex-direction:row-reverse;align-items:baseline;gap:4px}
+    .gw-slide .gw-k-dl b{font:600 7.5px/1 'DM Sans','Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--gw-muted)}
+    .gw-slide .gw-k-dl span{font:600 11px/1 'Inter',sans-serif;color:var(--gw-ink)}
+    .gw-slide .gw-k-dl span.nt{color:var(--gw-soft)}
+
+    .gw-slide .gw-t{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+    .gw-slide .gw-t th,.gw-slide .gw-t td{padding:0 5px;height:var(--gw-rh,14px);text-align:right;white-space:nowrap}
+    .gw-slide .gw-t col.gw-c-sec{width:78px} .gw-slide .gw-t col.gw-c-gap{width:12px}
+    .gw-slide .gw-t thead tr.gw-seg th{height:17px;text-align:left;padding-left:6px;vertical-align:bottom;padding-bottom:3px;font:700 9.5px/1 'DM Sans','Inter',sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:var(--gw-ink)}
+    .gw-slide .gw-t thead tr.gw-seg th span{font:500 9px/1 'Inter',sans-serif;letter-spacing:.2px;text-transform:none;color:var(--gw-soft);margin-left:6px}
+    .gw-slide .gw-t thead tr.gw-seg th.gw-sq{border-bottom:1.5px solid var(--gw-navy)}
+    .gw-slide .gw-t thead tr.gw-seg th.gw-sltm{border-bottom:1.5px solid var(--gw-teal-ink);color:var(--gw-teal-ink)}
+    .gw-slide .gw-t thead tr.gw-seg th.gw-sc{color:var(--gw-core);border-bottom:1.5px solid var(--gw-core)}
+    .gw-slide .gw-t thead tr.gw-seg th.gw-sl{color:var(--gw-lite);border-bottom:1.5px solid var(--gw-lite)}
+    .gw-slide .gw-t thead tr.gw-per th{height:17px;font:700 8.5px/1 'DM Sans','Inter',sans-serif;letter-spacing:1px;color:var(--gw-soft)}
+    .gw-slide .gw-t thead tr.gw-per th.gw-cur{padding:0 4px}
+    .gw-slide .gw-pill{display:inline-block;background:var(--gw-teal-ink);color:#fff;font:700 8.5px/1 'DM Sans','Inter',sans-serif;letter-spacing:1px;padding:3px 6px 3px 7px;border-radius:3px}
+    .gw-slide .gw-t .gw-cur{background:var(--gw-wash)}
+    .gw-slide .gw-t td.gw-gap,.gw-slide .gw-t th.gw-gap{padding:0;background:transparent;border:0!important}
+
+    .gw-slide .gw-t th.gw-sec{text-align:left;vertical-align:top;padding:4px 0 0;font:700 8px/1.25 'DM Sans','Inter',sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:var(--gw-ink);white-space:normal}
+    .gw-slide .gw-t th.gw-sec span{display:block;margin-top:2px;font:500 8.5px/1.3 'Inter',sans-serif;letter-spacing:.1px;text-transform:none;color:var(--gw-soft)}
+
+    .gw-slide .gw-t tbody tr.gw-first td.gw-m,.gw-slide .gw-t tbody tr.gw-first td.gw-v,.gw-slide .gw-t tbody tr.gw-first th.gw-sec{border-top:1px solid var(--gw-rule)}
+    .gw-slide .gw-t tbody tr.gw-tot td.gw-m,.gw-slide .gw-t tbody tr.gw-tot td.gw-v{border-top:1px solid var(--gw-muted)}
+    .gw-slide .gw-t tbody tr:last-child td.gw-m,.gw-slide .gw-t tbody tr:last-child td.gw-v{border-bottom:1px solid var(--gw-rule)}
+    .gw-slide .gw-t tbody tr:last-child th.gw-sec{border-bottom:1px solid var(--gw-rule)}
+
+    .gw-slide .gw-t td.gw-m{text-align:left;color:var(--gw-ink)}
+    .gw-slide .gw-t td.gw-m small{color:var(--gw-muted);font-size:9px;margin-left:5px}
+    .gw-slide .gw-t td.gw-m b.gw-op{display:inline-block;width:12px;font-weight:400;color:var(--gw-faint)}
+    .gw-slide .gw-t td.gw-v{color:var(--gw-ink)}
+    .gw-slide .gw-t td.gw-v.gw-h{color:var(--gw-ink-2)}
+    .gw-slide .gw-t td.gw-v.gw-cur{font-weight:600;color:var(--gw-ink)}
+    .gw-slide .gw-t tr.gw-lvl td.gw-v.gw-h{color:var(--gw-ink)}
+    .gw-slide .gw-t td.gw-v.gw-neg{color:var(--gw-neg)}
+    .gw-slide .gw-t td.gw-v.gw-h.gw-neg{color:var(--gw-neg-h)}
+    .gw-slide .gw-t td.gw-v.gw-na{color:var(--gw-faint)}
+    .gw-slide .gw-t td.gw-v.gw-ytd{color:var(--gw-ink-2)}
+    .gw-slide .gw-t td.gw-v sup{font-size:7px;color:var(--gw-soft);margin-left:1px;vertical-align:4px}
+    .gw-slide .gw-t tr.gw-lvl td.gw-m{color:var(--gw-ink);font-weight:700}
+    .gw-slide .gw-t tr.gw-lvl td.gw-v{font-weight:600}
+    .gw-slide .gw-t tr.gw-tot td.gw-m,.gw-slide .gw-t tr.gw-tot td.gw-v{font-weight:700}
+    .gw-slide .gw-t tr.gw-lvl td.gw-v.gw-cur{color:#000;font-weight:700}
+    .gw-slide .gw-t tr.gw-lvl td.gw-m,.gw-slide .gw-t tr.gw-lvl td.gw-v{background-image:linear-gradient(rgba(15,23,43,.035),rgba(15,23,43,.035))}
+    .gw-slide .gw-t tr.gw-sub td.gw-m{padding-left:18px;color:var(--gw-soft);font-size:10px}
+    .gw-slide .gw-t tr.gw-sub td.gw-v{color:var(--gw-soft);font-size:10px}
+    .gw-slide .gw-t tr.gw-sub td.gw-v.gw-cur{color:var(--gw-ink);font-weight:600}
+    .gw-slide .gw-t tr.gw-sub td.gw-v.gw-neg{color:var(--gw-neg)}
+    .gw-slide .gw-t tr.gw-sub td.gw-v.gw-h.gw-neg{color:var(--gw-neg-h)}
+    .gw-slide .gw-t tr.gw-sub td.gw-v.gw-na{color:var(--gw-faint)}
+
+    .gw-slide .gw-t.gw-ap thead tr.gw-seg th{text-align:center;padding-left:0}
+    .gw-slide .gw-t.gw-ap thead tr.gw-seg th.gw-blk{text-align:left;font-size:8px;letter-spacing:1.4px;color:var(--gw-teal-ink)}
+    .gw-slide .gw-t.gw-ap tbody th[scope="row"]{text-align:left;padding-left:0;font-weight:600;color:var(--gw-ink)}
+    .gw-slide .gw-t.gw-ap tbody tr td.gw-v,.gw-slide .gw-t.gw-ap tbody tr th[scope="row"]{border-top:1px solid var(--gw-hair)}
+    .gw-slide .gw-t.gw-ap tbody tr:first-child td.gw-v,.gw-slide .gw-t.gw-ap tbody tr:first-child th[scope="row"]{border-top:1px solid var(--gw-rule)}
+    .gw-slide .gw-t.gw-ap tbody tr.gw-tot td.gw-v,.gw-slide .gw-t.gw-ap tbody tr.gw-tot th[scope="row"]{border-top:1px solid var(--gw-muted);font-weight:600;color:var(--gw-ink)}
+    .gw-slide .gw-t.gw-ap tbody tr.gw-tot td.gw-v.gw-h{color:var(--gw-ink)}
+    .gw-slide .gw-t.gw-ap tbody tr.gw-tot td.gw-v,.gw-slide .gw-t.gw-ap tbody tr.gw-tot th[scope="row"]{font-weight:700;background-image:linear-gradient(rgba(15,23,43,.035),rgba(15,23,43,.035))}
+    .gw-slide .gw-t.gw-ap tbody tr.gw-fx td.gw-v,.gw-slide .gw-t.gw-ap tbody tr.gw-fx th[scope="row"]{border-top:0;font-style:italic;font-weight:400;color:var(--gw-soft);font-size:9.5px;background-image:none}
+    .gw-slide .gw-t.gw-ap tbody tr.gw-fx td.gw-v.gw-cur{font-style:normal;font-weight:600;color:var(--gw-ink)}
+    .gw-slide .gw-t.gw-ap tbody tr.gw-fx td.gw-v.gw-h.gw-neg{color:var(--gw-neg-h)}
+    .gw-slide .gw-t.gw-ap thead tr.gw-per th.gw-cur{color:var(--gw-teal-ink);font-weight:700}
+    .gw-slide .gw-t.gw-ap td.gw-v.gw-cur{color:var(--gw-ink);font-weight:600}
+    .gw-slide .gw-t.gw-ap tr.gw-tot td.gw-v.gw-cur{color:#000;font-weight:700}
+    .gw-slide .gw-t.gw-ap td.gw-v.gw-flag{color:var(--gw-neg)} .gw-slide .gw-t.gw-ap td.gw-v.gw-h.gw-flag{color:var(--gw-neg-h)}
+
+    .gw-slide .gw-ct{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+    .gw-slide .gw-ct th,.gw-slide .gw-ct td{padding:0 6px;text-align:right;white-space:nowrap}
+    .gw-slide .gw-ct td{height:36px;color:var(--gw-ink);font-size:13px}
+    .gw-slide .gw-ct thead tr.gw-seg th{height:17px;text-align:left;vertical-align:bottom;padding:0 0 3px 6px;font:700 9.5px/1 'DM Sans','Inter',sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:var(--gw-ink);border-bottom:1.5px solid var(--gw-navy)}
+    .gw-slide .gw-ct thead tr.gw-seg th span{font:500 9px/1 'Inter',sans-serif;letter-spacing:.2px;text-transform:none;color:var(--gw-soft);margin-left:6px}
+    .gw-slide .gw-ct thead tr.gw-seg th.gw-blank{border-bottom:0}
+    .gw-slide .gw-ct thead tr.gw-per th{height:20px;font:700 8.5px/1 'DM Sans','Inter',sans-serif;letter-spacing:.6px;color:var(--gw-soft);border-bottom:1px solid var(--gw-rule)}
+    .gw-slide .gw-ct thead tr.gw-per th.gw-l{text-align:left}
+    .gw-slide .gw-ct th.gw-gap,.gw-slide .gw-ct td.gw-gap{padding:0;border:0!important}
+    .gw-slide .gw-ct tbody th[scope="row"]{text-align:left;padding-left:0;font-size:13px;font-weight:600;color:var(--gw-ink)}
+    .gw-slide .gw-ct tbody tr td:not(.gw-gap),.gw-slide .gw-ct tbody tr th[scope="row"]{border-bottom:1px solid var(--gw-hair)}
+    .gw-slide .gw-ct tbody tr.gw-tot td:not(.gw-gap),.gw-slide .gw-ct tbody tr.gw-tot th[scope="row"]{border-top:1px solid var(--gw-muted);border-bottom:1px solid var(--gw-rule);font-weight:700;color:#000;background:rgba(15,23,43,.035)}
+    .gw-slide .gw-ct td.gw-cc{color:var(--gw-ink);font-weight:700}
+    .gw-slide .gw-ct td.gw-bd{font-weight:600;font-size:12px}
+    .gw-slide .gw-ct td.gw-bd.gw-up,.gw-slide .gw-k-bd .gw-up{color:var(--gw-pos)}
+    .gw-slide .gw-ct td.gw-bd.gw-dn,.gw-slide .gw-k-bd .gw-dn{color:var(--gw-neg)}
+    .gw-slide .gw-ct tbody tr.gw-tot td.gw-bd.gw-up{color:var(--gw-pos)}
+    .gw-slide .gw-ct tbody tr.gw-tot td.gw-bd.gw-dn{color:var(--gw-neg)}
+    .gw-slide .gw-dm{text-decoration:underline dotted;text-decoration-color:var(--gw-muted);text-underline-offset:3px}
+    .gw-slide .gw-ct thead tr.gw-per th{letter-spacing:.3px;padding:0 4px}
+    .gw-slide .gw-k-bd{font:500 8.5px/1 'DM Sans','Inter',sans-serif;letter-spacing:.6px;text-transform:uppercase;color:var(--gw-muted);display:flex;gap:4px;align-items:baseline}
+    .gw-slide .gw-k-bd span{font:600 11px/1 'Inter',sans-serif;letter-spacing:0;text-transform:none}
+    .gw-slide .gw-key i.gw-pos{background:var(--gw-pos)}
+    .gw-slide .gw-key i.gw-dot{background:none;border-bottom:1.5px dotted var(--gw-muted);border-radius:0;width:12px;height:4px}
+    .gw-slide .gw-ct td.gw-flag{color:var(--gw-neg);font-weight:600}
+    .gw-slide .gw-ct td.gw-na{color:var(--gw-faint)}
+    .gw-slide .gw-arr{display:flex;align-items:center;gap:8px}
+    .gw-slide .gw-arr .gw-n{width:50px;text-align:right}
+    .gw-slide .gw-arr .gw-bar{flex:1;height:8px;background:var(--gw-band);border-radius:2px;position:relative;max-width:66px}
+    .gw-slide .gw-arr .gw-bar i{position:absolute;inset:0 auto 0 0;background:var(--gw-teal);border-radius:2px}
+    .gw-slide .gw-arr .gw-p{width:30px;text-align:right;font-size:10.5px;color:var(--gw-muted);font-weight:400}
+    .gw-slide .gw-ct tr.gw-tot .gw-arr .gw-bar i{background:var(--gw-navy)}
   </style>
 </head>
 <body>
@@ -418,10 +625,694 @@
 
   <div class="slide-divider">↓</div>
 
+  {# Oculta 2026-10-24: el usuario pidió volver a insertar el HTML estático ya validado
+     ("board_3Q26_growth_slides_review.html", corregido y auditado esa sesión) tal cual,
+     en vez de esta versión 100% atada a metrics.* — la versión en vivo de abajo quedaba
+     con huecos reales (columnas LTM24-26, barras SVG decorativas, 2 de 3 tablas de la
+     slide D) que no se resolvieron a tiempo. Código intacto abajo, reversible cambiando
+     False por True — ver memory del proyecto para el plan de cómo cerrar esos huecos
+     antes de volver a activarlo. #}
+  {% if False %}
+  <!-- ════════════════════════════════════════════════════════════════════
+       GROWTH SLIDES (2026-10-23) — reemplazan visualmente las 3 slides de
+       abajo (Combined View + Core/Lite individuales, ahora ocultas) por
+       pedido del usuario. Diseño "board_3Q26_growth_slides_review.html"
+       (validado y auditado esa sesión), re-implementado acá 100% atado a
+       metrics.* — NO son números estáticos. Alcance real vs. el mockup
+       original (documentado también en el reporte de esta tarea):
+         · Slide A: igual a metrics.arr_walk_table (GLO), 7 trimestres
+           (1Q25-3Q26). Las columnas LTM24/LTM25/LTM26 del mockup NO se
+           implementaron — no existe ningún campo LTM en el pipeline (ni
+           para 1 ni para los otros), habría que construirlo aparte.
+           Retention: "Logo retention" SÍ se calcula en vivo (fórmula propia
+           ya validada esta sesión); "Net ARR retention" se omitió porque
+           ya se confirmó que no reconcilia con su propia fórmula y no hay
+           otra fuente — mejor no mostrarla que mostrar un número no
+           verificado.
+         · Slide B: igual a metrics.arr_walk_products (Core/Lite), 5
+           trimestres (3Q25-3Q26) — mismo motivo, sin columna LTM26.
+         · Slide C/D: ARR/Logos/ARPA en vivo para el trimestre de corte
+           (metrics.gw_country_summary, ver fetch_metrics.py). El histórico
+           3Q24/3Q25 de ARR/Logos/ARPA por país reusa los mismos números
+           estáticos ya vetados de la slide "ARR by Country — Version
+           Comparison" de abajo (mismo hueco de pipeline ya documentado ahí:
+           no existe un campo con serie trimestral histórica por país) — NO
+           se re-derivó nada, es la misma fuente. Lo nuevo de verdad es el
+           payback por país (slides C y D), 100% en vivo vía
+           merge_country_payback() en fetch_metrics.py (expone
+           metrics.country_payback y metrics.country_payback_hist — Jinja no
+           puede llamar funciones de Python, por eso todo queda precalculado
+           ahí, no invocado desde el template) — motor de cohortes real
+           (bi_strategic.payback_cohort_results),
+           mismo cache de Metabase que ya alimentaba payback_global/core/
+           lite, sin query nueva. "Other" no tiene payback (el motor no
+           modela esos países) — se muestra como "—", nunca inventado.
+           Las columnas S&M/CAC/Churn por país y los sparklines de
+           tendencia del mockup original NO se implementaron por falta de
+           una fuente en vivo confiable dentro del tiempo de esta tarea —
+           ver reporte para el detalle de qué haría falta construir.
+       ════════════════════════════════════════════════════════════════════ -->
+  {% set g_tbl   = metrics.arr_walk_table %}
+  {% set g_logo  = g_tbl.sections | selectattr('label','equalto',"Logo EoP (000's)") | first %}
+  {% set g_arr   = g_tbl.sections | selectattr('label','equalto',"ARR Walk — Spot ($M)") | first %}
+  {% set g_saas  = g_tbl.sections | selectattr('label','equalto',"SaaS Metrics") | first %}
+  {% set g_eop_row     = g_logo.rows | selectattr('label','equalto',"Total EoP") | first %}
+  {% set g_newpct_row  = g_logo.rows | selectattr('label','equalto',"Logo Monthly New Adds %") | first %}
+  {% set g_churnpct_row= g_logo.rows | selectattr('label','equalto',"Logo Monthly Churn %") | first %}
+  {% set g_bop_row  = g_arr.rows | selectattr('label','equalto',"ARR BoP") | first %}
+  {% set g_add_row  = g_arr.rows | selectattr('label','equalto',"Additions") | first %}
+  {% set g_rec_row  = g_arr.rows | selectattr('label','equalto',"Recovered") | first %}
+  {% set g_nc_row   = g_arr.rows | selectattr('label','equalto',"Net Churn") | first %}
+  {% set g_ne_row   = g_arr.rows | selectattr('label','equalto',"Net Expansion") | first %}
+  {% set g_fx_row   = g_arr.rows | selectattr('label','equalto',"(+/−) FX Impact") | first %}
+  {% set g_arreop_row = g_arr.rows | selectattr('label','equalto',"ARR EoP") | first %}
+  {% set g_arrcc_row  = g_arr.rows | selectattr('label','equalto',"ARR EoP (Constant Currency)") | first %}
+  {% set g_sm_row   = g_saas.rows | selectattr('label','equalto',"S&M Total Spend") | first %}
+  {% set g_pb_row   = g_saas.rows | selectattr('label','equalto',"CAC Payback (meses)") | first %}
+  {% set g_arpa_row = g_saas.rows | selectattr('label','equalto',"ARPA") | first %}
+  {% set g_arpaadd_row = g_saas.rows | selectattr('label','equalto',"ARPA Adds") | first %}
+  {% set g_arpachn_row = g_saas.rows | selectattr('label','equalto',"ARPA Churn") | first %}
+  {% set g_logo_retention = [] %}
+  {% for v in g_churnpct_row.cells %}{% set _ = g_logo_retention.append(((1 - (v.replace('%','')|float/100)) ** 12 * 100) | round(0)) %}{% endfor %}
+
+  <section class="slide gw-slide" style="width:960px;height:540px;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06);margin:0 auto;">
+    <div class="gw-hd"><h2>ARR &amp; Logo Walk GLO Alegra · Quarterly</h2><span>{{ config.quarter_label if metrics.is_quarter_end else config.month_label }}</span></div>
+    <div class="gw-body">
+      <table class="gw-t" style="--gw-rh:17px">
+        <colgroup><col class="gw-c-sec"><col style="width:142px"><col span="{{ g_tbl.quarters|length }}"></colgroup>
+        <thead>
+          <tr class="gw-seg"><th colspan="2"></th><th class="gw-sq" colspan="{{ g_tbl.quarters|length }}">Quarterly</th></tr>
+          <tr class="gw-per"><th colspan="2"></th>{% for q in g_tbl.quarters %}<th{% if loop.last %} class="gw-cur"{% endif %}>{% if loop.last %}<span class="gw-pill">{{ q }}</span>{% else %}{{ q }}{% endif %}</th>{% endfor %}</tr>
+        </thead>
+        <tbody>
+          <tr class="gw-lvl gw-first"><th class="gw-sec" rowspan="5">Logos<span>000s</span></th><td class="gw-m">Logos, EoP</td>{% for v in g_eop_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m">New adds<small>% / month</small></td>{% for v in g_newpct_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m">Churn<small>% / month</small></td>{% for v in g_churnpct_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr class="gw-sub"><td class="gw-m">Logo retention<small>LQA, (1−churn)^12</small></td>{% for v in g_logo_retention %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v|int }}%</td>{% endfor %}</tr>
+          <tr class="gw-sub"><td class="gw-m">EoP YoY growth</td>{% for i in range(g_eop_row.cells|length) %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{% if i >= 4 %}{{ ((g_eop_row.cells[i]|float / g_eop_row.cells[i-4]|float - 1) * 100) | round(0) | int }}%{% else %}—{% endif %}</td>{% endfor %}</tr>
+          <tr class="gw-lvl gw-first"><th class="gw-sec" rowspan="9">ARR Walk<span>Spot, $M</span></th><td class="gw-m">ARR, BoP</td>{% for v in g_bop_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m"><b class="gw-op">+</b>Additions</td>{% for v in g_add_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m"><b class="gw-op">+</b>Recovered</td>{% for v in g_rec_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m"><b class="gw-op">−</b>Net Churn</td>{% for v in g_nc_row.cells %}<td class="gw-v gw-h gw-neg{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m"><b class="gw-op">+</b>Net Expansion</td>{% for v in g_ne_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m"><b class="gw-op">±</b>FX Impact</td>{% for v in g_fx_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr class="gw-tot"><td class="gw-m">ARR, EoP</td>{% for v in g_arreop_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr class="gw-sub"><td class="gw-m">ARR, EoP<small>constant currency</small></td>{% for v in g_arrcc_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr class="gw-sub"><td class="gw-m">YoY growth<small>USD</small></td>{% for c in g_arreop_row.yoy_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}</tr>
+          <tr class="gw-lvl gw-first"><th class="gw-sec" rowspan="5">Unit economics</th><td class="gw-m">S&amp;M spend<small>$M</small></td>{% for v in g_sm_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m">CAC payback<small>months</small></td>{% for v in g_pb_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m">ARPA, all logos<small>$ / month</small></td>{% for v in g_arpa_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m">ARPA, new logos<small>$ / month</small></td>{% for v in g_arpaadd_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+          <tr><td class="gw-m">ARPA, churned logos<small>$ / month</small></td>{% for v in g_arpachn_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}</tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="gw-ft">
+      <p>Logos in 000s; ARR at spot FX in $M; negatives in parentheses. <b>Nota:</b> columnas LTM y "Net ARR retention" del diseño original no están disponibles en el pipeline hoy — ver comentario en el código fuente de esta slide. Excludes Alanube. Source: dm_board ARR walk, live.</p>
+      <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="sw"></i>Latest period</span></div><em>Alegra · Confidential</em></div>
+    </div>
+  </section>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- GROWTH SLIDE B — Core vs Lite Quarterly Performance (ver nota arriba) -->
+  {% set cp_core = metrics.arr_walk_products | selectattr('id','equalto','core') | first %}
+  {% set cp_lite = metrics.arr_walk_products | selectattr('id','equalto','lite') | first %}
+  {% if cp_core and cp_lite %}
+  {% set cp_core_tbl = cp_core.arr_walk_table %}
+  {% set cp_lite_tbl = cp_lite.arr_walk_table %}
+  <section class="slide gw-slide" style="width:960px;height:540px;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06);margin:0 auto;">
+    <div class="gw-hd"><h2>Core vs Lite Quarterly Performance GLO Alegra</h2><span>{{ config.quarter_label if metrics.is_quarter_end else config.month_label }}</span></div>
+    <div class="gw-body">
+      <div class="gw-ks gw-c3">
+        <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--gw-core)"></i>Core ARR</div></div><div class="gw-k-val">{{ cp_core.arr_eop }}</div><div class="gw-k-dl"><div><b>YoY</b><span>{{ cp_core.arr_yoy }}</span></div><div><b>QoQ</b><span>{{ cp_core.arr_qoq }}</span></div><div><b>Net new</b><span>{{ cp_core.net_new_arr }}</span></div></div></div>
+        <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--gw-lite)"></i>Lite ARR</div></div><div class="gw-k-val">{{ cp_lite.arr_eop }}</div><div class="gw-k-dl"><div><b>YoY</b><span>{{ cp_lite.arr_yoy }}</span></div><div><b>QoQ</b><span>{{ cp_lite.arr_qoq }}</span></div><div><b>Net new</b><span>{{ cp_lite.net_new_arr }}</span></div></div></div>
+        <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--gw-navy)"></i>Total ARR<sup style="font-size:7px;margin-left:-3px">†</sup></div></div><div class="gw-k-val">${{ g_arreop_row.cells[-1] }}M</div><div class="gw-k-dl"><div><b>YoY</b><span>{{ g_arreop_row.yoy_cells[-1].v }}</span></div><div><b>c.c.</b><span>{{ g_arrcc_row.yoy_cells[-1].v }}</span></div></div></div>
+      </div>
+      <table class="gw-t" style="--gw-rh:15px;font-size:10.5px">
+        <colgroup><col class="gw-c-sec"><col style="width:130px"><col span="{{ cp_core_tbl.quarters|length }}"><col class="gw-c-gap"><col span="{{ cp_lite_tbl.quarters|length }}"></colgroup>
+        <thead>
+          <tr class="gw-seg"><th colspan="2"></th><th class="gw-sc" colspan="{{ cp_core_tbl.quarters|length }}">Core</th><th class="gw-gap"></th><th class="gw-sl" colspan="{{ cp_lite_tbl.quarters|length }}">Lite</th></tr>
+          <tr class="gw-per"><th colspan="2"></th>{% for q in cp_core_tbl.quarters %}<th{% if loop.last %} class="gw-cur"{% endif %}>{{ q }}</th>{% endfor %}<th class="gw-gap"></th>{% for q in cp_lite_tbl.quarters %}<th{% if loop.last %} class="gw-cur"{% endif %}>{{ q }}</th>{% endfor %}</tr>
+        </thead>
+        <tbody>
+          {% for sec in cp_core_tbl.sections %}
+          {% set lsec = cp_lite_tbl.sections | selectattr('label','equalto',sec.label) | first %}
+          <tr class="gw-lvl gw-first"><th class="gw-sec" rowspan="{{ sec.rows|length + 1 }}">{{ sec.label }}</th><td class="gw-m">&nbsp;</td>{% for _ in cp_core_tbl.quarters %}<td class="gw-v"></td>{% endfor %}<td class="gw-gap"></td>{% for _ in cp_lite_tbl.quarters %}<td class="gw-v"></td>{% endfor %}</tr>
+          {% for row in sec.rows %}
+          {% set lrow = lsec.rows | selectattr('label','equalto',row.label) | first %}
+          <tr{% if row.label in ["Total EoP","ARR BoP","ARR EoP","ARR EoP (Constant Currency)"] %} class="gw-tot"{% endif %}>
+            <td class="gw-m">{{ row.label }}</td>
+            {% for v in row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}
+            <td class="gw-gap"></td>
+            {% for v in lrow.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}
+          </tr>
+          {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="gw-ft">
+      <p>Core/Lite por volumen de facturación anual. ARR = MRR × 12. Spot = FX real; c.c. = tasa constante del trimestre de corte. <b>†</b> Total ARR = Core + Lite (excluye Alanube, igual que la slide GLO anterior). <b>Nota:</b> columna LTM26 del diseño original no está disponible (sin agregación histórica en el pipeline para Core/Lite por separado). Source: dm_board ARR walk, live.</p>
+      <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="sw"></i>Latest period</span></div><em>Alegra · Confidential</em></div>
+    </div>
+  </section>
+  <div class="slide-divider">↓</div>
+  {% endif %}
+
+  <div class="slide-divider">↓ &nbsp; ARR by Country</div>
+
+  <!-- GROWTH SLIDE C — ARR by Country (summary) -->
+  <section class="slide gw-slide" style="width:960px;height:540px;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06);margin:0 auto;">
+    <div class="gw-hd"><h2>ARR by Country</h2><span>{{ config.quarter_label if metrics.is_quarter_end else config.month_label }}</span></div>
+    <div class="gw-body" style="gap:26px;padding-top:18px">
+      <div class="gw-ks gw-c5">
+        <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">ARR</div></div><div class="gw-k-val">${{ g_arreop_row.cells[-1] }}M</div><div class="gw-k-dl"><div><b>YoY</b><span>{{ g_arreop_row.yoy_cells[-1].v }}</span></div><div><b>c.c.</b><span>{{ g_arrcc_row.yoy_cells[-1].v }}</span></div></div></div>
+        <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">Logos</div></div><div class="gw-k-val">{{ metrics.gw_country_summary[-1].logos_k }}K</div><div class="gw-k-dl"><div><b>YoY</b><span>{{ metrics.logos_yoy }}</span></div></div></div>
+        <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">ARPA</div></div><div class="gw-k-val">${{ metrics.gw_country_summary[-1].arpa }}<small>/mo</small></div></div>
+        <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">S&amp;M spend</div></div><div class="gw-k-val">{{ g_sm_row.cells[-1] }}<small>/mo</small></div></div>
+        <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">CAC payback</div></div><div class="gw-k-val">{{ metrics.payback_global }}<small>months</small></div></div>
+      </div>
+      <table class="gw-ct">
+        <colgroup><col style="width:148px"><col style="width:108px"><col style="width:62px"><col style="width:62px"><col style="width:12px"><col style="width:54px"><col style="width:58px"><col style="width:12px"><col><col><col><col></colgroup>
+        <thead>
+          <tr class="gw-seg"><th class="gw-blank"></th><th colspan="3">Scale &amp; growth</th><th class="gw-gap"></th><th colspan="2">Customers</th><th class="gw-gap"></th><th colspan="4">Efficiency<span>3Q, per month</span></th></tr>
+          <tr class="gw-per"><th></th><th class="gw-l">ARR · share</th><th>YoY USD</th><th>YoY c.c.</th><th class="gw-gap"></th><th>Logos</th><th>ARPA $/mo</th><th class="gw-gap"></th><th>S&amp;M $K</th><th>CAC $</th><th>Churn</th><th>Payback</th></tr>
+        </thead>
+        <tbody>
+          {% for c in metrics.gw_country_summary %}
+          <tr{% if c.key == 'total' %} class="gw-tot"{% endif %}>
+            <th scope="row">{{ c.name }}</th>
+            <td><div class="gw-arr"><span class="gw-n">${{ c.arr_m }}M</span><span class="gw-bar"><i style="width:{{ c.arr_share_pct }}%"></i></span><span class="gw-p">{{ c.arr_share_pct }}%</span></div></td>
+            <td>{{ c.arr_yoy or '—' }}</td>
+            <td class="gw-cc">{{ c.arr_cc_yoy or '—' }}</td>
+            <td class="gw-gap"></td>
+            <td>{{ c.logos_k }}K</td>
+            <td>${{ c.arpa }}</td>
+            <td class="gw-gap"></td>
+            <td>{{ c.sm_k|int if c.sm_k is not none else '—' }}</td>
+            <td>{{ c.cac|int if c.cac is not none else '—' }}</td>
+            <td>{{ (c.churn_pct~'%') if c.churn_pct is not none else '—' }}</td>
+            <td{% if c.payback and c.payback > 24 %} class="gw-flag"{% elif not c.payback %} class="gw-na"{% endif %}>{{ ('%.1f'|format(c.payback)) if c.payback else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="gw-ft">
+      <p>ARR/Logos/ARPA/YoY/S&amp;M/CAC/Churn en vivo (trimestre de corte, Core+Lite combinado por país). Payback = motor de cohortes real por país (bi_strategic.payback_cohort_results); "Other" no tiene cobertura del motor, se muestra "—" en vez de un proxy; su S&amp;M/CAC/Churn tampoco se derivó por residual (ver reporte). c.c. = tasa constante del trimestre de corte. <b>Nota:</b> vs Budget por país y el sparkline histórico de 7 trimestres del diseño original no están disponibles en el pipeline hoy. Source: dm_board + bi_strategic.payback_cohort_results, live.</p>
+      <div class="gw-key"><em>Alegra · Confidential</em></div>
+    </div>
+  </section>
+
+  <div class="slide-divider">↓</div>
+
+  <!-- GROWTH SLIDE D — ARR by Country · Three-Year Detail.
+       ARR/Logos/ARPA 3Q24-3Q25-3Q26: MISMOS números estáticos ya vetados de la
+       slide "ARR by Country — Version Comparison" más abajo (mismo hueco de
+       pipeline documentado ahí — no existe campo con serie histórica trimestral
+       por país — no se re-derivó nada, es la misma fuente, solo reordenada en
+       esta grilla). 3Q26 de Logos/ARPA se reemplaza por metrics.gw_country_summary
+       (en vivo) porque es el mismo trimestre de corte y así queda consistente con
+       las demás slides nuevas. Payback SÍ es 100% nuevo y en vivo (ver nota en
+       GROWTH SLIDE C) vía metrics.country_payback (3Q26) y
+       metrics.country_payback_hist (3Q24/3Q25). -->
+  {% set gwd_arr = {
+    'colombia':  {'name':'Colombia',           'arr': ['12.0','15.7','22.3']},
+    'mexico':    {'name':'Mexico',             'arr': ['1.6','2.3','3.0']},
+    'rd':        {'name':'Dominican Republic', 'arr': ['3.0','4.1','5.2']},
+    'cr':        {'name':'Costa Rica',         'arr': ['0.6','0.7','1.0']},
+    'other':     {'name':'Other',              'arr': ['1.3','1.6','1.9']},
+    'total':     {'name':'Total',              'arr': ['18.4','24.3','33.4']},
+  } %}
+  {% set gwd_h2 = metrics.country_payback_hist.y2 %}
+  {% set gwd_h1 = metrics.country_payback_hist.y1 %}
+  <section class="slide gw-slide" style="width:960px;height:540px;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06);margin:0 auto;">
+    <div class="gw-hd"><h2>ARR by Country · Three-Year Detail</h2><span>3Q24 → 3Q26</span></div>
+    <div class="gw-body" style="gap:14px;padding-top:12px">
+      <table class="gw-t gw-ap" style="--gw-rh:17px">
+        <colgroup><col style="width:150px"><col span="3"></colgroup>
+        <thead><tr class="gw-seg"><th class="gw-blk">ARR ($M) — 3Q24 / 3Q25 / 3Q26</th><th class="gw-sq" colspan="3"></th></tr></thead>
+        <tbody>
+          {% for key in ['colombia','mexico','rd','cr','other'] %}
+          <tr><th scope="row">{{ gwd_arr[key].name }}</th>{% for v in gwd_arr[key].arr %}<td class="gw-v{% if loop.last %} gw-cur{% endif %}">${{ v }}</td>{% endfor %}</tr>
+          {% endfor %}
+          <tr class="gw-tot"><th scope="row">Total</th>{% for v in gwd_arr.total.arr %}<td class="gw-v{% if loop.last %} gw-cur{% endif %}">${{ v }}</td>{% endfor %}</tr>
+        </tbody>
+      </table>
+      <table class="gw-t gw-ap" style="--gw-rh:17px">
+        <colgroup><col style="width:150px"><col span="3"></colgroup>
+        <thead><tr class="gw-seg"><th class="gw-blk">CAC Payback (months) — 3Q24 / 3Q25 / 3Q26 — en vivo</th><th class="gw-sq" colspan="3"></th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Colombia</th><td class="gw-v">{{ gwd_h2.colombia }}</td><td class="gw-v">{{ gwd_h1.colombia }}</td><td class="gw-v gw-cur">{{ metrics.country_payback.colombia }}</td></tr>
+          <tr><th scope="row">Mexico</th><td class="gw-v gw-flag">{{ gwd_h2.mexico }}</td><td class="gw-v gw-flag">{{ gwd_h1.mexico }}</td><td class="gw-v gw-cur gw-flag">{{ metrics.country_payback.mexico }}</td></tr>
+          <tr><th scope="row">Dominican Republic</th><td class="gw-v gw-flag">{{ gwd_h2.rd }}</td><td class="gw-v">{{ gwd_h1.rd }}</td><td class="gw-v gw-cur">{{ metrics.country_payback.rd }}</td></tr>
+          <tr><th scope="row">Costa Rica</th><td class="gw-v">{{ gwd_h2.cr }}</td><td class="gw-v">{{ gwd_h1.cr }}</td><td class="gw-v gw-cur">{{ metrics.country_payback.cr }}</td></tr>
+          <tr><th scope="row">Other</th><td class="gw-v gw-na">—</td><td class="gw-v gw-na">—</td><td class="gw-v gw-cur gw-na">—</td></tr>
+          <tr class="gw-tot"><th scope="row">Total</th><td class="gw-v">{{ gwd_h2.global }}</td><td class="gw-v">{{ gwd_h1.global }}</td><td class="gw-v gw-cur">{{ metrics.payback_global }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="gw-ft">
+      <p>ARR por país 3Q24/3Q25: mismo snapshot estático ya usado por "ARR by Country — Version Comparison" (sin campo de serie histórica por país en el pipeline — ver esa slide). 3Q26 y todo el bloque de Payback son en vivo. Payback = motor de cohortes (bi_strategic.payback_cohort_results); "Other" sin cobertura. Above 24 months en rojo.</p>
+      <div class="gw-key"><em>Alegra · Confidential</em></div>
+    </div>
+  </section>
+  {% endif %}{# /Growth Slides en vivo, oculto 2026-10-24 #}
+
+  {% if metrics.is_quarter_end %}{# Growth slides = diseño TRIMESTRAL con LTM y cifras estáticas del cierre de Q — solo en cierre de trimestre (2026-11-17) #}
+  <div class="slide-divider">↓</div>
+
+  <!-- GROWTH SLIDE A — reconstruida en vivo 2026-10-23 (Fase 1, pedido explícito del
+       usuario: "ambas tablas deben tener estos campos... mucho cuidado con los cambios").
+       Columnas TRIMESTRALES (1Q25→3Q26) 100% en vivo desde metrics.arr_walk_table (mismo
+       motor ya usado por las slides de ARR Walk por producto más abajo en este archivo,
+       confirmado dato-por-dato contra la tabla estática vieja antes de reemplazarla — cero
+       discrepancias). Columnas LTM24/LTM25/LTM26 SIGUEN ESTÁTICAS (congeladas al cierre de
+       Sep-2026): para las filas que ya existían antes del rediseño, son el mismo snapshot
+       manual de siempre; para las filas NUEVAS del esquema (Logo Monthly New Adds %, Logo
+       Monthly Churn % bruto, y toda la sección Constant Currency) el LTM se calculó en Fase 2
+       (2026-10-24, ratio directo de 12 meses — ver footnote de esta slide para la fórmula y
+       la fuente). Sección Retention
+       (Logo retention / Net ARR retention) eliminada de esta slide por pedido explícito del
+       usuario — código intacto en el bloque oculto (if-false) arriba de este comentario,
+       reversible. -->
+  {% set g_tbl   = metrics.arr_walk_table %}
+  {% set g_logo  = g_tbl.sections | selectattr('label','equalto',"Logo EoP (000's)") | first %}
+  {% set g_arr   = g_tbl.sections | selectattr('label','equalto',"ARR Walk — Spot ($M)") | first %}
+  {% set g_saas  = g_tbl.sections | selectattr('label','equalto',"SaaS Metrics") | first %}
+  {% set g_eop_row      = g_logo.rows | selectattr('label','equalto',"Total EoP") | first %}
+  {% set g_newpct_row   = g_logo.rows | selectattr('label','equalto',"Logo Monthly New Adds %") | first %}
+  {% set g_churnpct_row = g_logo.rows | selectattr('label','equalto',"Logo Monthly Churn %") | first %}
+  {% set g_bop_row    = g_arr.rows | selectattr('label','equalto',"ARR BoP") | first %}
+  {% set g_add_row    = g_arr.rows | selectattr('label','equalto',"Additions") | first %}
+  {% set g_rec_row    = g_arr.rows | selectattr('label','equalto',"Recovered") | first %}
+  {% set g_nc_row     = g_arr.rows | selectattr('label','equalto',"Net Churn") | first %}
+  {% set g_ne_row     = g_arr.rows | selectattr('label','equalto',"Net Expansion") | first %}
+  {% set g_fx_row     = g_arr.rows | selectattr('label','equalto',"(+/−) FX Impact") | first %}
+  {% set g_arreop_row = g_arr.rows | selectattr('label','equalto',"ARR EoP") | first %}
+  {% set g_arrcc_row  = g_arr.rows | selectattr('label','equalto',"ARR EoP (Constant Currency)") | first %}
+  {% set g_sm_row      = g_saas.rows | selectattr('label','equalto',"S&M Total Spend") | first %}
+  {% set g_cac_row     = g_saas.rows | selectattr('label','equalto',"CAC") | first %}
+  {% set g_pb_row      = g_saas.rows | selectattr('label','equalto',"CAC Payback (meses)") | first %}
+  {% set g_arpa_row    = g_saas.rows | selectattr('label','equalto',"ARPA") | first %}
+  {% set g_arpaadd_row = g_saas.rows | selectattr('label','equalto',"ARPA Adds") | first %}
+  {% set g_arpachn_row = g_saas.rows | selectattr('label','equalto',"ARPA Churn") | first %}
+<section class="slide gw-slide" aria-label="ARR and logo walk, quarterly and last twelve months, 3Q26">
+  <header class="gw-hd"><h2>ARR &amp; Logo Walk GLO Alegra · Quarterly and LTM</h2><span>3Q26</span></header>
+  <div class="gw-body">
+    <table class="gw-t" style="--rh:15px">
+      <colgroup><col class="gw-c-sec"><col style="width:142px"><col span="7"><col class="gw-c-gap"><col span="3"></colgroup>
+      <thead><tr class="gw-seg"><th colspan="2"></th><th class="gw-sq" colspan="7">Quarterly</th><th class="gw-gap"></th><th class="gw-sltm" colspan="3">Last twelve months<span>Oct–Sep</span></th></tr><tr class="gw-per"><th colspan="2"></th><th>1Q25</th><th>2Q25</th><th>3Q25</th><th>4Q25</th><th>1Q26</th><th>2Q26</th><th>3Q26</th><th>2Q26</th><th class="gw-cur"><span class="gw-pill">3Q26</span></th><th class="gw-gap"></th><th>LTM24</th><th>LTM25</th><th class="gw-cur"><span class="gw-pill">LTM26</span></th></tr></thead>
+      <tbody>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="3">Logos<span>000s</span></th><td class="gw-m">Logos, EoP</td>{% for v in g_eop_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">52.2</td><td class="gw-v gw-h">55.1</td><td class="gw-v gw-cur">60.7</td></tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly New Adds %</td>{% for v in g_newpct_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">6.1%</td><td class="gw-v gw-h">5.0%</td><td class="gw-v gw-cur">5.1%</td></tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly Churn %</td>{% for v in g_churnpct_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">4.5%</td><td class="gw-v gw-h">4.5%</td><td class="gw-v gw-cur">4.3%</td></tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="10">ARR Walk<span>Spot, $M</span></th><td class="gw-m">ARR, BoP</td>{% for v in g_bop_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">13.2</td><td class="gw-v gw-h">18.4</td><td class="gw-v gw-cur">24.3</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New (additions)</td>{% for v in g_add_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">6.1</td><td class="gw-v gw-h">7.0</td><td class="gw-v gw-cur">9.9</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td>{% for v in g_rec_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">1.5</td><td class="gw-v gw-h">1.9</td><td class="gw-v gw-cur">2.5</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net¹</td>{% for v in g_nc_row.cells %}<td class="gw-v gw-h gw-neg{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(5.6)</td><td class="gw-v gw-h gw-neg">(9.3)</td><td class="gw-v gw-cur gw-neg">(11.8)</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Expansion, net</td>{% for v in g_ne_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">4.7</td><td class="gw-v gw-h">5.2</td><td class="gw-v gw-cur">4.3</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">±</b>FX impact</td>{% for v in g_fx_row.cells %}<td class="gw-v gw-h{% if v[0] in ['(','-','−'] %} gw-neg{% endif %}{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(1.5)<sup>§</sup></td><td class="gw-v gw-h">1.0</td><td class="gw-v gw-cur">4.2</td></tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">ARR, EoP</td>{% for v in g_arreop_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">18.4</td><td class="gw-v gw-h">24.3</td><td class="gw-v gw-cur">33.4</td></tr>
+<tr class="gw-sub"><td class="gw-m">QoQ growth<small>USD</small></td>{% for c in g_arreop_row.qoq_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-cur gw-na">n.d.</td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth<small>USD</small></td>{% for c in g_arreop_row.yoy_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">+39%</td><td class="gw-v gw-h">+32%</td><td class="gw-v gw-cur">+37%</td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR</td>{% for v in g_arreop_row.extra_sub.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">5.2</td><td class="gw-v gw-h">5.8</td><td class="gw-v gw-cur">9.1</td></tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="4">Constant currency<span>$M, 3Q26 FX</span></th><td class="gw-m">ARR, EoP<small>c.c.</small></td>{% for v in g_arrcc_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">22.4</td><td class="gw-v gw-h">28.1</td><td class="gw-v gw-cur">33.4</td></tr>
+<tr class="gw-sub"><td class="gw-m">QoQ growth<small>c.c.</small></td>{% for c in g_arrcc_row.qoq_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-cur gw-na">n.d.</td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth<small>c.c.</small></td>{% for c in g_arrcc_row.yoy_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">+43%</td><td class="gw-v gw-h">+26%</td><td class="gw-v gw-cur">+19%</td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR<small>c.c.</small></td>{% for v in g_arrcc_row.extra_sub.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">6.9</td><td class="gw-v gw-h">5.7</td><td class="gw-v gw-cur">5.3</td></tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="6">Unit economics</th><td class="gw-m">S&amp;M spend<small>$M</small></td>{% for v in g_sm_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{% if v.endswith('K') %}{{ "%.1f"|format(v.replace('$','').replace('K','')|float / 1000) }}{% else %}{{ v.replace('$','').replace('M','') }}{% endif %}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">10.6</td><td class="gw-v gw-h">9.9</td><td class="gw-v gw-cur">8.8</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC<small>$ / new logo</small></td>{% for v in g_cac_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">387</td><td class="gw-v gw-h">410</td><td class="gw-v gw-cur">336</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC payback<small>months</small></td>{% for v in g_pb_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">23.1</td><td class="gw-v gw-h">18.2</td><td class="gw-v gw-cur">11.6</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA²<small>$ / month</small></td>{% for v in g_arpa_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">29</td><td class="gw-v gw-h">37</td><td class="gw-v gw-cur">46</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, new logos<small>$ / month</small></td>{% for v in g_arpaadd_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">19</td><td class="gw-v gw-h">24</td><td class="gw-v gw-cur">31</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, churned logos<small>$ / month</small></td>{% for v in g_arpachn_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">20</td><td class="gw-v gw-h">25</td><td class="gw-v gw-cur">31</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="gw-ft">
+    <p>Logos in 000s; ARR at spot FX in $M; negatives in parentheses. LTM = Oct–Sep; QoQ stays "n.d." for a 12-month window. Logo Monthly New Adds % = (New + Recovered) ÷ average monthly BoP ÷ 12; Logo Monthly Churn % = average of the 12 monthly (Churn − Reactivated) ÷ BoP rates, from company-level classification (not raw per-segment logo counts, which double-count companies active in both Core and Lite and overstate churn). CAC = S&amp;M spend ÷ New logos; ARPA = (ARR EoP ÷ 12) ÷ Logos EoP — both summed/point-in-time as in the quarterly columns. <b>¹</b> ARR Churn, net and Logo Monthly Churn % are both net of Reactivated only (Recovered excluded, shown separately) — same convention, not a different base. <b>²</b> ARPA = MRR ÷ logos. Excludes Alanube. <b>§</b> FX impact for LTM24 is residual/estimated, not directly measured. Figures may not sum due to rounding.</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 1</em></div>
+  </footer>
+</section>
+
+  <div class="slide-divider">↓</div>
+
+<section class="slide gw-slide" aria-label="Core vs Lite quarterly performance, 3Q26">
+  <header class="gw-hd"><h2>Core vs Lite Quarterly Performance GLO Alegra</h2><span>3Q26</span></header>
+  <div class="gw-body">
+    <div class="gw-ks gw-c3">
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--core)"></i>Core ARR</div><div class="gw-k-mix">63% of ARR · 42% of logos</div></div><div class="gw-k-mid"><div class="gw-k-val">$20.9M</div><svg viewBox="0 0 160 46" width="160" height="46" role="img" aria-label="QoQ ARR growth, constant currency, 4Q25 to 3Q26: +11%, +3%, +7%, +6%"><text x="0" y="27.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">QoQ</text><text x="0" y="36.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">C.C.</text><line x1="32" x2="160" y1="29.8" y2="29.8" stroke="#cbd5e1" stroke-width=".8"/><rect x="44.5" y="12.6" width="14" height="17.2" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="51.5" y="10.1" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+11%</text><text x="51.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">4Q25</text><rect x="75.5" y="25.1" width="14" height="4.7" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="82.5" y="22.6" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+3%</text><text x="82.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">1Q26</text><rect x="106.5" y="18.8" width="14" height="10.9" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="113.5" y="16.3" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+7%</text><text x="113.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">2Q26</text><rect x="136.5" y="20.4" width="16" height="9.4" rx="1" fill="#0f172b" fill-opacity="1"/><text x="144.5" y="17.9" text-anchor="middle" font-size="8" font-weight="700" fill="#0f172b">+6%</text><text x="144.5" y="45" text-anchor="middle" font-size="6.5" font-weight="700" letter-spacing=".3" fill="#1a7e7f">3Q26</text></svg></div><div class="gw-k-dl"><div><b>YoY USD</b><span>+51%</span></div><div><b>YoY c.c.</b><span>+30%</span></div><div><b>Net new, Q</b><span>$2.5M</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--lite)"></i>Lite ARR</div><div class="gw-k-mix">37% of ARR · 58% of logos</div></div><div class="gw-k-mid"><div class="gw-k-val">$12.5M</div><svg viewBox="0 0 160 46" width="160" height="46" role="img" aria-label="QoQ ARR growth, constant currency, 4Q25 to 3Q26: +2%, -3%, +3%, +1%"><text x="0" y="27.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">QoQ</text><text x="0" y="36.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">C.C.</text><line x1="32" x2="160" y1="29.8" y2="29.8" stroke="#cbd5e1" stroke-width=".8"/><rect x="44.5" y="26.6" width="14" height="3.1" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="51.5" y="24.1" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+2%</text><text x="51.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">4Q25</text><rect x="75.5" y="29.8" width="14" height="4.7" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="82.5" y="27.2" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">-3%</text><text x="82.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">1Q26</text><rect x="106.5" y="25.1" width="14" height="4.7" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="113.5" y="22.6" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+3%</text><text x="113.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">2Q26</text><rect x="136.5" y="28.2" width="16" height="1.6" rx="1" fill="#0f172b" fill-opacity="1"/><text x="144.5" y="25.7" text-anchor="middle" font-size="8" font-weight="700" fill="#0f172b">+1%</text><text x="144.5" y="45" text-anchor="middle" font-size="6.5" font-weight="700" letter-spacing=".3" fill="#1a7e7f">3Q26</text></svg></div><div class="gw-k-dl"><div><b>YoY USD</b><span>+20%</span></div><div><b>YoY c.c.</b><span>+3%</span></div><div><b>Net new, Q</b><span>$0.9M</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--navy)"></i>Total ARR<sup style="font-size:7px;margin-left:-3px">†</sup></div><div class="gw-k-mix">60.7K paying logos</div></div><div class="gw-k-mid"><div class="gw-k-val">$33.4M</div><svg viewBox="0 0 160 46" width="160" height="46" role="img" aria-label="QoQ ARR growth, constant currency, 4Q25 to 3Q26: +7%, +1%, +6%, +4%"><text x="0" y="27.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">QoQ</text><text x="0" y="36.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">C.C.</text><line x1="32" x2="160" y1="29.8" y2="29.8" stroke="#cbd5e1" stroke-width=".8"/><rect x="44.5" y="18.8" width="14" height="10.9" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="51.5" y="16.3" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+7%</text><text x="51.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">4Q25</text><rect x="75.5" y="28.2" width="14" height="1.6" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="82.5" y="25.7" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+1%</text><text x="82.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">1Q26</text><rect x="106.5" y="20.4" width="14" height="9.4" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="113.5" y="17.9" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+6%</text><text x="113.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">2Q26</text><rect x="136.5" y="23.5" width="16" height="6.2" rx="1" fill="#0f172b" fill-opacity="1"/><text x="144.5" y="21.0" text-anchor="middle" font-size="8" font-weight="700" fill="#0f172b">+4%</text><text x="144.5" y="45" text-anchor="middle" font-size="6.5" font-weight="700" letter-spacing=".3" fill="#1a7e7f">3Q26</text></svg></div><div class="gw-k-dl"><div><b>YoY USD</b><span>+37%</span></div><div><b>YoY c.c.</b><span>+19%</span></div><div><b>Net new, Q</b><span>$3.4M</span></div></div></div>
+    </div>
+    {% set cb_core = metrics.arr_walk_products | selectattr('id','equalto','core') | first %}
+    {% set cb_lite = metrics.arr_walk_products | selectattr('id','equalto','lite') | first %}
+    {% set cb_core_tbl = cb_core.arr_walk_table %}
+    {% set cb_lite_tbl = cb_lite.arr_walk_table %}
+    {% set cb_core_logo = cb_core_tbl.sections | selectattr('label','equalto',"Logo EoP (000's)") | first %}
+    {% set cb_lite_logo = cb_lite_tbl.sections | selectattr('label','equalto',"Logo EoP (000's)") | first %}
+    {% set cb_core_arr  = cb_core_tbl.sections | selectattr('label','equalto',"ARR Walk — Spot ($M)") | first %}
+    {% set cb_lite_arr  = cb_lite_tbl.sections | selectattr('label','equalto',"ARR Walk — Spot ($M)") | first %}
+    {% set cb_core_saas = cb_core_tbl.sections | selectattr('label','equalto',"SaaS Metrics") | first %}
+    {% set cb_lite_saas = cb_lite_tbl.sections | selectattr('label','equalto',"SaaS Metrics") | first %}
+    {% set cb_core_eop = cb_core_logo.rows | selectattr('label','equalto',"Total EoP") | first %}
+    {% set cb_lite_eop = cb_lite_logo.rows | selectattr('label','equalto',"Total EoP") | first %}
+    {% set cb_core_newpct = cb_core_logo.rows | selectattr('label','equalto',"Logo Monthly New Adds %") | first %}
+    {% set cb_lite_newpct = cb_lite_logo.rows | selectattr('label','equalto',"Logo Monthly New Adds %") | first %}
+    {% set cb_core_churnpct = cb_core_logo.rows | selectattr('label','equalto',"Logo Monthly Churn %") | first %}
+    {% set cb_lite_churnpct = cb_lite_logo.rows | selectattr('label','equalto',"Logo Monthly Churn %") | first %}
+    {% set cb_core_bop = cb_core_arr.rows | selectattr('label','equalto',"ARR BoP") | first %}
+    {% set cb_lite_bop = cb_lite_arr.rows | selectattr('label','equalto',"ARR BoP") | first %}
+    {% set cb_core_add = cb_core_arr.rows | selectattr('label','equalto',"Additions") | first %}
+    {% set cb_lite_add = cb_lite_arr.rows | selectattr('label','equalto',"Additions") | first %}
+    {% set cb_core_rec = cb_core_arr.rows | selectattr('label','equalto',"Recovered") | first %}
+    {% set cb_lite_rec = cb_lite_arr.rows | selectattr('label','equalto',"Recovered") | first %}
+    {% set cb_core_nc  = cb_core_arr.rows | selectattr('label','equalto',"Net Churn") | first %}
+    {% set cb_lite_nc  = cb_lite_arr.rows | selectattr('label','equalto',"Net Churn") | first %}
+    {% set cb_core_ne  = cb_core_arr.rows | selectattr('label','equalto',"Net Expansion") | first %}
+    {% set cb_lite_ne  = cb_lite_arr.rows | selectattr('label','equalto',"Net Expansion") | first %}
+    {% set cb_core_fx  = cb_core_arr.rows | selectattr('label','equalto',"(+/−) FX Impact") | first %}
+    {% set cb_lite_fx  = cb_lite_arr.rows | selectattr('label','equalto',"(+/−) FX Impact") | first %}
+    {% set cb_core_arreop = cb_core_arr.rows | selectattr('label','equalto',"ARR EoP") | first %}
+    {% set cb_lite_arreop = cb_lite_arr.rows | selectattr('label','equalto',"ARR EoP") | first %}
+    {% set cb_core_arrcc  = cb_core_arr.rows | selectattr('label','equalto',"ARR EoP (Constant Currency)") | first %}
+    {% set cb_lite_arrcc  = cb_lite_arr.rows | selectattr('label','equalto',"ARR EoP (Constant Currency)") | first %}
+    {% set cb_core_sm = cb_core_saas.rows | selectattr('label','equalto',"S&M Total Spend") | first %}
+    {% set cb_lite_sm = cb_lite_saas.rows | selectattr('label','equalto',"S&M Total Spend") | first %}
+    {% set cb_core_cac = cb_core_saas.rows | selectattr('label','equalto',"CAC") | first %}
+    {% set cb_lite_cac = cb_lite_saas.rows | selectattr('label','equalto',"CAC") | first %}
+    {% set cb_core_pb = cb_core_saas.rows | selectattr('label','equalto',"CAC Payback (meses)") | first %}
+    {% set cb_lite_pb = cb_lite_saas.rows | selectattr('label','equalto',"CAC Payback (meses)") | first %}
+    {% set cb_core_arpa = cb_core_saas.rows | selectattr('label','equalto',"ARPA") | first %}
+    {% set cb_lite_arpa = cb_lite_saas.rows | selectattr('label','equalto',"ARPA") | first %}
+    {% set cb_core_arpaadd = cb_core_saas.rows | selectattr('label','equalto',"ARPA Adds") | first %}
+    {% set cb_lite_arpaadd = cb_lite_saas.rows | selectattr('label','equalto',"ARPA Adds") | first %}
+    {% set cb_core_arpachn = cb_core_saas.rows | selectattr('label','equalto',"ARPA Churn") | first %}
+    {% set cb_lite_arpachn = cb_lite_saas.rows | selectattr('label','equalto',"ARPA Churn") | first %}
+    <!-- Reconstruida en vivo 2026-10-23 (Fase 1) — columnas trimestrales (3Q25→3Q26) desde
+         metrics.arr_walk_products[core/lite], confirmadas dato-por-dato contra la tabla
+         estática vieja antes de reemplazarla. LTM 26 sigue estática (sin cambios) para las
+         filas que ya la tenían; S&M spend pasó de $K a $M para calzar con Slide A. -->
+    <table class="gw-t" style="--gw-rh:12.8px;font-size:10.5px">
+      <colgroup><col class="gw-c-sec"><col style="width:130px"><col span="6"><col class="gw-c-gap"><col span="6"></colgroup>
+      <thead><tr class="gw-seg"><th colspan="2"></th><th class="gw-sc" colspan="6">Core<span>Larger SMEs by annual invoicing</span></th><th class="gw-gap"></th><th class="gw-sl" colspan="6">Lite<span>Smaller SMEs by annual invoicing</span></th></tr><tr class="gw-per"><th colspan="2"></th><th>3Q25</th><th>4Q25</th><th>1Q26</th><th>2Q26</th><th class="gw-cur"><span class="gw-pill">3Q26</span></th><th>LTM 26</th><th class="gw-gap"></th><th>3Q25</th><th>4Q25</th><th>1Q26</th><th>2Q26</th><th class="gw-cur"><span class="gw-pill">3Q26</span></th><th>LTM 26</th></tr></thead>
+      <tbody>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="3">Logos<span>000s</span></th><td class="gw-m">Logos, EoP</td>{% for v in cb_core_eop.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">25.6</td><td class="gw-gap"></td>{% for v in cb_lite_eop.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">35.2</td></tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly New Adds %</td>{% for v in cb_core_newpct.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">4.9%</td><td class="gw-gap"></td>{% for v in cb_lite_newpct.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">6.3%</td></tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly Churn %</td>{% for v in cb_core_churnpct.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">3.6%</td><td class="gw-gap"></td>{% for v in cb_lite_churnpct.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">5.9%</td></tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="10">ARR Walk<span>Spot, $M</span></th><td class="gw-m">ARR, BoP</td>{% for v in cb_core_bop.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">13.8</td><td class="gw-gap"></td>{% for v in cb_lite_bop.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">10.4</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New (additions)</td>{% for v in cb_core_add.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">5.6</td><td class="gw-gap"></td>{% for v in cb_lite_add.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">6.0</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td>{% for v in cb_core_rec.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">1.4</td><td class="gw-gap"></td>{% for v in cb_lite_rec.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">2.1</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net</td>{% for v in cb_core_nc.cells %}<td class="gw-v gw-h gw-neg{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd gw-neg">(5.8)</td><td class="gw-gap"></td>{% for v in cb_lite_nc.cells %}<td class="gw-v gw-h gw-neg{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd gw-neg">(8.2)</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Expansion, net</td>{% for v in cb_core_ne.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">4.1</td><td class="gw-gap"></td>{% for v in cb_lite_ne.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">2.5</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">±</b>FX impact</td>{% for v in cb_core_fx.cells %}<td class="gw-v gw-h{% if v[0] in ['(','-','−'] %} gw-neg{% endif %}{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">1.8</td><td class="gw-gap"></td>{% for v in cb_lite_fx.cells %}<td class="gw-v gw-h{% if v[0] in ['(','-','−'] %} gw-neg{% endif %}{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd gw-neg">(0.3)</td></tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">ARR, EoP</td>{% for v in cb_core_arreop.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">20.9</td><td class="gw-gap"></td>{% for v in cb_lite_arreop.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">12.5</td></tr>
+<tr class="gw-sub"><td class="gw-m">QoQ growth</td>{% for c in cb_core_arreop.qoq_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td>{% for c in cb_lite_arreop.qoq_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth</td>{% for c in cb_core_arreop.yoy_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-v gw-ytd">+51%</td><td class="gw-gap"></td>{% for c in cb_lite_arreop.yoy_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-v gw-ytd">+20%</td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR</td>{% for v in cb_core_arreop.extra_sub.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">7.1</td><td class="gw-gap"></td>{% for v in cb_lite_arreop.extra_sub.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">2.1</td></tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="4">Constant currency<span>$M, 3Q26 FX</span></th><td class="gw-m">ARR, EoP<small>c.c.</small></td>{% for v in cb_core_arrcc.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">20.9</td><td class="gw-gap"></td>{% for v in cb_lite_arrcc.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">12.5</td></tr>
+<tr class="gw-sub"><td class="gw-m">QoQ growth</td>{% for c in cb_core_arrcc.qoq_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td>{% for c in cb_lite_arrcc.qoq_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth</td>{% for c in cb_core_arrcc.yoy_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-v gw-ytd">+30%</td><td class="gw-gap"></td>{% for c in cb_lite_arrcc.yoy_cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}<td class="gw-v gw-ytd">+3%</td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR<small>c.c.</small></td>{% for v in cb_core_arrcc.extra_sub.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">4.9</td><td class="gw-gap"></td>{% for v in cb_lite_arrcc.extra_sub.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">0.4</td></tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="6">Unit economics</th><td class="gw-m">S&amp;M spend<small>$M</small></td>{% for v in cb_core_sm.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{% if v.endswith('K') %}{{ "%.1f"|format(v.replace('$','').replace('K','')|float / 1000) }}{% else %}{{ v.replace('$','').replace('M','') }}{% endif %}</td>{% endfor %}<td class="gw-v gw-ytd">5.4</td><td class="gw-gap"></td>{% for v in cb_lite_sm.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{% if v.endswith('K') %}{{ "%.1f"|format(v.replace('$','').replace('K','')|float / 1000) }}{% else %}{{ v.replace('$','').replace('M','') }}{% endif %}</td>{% endfor %}<td class="gw-v gw-ytd">3.4</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC<small>$ / new logo</small></td>{% for v in cb_core_cac.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-v gw-ytd">488</td><td class="gw-gap"></td>{% for v in cb_lite_cac.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-v gw-ytd">188</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC payback<small>months</small></td>{% for v in cb_core_pb.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">11.5<sup>§</sup></td><td class="gw-gap"></td>{% for v in cb_lite_pb.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-v gw-ytd">11.3<sup>§</sup></td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA<small>$ / month</small></td>{% for v in cb_core_arpa.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-v gw-ytd">68</td><td class="gw-gap"></td>{% for v in cb_lite_arpa.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-v gw-ytd">30</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, new logos<small>$ / month</small></td>{% for v in cb_core_arpaadd.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-v gw-ytd">43<sup>‡</sup></td><td class="gw-gap"></td>{% for v in cb_lite_arpaadd.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-v gw-ytd">27<sup>‡</sup></td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, churned logos<small>$ / month</small></td>{% for v in cb_core_arpachn.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-v gw-ytd">49<sup>‡</sup></td><td class="gw-gap"></td>{% for v in cb_lite_arpachn.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ v.replace('$','') }}</td>{% endfor %}<td class="gw-v gw-ytd">26<sup>‡</sup></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="gw-ft">
+    <p><b>Core and Lite</b> segment SMEs by annual invoicing volume. Spot = actual FX; c.c. = restated at 3Q26 FX. LTM 26 = Oct-25–Sep-26. Negatives in parentheses. New Adds %/Churn %/CAC/ARPA in LTM 26 are computed directly, not a ‡ average. <b>†</b> Total ARR = Core + Lite, excludes Alanube ($34.5M incl. Alanube, see 3Q26/YTD Performance). <b>‡</b> Average of the four quarters. <b>§</b> Payback = S&amp;M-weighted average of the four quarters. Bars: QoQ ARR growth, c.c., common scale.</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 2</em></div>
+  </footer>
+</section>
+
+  <div class="slide-divider">↓</div>
+
+<section class="slide gw-slide" aria-label="ARR by country, 3Q26 summary">
+  <header class="gw-hd"><h2>ARR by Country</h2><span>3Q26</span></header>
+  <div class="gw-body" style="gap:26px;padding-top:18px">
+    <div class="gw-ks gw-c5">
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">ARR</div></div><div class="gw-k-val">$33.4M</div><div class="gw-k-dl"><div><b>YoY USD</b><span class="">+37.5%</span></div><div><b>YoY c.c.</b><span class="">+18.7%</span></div></div><div class="gw-k-bd"><span class="gw-up">+10.1%</span>vs budget</div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">Logos</div></div><div class="gw-k-val">60.7K</div><div class="gw-k-dl"><div><b>YoY</b><span class="">+10.2%</span></div></div><div class="gw-k-bd"><span class="gw-dn">−6.1%</span>vs budget</div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">ARPA</div></div><div class="gw-k-val">$45.8<small>/ month</small></div><div class="gw-k-dl"><div><b>YoY USD</b><span class="">+24.8%</span></div></div><div class="gw-k-bd"><span class="gw-up">+13.0%</span>vs budget</div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">S&amp;M spend</div></div><div class="gw-k-val">$833K<small>/ month</small></div><div class="gw-k-dl"><div><b>vs 3Q24</b><span class="">−26%</span></div></div><div class="gw-k-bd"><span class="gw-up gw-dm">−3.0%</span>vs budget</div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">CAC payback</div></div><div class="gw-k-val">13.5<small>months</small></div><div class="gw-k-dl"><div><b>in 3Q25</b><span class="gw-nt">14.6</span></div></div><div class="gw-k-bd"><span class="gw-dn gw-dm">+1.2 mo</span>vs budget</div></div>
+    </div>
+    <table class="gw-ct">
+      <colgroup><col style="width:116px"><col style="width:140px"><col style="width:58px"><col style="width:58px"><col style="width:160px"><col style="width:12px"><col style="width:54px"><col style="width:58px"><col style="width:12px"><col><col><col><col></colgroup>
+      <thead>
+        <tr class="gw-seg"><th class="gw-blank"></th><th colspan="5">Scale &amp; growth</th><th class="gw-gap"></th><th colspan="2">Customers</th><th class="gw-gap"></th><th colspan="4">Efficiency<span>3Q26, per month</span></th></tr>
+        <tr class="gw-per"><th></th><th class="gw-l">ARR · share</th><th>YoY USD</th><th>YoY c.c.</th><th class="gw-l" style="padding-left:6px">c.c. YoY, 1Q25–3Q26</th><th class="gw-gap"></th><th>Logos</th><th>ARPA $/mo</th><th class="gw-gap"></th><th>S&amp;M $K</th><th>CAC $</th><th>Churn</th><th>Payback</th></tr>
+      </thead>
+      <tbody>
+<tr><th scope="row">Colombia</th><td><div class="gw-arr"><span class="gw-n">$22.3M</span><span class="gw-bar"><i style="width:67%"></i></span><span class="gw-p">67%</span></div></td><td>+42.3%</td><td class="gw-cc">+15.4%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY 1Q25 50.4%, 2Q25 41.4%, 3Q25 22.5%, 4Q25 20.2%, 1Q26 9.5%, 2Q26 14.3%, 3Q26 15.4%"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,5.2 20.0,9.5 36.0,18.3 52.0,19.5 68.0,24.5 84.0,22.2 100.0,21.8" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="21.8" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>45.3K</td><td>41.1</td><td class="gw-gap"></td><td>383</td><td>267</td><td>3.8%</td><td class="">10.4</td></tr>
+<tr><th scope="row">Mexico</th><td><div class="gw-arr"><span class="gw-n">$3.0M</span><span class="gw-bar"><i style="width:9%"></i></span><span class="gw-p">9%</span></div></td><td>+30.7%</td><td class="gw-cc">+21.2%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY 1Q25 38.1%, 2Q25 39.4%, 3Q25 37.3%, 4Q25 32.4%, 1Q26 20.4%, 2Q26 20.2%, 3Q26 21.2%"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,10.9 20.0,10.4 36.0,11.4 52.0,13.7 68.0,19.3 84.0,19.5 100.0,19.0" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="19.0" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>5.4K</td><td>46.4</td><td class="gw-gap"></td><td>284</td><td>987</td><td>3.7%</td><td class="gw-flag">41.0</td></tr>
+<tr><th scope="row">Dominican Republic</th><td><div class="gw-arr"><span class="gw-n">$5.2M</span><span class="gw-bar"><i style="width:15%"></i></span><span class="gw-p">15%</span></div></td><td>+27.3%</td><td class="gw-cc">+27.3%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY 1Q25 47.4%, 2Q25 42.9%, 3Q25 36.8%, 4Q25 41.4%, 1Q26 19.7%, 2Q26 23.9%, 3Q26 27.3%"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,6.6 20.0,8.8 36.0,11.7 52.0,9.5 68.0,19.8 84.0,17.7 100.0,16.1" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="16.1" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>5.0K</td><td>86.9</td><td class="gw-gap"></td><td>94</td><td>456</td><td>4.2%</td><td class="">9.9</td></tr>
+<tr><th scope="row">Costa Rica</th><td><div class="gw-arr"><span class="gw-n">$1.0M</span><span class="gw-bar"><i style="width:3%"></i></span><span class="gw-p">3%</span></div></td><td>+41.7%</td><td class="gw-cc">+41.7%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY 1Q25 32.4%, 2Q25 29.9%, 3Q25 21.5%, 4Q25 32.5%, 1Q26 30.7%, 2Q26 40.7%, 3Q26 41.7%"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,13.7 20.0,14.8 36.0,18.9 52.0,13.7 68.0,14.6 84.0,9.8 100.0,9.4" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="9.4" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>1.7K</td><td>47.7</td><td class="gw-gap"></td><td>34</td><td>298</td><td>4.4%</td><td class="">9.6</td></tr>
+<tr><th scope="row">Other</th><td><div class="gw-arr"><span class="gw-n">$1.9M</span><span class="gw-bar"><i style="width:6%"></i></span><span class="gw-p">6%</span></div></td><td>+23.9%</td><td class="gw-cc">+23.9%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY 1Q25 45.9%, 2Q25 42.0%, 3Q25 21.9%, 4Q25 14.4%, 1Q26 11.6%, 2Q26 12.0%, 3Q26 23.9%"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,7.3 20.0,9.2 36.0,18.6 52.0,22.2 68.0,23.5 84.0,23.4 100.0,17.7" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="17.7" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>3.4K</td><td>46.9</td><td class="gw-gap"></td><td>38</td><td>355</td><td>3.5%</td><td class="">9.5<sup>†</sup></td></tr>
+<tr class="gw-tot"><th scope="row">Total</th><td><div class="gw-arr"><span class="gw-n">$33.4M</span><span class="gw-bar"><i style="width:100%"></i></span><span class="gw-p">100%</span></div></td><td>+37.5%</td><td class="gw-cc">+18.7%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY 1Q25 48.2%, 2Q25 41.2%, 3Q25 25.5%, 4Q25 23.8%, 1Q26 12.4%, 2Q26 16.7%, 3Q26 18.7%"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,6.2 20.0,9.5 36.0,17.0 52.0,17.7 68.0,23.1 84.0,21.1 100.0,20.2" fill="none" stroke="#0f172b" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="20.2" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>60.7K</td><td>45.8</td><td class="gw-gap"></td><td>833</td><td>386</td><td>4.1%</td><td class="">13.5</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="gw-ft">
+    <p>Figures exclude Alanube (company-wide ARR incl. Alanube is $34.5M, shown on the 3Q26/YTD Performance slides). ARR, Logos, ARPA, S&amp;M and CAC payback are all real. c.c. = constant currency. Efficiency = full, closed 3Q26 quarter. CAC = S&amp;M ÷ new logos. Payback = CAC payback in months (country-level uses the same cohort model as the GLO figure above); above 24 months in orange. Other = Total − four countries. <b>†</b> The cohort model doesn't cover Other's countries (Argentina, Chile, Panama, Peru, Spain, USA); its payback is CAC ÷ ARPA of new logos instead — a cruder estimate than the other rows.</p>
+    <div class="gw-key"><div><span><i class="gw-pos"></i>Above budget</span><span><i></i>Below budget / payback &gt; 24 mo</span></div><em>Alegra · Confidential · 3</em></div>
+  </footer>
+</section>
+
+  <div class="slide-divider">↓</div>
+
+<section class="slide gw-slide" aria-label="ARR by country, three-year detail, 3Q24 to 3Q26">
+  <header class="gw-hd"><h2>ARR by Country · Three-Year Detail</h2><span>3Q24 → 3Q26</span></header>
+  <div class="gw-body" style="gap:12px;padding-top:10px">
+    <table class="gw-t gw-ap" style="--rh:14.0px"><colgroup><col style="width:120px"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"></colgroup><thead><tr class="gw-seg"><th class="gw-blk">Scale &amp; growth</th><th class="gw-sq" colspan="3">ARR<span>$M</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">YoY in USD<span>%</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">YoY constant currency<span>%</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">ARR mix<span>%</span></th></tr><tr class="gw-per"><th></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th></tr></thead><tbody><tr><th scope="row">Colombia</th><td class="gw-v gw-h">12.0</td><td class="gw-v gw-h">15.7</td><td class="gw-v gw-cur">22.3</td><td class="gw-gap"></td><td class="gw-v gw-h">+43.7</td><td class="gw-v gw-h">+30.6</td><td class="gw-v gw-cur">+42.3</td><td class="gw-gap"></td><td class="gw-v gw-h">+48.2</td><td class="gw-v gw-h">+22.5</td><td class="gw-v gw-cur">+15.4</td><td class="gw-gap"></td><td class="gw-v gw-h">65</td><td class="gw-v gw-h">65</td><td class="gw-v gw-cur">67</td></tr><tr><th scope="row">Mexico</th><td class="gw-v gw-h">1.6</td><td class="gw-v gw-h">2.3</td><td class="gw-v gw-cur">3.0</td><td class="gw-gap"></td><td class="gw-v gw-h">+26.8</td><td class="gw-v gw-h">+45.5</td><td class="gw-v gw-cur">+30.7</td><td class="gw-gap"></td><td class="gw-v gw-h">+41.4</td><td class="gw-v gw-h">+37.3</td><td class="gw-v gw-cur">+21.2</td><td class="gw-gap"></td><td class="gw-v gw-h">9</td><td class="gw-v gw-h">9</td><td class="gw-v gw-cur">9</td></tr><tr><th scope="row">Dominican Republic</th><td class="gw-v gw-h">3.0</td><td class="gw-v gw-h">4.1</td><td class="gw-v gw-cur">5.2</td><td class="gw-gap"></td><td class="gw-v gw-h">+28.6</td><td class="gw-v gw-h">+36.8</td><td class="gw-v gw-cur">+27.3</td><td class="gw-gap"></td><td class="gw-v gw-h">+28.6</td><td class="gw-v gw-h">+36.8</td><td class="gw-v gw-cur">+27.3</td><td class="gw-gap"></td><td class="gw-v gw-h">16</td><td class="gw-v gw-h">17</td><td class="gw-v gw-cur">15</td></tr><tr><th scope="row">Costa Rica</th><td class="gw-v gw-h">0.6</td><td class="gw-v gw-h">0.7</td><td class="gw-v gw-cur">1.0</td><td class="gw-gap"></td><td class="gw-v gw-h">+45.4</td><td class="gw-v gw-h">+21.5</td><td class="gw-v gw-cur">+41.7</td><td class="gw-gap"></td><td class="gw-v gw-h">+45.4</td><td class="gw-v gw-h">+21.5</td><td class="gw-v gw-cur">+41.7</td><td class="gw-gap"></td><td class="gw-v gw-h">3</td><td class="gw-v gw-h">3</td><td class="gw-v gw-cur">3</td></tr><tr><th scope="row">Other</th><td class="gw-v gw-h">1.3</td><td class="gw-v gw-h">1.6</td><td class="gw-v gw-cur">1.9</td><td class="gw-gap"></td><td class="gw-v gw-h">+39.3</td><td class="gw-v gw-h">+18.1</td><td class="gw-v gw-cur">+23.9</td><td class="gw-gap"></td><td class="gw-v gw-h">+39.3</td><td class="gw-v gw-h">+18.1</td><td class="gw-v gw-cur">+23.9</td><td class="gw-gap"></td><td class="gw-v gw-h">7</td><td class="gw-v gw-h">6</td><td class="gw-v gw-cur">6</td></tr><tr class="gw-tot"><th scope="row">Total</th><td class="gw-v gw-h">18.4</td><td class="gw-v gw-h">24.3</td><td class="gw-v gw-cur">33.4</td><td class="gw-gap"></td><td class="gw-v gw-h">+39.2</td><td class="gw-v gw-h">+31.7</td><td class="gw-v gw-cur">+37.5</td><td class="gw-gap"></td><td class="gw-v gw-h">+43.4</td><td class="gw-v gw-h">+25.6</td><td class="gw-v gw-cur">+18.7</td><td class="gw-gap"></td><td class="gw-v gw-h">100</td><td class="gw-v gw-h">100</td><td class="gw-v gw-cur">100</td></tr><tr class="gw-fx"><th scope="row">FX effect, pp (USD − c.c.)</th><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-cur gw-na"></td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(4.2)</td><td class="gw-v gw-h">+6.1</td><td class="gw-v gw-cur">+18.8</td><td class="gw-gap"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-cur gw-na"></td><td class="gw-gap"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-cur gw-na"></td></tr></tbody></table>
+    <table class="gw-t gw-ap" style="--rh:14.0px"><colgroup><col style="width:120px"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"></colgroup><thead><tr class="gw-seg"><th class="gw-blk">Customers</th><th class="gw-sq" colspan="3">Logos<span>000s, EoP</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">Logos YoY<span>%</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">ARPA<span>$ / month</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">ARPA YoY<span>%, USD</span></th></tr><tr class="gw-per"><th></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th></tr></thead><tbody><tr><th scope="row">Colombia</th><td class="gw-v gw-h">40.4</td><td class="gw-v gw-h">42.5</td><td class="gw-v gw-cur">45.3</td><td class="gw-gap"></td><td class="gw-v gw-h">+18.8</td><td class="gw-v gw-h">+5.3</td><td class="gw-v gw-cur">+6.5</td><td class="gw-gap"></td><td class="gw-v gw-h">24.8</td><td class="gw-v gw-h">30.7</td><td class="gw-v gw-cur">41.1</td><td class="gw-gap"></td><td class="gw-v gw-h">+21.0</td><td class="gw-v gw-h">+24.0</td><td class="gw-v gw-cur">+33.6</td></tr><tr><th scope="row">Mexico</th><td class="gw-v gw-h">3.6</td><td class="gw-v gw-h">4.3</td><td class="gw-v gw-cur">5.4</td><td class="gw-gap"></td><td class="gw-v gw-h">+38.5</td><td class="gw-v gw-h">+18.7</td><td class="gw-v gw-cur">+25.7</td><td class="gw-gap"></td><td class="gw-v gw-h">36.4</td><td class="gw-v gw-h">44.6</td><td class="gw-v gw-cur">46.4</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(8.4)</td><td class="gw-v gw-h">+22.6</td><td class="gw-v gw-cur">+3.9</td></tr><tr><th scope="row">Dominican Republic</th><td class="gw-v gw-h">4.1</td><td class="gw-v gw-h">4.1</td><td class="gw-v gw-cur">5.0</td><td class="gw-gap"></td><td class="gw-v gw-h">+20.4</td><td class="gw-v gw-h">+1.5</td><td class="gw-v gw-cur">+20.0</td><td class="gw-gap"></td><td class="gw-v gw-h">60.8</td><td class="gw-v gw-h">82.0</td><td class="gw-v gw-cur">86.9</td><td class="gw-gap"></td><td class="gw-v gw-h">+6.8</td><td class="gw-v gw-h">+34.9</td><td class="gw-v gw-cur">+6.1</td></tr><tr><th scope="row">Costa Rica</th><td class="gw-v gw-h">1.0</td><td class="gw-v gw-h">1.3</td><td class="gw-v gw-cur">1.7</td><td class="gw-gap"></td><td class="gw-v gw-h">+50.4</td><td class="gw-v gw-h">+26.3</td><td class="gw-v gw-cur">+29.8</td><td class="gw-gap"></td><td class="gw-v gw-h">45.4</td><td class="gw-v gw-h">43.7</td><td class="gw-v gw-cur">47.7</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(3.3)</td><td class="gw-v gw-h gw-neg">(3.8)</td><td class="gw-v gw-cur">+9.1</td></tr><tr><th scope="row">Other</th><td class="gw-v gw-h">3.2</td><td class="gw-v gw-h">2.9</td><td class="gw-v gw-cur">3.4</td><td class="gw-gap"></td><td class="gw-v gw-h">+25.0</td><td class="gw-v gw-h gw-neg">(9.0)</td><td class="gw-v gw-cur">+18.3</td><td class="gw-gap"></td><td class="gw-v gw-h">34.5</td><td class="gw-v gw-h">44.8</td><td class="gw-v gw-cur">46.9</td><td class="gw-gap"></td><td class="gw-v gw-h">+11.4</td><td class="gw-v gw-h">+29.8</td><td class="gw-v gw-cur">+4.7</td></tr><tr class="gw-tot"><th scope="row">Total</th><td class="gw-v gw-h">52.2</td><td class="gw-v gw-h">55.1</td><td class="gw-v gw-cur">60.7</td><td class="gw-gap"></td><td class="gw-v gw-h">+21.0</td><td class="gw-v gw-h">+5.5</td><td class="gw-v gw-cur">+10.2</td><td class="gw-gap"></td><td class="gw-v gw-h">29.4</td><td class="gw-v gw-h">36.7</td><td class="gw-v gw-cur">45.8</td><td class="gw-gap"></td><td class="gw-v gw-h">+15.1</td><td class="gw-v gw-h">+24.9</td><td class="gw-v gw-cur">+24.8</td></tr></tbody></table>
+    <table class="gw-t gw-ap" style="--rh:14.0px"><colgroup><col style="width:120px"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"></colgroup><thead><tr class="gw-seg"><th class="gw-blk">GTM efficiency</th><th class="gw-sq" colspan="3">S&amp;M spend<span>$K / month</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">CAC<span>$ / new logo</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">Logo churn<span>% / month</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">CAC payback<span>months</span></th></tr><tr class="gw-per"><th></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th><th class="gw-gap"></th><th>3Q24</th><th>3Q25</th><th class="gw-cur">3Q26</th></tr></thead><tbody><tr><th scope="row">Colombia</th><td class="gw-v gw-h">437</td><td class="gw-v gw-h">318</td><td class="gw-v gw-cur">383</td><td class="gw-gap"></td><td class="gw-v gw-h">219</td><td class="gw-v gw-h">233</td><td class="gw-v gw-cur">267</td><td class="gw-gap"></td><td class="gw-v gw-h">5.0</td><td class="gw-v gw-h">4.2</td><td class="gw-v gw-cur">3.8</td><td class="gw-gap"></td><td class="gw-v gw-h">12.6</td><td class="gw-v gw-h">9.7</td><td class="gw-v gw-cur">10.4</td></tr><tr><th scope="row">Mexico</th><td class="gw-v gw-h">311</td><td class="gw-v gw-h">158</td><td class="gw-v gw-cur">284</td><td class="gw-gap"></td><td class="gw-v gw-h">1,835</td><td class="gw-v gw-h">776</td><td class="gw-v gw-cur">987</td><td class="gw-gap"></td><td class="gw-v gw-h">3.8</td><td class="gw-v gw-h">4.4</td><td class="gw-v gw-cur">3.7</td><td class="gw-gap"></td><td class="gw-v gw-h gw-flag">109.9</td><td class="gw-v gw-h gw-flag">33.0</td><td class="gw-v gw-cur gw-flag">41.0</td></tr><tr><th scope="row">Dominican Republic</th><td class="gw-v gw-h">220</td><td class="gw-v gw-h">176</td><td class="gw-v gw-cur">94</td><td class="gw-gap"></td><td class="gw-v gw-h">1,384</td><td class="gw-v gw-h">1,030</td><td class="gw-v gw-cur">456</td><td class="gw-gap"></td><td class="gw-v gw-h">3.7</td><td class="gw-v gw-h">4.6</td><td class="gw-v gw-cur">4.2</td><td class="gw-gap"></td><td class="gw-v gw-h gw-flag">28.0</td><td class="gw-v gw-h">17.8</td><td class="gw-v gw-cur">9.9</td></tr><tr><th scope="row">Costa Rica</th><td class="gw-v gw-h">51</td><td class="gw-v gw-h">48</td><td class="gw-v gw-cur">34</td><td class="gw-gap"></td><td class="gw-v gw-h">795</td><td class="gw-v gw-h">498</td><td class="gw-v gw-cur">298</td><td class="gw-gap"></td><td class="gw-v gw-h">5.6</td><td class="gw-v gw-h">4.4</td><td class="gw-v gw-cur">4.4</td><td class="gw-gap"></td><td class="gw-v gw-h">24.0</td><td class="gw-v gw-h">23.5</td><td class="gw-v gw-cur">9.6</td></tr><tr><th scope="row">Other</th><td class="gw-v gw-h">108</td><td class="gw-v gw-h">60</td><td class="gw-v gw-cur">38</td><td class="gw-gap"></td><td class="gw-v gw-h">685</td><td class="gw-v gw-h">684</td><td class="gw-v gw-cur">355</td><td class="gw-gap"></td><td class="gw-v gw-h">4.5</td><td class="gw-v gw-h">4.5</td><td class="gw-v gw-cur">3.5</td><td class="gw-gap"></td><td class="gw-v gw-h gw-flag">26.3<sup>†</sup></td><td class="gw-v gw-h">22.6<sup>†</sup></td><td class="gw-v gw-cur">9.5<sup>†</sup></td></tr><tr class="gw-tot"><th scope="row">Total</th><td class="gw-v gw-h">1,127</td><td class="gw-v gw-h">761</td><td class="gw-v gw-cur">833</td><td class="gw-gap"></td><td class="gw-v gw-h">442</td><td class="gw-v gw-h">395</td><td class="gw-v gw-cur">386</td><td class="gw-gap"></td><td class="gw-v gw-h">4.8</td><td class="gw-v gw-h">4.3</td><td class="gw-v gw-cur">4.1</td><td class="gw-gap"></td><td class="gw-v gw-h">21.2</td><td class="gw-v gw-h">14.6</td><td class="gw-v gw-cur">13.5</td></tr></tbody></table>
+  </div>
+  <footer class="gw-ft">
+    <p>Figures exclude Alanube (company-wide ARR incl. Alanube is $34.5M, shown on the 3Q26/YTD Performance slides). Units in each header. Negatives in parentheses. c.c. = YoY growth ex-FX. ARPA = MRR ÷ active logos. 3Q26 = full, closed quarter. CAC = S&amp;M ÷ new logos. Payback = CAC payback in months (country-level uses the same cohort model); above 24 months in orange. <b>†</b> The cohort model doesn't cover Other's countries; its payback is CAC ÷ ARPA of new logos instead — a cruder estimate than the other rows.</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 4</em></div>
+  </footer>
+</section>
+
+  {% endif %}{# /Growth slides trimestrales #}
+
+  {% if False %}{# Oculta 2026-10-24: pedido explícito del usuario — ocultar la slide
+       "Global — Core vs Lite Performance Alegra". Código intacto abajo, reversible
+       cambiando False por True. #}
+  <div class="slide-divider">↓</div>
+
+  <!-- REPLICA — Global Core vs Lite Performance (código idéntico al de 1_inicio.j2,
+       SLIDE 7, que queda oculto allá — ver nota ahí. Pedido explícito del usuario:
+       "ojo acá es una réplica, no traer lo que estaba en la sección 1". -->
+  <div class="slide cp-slide">
+    <div class="slide-header">
+      <span class="title">Global — Core vs Lite Performance Alegra</span>
+      <span class="period">{% if metrics.is_quarter_end %}{{ config.quarter_label }}{% else %}{{ config.month_label }}{% endif %}</span>
+    </div>
+    <div class="cp-inner">
+      <div class="bf-cards">
+        <div class="bf-card">
+          <div class="bf-card-id">
+            <span class="bf-card-label c">● CORE</span>
+            <span class="bf-card-value">{{ metrics.global_country.core.arr }}</span>
+          </div>
+          <div class="bf-card-deltas">
+            <div class="bf-card-delta"><span class="k">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="v {{ 'bf-pos' if metrics.global_country.core.arr_mom_positive else 'bf-neg' }}">{{ metrics.global_country.core.arr_mom }}</span></div>
+            <div class="bf-card-delta"><span class="k">YoY (USD)</span><span class="v {{ 'bf-pos' if metrics.global_country.core.arr_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.core.arr_yoy }}</span></div>
+            <div class="bf-card-delta"><span class="k">YoY (C.C)</span><span class="v cc {{ 'bf-pos' if metrics.global_country.core.arr_cc_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.core.arr_cc_yoy }}</span></div>
+          </div>
+        </div>
+        <div class="bf-card">
+          <div class="bf-card-id">
+            <span class="bf-card-label l">● LITE</span>
+            <span class="bf-card-value">{{ metrics.global_country.lite.arr }}</span>
+          </div>
+          <div class="bf-card-deltas">
+            <div class="bf-card-delta"><span class="k">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="v {{ 'bf-pos' if metrics.global_country.lite.arr_mom_positive else 'bf-neg' }}">{{ metrics.global_country.lite.arr_mom }}</span></div>
+            <div class="bf-card-delta"><span class="k">YoY (USD)</span><span class="v {{ 'bf-pos' if metrics.global_country.lite.arr_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.lite.arr_yoy }}</span></div>
+            <div class="bf-card-delta"><span class="k">YoY (C.C)</span><span class="v cc {{ 'bf-pos' if metrics.global_country.lite.arr_cc_yoy_positive else 'bf-neg' }}">{{ metrics.global_country.lite.arr_cc_yoy }}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bf-table">
+        <table>
+          <thead>
+            <tr class="grp">
+              <th></th>
+              <th colspan="3" class="core-col"><span class="grp-label core">CORE</span></th>
+              <th colspan="3" class="lite-col"><span class="grp-label lite">LITE</span></th>
+            </tr>
+            <tr class="sub">
+              <th class="metric-h left">Metric</th>
+              <th class="right core-col">Value</th><th class="right core-col">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</th><th class="right core-col">YoY</th>
+              <th class="right lite-col">Value</th><th class="right lite-col">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</th><th class="right lite-col">YoY</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in metrics.global_country.butterfly_rows %}
+            {% set is_primary = row.metric_name in ['Net Logo Adds', 'Net New ARR', 'New ARR', 'Churn Rate'] %}
+            {% set neutral_delta = row.metric_name == 'Investment' %}
+            {% set invert_delta = row.metric_name in ['Churn Rate', 'CAC'] %}
+            <tr>
+              <td class="metric-col"><span class="metric-name{{ ' primary' if is_primary else '' }}">{{ row.metric_name }}</span></td>
+              <td class="val{{ ' alert' if row.core.val_negative else '' }} right core-col">{{ row.core.val }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.core.mom_positive if invert_delta else row.core.mom_positive) else 'neg') }} right core-col">{{ row.core.mom }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.core.yoy_positive if invert_delta else row.core.yoy_positive) else 'neg') }} right core-col">{{ row.core.yoy }}</td>
+              <td class="val{{ ' alert' if row.lite.val_negative else '' }} right lite-col">{{ row.lite.val }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.lite.mom_positive if invert_delta else row.lite.mom_positive) else 'neg') }} right lite-col">{{ row.lite.mom }}</td>
+              <td class="delta {{ 'neutral' if neutral_delta else ('pos' if (not row.lite.yoy_positive if invert_delta else row.lite.yoy_positive) else 'neg') }} right lite-col">{{ row.lite.yoy }}</td>
+            </tr>
+            {% if row.metric_name == 'ARPA' %}
+            <tr>
+              <td class="metric-col" style="font-style:italic; padding-left:20px;">ARPA New Logos</td>
+              <td class="right core-col">{{ row.arpa_new_core }}</td>
+              <td class="delta {{ 'pos' if row.arpa_new_core_mom_positive else 'neg' }} right core-col">{{ row.arpa_new_core_mom }}</td>
+              <td class="delta {{ 'pos' if row.arpa_new_core_yoy_positive else 'neg' }} right core-col">{{ row.arpa_new_core_yoy }}</td>
+              <td class="right lite-col">{{ row.arpa_new_lite }}</td>
+              <td class="delta {{ 'pos' if row.arpa_new_lite_mom_positive else 'neg' }} right lite-col">{{ row.arpa_new_lite_mom }}</td>
+              <td class="delta {{ 'pos' if row.arpa_new_lite_yoy_positive else 'neg' }} right lite-col">{{ row.arpa_new_lite_yoy }}</td>
+            </tr>
+            <tr>
+              <td class="metric-col" style="font-style:italic; padding-left:20px;">ARPA Churned Logos</td>
+              <td class="right core-col">{{ row.arpa_churned_core }}</td>
+              <td class="delta {{ 'neg' if row.arpa_churned_core_mom_positive else 'pos' }} right core-col">{{ row.arpa_churned_core_mom }}</td>
+              <td class="delta {{ 'neg' if row.arpa_churned_core_yoy_positive else 'pos' }} right core-col">{{ row.arpa_churned_core_yoy }}</td>
+              <td class="right lite-col">{{ row.arpa_churned_lite }}</td>
+              <td class="delta {{ 'neg' if row.arpa_churned_lite_mom_positive else 'pos' }} right lite-col">{{ row.arpa_churned_lite_mom }}</td>
+              <td class="delta {{ 'neg' if row.arpa_churned_lite_yoy_positive else 'pos' }} right lite-col">{{ row.arpa_churned_lite_yoy }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">—</span>
+    </div>
+  </div>
+  {% endif %}{# /Global — Core vs Lite Performance Alegra, oculta 2026-10-24 #}
+
+  {# Oculta 2026-10-23: "ARR Walk Core & Lite (Combined View)" + el loop Core/Lite
+     individual se reemplazaron visualmente por las Growth Slides de arriba (pedido
+     del usuario). Código intacto abajo, reversible cambiando False por True. #}
+  {% if not metrics.is_quarter_end %}{# ARR Walk mensual por producto (Core/Lite) — visible en meses que no son cierre de Q (2026-11-17) #}
+  {% if False %}{# Combined View sigue oculto #}
+  <div class="slide-divider">↓ &nbsp; Countries Performance</div>
+
+  <!-- ============================================================
+       SLIDE 2 — ARR Walk Core & Lite (Combined View) — agregada 2026-10-21,
+       pedido explícito del usuario tras reunión con Lucas Vassalo: ver las dos
+       tablas de Core/Lite juntas en una sola slide, en vez de 2 separadas.
+       100% dinámica — reusa metrics.arr_walk_products (misma fuente que las
+       slides individuales de Core/Lite de abajo), columna de labels
+       compartida porque ambos segmentos tienen exactamente las mismas filas.
+       ============================================================ -->
+  {% set core_prod = metrics.arr_walk_products | selectattr('id','equalto','core') | first %}
+  {% set lite_prod  = metrics.arr_walk_products | selectattr('id','equalto','lite') | first %}
+  {% if core_prod and lite_prod %}
+  {% set core_tbl = core_prod.arr_walk_table %}
+  {% set lite_tbl = lite_prod.arr_walk_table %}
+  {% set n_q = core_tbl.quarters | length %}
+  {% set ytd_lbl = core_tbl.ytd_labels[1] %}
+  <div class="slide">
+    <div class="slide-header">
+      <span class="title">ARR Walk — Core &amp; Lite (Combined View)</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div class="slide-body" style="padding:14px 28px 0; gap:8px;">
+      <table class="aw-merged">
+        <colgroup>
+          <col style="width:180px">
+          {% for _ in range((n_q + 1) * 2) %}<col style="width:54px">{% endfor %}
+        </colgroup>
+        <thead>
+          <tr class="awg-group">
+            <th rowspan="3"></th>
+            <th colspan="{{ n_q + 1 }}" class="awg-core">Core</th>
+            <th colspan="{{ n_q + 1 }}" class="awg-lite">Lite</th>
+          </tr>
+          <tr class="awg-sub">
+            <th colspan="{{ n_q }}" class="awg-core-actual">Actual</th>
+            <th class="awg-core-ytd">{{ ytd_lbl }}</th>
+            <th colspan="{{ n_q }}" class="awg-lite-actual">Actual</th>
+            <th class="awg-lite-ytd">{{ ytd_lbl }}</th>
+          </tr>
+          <tr class="awg-q">
+            {% for q in core_tbl.quarters %}<th class="awg-core-actual">{{ q }}</th>{% endfor %}
+            <th class="awg-core-ytd">{{ ytd_lbl }}</th>
+            {% for q in lite_tbl.quarters %}<th class="awg-lite-actual">{{ q }}</th>{% endfor %}
+            <th class="awg-lite-ytd">{{ ytd_lbl }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sec in core_tbl.sections %}
+          {% set lite_sec = lite_tbl.sections | selectattr('label','equalto',sec.label) | first %}
+          <tr class="aw-sh"><td>{{ sec.label }}</td><td colspan="{{ (n_q + 1) * 2 }}"></td></tr>
+          {% for row in sec.rows %}
+          {% set lrow = lite_sec.rows | selectattr('label','equalto',row.label) | first %}
+          {% set is_bold = row.label in ["Total EoP","ARR BoP","ARR EoP","ARR EoP (Constant Currency)"] %}
+          {% set is_sub  = row.label in ["Additions","Recovered","Net Churn","Net Expansion","(+/−) FX Impact","Logo Monthly New Adds %","Logo Monthly Churn %"] %}
+          <tr class="{{ 'aw-rb' if is_bold else ('aw-in' if is_sub else 'aw-def') }}">
+            <td>{{ row.label }}</td>
+            {% for c in row.cells %}<td class="awg-core-actual">{{ c }}</td>{% endfor %}
+            <td class="awg-core-ytd">{{ row.ytd_cur }}</td>
+            {% for c in lrow.cells %}<td class="awg-lite-actual">{{ c }}</td>{% endfor %}
+            <td class="awg-lite-ytd">{{ lrow.ytd_cur }}</td>
+          </tr>
+          {% if row.label in ["ARR EoP", "ARR EoP (Constant Currency)"] %}
+          <tr class="aw-delta-sub">
+            <td>MoM</td>
+            {% for qc in row.qoq_cells %}<td class="awg-core-actual{% if loop.last %} aw-cur{% endif %}">{{ qc.v }}</td>{% endfor %}
+            <td class="awg-core-ytd"></td>
+            {% for qc in lrow.qoq_cells %}<td class="awg-lite-actual{% if loop.last %} aw-cur{% endif %}">{{ qc.v }}</td>{% endfor %}
+            <td class="awg-lite-ytd"></td>
+          </tr>
+          <tr class="aw-delta-sub">
+            <td>YoY</td>
+            {% for yc in row.yoy_cells %}<td class="awg-core-actual{% if loop.last %} aw-cur{% endif %}">{{ yc.v }}</td>{% endfor %}
+            <td class="awg-core-ytd"></td>
+            {% for yc in lrow.yoy_cells %}<td class="awg-lite-actual{% if loop.last %} aw-cur{% endif %}">{{ yc.v }}</td>{% endfor %}
+            <td class="awg-lite-ytd"></td>
+          </tr>
+          {% if row.extra_sub %}
+          <tr class="aw-delta-sub">
+            <td>{{ row.extra_sub.label }}</td>
+            {% for v in row.extra_sub.cells %}<td class="awg-core-actual{% if loop.last %} aw-cur{% endif %}">{{ v }}</td>{% endfor %}
+            <td class="awg-core-ytd"></td>
+            {% for v in lrow.extra_sub.cells %}<td class="awg-lite-actual{% if loop.last %} aw-cur{% endif %}">{{ v }}</td>{% endfor %}
+            <td class="awg-lite-ytd"></td>
+          </tr>
+          {% endif %}
+          {% endif %}
+          {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">2</span>
+    </div>
+  </div>
+
+  <div class="slide-divider">↓</div>
+  {% endif %}{# /core_prod #}
+  {% endif %}{# /Combined View oculto #}
+
   <!-- ============================================================
        SLIDES 2–3 — ARR Walk Core & Lite (loop dinámico)
        ============================================================ -->
-  {% for product in metrics.arr_walk_products %}
+  {# 2026-11-17: se agrega el ARR Walk GLO (total Alegra) como primera slide del loop mensual — misma tabla mensual que Core/Lite, fuente metrics.arr_walk_table #}
+  {% set walk_items = [{'id':'glo','name':'GLO Alegra','color':'#0f172b','arr_walk_table':metrics.arr_walk_table,'asks':[]}] + metrics.arr_walk_products %}
+  {% for product in walk_items %}
   {% set tbl = product.arr_walk_table %}
   {% if not loop.first %}<div class="slide-divider">↓</div>{% endif %}
   <div class="slide">
@@ -505,10 +1396,11 @@
 
     <div class="slide-footer">
       <span class="footer-brand">Alegra · Confidential</span>
-      <span class="footer-page">{{ loop.index + 1 }}</span>
+      <span class="footer-page">{{ loop.index + 2 }}</span>
     </div>
   </div>
   {% endfor %}
+  {% endif %}{# /ARR Walk mensual por producto #}
 
   <div class="slide-divider">↓ &nbsp; Countries Performance</div>
 
@@ -610,6 +1502,182 @@
   <div class="slide-divider">↓</div>
   {% endif %}
   {% endfor %}
+
+  {# Oculta 2026-10-24: pedido explícito del usuario — sacar la réplica de "ARR Walk —
+     Alanube" de esta sección. Código intacto abajo, reversible cambiando False por True. #}
+  {% if not metrics.is_quarter_end %}
+  <div class="slide-divider">↓ &nbsp; Alanube</div>
+
+  <!-- REPLICA — ARR Walk Alanube (código idéntico al de 1_inicio.j2, SLIDE 9, que
+       queda oculto allá — ver nota ahí. Pedido explícito del usuario: "ojo acá es
+       una réplica, no traer lo que estaba en la sección 1". Incluye su propio
+       bloque de estilos porque .al-cur/.al-sp-col/.al-sp-sm/.al-tb no existían en
+       este archivo (sí existen .aw-* ya compartidos). -->
+  <style>
+    .aw-sum-table thead th.al-cur { color: #208080; background: rgba(48,184,183,0.09); border-radius: 4px 4px 0 0; font-weight: 700; }
+    .aw-sum-table tbody td.al-cur { background: rgba(48,184,183,0.07); color: #1a7e7f; font-weight: 600; }
+    .aw-sum-table tr.aw-rb td.al-cur { color: #1a7e7f !important; background: rgba(48,184,183,0.09); }
+    .al-sp-col { width: 6px !important; padding: 0 !important; border: none !important; background: transparent !important; }
+    .al-sp-sm  { width: 3px !important; padding: 0 !important; border-left: 1.5px solid #e2e8f0 !important; background: transparent !important; }
+    .al-tb td  { border-top: 1.5px solid #cbd5e1 !important; }
+  </style>
+  <div class="slide">
+    <div class="slide-header">
+      <span class="title">ARR Walk — Alanube · Historical quarterly + monthly</span>
+      <span class="period">{{ config.month_label }}</span>
+    </div>
+    <div class="aw-body-row">
+
+      {% macro aw_row_alanube(label, row, rb=false, hl=false) %}
+      <tr class="{% if rb %}aw-rb{% if hl %} al-tb{% endif %}{% else %}aw-in{% endif %}">
+        <td>{% if rb %}<span class="aw-di aw-di-g"></span>{% endif %}{{ label }}</td>
+        {% for v in row.quarters %}<td{% if v is string and v.startswith('(') %} class="aw-nv"{% endif %}>{{ v }}</td>{% endfor %}
+        <td class="al-sp-col"></td>
+        {% for v in row.current %}<td class="al-cur{% if v is string and v.startswith('(') %} aw-nv{% endif %}">{{ v }}</td>{% endfor %}
+        <td{% if row.current_delta.startswith('(') %} class="aw-nv"{% endif %}>{{ row.current_delta }}</td>
+        <td class="al-sp-sm"></td>
+        <td class="aw-ytd{% if row.ytd_py is string and row.ytd_py.startswith('(') %} aw-nv{% endif %}">{{ row.ytd_py }}</td>
+        <td class="aw-ytd{% if row.ytd_cy is string and row.ytd_cy.startswith('(') %} aw-nv{% endif %}">{{ row.ytd_cy }}</td>
+        <td{% if row.ytd_delta.startswith('(') %} class="aw-nv"{% endif %}>{{ row.ytd_delta }}</td>
+      </tr>
+      {% endmacro %}
+      <div class="aw-sum-wrap" style="padding: 8px 32px 0 32px; align-items: center;">
+        <table class="aw-sum-table" style="width: auto; margin: 0 auto;">
+          <thead>
+            <tr>
+              <th>Consolidated Alanube</th>
+              <th>1Q25</th><th>2Q25</th><th>3Q25</th><th>4Q25</th><th>1Q26</th><th>2Q26</th><th>3Q26</th>
+              <th class="al-sp-col"></th>
+              {% for lbl in metrics.alanube_walk.current_labels %}<th class="al-cur">{{ lbl }}</th>{% endfor %}
+              <th class="aw-dh">{{ metrics.alanube_walk.current_header_label }}</th>
+              <th class="al-sp-sm"></th>
+              <th class="aw-ytd">YTD'25</th><th class="aw-ytd">YTD'26</th><th class="aw-dh">YTD Δ%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set aw = metrics.alanube_walk %}
+            <!-- Logo Walk -->
+            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}15{% else %}16{% endif %}">Logo Walk</td></tr>
+            {{ aw_row_alanube('Logos BoP', aw.logos.bop, rb=true) }}
+            {{ aw_row_alanube('New Logos', aw.logos.new) }}
+            {{ aw_row_alanube('Recovered Logos', aw.logos.recovered) }}
+            {{ aw_row_alanube('Churned Logos', aw.logos.churned) }}
+            {{ aw_row_alanube('Logos EoP', aw.logos.eop, rb=true, hl=true) }}
+            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}15{% else %}16{% endif %}"></td></tr>
+
+            <!-- ARR Walk -->
+            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}15{% else %}16{% endif %}">ARR Walk (MM USD)</td></tr>
+            {{ aw_row_alanube('ARR BoP', aw.arr.bop, rb=true) }}
+            {{ aw_row_alanube('New ARR', aw.arr.new) }}
+            {{ aw_row_alanube('Recovered ARR', aw.arr.recovered) }}
+            {{ aw_row_alanube('Expansion ARR', aw.arr.expansion) }}
+            {{ aw_row_alanube('Contraction ARR', aw.arr.contraction) }}
+            {{ aw_row_alanube('Churned ARR', aw.arr.churned) }}
+            {{ aw_row_alanube('FX', aw.arr.fx) }}
+            {{ aw_row_alanube('ARR EoP', aw.arr.eop, rb=true, hl=true) }}
+            {{ aw_row_alanube('OTR (One-Time Revenue) — $K', aw.arr.otr) }}
+            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}15{% else %}16{% endif %}"></td></tr>
+
+            <!-- Finance Metrics -->
+            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}15{% else %}16{% endif %}">Finance Metrics</td></tr>
+            {{ aw_row_alanube('ARR Growth Rate ' + (aw.is_quarter_end and 'QoQ' or 'MoM') + ' (%)', aw.finance.growth_pct) }}
+            {{ aw_row_alanube('ARR Growth Rate YoY (%)', aw.finance.growth_yoy_pct) }}
+            {{ aw_row_alanube('Avg. ARR per Logo', aw.finance.arr_per_logo) }}
+            {{ aw_row_alanube('Avg. Monthly Churn Rate (%)', aw.finance.churn_rate_pct) }}
+            <tr class="aw-gap"><td colspan="{% if aw.is_quarter_end %}15{% else %}16{% endif %}"></td></tr>
+
+            <!-- Operation Metrics -->
+            <tr class="aw-sh"><td colspan="{% if aw.is_quarter_end %}15{% else %}16{% endif %}">Operation Metrics</td></tr>
+            {{ aw_row_alanube('Avg. Monthly Processed Docs (MM)', aw.operation.docs_mm) }}
+            {{ aw_row_alanube('Monthly Documents per Logo (k)', aw.operation.docs_per_logo_k) }}
+            {{ aw_row_alanube('Price per Document', aw.operation.price_per_doc) }}
+          </tbody>
+        </table>
+      </div><!-- /.aw-sum-wrap -->
+
+    </div><!-- /.aw-body-row -->
+  </div>
+
+  <div class="slide-divider">↓</div>
+
+  {% endif %}{# /ARR Walk Alanube, oculto 2026-10-24 #}
+
+  <!-- ============================================================
+       SLIDE — ARR by Country — Version Comparison — agregada 2026-10-21,
+       pedido explícito del usuario tras reunión con Lucas Vassalo.
+
+       ⚠️ Datos ESTÁTICOS (snapshot de 2026-10-21), NO vienen de metrics.* —
+       no existe hoy un campo en el pipeline con ARR/Logos/ARPA por país para
+       3Q24/3Q25/3Q26 con year-ago para poder recalcular esto mes a mes (el
+       "countries" de metrics.yaml solo trae MoM/YoY del mes de corte, sin
+       serie trimestral histórica). Si este queda como slide fija del board,
+       hay que decidir con el usuario si se recalcula a mano cada trimestre o
+       se construye el pipeline dinámico.
+
+       ⚠️ CORREGIDO 2026-10-21 (hallazgo de auditoría, bug real): la primera
+       versión de esta slide sumaba amount_usd_mrr directo para TODOS los
+       países — correcto para Rep. Dominicana/Otros, pero MAL para
+       Colombia/México, que en la query oficial del board (_SQL_FACT_SUMMARY
+       en fetch_metrics.py) usan amount_mrr (moneda local) dividido por la
+       tasa de dwh_dimensions.tb_trm_banrep, no amount_usd_mrr. Daba Colombia
+       3Q26 = $17.7M cuando el ARR real (verificado contra metrics.yaml /
+       R21) es $22.3M — 21% de hueco. Recalculado con la metodología correcta
+       (amount_mrr/tb_trm_banrep para CO/MX; amount_usd_mrr directo para
+       DOM/Otros, igual que antes, ahí sí reconcilia). Argentina/Perú/España
+       (dentro de "Otros") tienen el mismo matiz de conversión pero su
+       impacto es <0.15% del ARR total — no se corrigió por ser
+       inmaterial.
+
+       Costa Rica agregada como fila propia (2026-10-21, pedido del usuario) — antes estaba
+       mezclada dentro de "Otros". "Otros" se recalculó para excluirla (Argentina + Perú +
+       España + resto, ver nota de arriba). -->
+  {% if False %}{# Oculta 2026-10-23: pedido explícito del usuario — ocultar la slide
+       "ARR by Country — Version Comparison". Código intacto abajo, reversible cambiando
+       False por True. #}
+  <div class="slide">
+    <div class="slide-header">
+      <span class="title">ARR by Country — Version Comparison</span>
+      <span class="period">3Q24 → 3Q26</span>
+    </div>
+    <div class="slide-body" style="padding:12px 28px 0; gap:8px;">
+      <table class="cv-table cv-main">
+        <thead>
+          <tr class="cv-group">
+            <th></th>
+            <th colspan="3">ARR ($Mn)</th>
+            <th colspan="3">YoY in USD</th>
+            <th colspan="3">YoY — Constant Currency*</th>
+            <th colspan="3">Breakdown (%)</th>
+          </tr>
+          <tr>
+            <th></th><th>3Q24</th><th>3Q25</th><th>3Q26</th><th>3Q24</th><th>3Q25</th><th>3Q26</th><th>3Q24</th><th>3Q25</th><th>3Q26</th><th>3Q24</th><th>3Q25</th><th>3Q26</th>
+          </tr>
+        </thead>
+        <tbody><tr><td>Colombia</td><td>$12.0</td><td>$15.7</td><td>$22.3</td><td>+43.7%</td><td>+30.6%</td><td>+42.3%</td><td class="cv-cc">+48.2%</td><td class="cv-cc cv-flag">+22.5%</td><td class="cv-cc cv-flag">+15.4%</td><td>65%</td><td>65%</td><td>67%</td></tr><tr><td>México</td><td>$1.6</td><td>$2.3</td><td>$3.0</td><td>+26.8%</td><td>+45.5%</td><td>+30.7%</td><td class="cv-cc cv-flag">+41.4%</td><td class="cv-cc cv-flag">+37.3%</td><td class="cv-cc cv-flag">+21.2%</td><td>9%</td><td>9%</td><td>9%</td></tr><tr><td>Rep. Dominicana</td><td>$3.0</td><td>$4.1</td><td>$5.2</td><td>+28.6%</td><td>+36.8%</td><td>+27.3%</td><td class="cv-cc">+28.6%</td><td class="cv-cc">+36.8%</td><td class="cv-cc">+27.3%</td><td>16%</td><td>17%</td><td>15%</td></tr><tr><td>Costa Rica</td><td>$0.6</td><td>$0.7</td><td>$1.0</td><td>+45.4%</td><td>+21.5%</td><td>+41.7%</td><td class="cv-cc">+45.4%</td><td class="cv-cc">+21.5%</td><td class="cv-cc">+41.7%</td><td>3%</td><td>3%</td><td>3%</td></tr><tr><td>Otros</td><td>$1.3</td><td>$1.6</td><td>$1.9</td><td>+39.3%</td><td>+18.1%</td><td>+23.9%</td><td class="cv-cc">+39.3%</td><td class="cv-cc">+18.1%</td><td class="cv-cc">+23.9%</td><td>7%</td><td>6%</td><td>6%</td></tr><tr class="cv-total"><td>Total</td><td>$18.4</td><td>$24.3</td><td>$33.4</td><td>+39.2%</td><td>+31.7%</td><td>+37.5%</td><td class="cv-cc">+43.4%</td><td class="cv-cc cv-flag">+25.6%</td><td class="cv-cc cv-flag">+18.7%</td><td>100%</td><td>100%</td><td>100%</td></tr></tbody>
+      </table>
+      <table class="cv-table cv-main">
+        <thead>
+          <tr class="cv-group">
+            <th></th>
+            <th colspan="3">Logos (000's)</th>
+            <th colspan="3">YoY</th>
+            <th colspan="3">ARPA ($/Month)</th>
+            <th colspan="3">ARPA YoY</th>
+          </tr>
+          <tr>
+            <th></th><th>3Q24</th><th>3Q25</th><th>3Q26</th><th>3Q24</th><th>3Q25</th><th>3Q26</th><th>3Q24</th><th>3Q25</th><th>3Q26</th><th>3Q24</th><th>3Q25</th><th>3Q26</th>
+          </tr>
+        </thead>
+        <tbody><tr><td>Colombia</td><td>40.4k</td><td>42.5k</td><td>45.3k</td><td>+18.8%</td><td>+5.3%</td><td>+6.5%</td><td>$24.8</td><td>$30.7</td><td>$41.1</td><td>+21.0%</td><td>+24.0%</td><td>+33.6%</td></tr><tr><td>México</td><td>3.6k</td><td>4.3k</td><td>5.4k</td><td>+38.5%</td><td>+18.7%</td><td>+25.7%</td><td>$36.4</td><td>$44.6</td><td>$46.4</td><td>−8.4%</td><td>+22.6%</td><td>+3.9%</td></tr><tr><td>Rep. Dominicana</td><td>4.1k</td><td>4.1k</td><td>5.0k</td><td>+20.4%</td><td>+1.5%</td><td>+20.0%</td><td>$60.8</td><td>$82.0</td><td>$86.9</td><td>+6.8%</td><td>+34.9%</td><td>+6.1%</td></tr><tr><td>Costa Rica</td><td>1.0k</td><td>1.3k</td><td>1.7k</td><td>+50.4%</td><td>+26.3%</td><td>+29.8%</td><td>$45.4</td><td>$43.7</td><td>$47.7</td><td>−3.3%</td><td>−3.8%</td><td>+9.1%</td></tr><tr><td>Otros</td><td>3.2k</td><td>2.9k</td><td>3.4k</td><td>+25.0%</td><td>−9.0%</td><td>+18.3%</td><td>$34.5</td><td>$44.8</td><td>$46.9</td><td>+11.4%</td><td>+29.8%</td><td>+4.7%</td></tr><tr class="cv-total"><td>Total</td><td>52.2k</td><td>55.1k</td><td>60.7k</td><td>+21.0%</td><td>+5.5%</td><td>+10.2%</td><td>$29.4</td><td>$36.7</td><td>$45.8</td><td>+15.1%</td><td>+24.9%</td><td>+24.8%</td></tr></tbody>
+      </table>
+    </div>
+    <div class="slide-footer">
+      <span class="footer-brand">Alegra · Confidential</span>
+      <span class="footer-page">9</span>
+    </div>
+  </div>
+
+  {% endif %}{# /ARR by Country — Version Comparison, oculta 2026-10-23 #}
 
 <script>
 (function() {

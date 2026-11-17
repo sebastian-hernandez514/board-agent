@@ -1,4 +1,4 @@
-<!-- updated_for_month: 2026-08 -->
+<!-- updated_for_month: 2026-10 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/base.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     /* ── Section cover ── */
     .section-divider {
@@ -32,576 +31,79 @@
       position: absolute; bottom: 24px; right: var(--slide-pad-x);
       font-size: 10px; color: rgba(255,255,255,0.15);
     }
+    /* ── Slides vacías pendientes de contenido ── */
+    .dt-empty-body {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: #cbd5e1; font-size: 13px; font-style: italic;
+    }
+    /* ── Lista de candidatos a Discussion Topic (2026-10-21, Mayra Gutiérrez) ── */
+    .dt-topic-list {
+      flex: 1; display: flex; flex-direction: column; justify-content: center;
+      gap: 14px; padding: 24px 56px;
+    }
+    .dt-topic-item { display: flex; gap: 14px; align-items: flex-start; }
+    .dt-topic-num {
+      flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--color-navy); color: #fff; font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+    }
+    .dt-topic-title { font-size: 13.5px; font-weight: 700; color: var(--color-text-primary); margin-bottom: 2px; }
+    .dt-topic-desc { font-size: 11.5px; color: var(--color-text-secondary); line-height: 1.4; }
+    /* ── "Pricing for Size" (2026-10-23) — 4 slides pegadas verbatim desde
+       ~/Downloads/pricing-for-size-board.html (sin los <details class="notes">, pedido
+       explícito del usuario). Diseño nativo 1920×1080 con todo posicionado absoluto;
+       se escala 0.5 para calzar exacto en el slide de 960×540 del board (960×2=1920,
+       540×2=1080, escala exacta sin recorte). Los resets de box-sizing/body/márgenes de p,h2,h3
+       del archivo original no se copiaron porque base.css ya los aplica globalmente. */
+    .ps-slide .frame { position: relative; width: 960px; height: 540px; overflow: hidden; }
+    .ps-slide .frame > section {
+      position: absolute; top: 0; left: 0; width: 1920px; height: 1080px;
+      overflow: hidden; transform-origin: top left; transform: scale(0.5);
+    }
   </style>
 </head>
 <body>
 
-
   <!-- ================================================================
-       DISCUSSION TOPIC — NDR
-       Portada + comentario histórico sin cambios (ver debajo de la portada
-       para el historial completo de pasadas hasta v3).
-
-       ACTUALIZADO 2026-09-28 (v4, "NDR Board Pack"): Luis Caro reemplazó
-       SOLO las slides 1 y 2 (las de tabla: "NDR by Version" → ahora "NDR by
-       Market", y "Pricing and Upselling..." → ahora "How NDR Has Evolved")
-       con un handoff HTML nuevo ("2026-09-28-ndr-board-pack.html", pegado
-       directo por Sebastián). Confirmado por Luis: "las gráficas son
-       iguales" — mismos números que v3, solo cambia el layout/diseño de
-       esas 2 slides. Las slides 3 y 4 (los charts "NDR Global" y "FX
-       Effect por país") NO se tocaron, siguen exactamente igual que en v3
-       — confirmado con el usuario antes de aplicar (primera pasada había
-       reemplazado las 4 por error). Clases con prefijo ndr- para las 2
-       slides nuevas (autocontenido, no usa .slide/.slide-header genéricos
-       de base.css) — registrado "ndr-slide" en
-       board_agent/paths.py::SLIDE_CLASS_TOKENS. El wrapper de presentación
-       standalone (.ndr-doc/.ndr-stage, fondo gris, centrado) del HTML
-       original se descartó — es solo para previsualizar el archivo suelto
-       en un browser. El divisor ".ndr-div" del original también se
-       descartó a favor del ".slide-divider" estándar que ya usa el resto
-       del deck (mismo look, una sola definición). -->
+       DISCUSSION TOPIC — vaciado de nuevo 2026-11-17 para octubre (pedido del usuario: solo cover + 2 slides vacías). Contenido de septiembre (candidatos + 4 slides 'Pricing for Size') en boards/2026-09/ v77. Reseteo anterior 2026-10-21 (pedido explícito del
+       usuario): el tema de septiembre todavía no está definido, así que
+       esta sección queda con el cover genérico + 2 slides vacías, sin
+       ninguna referencia a NDR. El contenido de NDR (NDR by Market, How
+       NDR Has Evolved, NDR Global, FX Effect) que vivía acá hasta v11 se
+       quitó por completo de este template — si hace falta recuperarlo,
+       está en el historial de versiones de boards/2026-09/ (v2 a v11).
+       ================================================================ -->
   <div class="slide section-divider">
-    <div class="eyebrow">Alegra's NRR</div>
-    <div class="section-title">NDR:<br>Analysis by Cohort</div>
+    <div class="eyebrow">Board Discussion</div>
+    <div class="section-title">Discussion Topic</div>
     <div class="topic-label">{{ config.month_label }}</div>
   </div>
 
-  <div class="slide-divider">↓ &nbsp; 1 / 4</div>
 
-  <style>
-  /* ══════════════════════════════════════════════════════════════════
-     NDR Board Pack — Discussion Topic, slides 1/2 and 2/2
-     Todas las clases van con prefijo ndr- y el shell de slide es
-     autocontenido (.ndr-slide, no .slide) para que este bloque pueda
-     pegarse dentro del HTML del board sin chocar con su CSS global —
-     es el mismo problema ya documentado en el board (la regla suelta
-     .slide{...} que pisaba el fondo navy de la portada).
-     ══════════════════════════════════════════════════════════════════ */
+  <div class="slide-divider">↓ &nbsp; 1 / 2</div>
 
-    :root{
-      --ndr-navy:#0f172b;
-      --ndr-bg:#ffffff;
-      --ndr-surface:#f8fafc;
-      --ndr-border:#e2e8f0;
-      --ndr-teal:#14b8a6;
-      --ndr-teal-dk:#1a7e7f;
-      --ndr-neg:#b42318;
-      --ndr-txt:#0f172b;
-      --ndr-txt-2:#475569;
-      --ndr-muted:#94a3b8;
-      --ndr-fx:#2a78d6;
-    }
-
-    /* ── shell ── */
-    .ndr-slide{
-      width:960px; height:540px; flex-shrink:0;
-      background:var(--ndr-bg); border-radius:10px;
-      box-shadow:0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
-      display:flex; flex-direction:column; overflow:hidden;
-    }
-    .ndr-hd{
-      background:var(--ndr-navy); padding:15px 40px;
-      display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
-    }
-    .ndr-hd-t{ color:#fff; font-size:15px; font-weight:600; letter-spacing:-0.2px; font-family:'DM Sans',sans-serif; }
-    .ndr-hd-p{ color:var(--ndr-teal); font-size:12px; font-weight:500; letter-spacing:0.3px; font-family:'DM Sans',sans-serif; }
-
-    .ndr-ft{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:7px 40px 11px; flex-shrink:0; border-top:1px solid var(--ndr-border);
-    }
-    .ndr-ft-b{ font-size:9px; color:var(--ndr-muted); font-weight:500; letter-spacing:0.5px; font-family:'DM Mono',monospace; }
-    .ndr-ft-s{ font-size:8.5px; color:var(--ndr-muted); font-style:italic; font-family:'DM Sans',sans-serif; }
-    .ndr-ft-p{ font-size:9px; color:var(--ndr-muted); font-family:'DM Mono',monospace; }
-
-    .ndr-sub{ font-size:10.5px; color:#64748b; font-family:'DM Sans',sans-serif; }
-
-    /* shared numeric semantics */
-    .ndr-neg{ color:var(--ndr-neg); }
-    .ndr-fx{ color:var(--ndr-fx); }
-    .ndr-nil{ color:#cbd5e1; }
-    .ndr-base{ color:var(--ndr-muted); font-weight:500; }
-
-    /* ══════════ SLIDE 1 — NDR by Market ══════════ */
-    .ndr-mkt-row{ flex:1; display:flex; overflow:hidden; }
-    .ndr-mkt-wrap{ flex:1; padding:16px 10px 0 40px; overflow:hidden; display:flex; flex-direction:column; }
-    .ndr-mkt-wrap .ndr-sub{ margin-bottom:12px; }
-
-    table.ndr-mkt{ width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
-
-    table.ndr-mkt thead tr.ndr-mkt-h{ background:var(--ndr-navy); }
-    table.ndr-mkt thead tr.ndr-mkt-h th{
-      text-align:right; font-size:9px; font-weight:600; text-transform:uppercase;
-      letter-spacing:.5px; color:var(--ndr-muted); padding:7px 9px; white-space:nowrap;
-      font-family:'DM Sans',sans-serif;
-    }
-    table.ndr-mkt thead tr.ndr-mkt-h th:first-child{ text-align:left; padding-left:6px; color:#fff; width:118px; }
-    table.ndr-mkt thead tr.ndr-mkt-h th.ndr-c-ndr{
-      color:#fff; border-left:1px solid rgba(255,255,255,0.18); border-right:1px solid rgba(255,255,255,0.18);
-    }
-    table.ndr-mkt thead tr.ndr-mkt-h th.ndr-c-fx{ border-left:1px solid rgba(255,255,255,0.18); }
-
-    table.ndr-mkt thead tr.ndr-mkt-sub th{
-      text-align:center; font-size:8px; font-weight:700; text-transform:uppercase;
-      letter-spacing:.4px; color:var(--ndr-teal-dk); background:#eaf6f4;
-      padding:2px 9px; border-bottom:1px solid var(--ndr-border);
-      font-family:'DM Sans',sans-serif;
-    }
-    table.ndr-mkt thead tr.ndr-mkt-sub th.ndr-blank{ background:var(--ndr-surface); }
-
-    table.ndr-mkt tbody td{
-      text-align:right; padding:0 9px; height:30px;
-      font-family:'DM Mono',monospace; font-size:11.5px; color:var(--ndr-txt-2);
-      white-space:nowrap; vertical-align:middle; border-bottom:1px solid #f1f5f9;
-    }
-    table.ndr-mkt tbody td:first-child{
-      text-align:left; font-family:'DM Sans',sans-serif; font-weight:600;
-      font-size:12px; color:var(--ndr-txt); padding-left:6px;
-    }
-    table.ndr-mkt tbody tr:nth-child(odd){ background:rgba(248,250,252,0.7); }
-
-    table.ndr-mkt td.ndr-c-ndr{
-      font-family:'DM Sans',sans-serif; font-weight:700; font-size:13px; color:var(--ndr-txt);
-      border-left:1px solid var(--ndr-border); border-right:1px solid var(--ndr-border);
-    }
-    table.ndr-mkt td.ndr-c-fx{ color:var(--ndr-fx); border-left:1px solid var(--ndr-border); }
-
-    sup.ndr-fn{ font-family:'DM Sans',sans-serif; font-size:8px; font-weight:700; color:var(--ndr-teal-dk); margin-left:1px; }
-
-    table.ndr-mkt tr.ndr-tot td{
-      border-top:1.5px solid var(--ndr-navy) !important;
-      border-bottom:3px double var(--ndr-navy) !important;
-      background:var(--ndr-surface);
-      font-weight:700 !important;
-      color:var(--ndr-navy) !important;
-      height:32px;
-    }
-    table.ndr-mkt tr.ndr-tot td:first-child{ font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:800 !important; }
-    table.ndr-mkt tr.ndr-tot td.ndr-c-ndr{ font-size:14px; color:var(--ndr-navy) !important; }
-    table.ndr-mkt tr.ndr-tot td.ndr-c-fx{ color:var(--ndr-fx) !important; }
-
-    .ndr-mkt-notes{ margin-top:9px; font-family:'DM Sans',sans-serif; font-size:9px; color:var(--ndr-muted); line-height:1.5; }
-    .ndr-mkt-notes sup{ font-weight:700; color:var(--ndr-teal-dk); }
-
-    .ndr-rail{
-      width:214px; flex-shrink:0; padding:22px 40px 14px 16px;
-      border-left:1px solid var(--ndr-border);
-      display:flex; flex-direction:column; gap:11px;
-    }
-    .ndr-rail-l{
-      font-size:8.5px; font-weight:700; text-transform:uppercase;
-      letter-spacing:1.4px; color:var(--ndr-muted); font-family:'DM Sans',sans-serif;
-    }
-    .ndr-note{ display:flex; gap:8px; align-items:flex-start; }
-    .ndr-note-n{
-      font-family:'DM Mono',monospace; font-size:9.5px; font-weight:700; color:var(--ndr-teal-dk);
-      flex-shrink:0; width:12px;
-    }
-    .ndr-note-t{ font-size:10.5px; font-family:'DM Sans',sans-serif; color:var(--ndr-txt-2); line-height:1.5; }
-    .ndr-note-t b{ color:var(--ndr-txt); font-weight:700; }
-    .ndr-note-hr{ height:1px; background:var(--ndr-border); width:100%; }
-
-    /* ══════════ SLIDE 2 — NDR bridge ══════════ */
-    .ndr-br-wrap{ flex:1; padding:20px 40px 0; overflow:hidden; display:flex; flex-direction:column; align-items:center; }
-    .ndr-br-wrap .ndr-sub{ margin-bottom:14px; align-self:flex-start; }
-    .ndr-br-center{ width:100%; display:flex; justify-content:center; }
-
-    table.ndr-br{ border-collapse:collapse; table-layout:fixed; font-variant-numeric:tabular-nums; }
-    table.ndr-br col.ndr-br-c1{ width:150px; }
-    table.ndr-br col.ndr-br-cp{ width:70px; }
-    table.ndr-br col.ndr-br-ce{ width:124px; }
-
-    table.ndr-br thead tr{ background:var(--ndr-navy); }
-    table.ndr-br thead th{
-      text-align:right; font-size:8.5px; font-weight:600; text-transform:uppercase;
-      letter-spacing:.5px; color:var(--ndr-muted); padding:7px 8px; white-space:nowrap;
-      font-family:'DM Sans',sans-serif;
-    }
-    table.ndr-br thead th:first-child{ text-align:left; padding-left:8px; color:#fff; }
-    table.ndr-br thead th.ndr-br-per{ color:#fff; }
-    table.ndr-br thead th.ndr-br-per.ndr-cur{ color:#5eead4; }
-    table.ndr-br thead th.ndr-br-exp{ text-align:left; padding-left:16px; }
-
-    table.ndr-br tbody td{
-      text-align:right; padding:5.5px 8px;
-      font-family:'DM Mono',monospace; font-size:11px; color:var(--ndr-txt-2);
-      white-space:nowrap; vertical-align:middle; border-bottom:1px solid var(--ndr-border);
-    }
-    table.ndr-br tbody td:first-child{
-      text-align:left; font-family:'DM Sans',sans-serif; font-weight:600;
-      font-size:11px; color:var(--ndr-txt); padding-left:8px;
-    }
-    table.ndr-br tbody tr.ndr-br-r:nth-child(odd){ background:rgba(248,250,252,0.7); }
-    table.ndr-br tbody td.ndr-cur{ background:rgba(20,184,166,0.07); color:var(--ndr-teal-dk); font-weight:600; }
-
-    table.ndr-br td.ndr-br-e{
-      text-align:left; padding-left:16px; white-space:nowrap;
-      font-family:'DM Sans',sans-serif; font-size:10.5px; font-weight:600; color:#334155;
-      vertical-align:middle;
-    }
-    table.ndr-br td.ndr-br-e.ndr-mut{ color:var(--ndr-muted); font-style:italic; font-weight:500; }
-    table.ndr-br td.ndr-br-e.ndr-tbd{ color:var(--ndr-muted); font-style:italic; font-weight:700; }
-
-    table.ndr-br tr.ndr-br-glbl td{
-      padding:2px 8px; font-size:7.5px; font-weight:700; color:var(--ndr-teal-dk);
-      text-transform:uppercase; letter-spacing:.4px; background:#eaf6f4;
-      border-bottom:1px solid #cdeee9; font-family:'DM Sans',sans-serif;
-    }
-    table.ndr-br tr.ndr-br-g td{ background:#f5fbfa; }
-    table.ndr-br tr.ndr-br-g td:first-child{ border-left:2px solid var(--ndr-teal); padding-left:6px; }
-
-    table.ndr-br tr.ndr-br-ndr td{
-      border-top:1.5px solid var(--ndr-navy) !important;
-      border-bottom:1px solid var(--ndr-navy) !important;
-      background:var(--ndr-surface);
-      font-weight:700 !important;
-      color:var(--ndr-navy) !important;
-      padding-top:7px; padding-bottom:7px;
-    }
-    table.ndr-br tr.ndr-br-ndr td:first-child{ font-family:'DM Sans',sans-serif; font-size:11.5px; font-weight:800 !important; }
-    table.ndr-br tr.ndr-br-ndr td.ndr-br-v{ font-size:12.5px; font-family:'DM Sans',sans-serif; }
-    table.ndr-br tr.ndr-br-ndr td.ndr-cur{ background:rgba(20,184,166,0.14); color:var(--ndr-teal-dk) !important; }
-    table.ndr-br tr.ndr-br-ndr td.ndr-br-e{ color:#334155 !important; font-weight:700 !important; font-style:normal; }
-
-    /* memo line — derivada, se distingue de las filas con fuente */
-    table.ndr-br tr.ndr-br-memo td{
-      border-bottom:3px double var(--ndr-navy) !important;
-      background:var(--ndr-surface);
-      font-style:italic; color:#64748b !important; font-size:10.5px;
-      padding-top:5px; padding-bottom:6px;
-    }
-    table.ndr-br tr.ndr-br-memo td:first-child{
-      font-family:'DM Sans',sans-serif; font-size:10.5px; font-weight:600;
-      color:#64748b !important; padding-left:8px;
-    }
-    table.ndr-br tr.ndr-br-memo td.ndr-cur{ background:rgba(20,184,166,0.10); color:var(--ndr-teal-dk) !important; }
-
-    .ndr-br-fn{ margin-top:12px; font-family:'DM Sans',sans-serif; font-size:8.5px; color:var(--ndr-muted); line-height:1.45; align-self:flex-start; max-width:760px; }
-  </style>
-
-  <!-- ══════════════ SLIDE 1 — NDR by Market ══════════════ -->
-  <div class="ndr-slide">
-    <div class="ndr-hd">
-      <span class="ndr-hd-t">NDR by Market</span>
-      <span class="ndr-hd-p">{{ config.month_label }}</span>
-    </div>
-
-    <div class="ndr-mkt-row">
-      <div class="ndr-mkt-wrap">
-        <p class="ndr-sub">NDR and its components by market · Aug-26 close · spot FX · components in pp of opening ARR</p>
-
-        <table class="ndr-mkt">
-          <thead>
-            <tr class="ndr-mkt-h">
-              <th>Market</th>
-              <th class="ndr-c-ndr">NDR</th>
-              <th>Net Churn</th>
-              <th>Pricing</th>
-              <th>Cross-sell</th>
-              <th>Upsell</th>
-              <th>Disc&amp;Other</th>
-              <th class="ndr-c-fx">FX</th>
-            </tr>
-            <tr class="ndr-mkt-sub">
-              <th class="ndr-blank"></th>
-              <th class="ndr-blank"></th>
-              <th class="ndr-blank"></th>
-              <th class="ndr-blank"></th>
-              <th colspan="3">&#8618; Net Upgrades</th>
-              <th class="ndr-blank"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Colombia</td>
-              <td class="ndr-c-ndr">111.6%<sup class="ndr-fn">1</sup></td>
-              <td class="ndr-neg">(23.8)</td>
-              <td>3.2</td>
-              <td class="ndr-nil">–</td>
-              <td>3.8</td>
-              <td>3.1</td>
-              <td class="ndr-c-fx">25.3</td>
-            </tr>
-            <tr>
-              <td>Mexico</td>
-              <td class="ndr-c-ndr">85.8%</td>
-              <td class="ndr-neg">(21.6)</td>
-              <td>0.6</td>
-              <td class="ndr-neg">(0.1)</td>
-              <td class="ndr-neg">(2.1)<sup class="ndr-fn">2</sup></td>
-              <td>1.5</td>
-              <td class="ndr-c-fx">7.4</td>
-            </tr>
-            <tr>
-              <td>Dominican Rep.</td>
-              <td class="ndr-c-ndr">79.1%</td>
-              <td class="ndr-neg">(23.2)</td>
-              <td>0.5</td>
-              <td class="ndr-nil">–</td>
-              <td>0.1</td>
-              <td>1.7</td>
-              <td class="ndr-c-fx ndr-nil">–</td>
-            </tr>
-            <tr>
-              <td>Costa Rica</td>
-              <td class="ndr-c-ndr">79.9%</td>
-              <td class="ndr-neg">(22.8)</td>
-              <td class="ndr-nil">–</td>
-              <td class="ndr-neg">(0.7)</td>
-              <td class="ndr-nil">–</td>
-              <td>3.5</td>
-              <td class="ndr-c-fx ndr-nil">–</td>
-            </tr>
-            <tr class="ndr-tot">
-              <td>Total</td>
-              <td class="ndr-c-ndr">101.0%</td>
-              <td>(23.7)</td>
-              <td>2.7</td>
-              <td class="ndr-nil">–</td>
-              <td>2.7</td>
-              <td>2.8</td>
-              <td class="ndr-c-fx">16.6</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <p class="ndr-mkt-notes">
-          <sup>1</sup>&nbsp;Only market above 100% NDR. &nbsp;&nbsp;<sup>2</sup>&nbsp;Only market with negative Net Upsell.<br>
-          Components are pp of opening ARR and are rounded to one decimal, so rows may not foot to NDR by ±0.1pp. Parentheses denote a negative; “–” denotes nil.
-        </p>
-      </div>
-
-      <div class="ndr-rail">
-        <div class="ndr-rail-l">Notes</div>
-        <div class="ndr-note">
-          <span class="ndr-note-n">01</span>
-          <span class="ndr-note-t">Excluding the FX line, group NDR is <b>84.4%</b> (101.0% less 16.6pp) — everything above 100% is currency.</span>
-        </div>
-        <div class="ndr-note-hr"></div>
-        <div class="ndr-note">
-          <span class="ndr-note-n">02</span>
-          <span class="ndr-note-t">Same basis, <b>Colombia is 86.3%</b>, not 111.6% — its +25.3pp tailwind is the largest in the group.</span>
-        </div>
-        <div class="ndr-note-hr"></div>
-        <div class="ndr-note">
-          <span class="ndr-note-n">03</span>
-          <span class="ndr-note-t">DR and Costa Rica carry no FX at all, so their <b>79.1%</b> and <b>79.9%</b> already show underlying retention.</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="ndr-ft">
-      <span class="ndr-ft-b">ALEGRA</span>
-      <span class="ndr-ft-s">ARR walk (By Version) + dwh_facts.fact_customers_mrr · FX spot, Aug-26 close TRM</span>
-      <span class="ndr-ft-p">NDR · 1/4</span>
-    </div>
-  </div>
-
-  <div class="slide-divider">↓ &nbsp; 2 / 4</div>
-
-  <!-- ══════════════ SLIDE 2 — NDR bridge ══════════════ -->
-  <div class="ndr-slide">
-    <div class="ndr-hd">
-      <span class="ndr-hd-t">How NDR Has Evolved</span>
-      <span class="ndr-hd-p">{{ config.month_label }}</span>
-    </div>
-
-    <div class="ndr-br-wrap">
-      <p class="ndr-sub">A useful way to look at the evolution is through the following bridge — global, spot FX · Aug-23 / Aug-24 / Aug-25 / Aug-26</p>
-
-      <div class="ndr-br-center">
-        <table class="ndr-br">
-          <colgroup>
-            <col class="ndr-br-c1"><col class="ndr-br-cp"><col class="ndr-br-cp"><col class="ndr-br-cp"><col class="ndr-br-cp"><col class="ndr-br-ce">
-          </colgroup>
-          <thead>
-            <tr>
-              <th>NDR driver</th>
-              <th class="ndr-br-per">Aug-23</th>
-              <th class="ndr-br-per">Aug-24</th>
-              <th class="ndr-br-per">Aug-25</th>
-              <th class="ndr-br-per ndr-cur">Aug-26</th>
-              <th class="ndr-br-exp">Long-term</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="ndr-br-r">
-              <td>Opening ARR</td>
-              <td class="ndr-base">100.0</td>
-              <td class="ndr-base">100.0</td>
-              <td class="ndr-base">100.0</td>
-              <td class="ndr-base ndr-cur">100.0</td>
-              <td class="ndr-br-e ndr-mut">Baseline</td>
-            </tr>
-            <tr class="ndr-br-r">
-              <td>Net Churn</td>
-              <td class="ndr-neg">(27.0)</td>
-              <td class="ndr-neg">(24.4)</td>
-              <td class="ndr-neg">(27.1)</td>
-              <td class="ndr-neg ndr-cur">(23.7)</td>
-              <td class="ndr-br-e">Improve</td>
-            </tr>
-            <tr class="ndr-br-r">
-              <td>Net Pricing</td>
-              <td>4.7</td>
-              <td>9.4</td>
-              <td>6.3</td>
-              <td class="ndr-cur">2.6</td>
-              <td class="ndr-br-e">Normalize</td>
-            </tr>
-
-            <tr class="ndr-br-glbl">
-              <td colspan="6">&#8618; Net Upgrades</td>
-            </tr>
-            <tr class="ndr-br-g">
-              <td>Net Cross-sell</td>
-              <td>3.6</td>
-              <td>1.4</td>
-              <td>0.5</td>
-              <td class="ndr-cur">0.0</td>
-              <td class="ndr-br-e" rowspan="3">Increase</td>
-            </tr>
-            <tr class="ndr-br-g">
-              <td>Net Upsell</td>
-              <td>11.4</td>
-              <td>6.7</td>
-              <td>4.7</td>
-              <td class="ndr-cur">2.7</td>
-            </tr>
-            <tr class="ndr-br-g">
-              <td>Net Disc&amp;Other</td>
-              <td>2.9</td>
-              <td>2.6</td>
-              <td>4.4</td>
-              <td class="ndr-cur">2.8</td>
-            </tr>
-
-            <tr class="ndr-br-r">
-              <td>FX</td>
-              <td class="ndr-fx">4.8</td>
-              <td class="ndr-fx ndr-neg">(3.7)</td>
-              <td class="ndr-fx">2.4</td>
-              <td class="ndr-fx ndr-cur">16.6</td>
-              <td class="ndr-br-e ndr-mut">Non-operating</td>
-            </tr>
-            <tr class="ndr-br-ndr">
-              <td>NDR (spot)</td>
-              <td class="ndr-br-v">100.1%</td>
-              <td class="ndr-br-v">91.6%</td>
-              <td class="ndr-br-v">91.2%</td>
-              <td class="ndr-br-v ndr-cur">101.0%</td>
-              <td class="ndr-br-e ndr-tbd">Target — TBD</td>
-            </tr>
-            <tr class="ndr-br-memo">
-              <td>Memo: NDR less FX</td>
-              <td>95.3%</td>
-              <td>95.3%</td>
-              <td>88.8%</td>
-              <td class="ndr-cur">84.4%</td>
-              <td class="ndr-br-e ndr-mut">Underlying</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p class="ndr-br-fn">
-        Drivers are pp of opening ARR; parentheses denote a negative. Aug-23 to Aug-26 are point-in-time closes, not full-year or YTD figures. Rounding to one decimal leaves Aug-23 and Aug-24 footing 0.3–0.4pp above the stated NDR. The memo line is spot NDR less the FX driver shown above — an arithmetic ex-FX view, not a full constant-currency restatement of the walk. Net Pricing for Aug-26 is 2.6 on this global cohort basis and 2.7 as the sum of the market-level walk on slide 1; the 0.1pp is rounding between the two cuts. “Target — TBD” is a placeholder pending a business-defined range.
-      </p>
-    </div>
-
-    <div class="ndr-ft">
-      <span class="ndr-ft-b">ALEGRA</span>
-      <span class="ndr-ft-s">ARR walk (By Version) + dwh_facts.fact_customers_mrr · FX spot, Aug-26 close TRM</span>
-      <span class="ndr-ft-p">NDR · 2/4</span>
-    </div>
-  </div>
-
-  <div class="slide-divider">↓ &nbsp; 3 / 4</div>
-
-  <!-- SLIDE 3 (reconstruida 2026-09-25, tercera reconstrucción en el mismo día,
-       a pedido del usuario:
-       - Un solo chart de eje dual en vez de 2 apilados: Churn/Pricing/FX en pp
-         (eje izquierdo) + Net Upgrades combinado (cross-sell+upsell+disc&other
-         sumados — ya no 3 líneas separadas, correcto porque "Net Upgrades" es
-         justamente esa suma) + NDR (spot, resaltada con trazo más grueso) en
-         el eje derecho (%). Mismo patrón de 4 líneas + NDR que ya usaba la
-         slide 4, ahora también en la vista global.
-       - Ventana recortada a Ago-23 → Ago-26 (37 meses, no 44) a pedido del
-         usuario para reducir el ancho temporal de cada chart.
-       - Se quitó todo el texto explicativo (subtítulo, insight-box, notas en
-         cursiva) — a pedido del usuario, "esas explicaciones no son
-         necesarias". Quedan los labels funcionales nada más: leyenda de
-         colores, ejes, valores finales de cada línea.
-       Coordenadas generadas una vez en Node con el mismo algoritmo de escala
-       (margen 12%, paso de grilla 5/10/20) aplicado a dos ejes independientes
-       (pp y %) — sigue siendo SVG fijo, cero JS.
-       Sin cambios en la pasada 2026-09-28 (v4) — confirmado con el usuario
-       que esta slide se queda igual, solo se reemplazaron las slides 1/2. -->
-  <div class="slide" style="display:flex;flex-direction:column">
+  <div class="slide">
     <div class="slide-header">
-      <span class="title">NDR Global: The Trend Behind the Snapshot</span>
+      <span class="title">Discussion Topic</span>
       <span class="period">{{ config.month_label }}</span>
     </div>
-    <div class="slide-body" style="gap:8px;justify-content:center">
-      <div style="display:flex;gap:14px;font-size:11px;font-weight:600;flex-wrap:wrap">
-        <span style="color:#e34948">● Churn</span>
-        <span style="color:#cf9a3a">● Pricing</span>
-        <span style="color:#1f9a8d">● Net Upgrades</span>
-        <span style="color:#2a78d6">● FX</span>
-        <span style="color:var(--color-navy)">● NDR (spot)</span>
-      </div>
-      <svg viewBox="0 0 848 340" style="width:100%;height:auto" role="img" aria-label="Net Churn, Net Pricing, Net Upgrades, FX and NDR spot, total book, August 2023 to August 2026"><line x1="42" y1="246.3" x2="794" y2="246.3" stroke="var(--color-border)" stroke-width="0.75"/><text x="36" y="249.3" text-anchor="end" style="font-size:8px;fill:var(--color-text-secondary)">-20</text><line x1="42" y1="147.2" x2="794" y2="147.2" stroke="#c9d4dc" stroke-width="1.2" stroke-dasharray="3 3"/><text x="36" y="150.2" text-anchor="end" style="font-size:8px;fill:var(--color-text-secondary)">0</text><line x1="42" y1="48.1" x2="794" y2="48.1" stroke="var(--color-border)" stroke-width="0.75"/><text x="36" y="51.1" text-anchor="end" style="font-size:8px;fill:var(--color-text-secondary)">+20</text><path d="M 42.0 281.0 L 62.9 280.0 L 83.8 277.3 L 104.7 275.6 L 125.6 275.8 L 146.4 272.5 L 167.3 273.1 L 188.2 268.6 L 209.1 265.1 L 230.0 263.8 L 250.9 268.6 L 271.8 268.5 L 292.7 268.1 L 313.6 271.0 L 334.4 267.8 L 355.3 270.6 L 376.2 270.6 L 397.1 272.2 L 418.0 276.7 L 438.9 275.2 L 459.8 279.7 L 480.7 281.3 L 501.6 280.9 L 522.4 280.2 L 543.3 281.5 L 564.2 278.0 L 585.1 277.5 L 606.0 276.0 L 626.9 275.9 L 647.8 274.5 L 668.7 276.0 L 689.6 273.0 L 710.4 270.1 L 731.3 268.3 L 752.2 266.3 L 773.1 265.3 L 794.0 264.6" fill="none" stroke="#e34948" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 42.0 123.7 L 62.9 121.2 L 83.8 119.1 L 104.7 119.9 L 125.6 134.4 L 146.4 139.4 L 167.3 136.7 L 188.2 129.1 L 209.1 127.9 L 230.0 127.2 L 250.9 127.7 L 271.8 130.7 L 292.7 100.7 L 313.6 101.5 L 334.4 100.3 L 355.3 100.9 L 376.2 103.4 L 397.1 104.2 L 418.0 120.0 L 438.9 88.4 L 459.8 87.8 L 480.7 89.3 L 501.6 86.6 L 522.4 99.5 L 543.3 115.8 L 564.2 115.3 L 585.1 115.2 L 606.0 115.2 L 626.9 117.5 L 647.8 116.9 L 668.7 133.0 L 689.6 143.2 L 710.4 143.9 L 731.3 144.5 L 752.2 141.4 L 773.1 135.3 L 794.0 134.1" fill="none" stroke="#cf9a3a" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 42.0 58.1 L 62.9 55.9 L 83.8 47.9 L 104.7 44.5 L 125.6 66.7 L 146.4 70.0 L 167.3 68.8 L 188.2 88.0 L 209.1 100.8 L 230.0 101.1 L 250.9 104.8 L 271.8 91.0 L 292.7 94.6 L 313.6 94.5 L 334.4 97.0 L 355.3 93.3 L 376.2 91.0 L 397.1 94.8 L 418.0 57.4 L 438.9 76.2 L 459.8 79.9 L 480.7 81.1 L 501.6 83.3 L 522.4 84.5 L 543.3 99.5 L 564.2 100.7 L 585.1 100.8 L 606.0 102.9 L 626.9 103.1 L 647.8 100.6 L 668.7 112.0 L 689.6 124.7 L 710.4 125.7 L 731.3 125.8 L 752.2 121.7 L 773.1 119.4 L 794.0 120.2" fill="none" stroke="#1f9a8d" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 42.0 123.4 L 62.9 109.1 L 83.8 96.7 L 104.7 92.2 L 125.6 77.8 L 146.4 98.2 L 167.3 88.3 L 188.2 96.2 L 209.1 98.7 L 230.0 110.6 L 250.9 152.7 L 271.8 168.5 L 292.7 165.6 L 313.6 166.5 L 334.4 176.9 L 355.3 185.9 L 376.2 196.3 L 397.1 184.4 L 418.0 172.0 L 438.9 178.9 L 459.8 182.9 L 480.7 178.9 L 501.6 148.2 L 522.4 146.2 L 543.3 135.3 L 564.2 126.9 L 585.1 104.6 L 606.0 95.7 L 626.9 95.7 L 647.8 94.2 L 668.7 107.1 L 689.6 114.0 L 710.4 97.2 L 731.3 110.6 L 752.2 99.7 L 773.1 82.8 L 794.0 65.0" fill="none" stroke="#2a78d6" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 42.0 139.7 L 62.9 107.3 L 83.8 63.5 L 104.7 44.5 L 125.6 76.8 L 146.4 135.9 L 167.3 101.6 L 188.2 127.3 L 209.1 151.1 L 230.0 168.2 L 250.9 265.4 L 271.8 277.7 L 292.7 220.6 L 313.6 228.2 L 334.4 243.5 L 355.3 260.6 L 376.2 281.5 L 397.1 268.2 L 418.0 213.0 L 438.9 198.7 L 459.8 220.6 L 480.7 220.6 L 501.6 160.6 L 522.4 182.5 L 543.3 224.4 L 564.2 202.5 L 585.1 158.7 L 606.0 142.5 L 626.9 147.3 L 647.8 132.1 L 668.7 213.0 L 689.6 267.3 L 710.4 233.0 L 731.3 257.7 L 752.2 218.7 L 773.1 170.1 L 794.0 131.1" fill="none" stroke="var(--color-navy)" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="794.0" cy="65.0" r="2.4" fill="#2a78d6"/><text x="802.0" y="68.0" style="font-size:9px;font-weight:700;fill:#2a78d6">+16.6</text><circle cx="794.0" cy="120.2" r="2.4" fill="#1f9a8d"/><text x="802.0" y="123.2" style="font-size:9px;font-weight:700;fill:#1f9a8d">+5.5</text><circle cx="794.0" cy="131.1" r="3.6" fill="var(--color-navy)"/><text x="802.0" y="134.1" style="font-size:11px;font-weight:700;fill:var(--color-navy)">101.0%</text><circle cx="794.0" cy="134.1" r="2.4" fill="#cf9a3a"/><line x1="794.0" y1="134.1" x2="799.0" y2="141.1" stroke="#cf9a3a" stroke-width="0.6"/><text x="802.0" y="144.1" style="font-size:9px;font-weight:700;fill:#cf9a3a">+2.6</text><circle cx="794.0" cy="264.6" r="2.4" fill="#e34948"/><text x="802.0" y="267.6" style="font-size:9px;font-weight:700;fill:#e34948">-23.7</text><text x="42" y="336" style="font-size:8px;fill:var(--color-text-secondary)">Ago-23</text><text x="794" y="336" text-anchor="end" style="font-size:8px;fill:var(--color-text-secondary)">Ago-26</text></svg>
-    </div>
+    <div class="dt-empty-body">—</div>
     <div class="slide-footer">
-      <span class="footer-brand">ALEGRA</span>
-      <span class="footer-source">ARR walk (By Version) + dwh_facts.fact_customers_mrr · FX spot, Aug-26 close TRM</span>
-      <span class="footer-page">NDR · 3/4</span>
+      <span class="footer-page">1/2</span>
     </div>
   </div>
 
-  <div class="slide-divider">↓ &nbsp; 4 / 4</div>
+  <div class="slide-divider">↓ &nbsp; 2 / 2</div>
 
-  <!-- SLIDE 4 (reconstruida 2026-09-25 — ver comentario de slide 3/4 arriba
-       para el porqué del cambio de ventana temporal y del texto. Se agregó la
-       línea de NDR (spot) de cada versión al eje derecho — antes esta slide
-       solo tenía los 4 componentes en pp, sin el NDR total por país.
-       Sin cambios en la pasada 2026-09-28 (v4) — ver nota de slide 3/4. -->
-  <div class="slide" style="display:flex;flex-direction:column">
+  <div class="slide">
     <div class="slide-header">
-      <span class="title">The FX Effect Is Concentrated in Colombia and Mexico</span>
+      <span class="title">Discussion Topic</span>
       <span class="period">{{ config.month_label }}</span>
     </div>
-    <div class="slide-body" style="gap:10px">
-      <div style="display:flex;gap:14px;font-size:11px;font-weight:600;flex-wrap:wrap">
-        <span style="color:#e34948">● Churn</span>
-        <span style="color:#cf9a3a">● Pricing</span>
-        <span style="color:#1f9a8d">● Net Upgrades</span>
-        <span style="color:#2a78d6">● FX</span>
-        <span style="color:var(--color-navy)">● NDR (spot)</span>
-      </div>
-      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px;min-height:0">
-        <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:4px">
-          <div style="font-size:11px;font-weight:700;color:var(--color-text-primary)">Colombia</div>
-          <svg viewBox="0 0 400 132" style="width:100%;height:auto" role="img" aria-label="Colombia: Net Churn, Net Pricing, Net Upgrades, FX and NDR spot, August 2023 to August 2026"><line x1="32" y1="87.8" x2="354" y2="87.8" stroke="var(--color-border)" stroke-width="0.75"/><text x="26" y="90.8" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">-20</text><line x1="32" y1="58.6" x2="354" y2="58.6" stroke="#c9d4dc" stroke-width="1" stroke-dasharray="3 3"/><text x="26" y="61.6" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">0</text><line x1="32" y1="29.4" x2="354" y2="29.4" stroke="var(--color-border)" stroke-width="0.75"/><text x="26" y="32.4" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">+20</text><path d="M 32.0 97.4 L 40.9 96.9 L 49.9 96.5 L 58.8 96.3 L 67.8 96.4 L 76.7 95.5 L 85.7 95.7 L 94.6 94.9 L 103.6 93.7 L 112.5 93.4 L 121.4 95.4 L 130.4 95.5 L 139.3 95.8 L 148.3 97.0 L 157.2 95.6 L 166.2 96.3 L 175.1 96.6 L 184.1 96.9 L 193.0 97.6 L 201.9 97.0 L 210.9 99.0 L 219.8 99.1 L 228.8 98.8 L 237.7 98.5 L 246.7 98.8 L 255.6 97.9 L 264.6 97.7 L 273.5 97.3 L 282.4 97.1 L 291.4 96.6 L 300.3 96.7 L 309.3 96.1 L 318.2 94.9 L 327.2 94.4 L 336.1 93.9 L 345.1 93.2 L 354.0 93.4" fill="none" stroke="#e34948" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 51.1 L 40.9 50.1 L 49.9 49.3 L 58.8 49.4 L 67.8 54.9 L 76.7 56.7 L 85.7 55.2 L 94.6 52.1 L 103.6 51.7 L 112.5 51.5 L 121.4 51.3 L 130.4 52.6 L 139.3 39.9 L 148.3 40.4 L 157.2 39.7 L 166.2 40.2 L 175.1 41.2 L 184.1 41.4 L 193.0 49.8 L 201.9 39.0 L 210.9 38.9 L 219.8 39.6 L 228.8 38.3 L 237.7 43.7 L 246.7 50.2 L 255.6 50.0 L 264.6 49.9 L 273.5 49.8 L 282.4 50.3 L 291.4 49.9 L 300.3 55.2 L 309.3 57.6 L 318.2 57.7 L 327.2 57.8 L 336.1 56.5 L 345.1 54.0 L 354.0 53.9" fill="none" stroke="#cf9a3a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 28.5 L 40.9 27.7 L 49.9 26.3 L 58.8 24.0 L 67.8 33.2 L 76.7 33.9 L 85.7 33.6 L 94.6 37.8 L 103.6 44.0 L 112.5 43.7 L 121.4 44.6 L 130.4 38.8 L 139.3 40.3 L 148.3 41.1 L 157.2 41.8 L 166.2 41.1 L 175.1 40.0 L 184.1 41.6 L 193.0 27.8 L 201.9 37.7 L 210.9 38.5 L 219.8 39.6 L 228.8 40.3 L 237.7 40.4 L 246.7 45.9 L 255.6 45.4 L 264.6 45.4 L 273.5 46.2 L 282.4 46.3 L 291.4 45.6 L 300.3 48.9 L 309.3 51.6 L 318.2 51.5 L 327.2 51.2 L 336.1 49.4 L 345.1 47.8 L 354.0 48.5" fill="none" stroke="#1f9a8d" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 47.5 L 40.9 38.8 L 49.9 31.5 L 58.8 29.6 L 67.8 24.2 L 76.7 33.5 L 85.7 27.4 L 94.6 31.2 L 103.6 32.6 L 112.5 39.1 L 121.4 57.5 L 130.4 64.3 L 139.3 61.1 L 148.3 62.9 L 157.2 67.7 L 166.2 70.7 L 175.1 76.2 L 184.1 71.5 L 193.0 65.6 L 201.9 68.6 L 210.9 71.5 L 219.8 70.2 L 228.8 57.9 L 237.7 57.9 L 246.7 54.8 L 255.6 50.6 L 264.6 41.0 L 273.5 37.2 L 282.4 37.7 L 291.4 37.3 L 300.3 43.6 L 309.3 45.5 L 318.2 37.0 L 327.2 43.0 L 336.1 37.3 L 345.1 28.8 L 354.0 21.7" fill="none" stroke="#2a78d6" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 50.7 L 40.9 36.8 L 49.9 26.9 L 58.8 21.7 L 67.8 29.2 L 76.7 43.0 L 85.7 33.0 L 94.6 37.1 L 103.6 44.0 L 112.5 50.0 L 121.4 73.8 L 130.4 77.2 L 139.3 60.9 L 148.3 65.8 L 157.2 69.5 L 166.2 73.5 L 175.1 79.9 L 184.1 76.6 L 193.0 64.8 L 201.9 66.6 L 210.9 72.8 L 219.8 73.3 L 228.8 58.6 L 237.7 64.5 L 246.7 74.8 L 255.6 68.2 L 264.6 57.1 L 273.5 53.1 L 282.4 54.3 L 291.4 51.3 L 300.3 68.2 L 309.3 75.9 L 318.2 65.1 L 327.2 71.3 L 336.1 60.9 L 345.1 46.4 L 354.0 38.7" fill="none" stroke="var(--color-navy)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="354.0" cy="21.7" r="1.8" fill="#2a78d6"/><text x="362.0" y="24.7" style="font-size:7px;font-weight:700;fill:#2a78d6">+25.3</text><circle cx="354.0" cy="38.7" r="2.8" fill="var(--color-navy)"/><text x="362.0" y="41.7" style="font-size:9px;font-weight:700;fill:var(--color-navy)">111.6%</text><circle cx="354.0" cy="48.5" r="1.8" fill="#1f9a8d"/><text x="362.0" y="51.5" style="font-size:7px;font-weight:700;fill:#1f9a8d">+6.9</text><circle cx="354.0" cy="53.9" r="1.8" fill="#cf9a3a"/><line x1="354.0" y1="53.9" x2="359.0" y2="57.5" stroke="#cf9a3a" stroke-width="0.6"/><text x="362.0" y="60.5" style="font-size:7px;font-weight:700;fill:#cf9a3a">+3.2</text><circle cx="354.0" cy="93.4" r="1.8" fill="#e34948"/><text x="362.0" y="96.4" style="font-size:7px;font-weight:700;fill:#e34948">-23.8</text><text x="32" y="130" style="font-size:7px;fill:var(--color-text-secondary)">Ago-23</text><text x="354" y="130" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">Ago-26</text></svg>
-        </div>
-        <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:4px">
-          <div style="font-size:11px;font-weight:700;color:var(--color-text-primary)">Mexico</div>
-          <svg viewBox="0 0 400 132" style="width:100%;height:auto" role="img" aria-label="Mexico: Net Churn, Net Pricing, Net Upgrades, FX and NDR spot, August 2023 to August 2026"><line x1="32" y1="87.8" x2="354" y2="87.8" stroke="var(--color-border)" stroke-width="0.75"/><text x="26" y="90.8" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">-20</text><line x1="32" y1="58.6" x2="354" y2="58.6" stroke="#c9d4dc" stroke-width="1" stroke-dasharray="3 3"/><text x="26" y="61.6" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">0</text><line x1="32" y1="29.4" x2="354" y2="29.4" stroke="var(--color-border)" stroke-width="0.75"/><text x="26" y="32.4" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">+20</text><path d="M 32.0 90.4 L 40.9 94.3 L 49.9 91.9 L 58.8 90.8 L 67.8 89.7 L 76.7 87.7 L 85.7 86.9 L 94.6 87.3 L 103.6 85.3 L 112.5 83.8 L 121.4 87.4 L 130.4 88.1 L 139.3 87.7 L 148.3 88.2 L 157.2 87.7 L 166.2 88.9 L 175.1 88.0 L 184.1 90.0 L 193.0 90.7 L 201.9 90.8 L 210.9 92.7 L 219.8 90.7 L 228.8 89.6 L 237.7 88.7 L 246.7 89.1 L 255.6 89.2 L 264.6 89.3 L 273.5 89.1 L 282.4 90.1 L 291.4 89.7 L 300.3 91.5 L 309.3 91.4 L 318.2 90.9 L 327.2 91.9 L 336.1 92.0 L 345.1 91.6 L 354.0 90.2" fill="none" stroke="#e34948" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 52.8 L 40.9 52.9 L 49.9 52.2 L 58.8 52.9 L 67.8 52.5 L 76.7 55.9 L 85.7 57.2 L 94.6 54.6 L 103.6 52.9 L 112.5 52.4 L 121.4 52.1 L 130.4 52.1 L 139.3 52.2 L 148.3 52.4 L 157.2 52.6 L 166.2 52.6 L 175.1 52.9 L 184.1 52.8 L 193.0 54.2 L 201.9 50.4 L 210.9 48.7 L 219.8 49.1 L 228.8 48.7 L 237.7 48.6 L 246.7 49.1 L 255.6 49.5 L 264.6 50.0 L 273.5 50.2 L 282.4 50.8 L 291.4 51.2 L 300.3 53.1 L 309.3 57.9 L 318.2 57.8 L 327.2 57.9 L 336.1 57.9 L 345.1 58.0 L 354.0 57.8" fill="none" stroke="#cf9a3a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 44.3 L 40.9 45.8 L 49.9 37.4 L 58.8 40.5 L 67.8 37.4 L 76.7 41.6 L 85.7 41.0 L 94.6 44.0 L 103.6 44.8 L 112.5 46.0 L 121.4 48.8 L 130.4 46.3 L 139.3 47.5 L 148.3 47.5 L 157.2 47.0 L 166.2 43.9 L 175.1 47.0 L 184.1 47.0 L 193.0 41.3 L 201.9 40.8 L 210.9 44.9 L 219.8 46.6 L 228.8 48.9 L 237.7 51.1 L 246.7 51.1 L 255.6 50.1 L 264.6 51.6 L 273.5 52.4 L 282.4 52.7 L 291.4 50.9 L 300.3 53.8 L 309.3 57.0 L 318.2 57.5 L 327.2 56.7 L 336.1 56.7 L 345.1 59.3 L 354.0 59.4" fill="none" stroke="#1f9a8d" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 33.1 L 40.9 38.9 L 49.9 45.0 L 58.8 42.4 L 67.8 36.7 L 76.7 46.1 L 85.7 48.4 L 94.6 46.5 L 103.6 50.7 L 112.5 52.9 L 121.4 66.8 L 130.4 72.2 L 139.3 77.5 L 148.3 73.5 L 157.2 71.8 L 166.2 78.5 L 175.1 83.9 L 184.1 80.4 L 193.0 81.1 L 201.9 85.2 L 210.9 79.2 L 219.8 75.6 L 228.8 64.3 L 237.7 59.1 L 246.7 52.2 L 255.6 52.2 L 264.6 47.7 L 273.5 45.5 L 282.4 41.7 L 291.4 37.6 L 300.3 35.1 L 309.3 40.7 L 318.2 41.5 L 327.2 44.3 L 336.1 47.4 L 345.1 50.9 L 354.0 47.8" fill="none" stroke="var(--color-navy)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="354.0" cy="47.8" r="1.8" fill="#2a78d6"/><text x="362.0" y="50.8" style="font-size:7px;font-weight:700;fill:#2a78d6">+7.4</text><circle cx="354.0" cy="57.8" r="1.8" fill="#cf9a3a"/><text x="362.0" y="60.8" style="font-size:7px;font-weight:700;fill:#cf9a3a">+0.6</text><circle cx="354.0" cy="59.4" r="1.8" fill="#1f9a8d"/><line x1="354.0" y1="59.4" x2="359.0" y2="66.8" stroke="#1f9a8d" stroke-width="0.6"/><text x="362.0" y="69.8" style="font-size:7px;font-weight:700;fill:#1f9a8d">-0.6</text><circle cx="354.0" cy="81.0" r="2.8" fill="var(--color-navy)"/><text x="362.0" y="84.0" style="font-size:9px;font-weight:700;fill:var(--color-navy)">85.8%</text><circle cx="354.0" cy="90.2" r="1.8" fill="#e34948"/><text x="362.0" y="93.2" style="font-size:7px;font-weight:700;fill:#e34948">-21.6</text><text x="32" y="130" style="font-size:7px;fill:var(--color-text-secondary)">Ago-23</text><text x="354" y="130" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">Ago-26</text></svg>
-        </div>
-        <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:4px">
-          <div style="font-size:11px;font-weight:700;color:var(--color-text-primary)">Dominican Republic</div>
-          <svg viewBox="0 0 400 132" style="width:100%;height:auto" role="img" aria-label="Dominican Republic: Net Churn, Net Pricing, Net Upgrades, FX and NDR spot, August 2023 to August 2026"><line x1="32" y1="87.8" x2="354" y2="87.8" stroke="var(--color-border)" stroke-width="0.75"/><text x="26" y="90.8" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">-20</text><line x1="32" y1="58.6" x2="354" y2="58.6" stroke="#c9d4dc" stroke-width="1" stroke-dasharray="3 3"/><text x="26" y="61.6" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">0</text><line x1="32" y1="29.4" x2="354" y2="29.4" stroke="var(--color-border)" stroke-width="0.75"/><text x="26" y="32.4" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">+20</text><path d="M 32.0 98.5 L 40.9 100.5 L 49.9 99.9 L 58.8 98.6 L 67.8 99.0 L 76.7 97.1 L 85.7 97.5 L 94.6 96.1 L 103.6 94.9 L 112.5 95.8 L 121.4 94.6 L 130.4 93.0 L 139.3 91.3 L 148.3 91.4 L 157.2 91.6 L 166.2 92.8 L 175.1 92.3 L 184.1 92.9 L 193.0 94.5 L 201.9 94.0 L 210.9 95.1 L 219.8 95.9 L 228.8 96.4 L 237.7 96.8 L 246.7 96.9 L 255.6 96.8 L 264.6 95.8 L 273.5 95.6 L 282.4 96.0 L 291.4 95.8 L 300.3 96.8 L 309.3 94.1 L 318.2 94.4 L 327.2 93.4 L 336.1 92.7 L 345.1 93.5 L 354.0 92.5" fill="none" stroke="#e34948" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 52.5 L 40.9 52.6 L 49.9 52.4 L 58.8 53.0 L 67.8 56.1 L 76.7 56.9 L 85.7 57.0 L 94.6 57.3 L 103.6 57.8 L 112.5 57.5 L 121.4 58.9 L 130.4 58.9 L 139.3 58.8 L 148.3 58.8 L 157.2 58.8 L 166.2 57.3 L 175.1 58.3 L 184.1 58.7 L 193.0 51.8 L 201.9 43.1 L 210.9 43.6 L 219.8 44.0 L 228.8 43.9 L 237.7 44.3 L 246.7 44.6 L 255.6 44.5 L 264.6 44.4 L 273.5 44.7 L 282.4 45.3 L 291.4 45.9 L 300.3 52.0 L 309.3 57.6 L 318.2 57.6 L 327.2 57.8 L 336.1 57.8 L 345.1 57.9 L 354.0 57.9" fill="none" stroke="#cf9a3a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 30.7 L 40.9 32.9 L 49.9 28.4 L 58.8 30.3 L 67.8 34.9 L 76.7 36.7 L 85.7 36.4 L 94.6 45.8 L 103.6 47.1 L 112.5 48.2 L 121.4 49.7 L 130.4 50.1 L 139.3 50.0 L 148.3 48.9 L 157.2 49.1 L 166.2 48.0 L 175.1 48.3 L 184.1 48.7 L 193.0 42.4 L 201.9 35.4 L 210.9 36.9 L 219.8 35.6 L 228.8 35.1 L 237.7 35.6 L 246.7 36.9 L 255.6 38.7 L 264.6 37.8 L 273.5 37.3 L 282.4 35.5 L 291.4 35.4 L 300.3 42.7 L 309.3 51.1 L 318.2 51.7 L 327.2 54.1 L 336.1 54.5 L 345.1 56.4 L 354.0 56.0" fill="none" stroke="#1f9a8d" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 58.6 L 40.9 58.6 L 49.9 58.6 L 58.8 58.6 L 67.8 58.6 L 76.7 58.6 L 85.7 58.6 L 94.6 58.6 L 103.6 58.6 L 112.5 58.6 L 121.4 58.6 L 130.4 58.6 L 139.3 58.6 L 148.3 58.6 L 157.2 58.6 L 166.2 58.6 L 175.1 58.6 L 184.1 58.6 L 193.0 58.6 L 201.9 58.6 L 210.9 58.6 L 219.8 58.6 L 228.8 58.6 L 237.7 58.6 L 246.7 58.6 L 255.6 58.6 L 264.6 58.6 L 273.5 58.6 L 282.4 58.6 L 291.4 58.6 L 300.3 58.6 L 309.3 58.6 L 318.2 58.6 L 327.2 58.6 L 336.1 58.6 L 345.1 58.6 L 354.0 58.6" fill="none" stroke="#2a78d6" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 63.8 L 40.9 69.2 L 49.9 63.3 L 58.8 65.0 L 67.8 74.1 L 76.7 76.4 L 85.7 75.1 L 94.6 84.5 L 103.6 86.9 L 112.5 86.9 L 121.4 88.9 L 130.4 87.7 L 139.3 85.1 L 148.3 83.8 L 157.2 84.1 L 166.2 82.8 L 175.1 83.6 L 184.1 85.1 L 193.0 72.2 L 201.9 54.0 L 210.9 57.4 L 219.8 57.2 L 228.8 57.2 L 237.7 58.7 L 246.7 60.7 L 255.6 62.5 L 264.6 60.0 L 273.5 59.7 L 282.4 58.7 L 291.4 58.9 L 300.3 74.9 L 309.3 88.1 L 318.2 88.9 L 327.2 90.7 L 336.1 90.4 L 345.1 93.5 L 354.0 92.0" fill="none" stroke="var(--color-navy)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="354.0" cy="56.0" r="1.8" fill="#1f9a8d"/><text x="362.0" y="59.0" style="font-size:7px;font-weight:700;fill:#1f9a8d">+1.8</text><circle cx="354.0" cy="57.9" r="1.8" fill="#cf9a3a"/><line x1="354.0" y1="57.9" x2="359.0" y2="65.0" stroke="#cf9a3a" stroke-width="0.6"/><text x="362.0" y="68.0" style="font-size:7px;font-weight:700;fill:#cf9a3a">+0.5</text><circle cx="354.0" cy="58.6" r="1.8" fill="#2a78d6"/><line x1="354.0" y1="58.6" x2="359.0" y2="74.0" stroke="#2a78d6" stroke-width="0.6"/><text x="362.0" y="77.0" style="font-size:7px;font-weight:700;fill:#2a78d6">0.0</text><circle cx="354.0" cy="92.0" r="2.8" fill="var(--color-navy)"/><text x="362.0" y="95.0" style="font-size:9px;font-weight:700;fill:var(--color-navy)">79.1%</text><circle cx="354.0" cy="92.5" r="1.8" fill="#e34948"/><line x1="354.0" y1="92.5" x2="359.0" y2="101.0" stroke="#e34948" stroke-width="0.6"/><text x="362.0" y="104.0" style="font-size:7px;font-weight:700;fill:#e34948">-23.2</text><text x="32" y="130" style="font-size:7px;fill:var(--color-text-secondary)">Ago-23</text><text x="354" y="130" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">Ago-26</text></svg>
-        </div>
-        <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:4px">
-          <div style="font-size:11px;font-weight:700;color:var(--color-text-primary)">Costa Rica</div>
-          <svg viewBox="0 0 400 132" style="width:100%;height:auto" role="img" aria-label="Costa Rica: Net Churn, Net Pricing, Net Upgrades, FX and NDR spot, August 2023 to August 2026"><line x1="32" y1="87.8" x2="354" y2="87.8" stroke="var(--color-border)" stroke-width="0.75"/><text x="26" y="90.8" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">-20</text><line x1="32" y1="58.6" x2="354" y2="58.6" stroke="#c9d4dc" stroke-width="1" stroke-dasharray="3 3"/><text x="26" y="61.6" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">0</text><line x1="32" y1="29.4" x2="354" y2="29.4" stroke="var(--color-border)" stroke-width="0.75"/><text x="26" y="32.4" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">+20</text><path d="M 32.0 91.3 L 40.9 92.1 L 49.9 93.6 L 58.8 90.5 L 67.8 92.5 L 76.7 93.9 L 85.7 91.4 L 94.6 90.3 L 103.6 90.2 L 112.5 89.9 L 121.4 87.3 L 130.4 87.1 L 139.3 90.0 L 148.3 89.7 L 157.2 93.7 L 166.2 94.5 L 175.1 94.7 L 184.1 94.4 L 193.0 93.7 L 201.9 94.5 L 210.9 95.3 L 219.8 94.9 L 228.8 96.2 L 237.7 96.3 L 246.7 95.9 L 255.6 94.2 L 264.6 102.3 L 273.5 95.5 L 282.4 97.2 L 291.4 95.9 L 300.3 95.0 L 309.3 96.2 L 318.2 93.0 L 327.2 92.5 L 336.1 90.8 L 345.1 91.0 L 354.0 92.0" fill="none" stroke="#e34948" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 55.4 L 40.9 56.3 L 49.9 55.3 L 58.8 55.1 L 67.8 56.0 L 76.7 55.5 L 85.7 57.5 L 94.6 58.0 L 103.6 58.3 L 112.5 58.0 L 121.4 59.6 L 130.4 59.6 L 139.3 58.6 L 148.3 59.6 L 157.2 59.7 L 166.2 59.8 L 175.1 59.7 L 184.1 58.6 L 193.0 58.6 L 201.9 58.6 L 210.9 58.1 L 219.8 58.0 L 228.8 57.2 L 237.7 57.7 L 246.7 57.1 L 255.6 57.5 L 264.6 58.1 L 273.5 58.1 L 282.4 58.6 L 291.4 58.6 L 300.3 58.6 L 309.3 58.6 L 318.2 58.6 L 327.2 58.6 L 336.1 58.6 L 345.1 58.6 L 354.0 58.6" fill="none" stroke="#cf9a3a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 49.2 L 40.9 36.7 L 49.9 37.8 L 58.8 37.3 L 67.8 38.4 L 76.7 38.7 L 85.7 46.0 L 94.6 52.6 L 103.6 52.9 L 112.5 53.4 L 121.4 54.2 L 130.4 52.7 L 139.3 50.3 L 148.3 45.7 L 157.2 53.6 L 166.2 51.5 L 175.1 51.6 L 184.1 53.6 L 193.0 51.8 L 201.9 49.2 L 210.9 50.4 L 219.8 50.6 L 228.8 52.5 L 237.7 53.2 L 246.7 54.3 L 255.6 60.2 L 264.6 55.2 L 273.5 55.3 L 282.4 53.3 L 291.4 53.1 L 300.3 52.5 L 309.3 57.8 L 318.2 59.5 L 327.2 58.4 L 336.1 57.3 L 345.1 54.6 L 354.0 54.6" fill="none" stroke="#1f9a8d" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 58.6 L 40.9 58.6 L 49.9 58.6 L 58.8 58.6 L 67.8 58.6 L 76.7 58.6 L 85.7 58.6 L 94.6 58.6 L 103.6 58.6 L 112.5 58.6 L 121.4 58.6 L 130.4 58.6 L 139.3 58.6 L 148.3 58.6 L 157.2 58.6 L 166.2 58.6 L 175.1 58.6 L 184.1 58.6 L 193.0 58.6 L 201.9 58.6 L 210.9 58.6 L 219.8 58.6 L 228.8 58.6 L 237.7 58.6 L 246.7 58.6 L 255.6 58.6 L 264.6 58.6 L 273.5 58.6 L 282.4 58.6 L 291.4 58.6 L 300.3 58.6 L 309.3 58.6 L 318.2 58.6 L 327.2 58.6 L 336.1 58.6 L 345.1 58.6 L 354.0 58.6" fill="none" stroke="#2a78d6" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.9"/><path d="M 32.0 82.3 L 40.9 68.1 L 49.9 69.9 L 58.8 65.6 L 67.8 69.9 L 76.7 72.7 L 85.7 83.6 L 94.6 86.4 L 103.6 86.4 L 112.5 86.8 L 121.4 85.9 L 130.4 84.5 L 139.3 83.6 L 148.3 79.2 L 157.2 92.8 L 166.2 91.3 L 175.1 91.7 L 184.1 92.3 L 193.0 89.5 L 201.9 87.4 L 210.9 89.0 L 219.8 88.7 L 228.8 91.5 L 237.7 93.0 L 246.7 93.1 L 255.6 98.1 L 264.6 102.3 L 273.5 94.8 L 282.4 95.1 L 291.4 93.1 L 300.3 91.3 L 309.3 99.0 L 318.2 97.2 L 327.2 95.6 L 336.1 92.3 L 345.1 89.5 L 354.0 90.7" fill="none" stroke="var(--color-navy)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="354.0" cy="54.6" r="1.8" fill="#1f9a8d"/><text x="362.0" y="57.6" style="font-size:7px;font-weight:700;fill:#1f9a8d">+2.8</text><circle cx="354.0" cy="58.6" r="1.8" fill="#cf9a3a"/><line x1="354.0" y1="58.6" x2="359.0" y2="63.6" stroke="#cf9a3a" stroke-width="0.6"/><text x="362.0" y="66.6" style="font-size:7px;font-weight:700;fill:#cf9a3a">0.0</text><circle cx="354.0" cy="58.6" r="1.8" fill="#2a78d6"/><line x1="354.0" y1="58.6" x2="359.0" y2="72.6" stroke="#2a78d6" stroke-width="0.6"/><text x="362.0" y="75.6" style="font-size:7px;font-weight:700;fill:#2a78d6">0.0</text><circle cx="354.0" cy="90.7" r="2.8" fill="var(--color-navy)"/><text x="362.0" y="93.7" style="font-size:9px;font-weight:700;fill:var(--color-navy)">79.9%</text><circle cx="354.0" cy="92.0" r="1.8" fill="#e34948"/><line x1="354.0" y1="92.0" x2="359.0" y2="99.7" stroke="#e34948" stroke-width="0.6"/><text x="362.0" y="102.7" style="font-size:7px;font-weight:700;fill:#e34948">-22.8</text><text x="32" y="130" style="font-size:7px;fill:var(--color-text-secondary)">Ago-23</text><text x="354" y="130" text-anchor="end" style="font-size:7px;fill:var(--color-text-secondary)">Ago-26</text></svg>
-        </div>
-      </div>
-    </div>
+    <div class="dt-empty-body">—</div>
     <div class="slide-footer">
-      <span class="footer-brand">ALEGRA</span>
-      <span class="footer-source">ARR walk (By Version) + dwh_facts.fact_customers_mrr · FX spot, Aug-26 close TRM · shared scale across all 4</span>
-      <span class="footer-page">NDR · 4/4</span>
+      <span class="footer-page">2/2</span>
     </div>
   </div>
 

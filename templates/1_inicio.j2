@@ -15,7 +15,14 @@
        DM Sans / DM Mono — prefix .ks- for CSS isolation
        ============================================================ */
     .ks-content {
-      flex: 1;
+      /* flex-basis:auto (no "flex:1" a secas, que vale "1 1 0%") — con basis:0% este bloque
+         ignoraba su alto natural para la distribución de espacio y podía "crecer" por encima
+         de lo que sus hijos necesitaban, empujando el <p> del asterisco + el footer más allá
+         del alto fijo del slide (hallazgo de auditoría 2026-10-21, R18: slide completo
+         desbordaba +10px tras agregar la línea "cc"). Con basis:auto, shrink SÍ se activa
+         cuando hace falta, en vez de inflar este bloque con espacio que nadie pidió. */
+      flex: 1 1 auto;
+      min-height: 0;
       padding: 20px 48px 0;
       display: flex;
       flex-direction: column;
@@ -46,7 +53,7 @@
     }
     .ks-divider { border: none; border-top: 0.5px solid #e8e6df; margin: 14px 0; }
     /* Primary row */
-    .ks-p-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; }
+    .ks-p-row { display: grid; grid-template-columns: 1.25fr 1.25fr 1fr; }
     .ks-p-cell { padding-right: 28px; }
     .ks-p-cell:not(:first-child) { padding-left: 28px; padding-right: 0; border-left: 0.5px solid #e8e6df; }
     .ks-p-name { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 4px; }
@@ -57,8 +64,22 @@
     .ks-d-compact { display: flex; flex-direction: column; gap: 3px; }
     .ks-d-line { display: flex; align-items: baseline; font-size: 11px; line-height: 1.3; }
     .ks-tags { display: flex; gap: 4px; flex-wrap: wrap; align-items: baseline; }
-    .ks-d-tag-pill { font-size: 10px; font-weight: 500; color: #bbb; background: #f5f4f0; border-radius: 4px; padding: 1px 5px; letter-spacing: 0.04em; font-family: 'DM Mono', monospace; }
-    .ks-d-sep { font-size: 10px; color: #ddd; margin: 0 2px; }
+    .ks-d-tag-pill { font-size: 9px; font-weight: 500; color: #bbb; background: #f5f4f0; border-radius: 4px; padding: 1px 4px; letter-spacing: 0.02em; font-family: 'DM Mono', monospace; }
+    /* cc = constant currency (2026-10-21, pedido reunión Lucas Vassalo 1-oct-2026) — mismo
+       pill que los existentes, gris más oscuro para diferenciarlo sin alargar la tarjeta
+       (va a la derecha de la misma línea, no en una fila nueva). Solo en la tarjeta ARR.
+       Fix de overflow (2026-10-21, hallazgo de auditoría vía R18): con 3 badges "USD" en
+       una sola línea (YoY/QoQ/Bud, cada uno con el sufijo nuevo) el texto no entraba en el
+       ancho de la celda y el ".ks-tags" (flex-wrap:wrap) envolvía a una 2ª fila visual,
+       empujando la tarjeta +7px más alta que el slide — achicado el pill/separador un poco
+       para que quepa en una sola línea de nuevo (afecta a todas las tarjetas por
+       consistencia visual, no solo ARR). */
+    .ks-cc-pill { background: #cbd5e1; color: #334155; }
+    /* Pill "Bud" con su propio gris (2026-10-27, pedido de Luis Caro vía Sebastián) —
+       distinto al de "cc" para que la comparativa vs budget se distinga a simple vista
+       del resto (YoY/QoQ), sin inventar un color de más en la paleta de la slide. */
+    .ks-bud-pill { background: #e4e4e7; color: #52525b; }
+    .ks-d-sep { font-size: 9px; color: #ddd; margin: 0 1px; }
     .ks-pos { color: #1d9e75; font-weight: 500; }
     .ks-neg { color: #d85a30; font-weight: 500; }
     .ks-neu { color: #888;    font-weight: 500; }
@@ -507,24 +528,23 @@
           <div class="ks-p-name">ARR</div>
           <div class="ks-p-val">{{ metrics.arr_total }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="{{ 'ks-pos' if (metrics.arr_qoq_positive if metrics.is_quarter_end else metrics.arr_mom_positive) else 'ks-neg' }}">{{ metrics.arr_qoq if metrics.is_quarter_end else metrics.arr_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.arr_vs_budget_positive else 'ks-neg' }}">{{ metrics.arr_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.arr_yoy_positive else 'ks-neg' }}">{{ metrics.arr_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">{{ metrics.arr_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %} USD</span><span class="ks-neu">{{ metrics.arr_qoq if metrics.is_quarter_end else metrics.arr_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="{{ 'ks-pos' if metrics.arr_vs_budget_positive else 'ks-neg' }}">{{ metrics.arr_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.arr_yoy_cc }}</span>{% if metrics.is_quarter_end %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">QoQ cc</span><span class="ks-neu">{{ metrics.arr_qoq_cc }}</span>{% endif %}</div></div>
           </div>
         </div>
         <div class="ks-p-cell">
           <div class="ks-p-name">New MRR</div>
           <div class="ks-p-val-sm">{{ metrics.new_mrr }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="{{ 'ks-pos' if (metrics.new_mrr_qoq_positive if metrics.is_quarter_end else metrics.new_mrr_mom_positive) else 'ks-neg' }}">{{ metrics.new_mrr_qoq if metrics.is_quarter_end else metrics.new_mrr_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.new_mrr_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_mrr_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.new_mrr_yoy_positive else 'ks-neg' }}">{{ metrics.new_mrr_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">{{ metrics.new_mrr_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %} USD</span><span class="ks-neu">{{ metrics.new_mrr_qoq if metrics.is_quarter_end else metrics.new_mrr_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="{{ 'ks-pos' if metrics.new_mrr_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_mrr_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.new_mrr_yoy_cc }}</span>{% if metrics.is_quarter_end %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">QoQ cc</span><span class="ks-neu">{{ metrics.new_mrr_qoq_cc }}</span>{% endif %}</div></div>
           </div>
         </div>
         <div class="ks-p-cell">
           <div class="ks-p-name">New Logos</div>
           <div class="ks-p-val-sm">{{ metrics.new_logos }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="{{ 'ks-pos' if (metrics.new_logos_qoq_positive if metrics.is_quarter_end else metrics.new_logos_mom_positive) else 'ks-neg' }}">{{ metrics.new_logos_qoq if metrics.is_quarter_end else metrics.new_logos_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">Bud</span><span class="ks-neu">{{ metrics.new_logos_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.new_logos_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.new_logos_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="ks-neu">{{ metrics.new_logos_qoq if metrics.is_quarter_end else metrics.new_logos_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.new_logos_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_logos_vs_budget }}</span></div></div>
           </div>
         </div>
       </div>
@@ -537,24 +557,24 @@
           <div class="ks-sec-name">Net Revenue</div>
           <div class="ks-sec-val">{{ metrics.net_revenue }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="{{ 'ks-pos' if metrics.net_revenue_mom_positive else 'ks-neg' }}">{{ metrics.net_revenue_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.net_revenue_vs_budget_positive else 'ks-neg' }}">{{ metrics.net_revenue_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.net_revenue_yoy_positive else 'ks-neg' }}">{{ metrics.net_revenue_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="ks-neu">{{ metrics.net_revenue_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.net_revenue_vs_budget_positive else 'ks-neg' }}">{{ metrics.net_revenue_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.net_revenue_yoy }}</span></div></div>
           </div>
         </div>
         <div class="ks-sec-cell">
           <div class="ks-sec-name">Gross Margin</div>
           <div class="ks-sec-val">{{ metrics.gross_margin }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="ks-neu">{{ metrics.gross_margin_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.gross_margin_vs_budget_positive else 'ks-neg' }}">{{ metrics.gross_margin_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.gross_margin_yoy_positive else 'ks-neg' }}">{{ metrics.gross_margin_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="ks-neu">{{ metrics.gross_margin_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.gross_margin_vs_budget_positive else 'ks-neg' }}">{{ metrics.gross_margin_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.gross_margin_yoy }}</span></div></div>
           </div>
         </div>
         <div class="ks-sec-cell">
           <div class="ks-sec-name">EBITDA Margin</div>
           <div class="ks-sec-val">{{ metrics.ebitda_margin }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="{{ 'ks-pos' if metrics.ebitda_margin_mom_positive else 'ks-neg' }}">{{ metrics.ebitda_margin_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.ebitda_margin_vs_budget_positive else 'ks-neg' }}">{{ metrics.ebitda_margin_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.ebitda_margin_yoy_positive else 'ks-neg' }}">{{ metrics.ebitda_margin_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="ks-neu">{{ metrics.ebitda_margin_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.ebitda_margin_vs_budget_positive else 'ks-neg' }}">{{ metrics.ebitda_margin_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.ebitda_margin_yoy }}</span></div></div>
           </div>
         </div>
       </div>
@@ -627,24 +647,23 @@
           <div class="ks-p-name">ARR</div>
           <div class="ks-p-val ks-p-val-green">{{ metrics.arr_total }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.arr_vs_budget_positive else 'ks-neg' }}">{{ metrics.arr_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.arr_yoy_positive else 'ks-neg' }}">{{ metrics.arr_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">{{ metrics.arr_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="{{ 'ks-pos' if metrics.arr_vs_budget_positive else 'ks-neg' }}">{{ metrics.arr_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.arr_yoy_cc }}</span></div></div>
           </div>
         </div>
         <div class="ks-p-cell">
           <div class="ks-p-name">New MRR YTD</div>
           <div class="ks-p-val-sm ks-p-val-green">{{ metrics.new_mrr_ytd }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.new_mrr_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_mrr_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.new_mrr_ytd_yoy_positive else 'ks-neg' }}">{{ metrics.new_mrr_ytd_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">{{ metrics.new_mrr_ytd_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="{{ 'ks-pos' if metrics.new_mrr_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_mrr_ytd_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.new_mrr_ytd_yoy_cc }}</span></div></div>
           </div>
         </div>
         <div class="ks-p-cell">
           <div class="ks-p-name">New Logos YTD</div>
           <div class="ks-p-val-sm ks-p-val-green">{{ metrics.new_logos_ytd }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">Bud</span><span class="ks-neu">{{ metrics.new_logos_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.new_logos_ytd_yoy_positive else 'ks-neg' }}">{{ metrics.new_logos_ytd_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.new_logos_ytd_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.new_logos_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_logos_ytd_vs_budget }}</span></div></div>
           </div>
         </div>
       </div>
@@ -657,24 +676,24 @@
           <div class="ks-sec-name">Net Revenue YTD</div>
           <div class="ks-sec-val">{{ metrics.net_revenue_ytd }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.net_revenue_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.net_revenue_ytd_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.net_revenue_ytd_yoy_positive else 'ks-neg' }}">{{ metrics.net_revenue_ytd_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.net_revenue_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.net_revenue_ytd_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.net_revenue_ytd_yoy }}</span></div></div>
           </div>
         </div>
         <div class="ks-sec-cell">
           <div class="ks-sec-name">Gross Margin YTD</div>
           <div class="ks-sec-val">{{ metrics.gross_margin_ytd }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.gross_margin_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.gross_margin_ytd_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.gross_margin_ytd_yoy_positive else 'ks-neg' }}">{{ metrics.gross_margin_ytd_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.gross_margin_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.gross_margin_ytd_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.gross_margin_ytd_yoy }}</span></div></div>
           </div>
         </div>
         <div class="ks-sec-cell">
           <div class="ks-sec-name">EBITDA YTD</div>
           <div class="ks-sec-val">{{ metrics.ebitda_ytd }}</div>
           <div class="ks-d-compact">
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">Bud</span><span class="{{ 'ks-pos' if metrics.ebitda_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.ebitda_ytd_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="{{ 'ks-pos' if metrics.ebitda_ytd_yoy_positive else 'ks-neg' }}">{{ metrics.ebitda_ytd_yoy }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.ebitda_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.ebitda_ytd_vs_budget }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.ebitda_ytd_yoy }}</span></div></div>
           </div>
         </div>
       </div>
@@ -686,12 +705,12 @@
         <div class="ks-ter-cell ks-ter-cell-green">
           <div class="ks-ter-name">SMB Logos EoP</div>
           <div class="ks-ter-val ks-ter-val-green">{{ "{:,}".format(metrics.smb_logos_eop | int).replace(",", ".") }}</div>
-          <div class="ks-ter-d"><span class="{{ 'ks-pos' if metrics.smb_logos_yoy_positive else 'ks-neg' }}">{{ metrics.smb_logos_yoy }}</span> YoY · {{ metrics.smb_logos_net_adds }} net adds {{ config.month }}</div>
+          <div class="ks-ter-d"><span class="ks-neu">{{ metrics.smb_logos_yoy }}</span> YoY · {{ metrics.smb_logos_net_adds }} net adds {{ config.month }}</div>
         </div>
         <div class="ks-ter-cell ks-ter-cell-green">
           <div class="ks-ter-name">Accountant Logos EoP</div>
           <div class="ks-ter-val ks-ter-val-green">{{ metrics.accountant_logos_eop }}</div>
-          <div class="ks-ter-d"><span class="{{ 'ks-pos' if metrics.accountant_logos_mom_positive else 'ks-neg' }}">{{ metrics.accountant_logos_mom }}</span> MoM · <span class="{{ 'ks-pos' if metrics.accountant_logos_yoy_positive else 'ks-neg' }}">{{ metrics.accountant_logos_yoy }}</span> YoY · {{ metrics.accountant_logos_net_adds }} net adds</div>
+          <div class="ks-ter-d"><span class="ks-neu">{{ metrics.accountant_logos_mom }}</span> MoM · <span class="ks-neu">{{ metrics.accountant_logos_yoy }}</span> YoY · {{ metrics.accountant_logos_net_adds }} net adds</div>
         </div>
       </div>
 
@@ -703,6 +722,13 @@
   </div>
   {% endif %}{# /YTD Performance oculto #}
 
+  {# Oculta 2026-10-23: "ARR Walk Summary" (SLIDE 6), "Global — Core vs Lite
+     Performance Alegra" (SLIDE 7) y "ARR Walk Alanube" (SLIDE 9) se reubicaron
+     (como réplicas) en templates/3_arr_walk.j2, sección ARR Walk — pedido del
+     usuario. Código intacto abajo, reversible cambiando False por True. El
+     <script> de más abajo (gráfico ARR EoP de la slide "ARR Overview", SLIDE 4,
+     que SIGUE visible) queda fuera de este bloque a propósito — no tocar. #}
+  {% if False %}
   <div class="slide-divider">↓ &nbsp; 7 / 7</div>
 
   <!-- ============================================================
@@ -959,6 +985,7 @@
 
     </div><!-- /.aw-body-row -->
   </div>
+  {% endif %}{# /ARR Walk Summary + Global Core vs Lite + ARR Walk Alanube oculto #}
 
 <script>
 (function(){
@@ -992,7 +1019,7 @@
     },
     options: {
       responsive: true, maintainAspectRatio: false, animation: false,
-      layout: { padding: { top: 16 } },
+      layout: { padding: { top: 30 } },
       plugins: {
         legend: { display: false },
         tooltip: { mode: 'index', callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(2)} Mn` } }
@@ -1005,15 +1032,29 @@
     },
     plugins: [{
       id: 'arrEoPLabels',
+      // 2026-10-23 — Luis Caro: "se ve cortado estos numeros al final de la serie como
+      // que se solapan". Causa: Spot y Constant Currency convergen en los meses más
+      // recientes (la revaluación CC pierde diferencia contra el mes de corte), así que
+      // sus barras quedan casi a la misma altura y ambas etiquetas caían en el mismo
+      // pixel (bar.y - 2 de cada una). Fix: si las dos barras de un mismo mes están a
+      // menos de minGap de distancia vertical, se apilan las dos etiquetas una encima de
+      // la otra (ambas ancladas a la barra más alta) en vez de cada una sobre su propia
+      // barra — así nunca se superponen, sin importar qué tan cerca estén los valores.
       afterDatasetsDraw(chart) {
         const { ctx } = chart;
         ctx.save();
         ctx.font = '700 9px Arial'; ctx.fillStyle = '#1f2937';
         ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-        chart.data.datasets.forEach((ds, di) => {
-          chart.getDatasetMeta(di).data.forEach((bar, i) => {
-            ctx.fillText(ds.data[i].toFixed(1), bar.x, bar.y - 2);
-          });
+        const minGap = 11;
+        const metaSpot = chart.getDatasetMeta(0).data;
+        const metaCC   = chart.getDatasetMeta(1).data;
+        metaSpot.forEach((barSpot, i) => {
+          const barCC = metaCC[i];
+          const ySpot = barSpot.y, yCC = barCC.y;
+          const close = Math.abs(ySpot - yCC) < minGap;
+          const topY  = Math.min(ySpot, yCC) - 2;
+          ctx.fillText(totalSpot[i].toFixed(1), barSpot.x, close ? topY - minGap : ySpot - 2);
+          ctx.fillText(totalCC[i].toFixed(1),   barCC.x,   close ? topY           : yCC   - 2);
         });
         ctx.restore();
       }
