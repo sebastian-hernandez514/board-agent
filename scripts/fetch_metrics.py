@@ -164,6 +164,45 @@ def _new_mrr_cc_for_month(m_iso, cutoff, fx=None):
             total += local
     return total
 
+_SQL_REAL_BDG_FX = """
+SELECT TO_CHAR(date_month, 'YYYY-MM') AS m, metric_name,
+       SUM(amount_usd_real) AS real_usd, SUM(amount_usd_bdg) AS bdg_usd
+FROM bi_strategic.fact_real_for_bdg
+WHERE date_month >= DATE_TRUNC('year', '{cutoff}-01'::date)
+  AND date_month <= '{cutoff}-01'
+  AND metric_name IN ('mrr_eop', 'new_mrr_base_t0', 'new_mrr_cross_t0')
+GROUP BY 1, 2
+ORDER BY 1, 2
+"""
+# 2026-11-17 (pedido del usuario — "Bud cc" en Monthly/YTD Performance): bi_strategic.fact_real_for_bdg
+# trae el REAL valuado a la tasa spot (amount_usd_real) y a la tasa de BUDGET congelada
+# (amount_usd_bdg), mismo universo y misma métrica. El cociente bdg/real de cada mes es el factor
+# de moneda constante a tasa budget: se aplica a las cifras del board (que ya incluyen su propio
+# alcance, p. ej. Alanube aparte) para compararlas contra el budget SIN el efecto FX.
+
+_bdg_fx_cache = None
+
+def load_bdg_fx():
+    """{'arr': {'YYYY-MM': factor}, 'new': {'YYYY-MM': factor}} — factor = real a tasa budget ÷ real a tasa spot."""
+    global _bdg_fx_cache
+    if _bdg_fx_cache is not None:
+        return _bdg_fx_cache
+    agg = {}
+    rows = _pages_or_missing("Real vs Budget FX (fact_real_for_bdg)", [],
+                              "fact_real_for_bdg no disponible — Bud cc en N/A")
+    for r in rows:
+        m, met = str(r.get("m") or "")[:7], r.get("metric_name")
+        if not m or not met: continue
+        a = agg.setdefault(m, {"arr": [0.0, 0.0], "new": [0.0, 0.0]})
+        key = "arr" if met == "mrr_eop" else "new"
+        a[key][0] += float(r.get("real_usd") or 0); a[key][1] += float(r.get("bdg_usd") or 0)
+    out = {"arr": {}, "new": {}}
+    for m, a in agg.items():
+        for k in ("arr", "new"):
+            if a[k][0]: out[k][m] = a[k][1] / a[k][0]
+    _bdg_fx_cache = out
+    return out
+
 _SQL_ALANUBE_ARR = """
 SELECT month_date,
        SUM(CASE WHEN COALESCE(event_type,'') <> 'C' THEN arr_local ELSE 0 END) AS arr_eop
@@ -1654,7 +1693,7 @@ SELECT cohortmonth, app_version, segment_type,
        SUM(general_expenses_usd + software_and_tools_expenses_usd + travel_expenses_usd) AS other_usd
 FROM db_finance.fact_cac_version_segments
 WHERE cohortmonth <= '{cutoff}-01'
-  AND cohortmonth >= DATE_TRUNC('year', DATEADD(year, -1, '{cutoff}-01'))
+  AND cohortmonth >= DATE_TRUNC('year', DATEADD(year, -2, '{cutoff}-01'))
   AND segment_type IN ('Core', 'Lite')
 GROUP BY cohortmonth, app_version, segment_type
 ORDER BY cohortmonth
@@ -1664,6 +1703,8 @@ ORDER BY cohortmonth
 # ARTIFICIAL de esta query, no del origen: db_finance.fact_cac_version_segments tiene
 # datos desde 2023-01 (verificado por RS: MIN(cohortmonth)=2023-01-01). Ahora trae desde
 # enero del año anterior al de corte, suficiente para 5 quarters + YTD año anterior.
+# 2026-11-17: ampliado a 2 años atrás (enero de corte-2) para S&M/CAC de oct-24 en la slide
+# "ARR by Country · Three-Year Detail" mensual.
 
 _SQL_FLYWHEEL = """
 WITH base_monthly_data AS (
@@ -3869,6 +3910,82 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         _c["arr_share_pct"] = round(_c["arr_m"] / _gw_countries[-1]["arr_m"] * 100) if _gw_countries[-1]["arr_m"] else 0
     gw_country_summary = _gw_countries
 
+    # ── gw_country_detail (2026-11-17) — base de las slides "ARR by Country" y "ARR by Country ·
+    # Three-Year Detail" en MESES (el board mensual las perdió al encerrarlas en is_quarter_end).
+    # Core+Lite por país (+ Other = Total − 4 países, + Total) en 3 cortes (mes de corte, −12, −24)
+    # y serie de c.c. YoY de los últimos 7 meses para los sparklines. Todo del mismo cache que ya
+    # usa gw_country_summary; el payback se parchea en merge_country_payback().
+    _MON3 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    def _mlbl(m): return f"{_MON3[int(m[5:7]) - 1]}-{m[2:4]}"
+    def _m_shift(m, back):
+        y, mo = int(m[:4]), int(m[5:7]) - back
+        while mo <= 0: mo += 12; y -= 1
+        return f"{y:04d}-{mo:02d}"
+    _GWD_KEYS = [("colombia", "Colombia"), ("mexico", "Mexico"), ("republicaDominicana", "Dominican Republic"),
+                 ("costaRica", "Costa Rica"), ("other", "Other"), ("total", "Total")]
+    _gwd_cache = {}
+    def _gwd(key, m):
+        ck = (key, m)
+        if ck in _gwd_cache: return _gwd_cache[ck]
+        fields = ("mrr", "mrr_cc", "logos", "new", "churn_net", "inv", "bop")
+        if key == "other":
+            tot = _gwd("total", m); named = [_gwd(k, m) for k, _ in _GWD_KEYS[:4]]
+            r = {f: max(tot[f] - sum(n[f] for n in named), 0.0) for f in fields}
+        else:
+            r = {f: 0.0 for f in fields}
+            for _sg in ("Core", "Lite"):
+                if key == "total":
+                    d, dp = _graw(_sg, m), _graw(_sg, _prev_m(m))
+                    r["inv"] += sum((ci.get(_sg, {}).get(m, {}).get("total", 0) or 0) for ci in (investment or {}).values())
+                else:
+                    d = country_raw.get(m, {}).get(key, {}).get(_sg, {})
+                    dp = country_raw.get(_prev_m(m), {}).get(key, {}).get(_sg, {})
+                    r["inv"] += ((investment or {}).get(key, {}).get(_sg, {}).get(m) or {}).get("total", 0) or 0
+                r["mrr"] += d.get("mrr_eop", 0); r["mrr_cc"] += d.get("mrr_eop_cc", 0)
+                r["logos"] += d.get("logos_eop", 0); r["new"] += d.get("logos_new", 0)
+                r["churn_net"] += max(d.get("logos_churn", 0) - d.get("logos_react", 0), 0)
+                r["bop"] += dp.get("logos_eop", 0)
+        _gwd_cache[ck] = r
+        return r
+    def _gpc(a, b): return ((a / b) - 1) * 100 if b else None
+    def _gsg(v, dec=1):
+        if v is None: return "—"
+        t = f"{abs(v):.{dec}f}"
+        return f"({t})" if round(v, dec) < 0 else f"+{t}"
+    _gwd_ms = [_m_shift(latest_m, 24), _m_shift(latest_m, 12), latest_m]
+    _gwd_rows = []
+    for _k, _nm in _GWD_KEYS:
+        _cols = []
+        for _m in _gwd_ms:
+            c, py = _gwd(_k, _m), _gwd(_k, _m_shift(_m, 12))
+            tot = _gwd("total", _m)
+            arr = c["mrr"] * 12 / 1e6; arpa = c["mrr"] / c["logos"] if c["logos"] else None
+            arpa_py = py["mrr"] / py["logos"] if py["logos"] else None
+            sm = c["inv"] / 1000; cac = c["inv"] / c["new"] if c["new"] else None
+            churn = c["churn_net"] / c["bop"] * 100 if c["bop"] else None
+            _cols.append({
+                "m": _mlbl(_m), "arr": f"{arr:.1f}", "arr_raw": arr,
+                "yoy_usd": _gsg(_gpc(c["mrr"], py["mrr"])), "yoy_cc": _gsg(_gpc(c["mrr_cc"], py["mrr_cc"])),
+                "mix": f"{(c['mrr'] / tot['mrr'] * 100) if tot['mrr'] else 0:.0f}",
+                "logos": f"{c['logos'] / 1000:.1f}", "logos_yoy": _gsg(_gpc(c["logos"], py["logos"])),
+                "arpa": f"{arpa:.1f}" if arpa else "—", "arpa_yoy": _gsg(_gpc(arpa, arpa_py) if arpa and arpa_py else None),
+                "sm": f"{sm:,.0f}" if sm else "—", "sm_raw": sm,
+                "cac": f"{cac:,.0f}" if cac else "—",
+                "churn": ("n.m." if (_k == "other" and churn is not None and churn > 15) else (f"{churn:.1f}" if churn is not None else "—")),
+                "payback": None, "payback_flag": False,
+            })
+        _spark = []
+        for _i in range(6, -1, -1):
+            _mm = _m_shift(latest_m, _i)
+            _spark.append(round(_gpc(_gwd(_k, _mm)["mrr_cc"], _gwd(_k, _m_shift(_mm, 12))["mrr_cc"]) or 0, 1))
+        _gwd_rows.append({"key": _k, "name": _nm, "cols": _cols, "spark": _spark})
+    _gwd_tot = _gwd_rows[-1]["cols"]
+    gw_country_detail = {
+        "cols": [_mlbl(m) for m in _gwd_ms], "spark_labels": [_mlbl(_m_shift(latest_m, i)) for i in range(6, -1, -1)],
+        "rows": _gwd_rows,
+        "sm_vs_first": _gsg(_gpc(_gwd_tot[2]["sm_raw"], _gwd_tot[0]["sm_raw"]), 0),
+    }
+
     def _g_net_new_arr(seg, m):
         return (_graw(seg, m).get("mrr_eop", 0) - _graw(seg, _prev_m(m)).get("mrr_eop", 0)) * 12
 
@@ -4192,6 +4309,12 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     _total_cur_cc = all_m.get("a_cc_eop", 0)    + _al_cur
     _total_py_cc  = all_m_py.get("a_cc_eop", 0) + _al_py
     arr_yoy_cc_str, arr_yoy_cc_pos = _pct_delta(_total_cur_cc, _total_py_cc)
+    # MoM en moneda constante (2026-11-17): mismo alcance que arr_yoy_cc (Alegra a_cc_eop + Alanube),
+    # mes de corte vs mes anterior, ambos revaluados a la tasa del mes de corte.
+    _total_prev_cc = all_m_pv.get("a_cc_eop", 0) + _al_prev
+    arr_mom_cc_str, arr_mom_cc_pos = _pct_delta(_total_cur_cc, _total_prev_cc)
+    new_mrr_mom_cc_str, new_mrr_mom_cc_pos = _pct_delta(_new_mrr_cc_for_month(latest_m, latest_m),
+                                                          _new_mrr_cc_for_month(prev_m, latest_m))
 
     # ── ARR Mix (Core/Lite/Alanube) — corregido 2026-07-27 (hallazgo real del usuario:
     # Core/Lite se calculaban entre sí solos (suman 100%) y Alanube se mostraba con un
@@ -4224,6 +4347,20 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "arr_yoy":             arr_yoy_str,
         "arr_yoy_positive":    arr_yoy_pos,
         "arr_yoy_cc":          arr_yoy_cc_str,
+        "arr_mom_cc":          arr_mom_cc_str,
+        "arr_mom_cc_positive": arr_mom_cc_pos,
+        "new_mrr_mom_cc":      new_mrr_mom_cc_str,
+        "new_mrr_mom_cc_positive": new_mrr_mom_cc_pos,
+        # New Logos son conteos: no tienen efecto FX, así que sus "cc" son los mismos YoY/MoM/Bud (2026-11-17).
+        "new_logos_yoy_cc":          new_logos_yoy_str,
+        "new_logos_yoy_cc_positive": new_logos_yoy_pos,
+        "new_logos_mom_cc":          new_logos_mom_str,
+        "new_logos_mom_cc_positive": new_logos_mom_pos,
+        "arr_vs_budget_cc": "N/A", "arr_vs_budget_cc_positive": True,
+        "new_mrr_vs_budget_cc": "N/A", "new_mrr_vs_budget_cc_positive": True,
+        "new_logos_vs_budget_cc": "N/A", "new_logos_vs_budget_cc_positive": True,
+        "new_mrr_ytd_vs_budget_cc": "N/A", "new_mrr_ytd_vs_budget_cc_positive": True,
+        "new_logos_ytd_vs_budget_cc": "N/A", "new_logos_ytd_vs_budget_cc_positive": True,
         "arr_yoy_cc_positive": arr_yoy_cc_pos,
         "arr_core_lite_split":     f"Core {_core_arr_pct3}% · Lite {_lite_arr_pct3}%",
         "arr_alanube_pct":         f"{_alanube_arr_pct3}%",
@@ -4340,6 +4477,7 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         "global_country": global_country,
         "country_stock_eop": country_stock_eop,
         "gw_country_summary": gw_country_summary,
+        "gw_country_detail": gw_country_detail,
     }
 
     # ── YTD acumulado (slide 5) ───────────────────────────────────────────────
@@ -4365,6 +4503,23 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
     if "_raw" in out:
         out["_raw"]["new_mrr_ytd"] = _new_mrr_ytd
         out["_raw"]["new_logos_ytd"] = _new_l_ytd
+
+    # ── Bud cc (2026-11-17): real a TASA BUDGET = cifra del board × factor bdg/real de ese mes
+    # (load_bdg_fx). ARR: Alegra × factor del mes + Alanube (USD, sin ajuste); New MRR: cada mes de la
+    # ventana × su factor. New Logos no cambia (conteo). Los % contra budget se calculan en merge_budget().
+    _bfx = load_bdg_fx()
+    if "_raw" in out and _bfx["arr"].get(latest_m) and _bfx["new"].get(latest_m):
+        out["_raw"]["arr_bfx_incl_alanube"] = all_m.get("a_eop", 0) * _bfx["arr"][latest_m] + _al_cur
+        _win_bfx = _cur_q_ms if is_quarter_end else [latest_m]
+        def _new_bfx(months):
+            tot = 0.0
+            for _mm in months:
+                _a = seg_metrics.get("all", {}).get("months", {}).get(_month_label(_mm), {}).get("a_new", 0) / 12
+                tot += _a * _bfx["new"].get(_mm, 1.0)
+            return tot
+        out["_raw"]["new_mrr_bfx"] = _new_bfx(_win_bfx)
+        out["_raw"]["new_mrr_ytd_bfx"] = _new_bfx([f"{_cur_yr}-{_k:02d}" for _k in range(1, int(latest_m[5:7]) + 1)])
+    out["new_logos_ytd_yoy_cc"], out["new_logos_ytd_yoy_cc_positive"] = out["new_logos_ytd_yoy"], out["new_logos_ytd_yoy_positive"]
 
     # New MRR YTD cc (2026-10-23) — mismo criterio que new_mrr_yoy_cc, sumando Ene→mes de
     # corte de cada año, todo revaluado a la tasa de ESTE mes de corte.
@@ -4874,8 +5029,38 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
         l_eop    = _ytd_l_eop_g[0 if is_py else 1]
         return (arr_eop / 12) / l_eop if l_eop else None
 
+    # ── Logo walk detallado (2026-11-17, pedido del usuario): Logos BoP + New + Recovered − Churn net
+    # (Churn gross y Reactivated como detalle) = Logos EoP. EoP = dedup logos_all (igual que "Total EoP");
+    # churn neto se DERIVA (BoP + New + Recovered − EoP), como ya hace build_seg_metrics (l_disc), para que
+    # el walk siempre cuadre; BoP = EoP del mes anterior (dedup) para que cada columna enlace con la previa.
+    # Logo walk en MILES (pedido 2026-11-17): >= 10K → 1 decimal (60.7); < 10K → 3 decimales (725 → 0.725)
+    # para que se vea el conteo exacto de logos sin perder la escala de miles de la tabla.
+    _fmt_lw = lambda v: ("—" if v is None else (f"{v/1e3:.1f}" if abs(v) >= 1e4 else f"{v/1e3:.3f}"))
+    if not is_quarter_end:
+        _lw_bop = [((logos_all or {}).get(_prev_m(m)) or {}).get("logos_eop") or _l_bop[i]
+                   for i, m in enumerate(_last5m_iso_g)]
+    else:
+        _lw_bop = list(_l_bop)
+    _lw_rec, _lw_react = _graw("l_recov"), _graw("l_react")
+    _lw_nc    = [_lw_bop[i] + _l_new[i] + _lw_rec[i] - _l_eop[i] for i in range(len(_g5))]
+    _lw_churn = [_lw_nc[i] + _lw_react[i] for i in range(len(_g5))]
+    def _dec_eop(yr):
+        return ((logos_all or {}).get(f"{yr - 1}-12") or {}).get("logos_eop")
+    _ylw_bop = (_dec_eop(_awt_prev_yr_i) or _ytd_g("l_bop")[0], _dec_eop(_awt_prev_yr_i + 1) or _ytd_g("l_bop")[1])
+    _ylw_nc  = tuple(_ylw_bop[k] + _ytd_g("l_new")[k] + _ytd_g("l_recov")[k] - _ytd_l_eop_g[k] for k in (0, 1))
+    _ylw_ch  = tuple(_ylw_nc[k] + _ytd_g("l_react")[k] for k in (0, 1))
+    _logo_walk_g = {"rows": [
+        _aw_row("Logos BoP",   "rb", None, _lw_bop,    _fmt_lw, ytd_raw=_ylw_bop),
+        _aw_row("New Logos",   "in", "g",  _l_new,     _fmt_lw, ytd_raw=_ytd_g("l_new")),
+        _aw_row("Recovered",   "in", "g",  _lw_rec,    _fmt_lw, ytd_raw=_ytd_g("l_recov")),
+        _aw_row("Net Churn",   "in", "r",  _lw_nc,     _fmt_lw, nv=True, ytd_raw=_ylw_nc),
+        _aw_row("Churn",       "in", "r",  _lw_churn,  _fmt_lw, nv=True, ytd_raw=_ylw_ch),
+        _aw_row("Reactivated", "in", "g",  _lw_react,  _fmt_lw, ytd_raw=_ytd_g("l_react")),
+        _aw_row("Logos EoP",   "rb", "g",  _l_eop,     _fmt_lw, ytd_raw=_ytd_l_eop_g),
+    ]}
     out["arr_walk_table"] = {
         "quarters": _g5,
+        "logo_walk": _logo_walk_g,
         "ytd_labels": _g_ytd_labels,
         "sections": [
             {
@@ -5076,8 +5261,23 @@ def build_yaml(seg_metrics, segs_raw, all_months, latest_mm, country_raw, cutoff
             l_eop   = _ytd_s("l_eop")[0 if is_py else 1]
             return (arr_eop / 12) / l_eop if l_eop else None
 
+        _slw_rec, _slw_react = _sraw("l_recov"), _sraw("l_react")
+        _slw_nc    = [_sl_bop[i] + _sl_new[i] + _slw_rec[i] - _sl_eop[i] for i in range(len(_s5))]
+        _slw_churn = [_slw_nc[i] + _slw_react[i] for i in range(len(_s5))]
+        _yslw_nc   = tuple(_ytd_s("l_bop")[k] + _ytd_s("l_new")[k] + _ytd_s("l_recov")[k] - _ytd_s("l_eop")[k] for k in (0, 1))
+        _yslw_ch   = tuple(_yslw_nc[k] + _ytd_s("l_react")[k] for k in (0, 1))
+        _seg_logo_walk = {"rows": [
+            _aw_row("Logos BoP",   "rb", None, _sl_bop,     _fmt_lw, ytd_raw=_ytd_s("l_bop")),
+            _aw_row("New Logos",   "in", "g",  _sl_new,     _fmt_lw, ytd_raw=_ytd_s("l_new")),
+            _aw_row("Recovered",   "in", "g",  _slw_rec,    _fmt_lw, ytd_raw=_ytd_s("l_recov")),
+            _aw_row("Net Churn",   "in", "r",  _slw_nc,     _fmt_lw, nv=True, ytd_raw=_yslw_nc),
+            _aw_row("Churn",       "in", "r",  _slw_churn,  _fmt_lw, nv=True, ytd_raw=_yslw_ch),
+            _aw_row("Reactivated", "in", "g",  _slw_react,  _fmt_lw, ytd_raw=_ytd_s("l_react")),
+            _aw_row("Logos EoP",   "rb", "g",  _sl_eop,     _fmt_lw, ytd_raw=_ytd_s("l_eop")),
+        ]}
         _prod["arr_walk_table"] = {
             "quarters":   _s5,
+            "logo_walk": _seg_logo_walk,
             "ytd_labels": _ytd_labels,
             "sections": [
                 {
@@ -5704,6 +5904,22 @@ def merge_budget(out, cutoff):
         s, pos = _pct(raw.get("new_logos_ytd", 0), budget_ytd_new_logos)
         out["new_logos_ytd_vs_budget"] = s
         out["new_logos_ytd_vs_budget_positive"] = pos
+
+    # Bud cc (2026-11-17): real a tasa BUDGET vs budget (ver load_bdg_fx / build_yaml).
+    if "ARR EoP" in budget and raw.get("arr_bfx_incl_alanube") is not None:
+        s_, pos = _pct(raw["arr_bfx_incl_alanube"], budget["ARR EoP"])
+        out["arr_vs_budget_cc"], out["arr_vs_budget_cc_positive"] = s_, pos
+    if budget_q_new_mrr and raw.get("new_mrr_bfx") is not None:
+        s_, pos = _pct(raw["new_mrr_bfx"], budget_q_new_mrr)
+        out["new_mrr_vs_budget_cc"], out["new_mrr_vs_budget_cc_positive"] = s_, pos
+    if budget_ytd_new_mrr and raw.get("new_mrr_ytd_bfx") is not None:
+        s_, pos = _pct(raw["new_mrr_ytd_bfx"], budget_ytd_new_mrr)
+        out["new_mrr_ytd_vs_budget_cc"], out["new_mrr_ytd_vs_budget_cc_positive"] = s_, pos
+    # New Logos: conteo, sin efecto FX → mismo valor que Bud.
+    out["new_logos_vs_budget_cc"] = out.get("new_logos_vs_budget", "N/A")
+    out["new_logos_vs_budget_cc_positive"] = out.get("new_logos_vs_budget_positive", True)
+    out["new_logos_ytd_vs_budget_cc"] = out.get("new_logos_ytd_vs_budget", "N/A")
+    out["new_logos_ytd_vs_budget_cc_positive"] = out.get("new_logos_ytd_vs_budget_positive", True)
 
     # Churn Rate (pp delta: real - budget)
     if "Churn Rate" in budget:
@@ -6345,6 +6561,22 @@ def merge_country_payback(out, cutoff):
     # iguales a country_stock_eop/COUNTRY_CFG) — result usa las CORTAS (colombia/mexico/
     # rd/cr, iguales a _PAYBACK_DIM_TO_KEY) — traducir con _COUNTRY_PAYBACK_KEY invertido.
     _long_to_short = {v: k for k, v in _COUNTRY_PAYBACK_KEY.items()}
+    # Payback en gw_country_detail (3 cortes: corte-24, corte-12, corte) — Total usa "global".
+    _gd = out.get("gw_country_detail")
+    if _gd:
+        _tshort = {"colombia": "colombia", "mexico": "mexico", "republicaDominicana": "rd", "costaRica": "cr", "total": "global"}
+        _cur_pb = dict(result); _cur_pb["global"] = out.get("payback_global")
+        _srcs = [hist.get("y2", {}), hist.get("y1", {}), _cur_pb]
+        for _r in _gd["rows"]:
+            _sk = _tshort.get(_r["key"])
+            for _ci, _src in enumerate(_srcs):
+                _v = _src.get(_sk) if _sk else None
+                try:
+                    _f = float(str(_v).replace("mo", "").strip()) if _v not in (None, "", "N/A") else None
+                except ValueError:
+                    _f = None
+                _r["cols"][_ci]["payback"] = f"{_f:.1f}" if _f is not None else "—"
+                _r["cols"][_ci]["payback_flag"] = bool(_f is not None and _f > 24)
     for _c in out.get("gw_country_summary", []):
         if _c["key"] == "total":
             _c["payback"] = out.get("payback_global")

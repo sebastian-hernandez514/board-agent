@@ -1,3 +1,5 @@
+{# Bud cc (real a tasa de presupuesto vs budget) OCULTO por ahora — decisión del usuario 2026-11-18, pendiente definir cuál presupuesto es el oficial (CSV Base vs dm_strategic.fact_budget). Reactivar: show_bud_cc = true. Los valores siguen calculándose en metrics.*_vs_budget_cc. #}
+{% set show_bud_cc = false %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,9 +55,14 @@
     }
     .ks-divider { border: none; border-top: 0.5px solid #e8e6df; margin: 14px 0; }
     /* Primary row */
-    .ks-p-row { display: grid; grid-template-columns: 1.25fr 1.25fr 1fr; }
-    .ks-p-cell { padding-right: 28px; }
-    .ks-p-cell:not(:first-child) { padding-left: 28px; padding-right: 0; border-left: 0.5px solid #e8e6df; }
+    /* 2026-11-17: columnas más parejas y menos padding — con las líneas cc nuevas (YoY cc · MoM cc · Bud cc) la columna de New Logos envolvía a 3 filas */
+    .ks-p-row { display: grid; grid-template-columns: 1.1fr 1.15fr 1.1fr; }
+    .ks-p-cell { padding-right: 14px; }
+    .ks-p-row .ks-d-sep { display: none; }  /* los pills ya separan; el "·" robaba ancho y partía líneas */
+    .ks-p-row .ks-tags { gap: 4px; }
+    .ks-p-row .ks-d-line { font-size: 10.2px; }
+    .ks-p-row .ks-d-tag-pill { font-size: 8px; padding: 1px 3px; }
+    .ks-p-cell:not(:first-child) { padding-left: 14px; padding-right: 0; border-left: 0.5px solid #e8e6df; }
     .ks-p-name { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 4px; }
     .ks-p-val    { font-size: 40px; font-weight: 500; color: #0e3d5c; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em; }
     .ks-p-val-sm { font-size: 34px; font-weight: 500; color: #0e3d5c; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em; }
@@ -529,7 +536,7 @@
           <div class="ks-p-val">{{ metrics.arr_total }}</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">{{ metrics.arr_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %} USD</span><span class="ks-neu">{{ metrics.arr_qoq if metrics.is_quarter_end else metrics.arr_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="{{ 'ks-pos' if metrics.arr_vs_budget_positive else 'ks-neg' }}">{{ metrics.arr_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.arr_yoy_cc }}</span>{% if metrics.is_quarter_end %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">QoQ cc</span><span class="ks-neu">{{ metrics.arr_qoq_cc }}</span>{% endif %}</div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.arr_yoy_cc }}</span>{% if metrics.is_quarter_end %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">QoQ cc</span><span class="ks-neu">{{ metrics.arr_qoq_cc }}</span>{% else %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">MoM cc</span><span class="ks-neu">{{ metrics.arr_mom_cc }}</span>{% if show_bud_cc %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud cc</span><span class="{{ 'ks-pos' if metrics.arr_vs_budget_cc_positive else 'ks-neg' }}">{{ metrics.arr_vs_budget_cc }}</span>{% endif %}{% endif %}</div></div>
           </div>
         </div>
         <div class="ks-p-cell">
@@ -537,7 +544,7 @@
           <div class="ks-p-val-sm">{{ metrics.new_mrr }}</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">{{ metrics.new_mrr_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %} USD</span><span class="ks-neu">{{ metrics.new_mrr_qoq if metrics.is_quarter_end else metrics.new_mrr_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="{{ 'ks-pos' if metrics.new_mrr_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_mrr_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.new_mrr_yoy_cc }}</span>{% if metrics.is_quarter_end %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">QoQ cc</span><span class="ks-neu">{{ metrics.new_mrr_qoq_cc }}</span>{% endif %}</div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.new_mrr_yoy_cc }}</span>{% if metrics.is_quarter_end %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">QoQ cc</span><span class="ks-neu">{{ metrics.new_mrr_qoq_cc }}</span>{% else %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">MoM cc</span><span class="ks-neu">{{ metrics.new_mrr_mom_cc }}</span>{% if show_bud_cc %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud cc</span><span class="{{ 'ks-pos' if metrics.new_mrr_vs_budget_cc_positive else 'ks-neg' }}">{{ metrics.new_mrr_vs_budget_cc }}</span>{% endif %}{% endif %}</div></div>
           </div>
         </div>
         <div class="ks-p-cell">
@@ -545,6 +552,7 @@
           <div class="ks-p-val-sm">{{ metrics.new_logos }}</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.new_logos_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">{% if metrics.is_quarter_end %}QoQ{% else %}MoM{% endif %}</span><span class="ks-neu">{{ metrics.new_logos_qoq if metrics.is_quarter_end else metrics.new_logos_mom }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.new_logos_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_logos_vs_budget }}</span></div></div>
+            {% if not metrics.is_quarter_end %}<div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.new_logos_yoy_cc }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">MoM cc</span><span class="ks-neu">{{ metrics.new_logos_mom_cc }}</span>{% if show_bud_cc %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud cc</span><span class="{{ 'ks-pos' if metrics.new_logos_vs_budget_cc_positive else 'ks-neg' }}">{{ metrics.new_logos_vs_budget_cc }}</span>{% endif %}</div></div>{% endif %}
           </div>
         </div>
       </div>
@@ -648,7 +656,7 @@
           <div class="ks-p-val ks-p-val-green">{{ metrics.arr_total }}</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">{{ metrics.arr_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="{{ 'ks-pos' if metrics.arr_vs_budget_positive else 'ks-neg' }}">{{ metrics.arr_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.arr_yoy_cc }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.arr_yoy_cc }}</span>{% if show_bud_cc %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud cc</span><span class="{{ 'ks-pos' if metrics.arr_vs_budget_cc_positive else 'ks-neg' }}">{{ metrics.arr_vs_budget_cc }}</span>{% endif %}</div></div>
           </div>
         </div>
         <div class="ks-p-cell">
@@ -656,7 +664,7 @@
           <div class="ks-p-val-sm ks-p-val-green">{{ metrics.new_mrr_ytd }}</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">{{ metrics.new_mrr_ytd_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="{{ 'ks-pos' if metrics.new_mrr_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_mrr_ytd_vs_budget }}</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.new_mrr_ytd_yoy_cc }}</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.new_mrr_ytd_yoy_cc }}</span>{% if show_bud_cc %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud cc</span><span class="{{ 'ks-pos' if metrics.new_mrr_ytd_vs_budget_cc_positive else 'ks-neg' }}">{{ metrics.new_mrr_ytd_vs_budget_cc }}</span>{% endif %}</div></div>
           </div>
         </div>
         <div class="ks-p-cell">
@@ -664,6 +672,7 @@
           <div class="ks-p-val-sm ks-p-val-green">{{ metrics.new_logos_ytd }}</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">{{ metrics.new_logos_ytd_yoy }}</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="{{ 'ks-pos' if metrics.new_logos_ytd_vs_budget_positive else 'ks-neg' }}">{{ metrics.new_logos_ytd_vs_budget }}</span></div></div>
+             {% if show_bud_cc %}<div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">{{ metrics.new_logos_ytd_yoy_cc }}</span>{% if show_bud_cc %}<span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud cc</span><span class="{{ 'ks-pos' if metrics.new_logos_ytd_vs_budget_cc_positive else 'ks-neg' }}">{{ metrics.new_logos_ytd_vs_budget_cc }}</span>{% endif %}</div></div>{% endif %}
           </div>
         </div>
       </div>

@@ -502,9 +502,14 @@ body {
     }
     .ks-divider { border: none; border-top: 0.5px solid #e8e6df; margin: 14px 0; }
     /* Primary row */
-    .ks-p-row { display: grid; grid-template-columns: 1.25fr 1.25fr 1fr; }
-    .ks-p-cell { padding-right: 28px; }
-    .ks-p-cell:not(:first-child) { padding-left: 28px; padding-right: 0; border-left: 0.5px solid #e8e6df; }
+    /* 2026-11-17: columnas más parejas y menos padding — con las líneas cc nuevas (YoY cc · MoM cc · Bud cc) la columna de New Logos envolvía a 3 filas */
+    .ks-p-row { display: grid; grid-template-columns: 1.1fr 1.15fr 1.1fr; }
+    .ks-p-cell { padding-right: 14px; }
+    .ks-p-row .ks-d-sep { display: none; }  /* los pills ya separan; el "·" robaba ancho y partía líneas */
+    .ks-p-row .ks-tags { gap: 4px; }
+    .ks-p-row .ks-d-line { font-size: 10.2px; }
+    .ks-p-row .ks-d-tag-pill { font-size: 8px; padding: 1px 3px; }
+    .ks-p-cell:not(:first-child) { padding-left: 14px; padding-right: 0; border-left: 0.5px solid #e8e6df; }
     .ks-p-name { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 4px; }
     .ks-p-val    { font-size: 40px; font-weight: 500; color: #0e3d5c; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em; }
     .ks-p-val-sm { font-size: 34px; font-weight: 500; color: #0e3d5c; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em; }
@@ -1440,15 +1445,6 @@ body {
     .gw-slide .gw-arr .gw-bar i{position:absolute;inset:0 auto 0 0;background:var(--gw-teal);border-radius:2px}
     .gw-slide .gw-arr .gw-p{width:30px;text-align:right;font-size:10.5px;color:var(--gw-muted);font-weight:400}
     .gw-slide .gw-ct tr.gw-tot .gw-arr .gw-bar i{background:var(--gw-navy)}
-  
-
-
-    .aw-sum-table thead th.al-cur { color: #208080; background: rgba(48,184,183,0.09); border-radius: 4px 4px 0 0; font-weight: 700; }
-    .aw-sum-table tbody td.al-cur { background: rgba(48,184,183,0.07); color: #1a7e7f; font-weight: 600; }
-    .aw-sum-table tr.aw-rb td.al-cur { color: #1a7e7f !important; background: rgba(48,184,183,0.09); }
-    .al-sp-col { width: 6px !important; padding: 0 !important; border: none !important; background: transparent !important; }
-    .al-sp-sm  { width: 3px !important; padding: 0 !important; border-left: 1.5px solid #e2e8f0 !important; background: transparent !important; }
-    .al-tb td  { border-top: 1.5px solid #cbd5e1 !important; }
   
 
 
@@ -2804,8 +2800,6 @@ body {
 
   
 
-.stale-slide{position:relative !important;}.stale-overlay{position:absolute;inset:0;z-index:999;background:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:40px;box-sizing:border-box;}.stale-overlay .stale-icon{font-size:32px;}.stale-overlay .stale-title{font-size:20px;font-weight:700;color:#475569;}.stale-overlay .stale-sub{font-size:14px;color:#94a3b8;max-width:520px;}
-
 
     .section-cover {
       background: var(--color-navy);
@@ -2921,7 +2915,7 @@ body {
     <div class="cover-title">Monthly Business<br>Review</div>
     <div class="cover-subtitle">October 2026 Performance</div>
     <div class="cover-logo">Alegra</div>
-    <div class="cover-updated">Last updated: 17 Nov 2026, 12:37</div>
+    <div class="cover-updated">Last updated: 18 Nov 2026, 07:20</div>
   </div>
 
   <div class="slide-divider">↓ &nbsp; 2 / 7</div>
@@ -3131,7 +3125,7 @@ body {
           <div class="ks-p-val">$34.7M</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">+35.8%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">MoM USD</span><span class="ks-neu">+0.5%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="ks-pos">+6.5%</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">+19.9%</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">+19.9%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">MoM cc</span><span class="ks-neu">+1.5%</span></div></div>
           </div>
         </div>
         <div class="ks-p-cell">
@@ -3139,7 +3133,7 @@ body {
           <div class="ks-p-val-sm">$90K</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY USD</span><span class="ks-neu">+68.7%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">MoM USD</span><span class="ks-neu">+15.2%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud USD</span><span class="ks-neg">-15.5%</span></div></div>
-            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">+50.9%</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">+50.9%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">MoM cc</span><span class="ks-neu">+16.7%</span></div></div>
           </div>
         </div>
         <div class="ks-p-cell">
@@ -3147,6 +3141,7 @@ body {
           <div class="ks-p-val-sm">2.6k</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">+28.4%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill">MoM</span><span class="ks-neu">+13.1%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="ks-neg">-22.8%</span></div></div>
+            <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill ks-cc-pill">YoY cc</span><span class="ks-neu">+28.4%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-cc-pill">MoM cc</span><span class="ks-neu">+13.1%</span></div></div>
           </div>
         </div>
       </div>
@@ -3266,6 +3261,7 @@ body {
           <div class="ks-p-val-sm ks-p-val-green">22.7k</div>
           <div class="ks-d-compact">
             <div class="ks-d-line"><div class="ks-tags"><span class="ks-d-tag-pill">YoY</span><span class="ks-neu">+14.7%</span><span class="ks-d-sep">·</span><span class="ks-d-tag-pill ks-bud-pill">Bud</span><span class="ks-neg">-22.2%</span></div></div>
+             
           </div>
         </div>
       </div>
@@ -3306,13 +3302,13 @@ body {
       <div class="ks-ter-row">
         <div class="ks-ter-cell ks-ter-cell-green">
           <div class="ks-ter-name">SMB Logos EoP</div>
-          <div class="ks-ter-val ks-ter-val-green">61.746</div>
-          <div class="ks-ter-d"><span class="ks-neu">+11.0%</span> YoY · 1017 net adds October</div>
+          <div class="ks-ter-val ks-ter-val-green">61.747</div>
+          <div class="ks-ter-d"><span class="ks-neu">+11.0%</span> YoY · 1018 net adds October</div>
         </div>
         <div class="ks-ter-cell ks-ter-cell-green">
           <div class="ks-ter-name">Accountant Logos EoP</div>
-          <div class="ks-ter-val ks-ter-val-green">16.672</div>
-          <div class="ks-ter-d"><span class="ks-neu">+1.7%</span> MoM · <span class="ks-neu">+19.6%</span> YoY · +278 net adds</div>
+          <div class="ks-ter-val ks-ter-val-green">16.674</div>
+          <div class="ks-ter-d"><span class="ks-neu">+1.7%</span> MoM · <span class="ks-neu">+19.6%</span> YoY · +280 net adds</div>
         </div>
       </div>
 
@@ -3405,8 +3401,8 @@ body {
   const newAdds      = [829, 757, 797, 821, 883, 993, 970, 977, 1176, 1178, 1052, 1030, 984, 1100, 1196, 1284];
   const netChurn     = [-792, -915, -792, -781, -830, -833, -1120, -1262, -878, -957, -982, -910, -1048, -1100, -1136, -1039];
   const netExpansion = [259, 163, 278, 236, 438, 835, 102, 12, 288, 229, 270, 629, 840, 334, 133, 220];
-  const fxImpact     = [291, -36, 484, 190, 391, 15, 471, 212, -268, 519, -446, 1073, 1415, 1027, -376, -331];
-  const netNew       = [586, -31, 766, 465, 882, 1011, 422, -61, 318, 970, -106, 1822, 2192, 1360, -184, 134];
+  const fxImpact     = [291, -36, 484, 190, 391, 15, 471, 212, -268, 519, -446, 1073, 1415, 1027, -376, -330];
+  const netNew       = [586, -31, 766, 465, 882, 1011, 422, -61, 318, 970, -106, 1822, 2192, 1360, -184, 136];
 
   new Chart(document.getElementById('netNew'), {
     type: 'bar',
@@ -3506,1547 +3502,264 @@ body {
   
   
 
-  <!-- ============================================================
-       SLIDES 2–3 — ARR Walk Core & Lite (loop dinámico)
-       ============================================================ -->
   
   
   
   
   
-  <div class="slide">
-    <div class="slide-header" style="border-bottom: 3px solid #0f172b;">
-      <span style="color:#fff; font-size:15px; font-weight:600; letter-spacing:-0.3px;">ARR GLO Alegra</span>
-      <span class="period">October 2026</span>
-    </div>
+  
+  
+  
+  
+  
 
-    <div class="aw-body-row">
-    <div class="aw-sum-wrap" style="padding: 8px 90px 0;">
-      <table class="aw-sum-table">
-        <thead>
-          <tr>
-            <th></th>
-            
-            <th>Jun-26</th>
-            
-            <th>Jul-26</th>
-            
-            <th>Aug-26</th>
-            
-            <th>Sep-26</th>
-            
-            <th class="aw-cur">Oct-26</th>
-            
-            <th class="aw-ytd">YTD'25</th>
-            <th class="aw-ytd">YTD'26</th>
-            <th class="aw-ytd aw-ytd-vs">YTD Δ%</th>
-          </tr>
-        </thead>
-        <tbody>
-          
-          <tr class="aw-sh">
-            <td>Logo EoP (000's)</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>Total EoP</td>
-            
-            
-            <td>59.3</td>
-            
-            
-            <td>59.8</td>
-            
-            
-            <td>60.2</td>
-            
-            
-            <td>60.7</td>
-            
-            
-            <td class="aw-cur">61.7</td>
-            
-            <td class="aw-ytd">55.6</td>
-            <td class="aw-ytd">61.7</td>
-            <td class="aw-ytd aw-ytd-vs">+11%</td>
-          </tr>
-          
-          
-          <tr class="aw-rt">
-            <td>Logo Monthly New Adds %</td>
-            
-            
-            <td>4.7%</td>
-            
-            
-            <td>4.7%</td>
-            
-            
-            <td>4.6%</td>
-            
-            
-            <td>5.1%</td>
-            
-            
-            <td class="aw-cur">5.5%</td>
-            
-            <td class="aw-ytd">4.8%</td>
-            <td class="aw-ytd">5.0%</td>
-            <td class="aw-ytd aw-ytd-vs">+0.2pp</td>
-          </tr>
-          
-          
-          <tr class="aw-rt">
-            <td>Logo Monthly Churn %</td>
-            
-            
-            <td>4.1%</td>
-            
-            
-            <td>3.9%</td>
-            
-            
-            <td>4.0%</td>
-            
-            
-            <td>4.3%</td>
-            
-            
-            <td class="aw-cur">3.8%</td>
-            
-            <td class="aw-ytd">4.7%</td>
-            <td class="aw-ytd">4.3%</td>
-            <td class="aw-ytd aw-ytd-vs">−0.4pp</td>
-          </tr>
-          
-          
-          <tr class="aw-gap"><td colspan="9"></td></tr>
-          
-          <tr class="aw-sh">
-            <td>ARR Walk — Spot ($M)</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR BoP</td>
-            
-            
-            <td>28.2</td>
-            
-            
-            <td>30.0</td>
-            
-            
-            <td>32.2</td>
-            
-            
-            <td>33.5</td>
-            
-            
-            <td class="aw-cur">33.4</td>
-            
-            <td class="aw-ytd">19.3</td>
-            <td class="aw-ytd">26.6</td>
-            <td class="aw-ytd aw-ytd-vs">+38%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>Additions</td>
-            
-            
-            <td>0.8</td>
-            
-            
-            <td>0.8</td>
-            
-            
-            <td>0.9</td>
-            
-            
-            <td>0.9</td>
-            
-            
-            <td class="aw-cur">1.1</td>
-            
-            <td class="aw-ytd">6.0</td>
-            <td class="aw-ytd">9.0</td>
-            <td class="aw-ytd aw-ytd-vs">+49%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>Recovered</td>
-            
-            
-            <td>0.2</td>
-            
-            
-            <td>0.2</td>
-            
-            
-            <td>0.2</td>
-            
-            
-            <td>0.3</td>
-            
-            
-            <td class="aw-cur">0.2</td>
-            
-            <td class="aw-ytd">1.6</td>
-            <td class="aw-ytd">2.0</td>
-            <td class="aw-ytd aw-ytd-vs">+20%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-r"></span>Net Churn</td>
-            
-            
-            <td class="aw-nv">(0.9)</td>
-            
-            
-            <td class="aw-nv">(1.0)</td>
-            
-            
-            <td class="aw-nv">(1.1)</td>
-            
-            
-            <td class="aw-nv">(1.1)</td>
-            
-            
-            <td class="aw-cur aw-nv">(1.0)</td>
-            
-            <td class="aw-ytd aw-nv">(8.4)</td>
-            <td class="aw-ytd aw-nv">(10.4)</td>
-            <td class="aw-ytd aw-ytd-vs aw-nv">−24%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-a"></span>Net Expansion</td>
-            
-            
-            <td>0.6</td>
-            
-            
-            <td>0.8</td>
-            
-            
-            <td>0.3</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td class="aw-cur">0.2</td>
-            
-            <td class="aw-ytd">4.3</td>
-            <td class="aw-ytd">3.1</td>
-            <td class="aw-ytd aw-ytd-vs">−30%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-s"></span>(+/−) FX Impact</td>
-            
-            
-            <td>1.1</td>
-            
-            
-            <td>1.4</td>
-            
-            
-            <td>1.0</td>
-            
-            
-            <td>(0.4)</td>
-            
-            
-            <td class="aw-cur">(0.3)</td>
-            
-            <td class="aw-ytd">1.8</td>
-            <td class="aw-ytd">3.3</td>
-            <td class="aw-ytd aw-ytd-vs">+79%</td>
-          </tr>
-          
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR EoP</td>
-            
-            
-            <td>30.0</td>
-            
-            
-            <td>32.2</td>
-            
-            
-            <td>33.5</td>
-            
-            
-            <td>33.4</td>
-            
-            
-            <td class="aw-cur">33.5</td>
-            
-            <td class="aw-ytd">24.7</td>
-            <td class="aw-ytd">33.5</td>
-            <td class="aw-ytd aw-ytd-vs">+35%</td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>MoM</td>
-            <td>—</td><td>+7%</td><td>+4%</td><td>−1%</td><td class="aw-cur">+0%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          <tr class="aw-delta-sub">
-            <td>YoY</td>
-            <td>+31%</td><td>+37%</td><td>+43%</td><td>+37%</td><td class="aw-cur">+35%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>Net New ARR</td>
-            <td>1.8</td><td>2.2</td><td>1.4</td><td>(0.2)</td><td class="aw-cur">0.1</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR EoP (Constant Currency)</td>
-            
-            
-            <td>31.7</td>
-            
-            
-            <td>32.5</td>
-            
-            
-            <td>32.8</td>
-            
-            
-            <td>33.0</td>
-            
-            
-            <td class="aw-cur">33.5</td>
-            
-            <td class="aw-ytd">28.1</td>
-            <td class="aw-ytd">33.5</td>
-            <td class="aw-ytd aw-ytd-vs">+19%</td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>MoM</td>
-            <td>—</td><td>+3%</td><td>+1%</td><td>+1%</td><td class="aw-cur">+1%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          <tr class="aw-delta-sub">
-            <td>YoY</td>
-            <td>+17%</td><td>+18%</td><td>+20%</td><td>+19%</td><td class="aw-cur">+19%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>Net New ARR (Constant Currency)</td>
-            <td>0.8</td><td>0.8</td><td>0.3</td><td>0.2</td><td class="aw-cur">0.5</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          
-          
-          <tr class="aw-gap"><td colspan="9"></td></tr>
-          
-          <tr class="aw-sh">
-            <td>SaaS Metrics</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-s"></span>S&M Total Spend</td>
-            
-            
-            <td>$782K</td>
-            
-            
-            <td>$800K</td>
-            
-            
-            <td>$815K</td>
-            
-            
-            <td>$876K</td>
-            
-            
-            <td class="aw-cur">$1.0M</td>
-            
-            <td class="aw-ytd">$8.1M</td>
-            <td class="aw-ytd">$7.7M</td>
-            <td class="aw-ytd aw-ytd-vs">−5%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>CAC</td>
-            
-            
-            <td>$371</td>
-            
-            
-            <td>$388</td>
-            
-            
-            <td>$393</td>
-            
-            
-            <td>$379</td>
-            
-            
-            <td class="aw-cur">$394</td>
-            
-            <td class="aw-ytd">$412</td>
-            <td class="aw-ytd">$342</td>
-            <td class="aw-ytd aw-ytd-vs">−17%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>CAC Payback (meses)</td>
-            
-            
-            <td>12.2</td>
-            
-            
-            <td>15.2</td>
-            
-            
-            <td>13.3</td>
-            
-            
-            <td>12.0</td>
-            
-            
-            <td class="aw-cur">11.2</td>
-            
-            <td class="aw-ytd">17.1</td>
-            <td class="aw-ytd">11.2</td>
-            <td class="aw-ytd aw-ytd-vs">−35%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>ARPA</td>
-            
-            
-            <td>$42</td>
-            
-            
-            <td>$45</td>
-            
-            
-            <td>$46</td>
-            
-            
-            <td>$46</td>
-            
-            
-            <td class="aw-cur">$45</td>
-            
-            <td class="aw-ytd">$37</td>
-            <td class="aw-ytd">$45</td>
-            <td class="aw-ytd aw-ytd-vs">+22%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>ARPA Adds</td>
-            
-            
-            <td>$33</td>
-            
-            
-            <td>$32</td>
-            
-            
-            <td>$36</td>
-            
-            
-            <td>$34</td>
-            
-            
-            <td class="aw-cur">$34</td>
-            
-            <td class="aw-ytd">$25</td>
-            <td class="aw-ytd">$33</td>
-            <td class="aw-ytd aw-ytd-vs">+30%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-r"></span>ARPA Churn</td>
-            
-            
-            <td>$31</td>
-            
-            
-            <td>$34</td>
-            
-            
-            <td>$35</td>
-            
-            
-            <td>$34</td>
-            
-            
-            <td class="aw-cur">$34</td>
-            
-            <td class="aw-ytd">$26</td>
-            <td class="aw-ytd">$32</td>
-            <td class="aw-ytd aw-ytd-vs">+23%</td>
-          </tr>
-          
-          
-          
-          
-        </tbody>
-      </table>
-    </div><!-- /.aw-sum-wrap -->
-    
-    </div><!-- /.aw-body-row -->
-
-    <div class="slide-footer">
-      <span class="footer-brand">Alegra · Confidential</span>
-      <span class="footer-page">3</span>
-    </div>
-  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   <div class="slide-divider">↓</div>
-  <div class="slide">
-    <div class="slide-header" style="border-bottom: 3px solid #534AB7;">
-      <span style="color:#fff; font-size:15px; font-weight:600; letter-spacing:-0.3px;">ARR Core</span>
-      <span class="period">October 2026</span>
-    </div>
 
-    <div class="aw-body-row">
-    <div class="aw-sum-wrap" style="padding: 8px 90px 0;">
-      <table class="aw-sum-table">
-        <thead>
-          <tr>
-            <th></th>
-            
-            <th>Jun-26</th>
-            
-            <th>Jul-26</th>
-            
-            <th>Aug-26</th>
-            
-            <th>Sep-26</th>
-            
-            <th class="aw-cur">Oct-26</th>
-            
-            <th class="aw-ytd">YTD'25</th>
-            <th class="aw-ytd">YTD'26</th>
-            <th class="aw-ytd aw-ytd-vs">YTD Δ%</th>
-          </tr>
-        </thead>
-        <tbody>
-          
-          <tr class="aw-sh">
-            <td>Logo EoP (000's)</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>Total EoP</td>
-            
-            
-            <td>24.5</td>
-            
-            
-            <td>24.9</td>
-            
-            
-            <td>25.3</td>
-            
-            
-            <td>25.6</td>
-            
-            
-            <td class="aw-cur">26.1</td>
-            
-            <td class="aw-ytd">20.9</td>
-            <td class="aw-ytd">26.1</td>
-            <td class="aw-ytd aw-ytd-vs">+25%</td>
-          </tr>
-          
-          
-          <tr class="aw-rt">
-            <td>Logo Monthly New Adds %</td>
-            
-            
-            <td>3.4%</td>
-            
-            
-            <td>3.2%</td>
-            
-            
-            <td>3.0%</td>
-            
-            
-            <td>3.2%</td>
-            
-            
-            <td class="aw-cur">3.5%</td>
-            
-            <td class="aw-ytd">5.0%</td>
-            <td class="aw-ytd">4.4%</td>
-            <td class="aw-ytd aw-ytd-vs">−0.6pp</td>
-          </tr>
-          
-          
-          <tr class="aw-rt">
-            <td>Logo Monthly Churn %</td>
-            
-            
-            <td>2.5%</td>
-            
-            
-            <td>2.4%</td>
-            
-            
-            <td>2.9%</td>
-            
-            
-            <td>2.9%</td>
-            
-            
-            <td class="aw-cur">2.6%</td>
-            
-            <td class="aw-ytd">4.5%</td>
-            <td class="aw-ytd">3.3%</td>
-            <td class="aw-ytd aw-ytd-vs">−1.2pp</td>
-          </tr>
-          
-          
-          <tr class="aw-gap"><td colspan="9"></td></tr>
-          
-          <tr class="aw-sh">
-            <td>ARR Walk — Spot ($M)</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR BoP</td>
-            
-            
-            <td>17.2</td>
-            
-            
-            <td>18.4</td>
-            
-            
-            <td>20.0</td>
-            
-            
-            <td>21.0</td>
-            
-            
-            <td class="aw-cur">20.9</td>
-            
-            <td class="aw-ytd">10.7</td>
-            <td class="aw-ytd">15.7</td>
-            <td class="aw-ytd aw-ytd-vs">+47%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>Additions</td>
-            
-            
-            <td>0.3</td>
-            
-            
-            <td>0.4</td>
-            
-            
-            <td>0.5</td>
-            
-            
-            <td>0.5</td>
-            
-            
-            <td class="aw-cur">0.5</td>
-            
-            <td class="aw-ytd">4.2</td>
-            <td class="aw-ytd">4.6</td>
-            <td class="aw-ytd aw-ytd-vs">+9%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>Recovered</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td>0.0</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td class="aw-cur">0.1</td>
-            
-            <td class="aw-ytd">1.1</td>
-            <td class="aw-ytd">0.8</td>
-            <td class="aw-ytd aw-ytd-vs">−25%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-r"></span>Net Churn</td>
-            
-            
-            <td class="aw-nv">(0.3)</td>
-            
-            
-            <td class="aw-nv">(0.4)</td>
-            
-            
-            <td class="aw-nv">(0.5)</td>
-            
-            
-            <td class="aw-nv">(0.5)</td>
-            
-            
-            <td class="aw-cur aw-nv">(0.5)</td>
-            
-            <td class="aw-ytd aw-nv">(4.8)</td>
-            <td class="aw-ytd aw-nv">(4.9)</td>
-            <td class="aw-ytd aw-ytd-vs aw-nv">−4%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-a"></span>Net Expansion</td>
-            
-            
-            <td>0.5</td>
-            
-            
-            <td>1.5</td>
-            
-            
-            <td>0.4</td>
-            
-            
-            <td>0.2</td>
-            
-            
-            <td class="aw-cur">0.3</td>
-            
-            <td class="aw-ytd">2.0</td>
-            <td class="aw-ytd">3.6</td>
-            <td class="aw-ytd aw-ytd-vs">+78%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-s"></span>(+/−) FX Impact</td>
-            
-            
-            <td>0.7</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td>0.6</td>
-            
-            
-            <td>(0.3)</td>
-            
-            
-            <td class="aw-cur">(0.3)</td>
-            
-            <td class="aw-ytd">1.0</td>
-            <td class="aw-ytd">1.4</td>
-            <td class="aw-ytd aw-ytd-vs">+32%</td>
-          </tr>
-          
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR EoP</td>
-            
-            
-            <td>18.4</td>
-            
-            
-            <td>20.0</td>
-            
-            
-            <td>21.0</td>
-            
-            
-            <td>20.9</td>
-            
-            
-            <td class="aw-cur">21.1</td>
-            
-            <td class="aw-ytd">14.2</td>
-            <td class="aw-ytd">21.1</td>
-            <td class="aw-ytd aw-ytd-vs">+49%</td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>MoM</td>
-            <td>—</td><td>+9%</td><td>+5%</td><td>−0%</td><td class="aw-cur">+1%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          <tr class="aw-delta-sub">
-            <td>YoY</td>
-            <td>+44%</td><td>+51%</td><td>+58%</td><td>+51%</td><td class="aw-cur">+49%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>Net New ARR</td>
-            <td>1.2</td><td>1.6</td><td>1.0</td><td>(0.1)</td><td class="aw-cur">0.1</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR EoP (Constant Currency)</td>
-            
-            
-            <td>19.5</td>
-            
-            
-            <td>20.2</td>
-            
-            
-            <td>20.6</td>
-            
-            
-            <td>20.7</td>
-            
-            
-            <td class="aw-cur">21.1</td>
-            
-            <td class="aw-ytd">16.1</td>
-            <td class="aw-ytd">21.1</td>
-            <td class="aw-ytd aw-ytd-vs">+31%</td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>MoM</td>
-            <td>—</td><td>+4%</td><td>+2%</td><td>+1%</td><td class="aw-cur">+2%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          <tr class="aw-delta-sub">
-            <td>YoY</td>
-            <td>+28%</td><td>+31%</td><td>+32%</td><td>+31%</td><td class="aw-cur">+31%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>Net New ARR (Constant Currency)</td>
-            <td>0.6</td><td>0.7</td><td>0.3</td><td>0.2</td><td class="aw-cur">0.3</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          
-          
-          <tr class="aw-gap"><td colspan="9"></td></tr>
-          
-          <tr class="aw-sh">
-            <td>SaaS Metrics</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-s"></span>S&M Total Spend</td>
-            
-            
-            <td>$484K</td>
-            
-            
-            <td>$476K</td>
-            
-            
-            <td>$501K</td>
-            
-            
-            <td>$571K</td>
-            
-            
-            <td class="aw-cur">$644K</td>
-            
-            <td class="aw-ytd">$4.9M</td>
-            <td class="aw-ytd">$4.8M</td>
-            <td class="aw-ytd aw-ytd-vs">−3%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>CAC</td>
-            
-            
-            <td>$584</td>
-            
-            
-            <td>$602</td>
-            
-            
-            <td>$662</td>
-            
-            
-            <td>$707</td>
-            
-            
-            <td class="aw-cur">$720</td>
-            
-            <td class="aw-ytd">$640</td>
-            <td class="aw-ytd">$531</td>
-            <td class="aw-ytd aw-ytd-vs">−17%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>CAC Payback (meses)</td>
-            
-            
-            <td>12.0</td>
-            
-            
-            <td>14.9</td>
-            
-            
-            <td>13.4</td>
-            
-            
-            <td>13.4</td>
-            
-            
-            <td class="aw-cur">13.2</td>
-            
-            <td class="aw-ytd">16.8</td>
-            <td class="aw-ytd">11.2</td>
-            <td class="aw-ytd aw-ytd-vs">−33%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>ARPA</td>
-            
-            
-            <td>$63</td>
-            
-            
-            <td>$67</td>
-            
-            
-            <td>$69</td>
-            
-            
-            <td>$68</td>
-            
-            
-            <td class="aw-cur">$67</td>
-            
-            <td class="aw-ytd">$57</td>
-            <td class="aw-ytd">$67</td>
-            <td class="aw-ytd aw-ytd-vs">+19%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>ARPA Adds</td>
-            
-            
-            <td>$30</td>
-            
-            
-            <td>$44</td>
-            
-            
-            <td>$52</td>
-            
-            
-            <td>$48</td>
-            
-            
-            <td class="aw-cur">$48</td>
-            
-            <td class="aw-ytd">$45</td>
-            <td class="aw-ytd">$42</td>
-            <td class="aw-ytd aw-ytd-vs">−6%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-r"></span>ARPA Churn</td>
-            
-            
-            <td>$48</td>
-            
-            
-            <td>$51</td>
-            
-            
-            <td>$56</td>
-            
-            
-            <td>$55</td>
-            
-            
-            <td class="aw-cur">$53</td>
-            
-            <td class="aw-ytd">$45</td>
-            <td class="aw-ytd">$50</td>
-            <td class="aw-ytd aw-ytd-vs">+11%</td>
-          </tr>
-          
-          
-          
-          
-        </tbody>
-      </table>
-    </div><!-- /.aw-sum-wrap -->
-    
-    </div><!-- /.aw-body-row -->
+<section class="slide gw-slide" aria-label="ARR and logo walk, monthly and year to date, October 2026">
+  <header class="gw-hd"><h2>ARR &amp; Logo Walk GLO Alegra · Monthly and YTD</h2><span>October 2026</span></header>
+  <div class="gw-body">
+    <table class="gw-t" style="--gw-rh:11.5px;font-size:10px">
+      <colgroup><col class="gw-c-sec"><col style="width:142px"><col span="5"><col class="gw-c-gap"><col span="3"></colgroup>
+      <thead><tr class="gw-seg"><th colspan="2"></th><th class="gw-sq" colspan="5">Monthly</th><th class="gw-gap"></th><th class="gw-sltm" colspan="3">Year to date<span>Jan–Oct</span></th></tr><tr class="gw-per"><th colspan="2"></th><th>Jun-26</th><th>Jul-26</th><th>Aug-26</th><th>Sep-26</th><th class="gw-cur"><span class="gw-pill">Oct-26</span></th><th class="gw-gap"></th><th>YTD'25</th><th class="gw-cur"><span class="gw-pill">YTD'26</span></th><th>YTD Δ%</th></tr></thead>
+      <tbody>
 
-    <div class="slide-footer">
-      <span class="footer-brand">Alegra · Confidential</span>
-      <span class="footer-page">4</span>
-    </div>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="9">Logo walk<span>000s</span></th><td class="gw-m">Logos, BoP</td><td class="gw-v gw-h">59.0</td><td class="gw-v gw-h">59.3</td><td class="gw-v gw-h">59.8</td><td class="gw-v gw-h">60.2</td><td class="gw-v gw-h gw-cur">60.7</td><td class="gw-gap"></td><td class="gw-v gw-h">54.6</td><td class="gw-v gw-cur">56.8</td><td class="gw-v gw-h">+4%</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New logos</td><td class="gw-v gw-h">2.111</td><td class="gw-v gw-h">2.064</td><td class="gw-v gw-h">2.074</td><td class="gw-v gw-h">2.312</td><td class="gw-v gw-h gw-cur">2.614</td><td class="gw-gap"></td><td class="gw-v gw-h">19.8</td><td class="gw-v gw-cur">22.7</td><td class="gw-v gw-h">+15%</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td><td class="gw-v gw-h">0.650</td><td class="gw-v gw-h">0.711</td><td class="gw-v gw-h">0.693</td><td class="gw-v gw-h">0.789</td><td class="gw-v gw-h gw-cur">0.725</td><td class="gw-gap"></td><td class="gw-v gw-h">6.913</td><td class="gw-v gw-cur">7.179</td><td class="gw-v gw-h">+4%</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net³</td><td class="gw-v gw-h gw-neg">(2.423)</td><td class="gw-v gw-h gw-neg">(2.251)</td><td class="gw-v gw-h gw-neg">(2.413)</td><td class="gw-v gw-h gw-neg">(2.562)</td><td class="gw-v gw-h gw-neg gw-cur">(2.321)</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(25.6)</td><td class="gw-v gw-cur gw-neg">(24.9)</td><td class="gw-v gw-h">−3%</td></tr>
+<tr class="gw-sub"><td class="gw-m">Churn<small>gross</small></td><td class="gw-v gw-h gw-neg">(3.837)</td><td class="gw-v gw-h gw-neg">(3.578)</td><td class="gw-v gw-h gw-neg">(3.542)</td><td class="gw-v gw-h gw-neg">(3.732)</td><td class="gw-v gw-h gw-neg gw-cur">(3.642)</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(35.9)</td><td class="gw-v gw-cur gw-neg">(38.4)</td><td class="gw-v gw-h">+7%</td></tr>
+<tr class="gw-sub"><td class="gw-m">Reactivated</td><td class="gw-v gw-h">1.414</td><td class="gw-v gw-h">1.327</td><td class="gw-v gw-h">1.129</td><td class="gw-v gw-h">1.170</td><td class="gw-v gw-h gw-cur">1.321</td><td class="gw-gap"></td><td class="gw-v gw-h">10.3</td><td class="gw-v gw-cur">13.5</td><td class="gw-v gw-h">+32%</td></tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">Logos, EoP</td><td class="gw-v gw-h">59.3</td><td class="gw-v gw-h">59.8</td><td class="gw-v gw-h">60.2</td><td class="gw-v gw-h">60.7</td><td class="gw-v gw-h gw-cur">61.7</td><td class="gw-gap"></td><td class="gw-v gw-h">55.6</td><td class="gw-v gw-cur">61.7</td><td class="gw-v gw-h">+11%</td></tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly New Adds %</td><td class="gw-v gw-h">4.7%</td><td class="gw-v gw-h">4.7%</td><td class="gw-v gw-h">4.6%</td><td class="gw-v gw-h">5.1%</td><td class="gw-v gw-h gw-cur">5.5%</td><td class="gw-gap"></td><td class="gw-v gw-h">4.8%</td><td class="gw-v gw-cur">5.0%</td><td class="gw-v gw-h">+0.2pp</td></tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly Churn %</td><td class="gw-v gw-h">4.1%</td><td class="gw-v gw-h">3.9%</td><td class="gw-v gw-h">4.0%</td><td class="gw-v gw-h">4.3%</td><td class="gw-v gw-h gw-cur">3.8%</td><td class="gw-gap"></td><td class="gw-v gw-h">4.7%</td><td class="gw-v gw-cur">4.3%</td><td class="gw-v gw-h">−0.4pp</td></tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="10">ARR Walk<span>Spot, $M</span></th><td class="gw-m">ARR, BoP</td><td class="gw-v gw-h">28.2</td><td class="gw-v gw-h">30.0</td><td class="gw-v gw-h">32.2</td><td class="gw-v gw-h">33.5</td><td class="gw-v gw-h gw-cur">33.4</td><td class="gw-gap"></td><td class="gw-v gw-h">19.3</td><td class="gw-v gw-cur">26.6</td><td class="gw-v gw-h">+38%</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New (additions)</td><td class="gw-v gw-h">0.8</td><td class="gw-v gw-h">0.8</td><td class="gw-v gw-h">0.9</td><td class="gw-v gw-h">0.9</td><td class="gw-v gw-h gw-cur">1.1</td><td class="gw-gap"></td><td class="gw-v gw-h">6.0</td><td class="gw-v gw-cur">9.0</td><td class="gw-v gw-h">+49%</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h gw-cur">0.2</td><td class="gw-gap"></td><td class="gw-v gw-h">1.6</td><td class="gw-v gw-cur">2.0</td><td class="gw-v gw-h">+20%</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net¹</td><td class="gw-v gw-h gw-neg">(0.9)</td><td class="gw-v gw-h gw-neg">(1.0)</td><td class="gw-v gw-h gw-neg">(1.1)</td><td class="gw-v gw-h gw-neg">(1.1)</td><td class="gw-v gw-h gw-neg gw-cur">(1.0)</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(8.4)</td><td class="gw-v gw-cur gw-neg">(10.4)</td><td class="gw-v gw-h">−24%</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Expansion, net</td><td class="gw-v gw-h">0.6</td><td class="gw-v gw-h">0.8</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h gw-cur">0.2</td><td class="gw-gap"></td><td class="gw-v gw-h">4.3</td><td class="gw-v gw-cur">3.1</td><td class="gw-v gw-h">−30%</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">±</b>FX impact</td><td class="gw-v gw-h">1.1</td><td class="gw-v gw-h">1.4</td><td class="gw-v gw-h">1.0</td><td class="gw-v gw-h gw-neg">(0.4)</td><td class="gw-v gw-h gw-neg gw-cur">(0.3)</td><td class="gw-gap"></td><td class="gw-v gw-h">1.8</td><td class="gw-v gw-cur">3.3</td><td class="gw-v gw-h">+79%</td></tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">ARR, EoP</td><td class="gw-v gw-h">30.0</td><td class="gw-v gw-h">32.2</td><td class="gw-v gw-h">33.5</td><td class="gw-v gw-h">33.4</td><td class="gw-v gw-h gw-cur">33.5</td><td class="gw-gap"></td><td class="gw-v gw-h">24.7</td><td class="gw-v gw-cur">33.5</td><td class="gw-v gw-h">+35%</td></tr>
+<tr class="gw-sub"><td class="gw-m">MoM growth<small>USD</small></td><td class="gw-v gw-h">—</td><td class="gw-v gw-h">+7%</td><td class="gw-v gw-h">+4%</td><td class="gw-v gw-h">−1%</td><td class="gw-v gw-h gw-cur">+0%</td><td class="gw-gap"></td><td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-cur gw-na">n.d.</td><td class="gw-v gw-h gw-na">n.d.</td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth<small>USD</small></td><td class="gw-v gw-h">+31%</td><td class="gw-v gw-h">+37%</td><td class="gw-v gw-h">+43%</td><td class="gw-v gw-h">+37%</td><td class="gw-v gw-h gw-cur">+35%</td><td class="gw-gap"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-cur">+35%</td><td class="gw-v gw-h gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR</td><td class="gw-v gw-h">1.8</td><td class="gw-v gw-h">2.2</td><td class="gw-v gw-h">1.4</td><td class="gw-v gw-h">(0.2)</td><td class="gw-v gw-h gw-cur">0.1</td><td class="gw-gap"></td><td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-cur gw-na">n.d.</td><td class="gw-v gw-h gw-na">n.d.</td></tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="4">Constant currency<span>$M, Oct-26 FX</span></th><td class="gw-m">ARR, EoP<small>c.c.</small></td><td class="gw-v gw-h">31.7</td><td class="gw-v gw-h">32.5</td><td class="gw-v gw-h">32.8</td><td class="gw-v gw-h">33.0</td><td class="gw-v gw-h gw-cur">33.5</td><td class="gw-gap"></td><td class="gw-v gw-h">28.1</td><td class="gw-v gw-cur">33.5</td><td class="gw-v gw-h">+19%</td></tr>
+<tr class="gw-sub"><td class="gw-m">MoM growth<small>c.c.</small></td><td class="gw-v gw-h">—</td><td class="gw-v gw-h">+3%</td><td class="gw-v gw-h">+1%</td><td class="gw-v gw-h">+1%</td><td class="gw-v gw-h gw-cur">+1%</td><td class="gw-gap"></td><td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-cur gw-na">n.d.</td><td class="gw-v gw-h gw-na">n.d.</td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth<small>c.c.</small></td><td class="gw-v gw-h">+17%</td><td class="gw-v gw-h">+18%</td><td class="gw-v gw-h">+20%</td><td class="gw-v gw-h">+19%</td><td class="gw-v gw-h gw-cur">+19%</td><td class="gw-gap"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-cur">+19%</td><td class="gw-v gw-h gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR<small>c.c.</small></td><td class="gw-v gw-h">0.8</td><td class="gw-v gw-h">0.8</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h gw-cur">0.5</td><td class="gw-gap"></td><td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-cur gw-na">n.d.</td><td class="gw-v gw-h gw-na">n.d.</td></tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="6">Unit economics</th><td class="gw-m">S&amp;M spend<small>$M</small></td><td class="gw-v gw-h">0.8</td><td class="gw-v gw-h">0.8</td><td class="gw-v gw-h">0.8</td><td class="gw-v gw-h">0.9</td><td class="gw-v gw-h gw-cur">1.0</td><td class="gw-gap"></td><td class="gw-v gw-h">8.1</td><td class="gw-v gw-cur">7.7</td><td class="gw-v gw-h">−5%</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC<small>$ / new logo</small></td><td class="gw-v gw-h">371</td><td class="gw-v gw-h">388</td><td class="gw-v gw-h">393</td><td class="gw-v gw-h">379</td><td class="gw-v gw-h gw-cur">394</td><td class="gw-gap"></td><td class="gw-v gw-h">412</td><td class="gw-v gw-cur">342</td><td class="gw-v gw-h">−17%</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC payback<small>months</small></td><td class="gw-v gw-h">12.2</td><td class="gw-v gw-h">15.2</td><td class="gw-v gw-h">13.3</td><td class="gw-v gw-h">12.0</td><td class="gw-v gw-h gw-cur">11.2</td><td class="gw-gap"></td><td class="gw-v gw-h">17.1</td><td class="gw-v gw-cur">11.2</td><td class="gw-v gw-h">−35%</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA²<small>$ / month</small></td><td class="gw-v gw-h">42</td><td class="gw-v gw-h">45</td><td class="gw-v gw-h">46</td><td class="gw-v gw-h">46</td><td class="gw-v gw-h gw-cur">45</td><td class="gw-gap"></td><td class="gw-v gw-h">37</td><td class="gw-v gw-cur">45</td><td class="gw-v gw-h">+22%</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, new logos<small>$ / month</small></td><td class="gw-v gw-h">33</td><td class="gw-v gw-h">32</td><td class="gw-v gw-h">36</td><td class="gw-v gw-h">34</td><td class="gw-v gw-h gw-cur">34</td><td class="gw-gap"></td><td class="gw-v gw-h">25</td><td class="gw-v gw-cur">33</td><td class="gw-v gw-h">+30%</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, churned logos<small>$ / month</small></td><td class="gw-v gw-h">31</td><td class="gw-v gw-h">34</td><td class="gw-v gw-h">35</td><td class="gw-v gw-h">34</td><td class="gw-v gw-h gw-cur">34</td><td class="gw-gap"></td><td class="gw-v gw-h">26</td><td class="gw-v gw-cur">32</td><td class="gw-v gw-h">+23%</td></tr>
+      </tbody>
+    </table>
   </div>
-  
-  
+  <footer class="gw-ft">
+    <p>Logo walk in thousands of logos (e.g. 0.725 = 725 logos); ARR at spot FX in $M; negatives in parentheses. YTD = Jan–Oct; YTD columns show the YTD'25 and YTD'26 cutoff values (stock) or accumulated flows, and the YoY change; MoM growth stays "n.d." for a YTD window. Logo Monthly New Adds % = (New + Recovered) ÷ BoP logos; Logo Monthly Churn % = (Churn − Reactivated) ÷ BoP, from company-level classification (not raw per-segment logo counts, which double-count companies active in both Core and Lite). CAC = S&amp;M spend ÷ New logos; ARPA = (ARR EoP ÷ 12) ÷ Logos EoP. <b>¹</b> ARR Churn, net and Logo Monthly Churn % are both net of Reactivated only (Recovered excluded, shown separately). <b>²</b> ARPA = MRR ÷ logos. Excludes Alanube ($1.2M ARR; company-wide ARR incl. Alanube is shown on the Monthly/YTD Performance slides). <b>³</b> Logo walk: Logos, EoP = BoP + New + Recovered − Churn, net; Churn, net = Churn (gross) − Reactivated, derived from the logo balance so the walk foots (BoP = prior-month EoP, de-duplicated across Core and Lite). Figures may not sum due to rounding.</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 1</em></div>
+  </footer>
+</section>
+
   <div class="slide-divider">↓</div>
-  <div class="slide">
-    <div class="slide-header" style="border-bottom: 3px solid #1D9E75;">
-      <span style="color:#fff; font-size:15px; font-weight:600; letter-spacing:-0.3px;">ARR Lite</span>
-      <span class="period">October 2026</span>
-    </div>
 
-    <div class="aw-body-row">
-    <div class="aw-sum-wrap" style="padding: 8px 90px 0;">
-      <table class="aw-sum-table">
-        <thead>
-          <tr>
-            <th></th>
-            
-            <th>Jun-26</th>
-            
-            <th>Jul-26</th>
-            
-            <th>Aug-26</th>
-            
-            <th>Sep-26</th>
-            
-            <th class="aw-cur">Oct-26</th>
-            
-            <th class="aw-ytd">YTD'25</th>
-            <th class="aw-ytd">YTD'26</th>
-            <th class="aw-ytd aw-ytd-vs">YTD Δ%</th>
-          </tr>
-        </thead>
-        <tbody>
-          
-          <tr class="aw-sh">
-            <td>Logo EoP (000's)</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>Total EoP</td>
-            
-            
-            <td>34.8</td>
-            
-            
-            <td>34.9</td>
-            
-            
-            <td>34.9</td>
-            
-            
-            <td>35.1</td>
-            
-            
-            <td class="aw-cur">35.6</td>
-            
-            <td class="aw-ytd">34.8</td>
-            <td class="aw-ytd">35.6</td>
-            <td class="aw-ytd aw-ytd-vs">+2%</td>
-          </tr>
-          
-          
-          <tr class="aw-rt">
-            <td>Logo Monthly New Adds %</td>
-            
-            
-            <td>3.7%</td>
-            
-            
-            <td>3.7%</td>
-            
-            
-            <td>3.8%</td>
-            
-            
-            <td>4.3%</td>
-            
-            
-            <td class="aw-cur">4.9%</td>
-            
-            <td class="aw-ytd">5.3%</td>
-            <td class="aw-ytd">5.6%</td>
-            <td class="aw-ytd aw-ytd-vs">+0.3pp</td>
-          </tr>
-          
-          
-          <tr class="aw-rt">
-            <td>Logo Monthly Churn %</td>
-            
-            
-            <td>5.3%</td>
-            
-            
-            <td>4.9%</td>
-            
-            
-            <td>4.9%</td>
-            
-            
-            <td>5.2%</td>
-            
-            
-            <td class="aw-cur">4.7%</td>
-            
-            <td class="aw-ytd">6.4%</td>
-            <td class="aw-ytd">5.6%</td>
-            <td class="aw-ytd aw-ytd-vs">−0.8pp</td>
-          </tr>
-          
-          
-          <tr class="aw-gap"><td colspan="9"></td></tr>
-          
-          <tr class="aw-sh">
-            <td>ARR Walk — Spot ($M)</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR BoP</td>
-            
-            
-            <td>11.0</td>
-            
-            
-            <td>11.6</td>
-            
-            
-            <td>12.2</td>
-            
-            
-            <td>12.5</td>
-            
-            
-            <td class="aw-cur">12.4</td>
-            
-            <td class="aw-ytd">8.6</td>
-            <td class="aw-ytd">10.9</td>
-            <td class="aw-ytd aw-ytd-vs">+26%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>Additions</td>
-            
-            
-            <td>0.5</td>
-            
-            
-            <td>0.4</td>
-            
-            
-            <td>0.4</td>
-            
-            
-            <td>0.5</td>
-            
-            
-            <td class="aw-cur">0.6</td>
-            
-            <td class="aw-ytd">3.6</td>
-            <td class="aw-ytd">5.2</td>
-            <td class="aw-ytd aw-ytd-vs">+43%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>Recovered</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td>0.2</td>
-            
-            
-            <td class="aw-cur">0.1</td>
-            
-            <td class="aw-ytd">1.7</td>
-            <td class="aw-ytd">1.6</td>
-            <td class="aw-ytd aw-ytd-vs">−7%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-r"></span>Net Churn</td>
-            
-            
-            <td class="aw-nv">(0.6)</td>
-            
-            
-            <td class="aw-nv">(0.7)</td>
-            
-            
-            <td class="aw-nv">(0.6)</td>
-            
-            
-            <td class="aw-nv">(0.6)</td>
-            
-            
-            <td class="aw-cur aw-nv">(0.6)</td>
-            
-            <td class="aw-ytd aw-nv">(6.4)</td>
-            <td class="aw-ytd aw-nv">(6.6)</td>
-            <td class="aw-ytd aw-ytd-vs aw-nv">−3%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-a"></span>Net Expansion</td>
-            
-            
-            <td>0.3</td>
-            
-            
-            <td>0.4</td>
-            
-            
-            <td>0.3</td>
-            
-            
-            <td>0.2</td>
-            
-            
-            <td class="aw-cur">0.2</td>
-            
-            <td class="aw-ytd">2.2</td>
-            <td class="aw-ytd">2.2</td>
-            <td class="aw-ytd aw-ytd-vs">−2%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-s"></span>(+/−) FX Impact</td>
-            
-            
-            <td>0.2</td>
-            
-            
-            <td>0.3</td>
-            
-            
-            <td>0.1</td>
-            
-            
-            <td>(0.4)</td>
-            
-            
-            <td class="aw-cur">(0.3)</td>
-            
-            <td class="aw-ytd">0.8</td>
-            <td class="aw-ytd">(0.8)</td>
-            <td class="aw-ytd aw-ytd-vs">−195%</td>
-          </tr>
-          
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR EoP</td>
-            
-            
-            <td>11.6</td>
-            
-            
-            <td>12.2</td>
-            
-            
-            <td>12.5</td>
-            
-            
-            <td>12.4</td>
-            
-            
-            <td class="aw-cur">12.4</td>
-            
-            <td class="aw-ytd">10.5</td>
-            <td class="aw-ytd">12.4</td>
-            <td class="aw-ytd aw-ytd-vs">+18%</td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>MoM</td>
-            <td>—</td><td>+5%</td><td>+3%</td><td>−1%</td><td class="aw-cur">−0%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          <tr class="aw-delta-sub">
-            <td>YoY</td>
-            <td>+14%</td><td>+18%</td><td>+23%</td><td>+19%</td><td class="aw-cur">+18%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>Net New ARR</td>
-            <td>0.6</td><td>0.6</td><td>0.4</td><td>(0.1)</td><td class="aw-cur">(0.0)</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          
-          
-          <tr class="aw-rb">
-            <td><span class="aw-di aw-di-g"></span>ARR EoP (Constant Currency)</td>
-            
-            
-            <td>12.2</td>
-            
-            
-            <td>12.3</td>
-            
-            
-            <td>12.3</td>
-            
-            
-            <td>12.3</td>
-            
-            
-            <td class="aw-cur">12.4</td>
-            
-            <td class="aw-ytd">12.0</td>
-            <td class="aw-ytd">12.4</td>
-            <td class="aw-ytd aw-ytd-vs">+4%</td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>MoM</td>
-            <td>—</td><td>+1%</td><td>−0%</td><td>+0%</td><td class="aw-cur">+1%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          <tr class="aw-delta-sub">
-            <td>YoY</td>
-            <td>+2%</td><td>+2%</td><td>+3%</td><td>+3%</td><td class="aw-cur">+4%</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-delta-sub">
-            <td>Net New ARR (Constant Currency)</td>
-            <td>0.2</td><td>0.1</td><td>(0.0)</td><td>0.0</td><td class="aw-cur">0.1</td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          
-          
-          <tr class="aw-gap"><td colspan="9"></td></tr>
-          
-          <tr class="aw-sh">
-            <td>SaaS Metrics</td>
-            <td></td><td></td><td></td><td></td><td class="aw-cur"></td>
-            <td></td><td></td><td></td>
-          </tr>
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-s"></span>S&M Total Spend</td>
-            
-            
-            <td>$299K</td>
-            
-            
-            <td>$323K</td>
-            
-            
-            <td>$314K</td>
-            
-            
-            <td>$305K</td>
-            
-            
-            <td class="aw-cur">$387K</td>
-            
-            <td class="aw-ytd">$3.2M</td>
-            <td class="aw-ytd">$3.0M</td>
-            <td class="aw-ytd aw-ytd-vs">−7%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>CAC</td>
-            
-            
-            <td>$233</td>
-            
-            
-            <td>$254</td>
-            
-            
-            <td>$238</td>
-            
-            
-            <td>$203</td>
-            
-            
-            <td class="aw-cur">$225</td>
-            
-            <td class="aw-ytd">$265</td>
-            <td class="aw-ytd">$217</td>
-            <td class="aw-ytd aw-ytd-vs">−18%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>CAC Payback (meses)</td>
-            
-            
-            <td>11.9</td>
-            
-            
-            <td>15.0</td>
-            
-            
-            <td>12.5</td>
-            
-            
-            <td>9.9</td>
-            
-            
-            <td class="aw-cur">8.8</td>
-            
-            <td class="aw-ytd">16.8</td>
-            <td class="aw-ytd">10.8</td>
-            <td class="aw-ytd aw-ytd-vs">−36%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>ARPA</td>
-            
-            
-            <td>$28</td>
-            
-            
-            <td>$29</td>
-            
-            
-            <td>$30</td>
-            
-            
-            <td>$30</td>
-            
-            
-            <td class="aw-cur">$29</td>
-            
-            <td class="aw-ytd">$25</td>
-            <td class="aw-ytd">$29</td>
-            <td class="aw-ytd aw-ytd-vs">+15%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-g"></span>ARPA Adds</td>
-            
-            
-            <td>$35</td>
-            
-            
-            <td>$25</td>
-            
-            
-            <td>$27</td>
-            
-            
-            <td>$26</td>
-            
-            
-            <td class="aw-cur">$27</td>
-            
-            <td class="aw-ytd">$25</td>
-            <td class="aw-ytd">$32</td>
-            <td class="aw-ytd aw-ytd-vs">+26%</td>
-          </tr>
-          
-          
-          <tr class="aw-in">
-            <td><span class="aw-di aw-di-r"></span>ARPA Churn</td>
-            
-            
-            <td>$25</td>
-            
-            
-            <td>$28</td>
-            
-            
-            <td>$27</td>
-            
-            
-            <td>$26</td>
-            
-            
-            <td class="aw-cur">$26</td>
-            
-            <td class="aw-ytd">$23</td>
-            <td class="aw-ytd">$26</td>
-            <td class="aw-ytd aw-ytd-vs">+15%</td>
-          </tr>
-          
-          
-          
-          
-        </tbody>
-      </table>
-    </div><!-- /.aw-sum-wrap -->
+<section class="slide gw-slide" aria-label="Core vs Lite monthly performance, October 2026">
+  <header class="gw-hd"><h2>Core vs Lite Monthly Performance GLO Alegra</h2><span>October 2026</span></header>
+  <div class="gw-body">
     
-    </div><!-- /.aw-body-row -->
-
-    <div class="slide-footer">
-      <span class="footer-brand">Alegra · Confidential</span>
-      <span class="footer-page">5</span>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="gw-ks gw-c3">
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--core)"></i>Core ARR</div><div class="gw-k-mix">63% of ARR · 42% of logos</div></div><div class="gw-k-mid"><div class="gw-k-val">$21.1M</div><svg viewBox="0 0 160 46" width="160" height="46" role="img" aria-label="MoM ARR growth, constant currency, last four months"><text x="0" y="27.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">MoM</text><text x="0" y="36.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">C.C.</text><line x1="32" x2="160" y1="29.8" y2="29.8" stroke="#cbd5e1" stroke-width=".8"/><rect x="44.5" y="12.6" width="14" height="17.2" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="51.5" y="10.1" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+4%</text><text x="51.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Jul</text><rect x="75.5" y="21.2" width="14" height="8.6" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="82.5" y="18.7" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+2%</text><text x="82.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Aug</text><rect x="106.5" y="25.5" width="14" height="4.3" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="113.5" y="23.0" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+1%</text><text x="113.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Sep</text><rect x="136.5" y="21.2" width="16" height="8.6" rx="1" fill="#0f172b" fill-opacity="1"/><text x="144.5" y="18.7" text-anchor="middle" font-size="8" font-weight="700" fill="#0f172b">+2%</text><text x="144.5" y="45" text-anchor="middle" font-size="6.5" font-weight="700" letter-spacing=".3" fill="#1a7e7f">Oct</text></svg></div><div class="gw-k-dl"><div><b>YoY USD</b><span>+49%</span></div><div><b>YoY c.c.</b><span>+31%</span></div><div><b>Net new, M</b><span>$0.1M</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--lite)"></i>Lite ARR</div><div class="gw-k-mix">37% of ARR · 58% of logos</div></div><div class="gw-k-mid"><div class="gw-k-val">$12.4M</div><svg viewBox="0 0 160 46" width="160" height="46" role="img" aria-label="MoM ARR growth, constant currency, last four months"><text x="0" y="27.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">MoM</text><text x="0" y="36.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">C.C.</text><line x1="32" x2="160" y1="29.8" y2="29.8" stroke="#cbd5e1" stroke-width=".8"/><rect x="44.5" y="25.5" width="14" height="4.3" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="51.5" y="23.0" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+1%</text><text x="51.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Jul</text><rect x="75.5" y="28.8" width="14" height="1.0" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="82.5" y="26.3" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">−0%</text><text x="82.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Aug</text><rect x="106.5" y="28.8" width="14" height="1.0" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="113.5" y="26.3" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+0%</text><text x="113.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Sep</text><rect x="136.5" y="25.5" width="16" height="4.3" rx="1" fill="#0f172b" fill-opacity="1"/><text x="144.5" y="23.0" text-anchor="middle" font-size="8" font-weight="700" fill="#0f172b">+1%</text><text x="144.5" y="45" text-anchor="middle" font-size="6.5" font-weight="700" letter-spacing=".3" fill="#1a7e7f">Oct</text></svg></div><div class="gw-k-dl"><div><b>YoY USD</b><span>+18%</span></div><div><b>YoY c.c.</b><span>+4%</span></div><div><b>Net new, M</b><span>$0.0M</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--navy)"></i>Total ARR<sup style="font-size:7px;margin-left:-3px">†</sup></div><div class="gw-k-mix">61.7K paying logos</div></div><div class="gw-k-mid"><div class="gw-k-val">$33.5M</div><svg viewBox="0 0 160 46" width="160" height="46" role="img" aria-label="MoM ARR growth, constant currency, last four months"><text x="0" y="27.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">MoM</text><text x="0" y="36.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">C.C.</text><line x1="32" x2="160" y1="29.8" y2="29.8" stroke="#cbd5e1" stroke-width=".8"/><rect x="44.5" y="16.9" width="14" height="12.9" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="51.5" y="14.4" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+3%</text><text x="51.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Jul</text><rect x="75.5" y="25.5" width="14" height="4.3" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="82.5" y="23.0" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+1%</text><text x="82.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Aug</text><rect x="106.5" y="25.5" width="14" height="4.3" rx="1" fill="#0f172b" fill-opacity=".42"/><text x="113.5" y="23.0" text-anchor="middle" font-size="7" font-weight="500" fill="#64748b">+1%</text><text x="113.5" y="45" text-anchor="middle" font-size="6.5" font-weight="500" letter-spacing=".3" fill="#94a3b8">Sep</text><rect x="136.5" y="25.5" width="16" height="4.3" rx="1" fill="#0f172b" fill-opacity="1"/><text x="144.5" y="23.0" text-anchor="middle" font-size="8" font-weight="700" fill="#0f172b">+1%</text><text x="144.5" y="45" text-anchor="middle" font-size="6.5" font-weight="700" letter-spacing=".3" fill="#1a7e7f">Oct</text></svg></div><div class="gw-k-dl"><div><b>YoY USD</b><span>+35%</span></div><div><b>YoY c.c.</b><span>+19%</span></div><div><b>Net new, M</b><span>$0.1M</span></div></div></div>
     </div>
+    
+    <table class="gw-t" style="--gw-rh:9.7px;font-size:9px;line-height:1">
+      <colgroup><col class="gw-c-sec"><col style="width:130px"><col span="6"><col class="gw-c-gap"><col span="6"></colgroup>
+      <thead><tr class="gw-seg"><th colspan="2"></th><th class="gw-sc" colspan="6">Core<span>Larger SMEs by annual invoicing</span></th><th class="gw-gap"></th><th class="gw-sl" colspan="6">Lite<span>Smaller SMEs by annual invoicing</span></th></tr><tr class="gw-per"><th colspan="2"></th><th>Jun-26</th><th>Jul-26</th><th>Aug-26</th><th>Sep-26</th><th class="gw-cur"><span class="gw-pill">Oct-26</span></th><th>YTD'26</th><th class="gw-gap"></th><th>Jun-26</th><th>Jul-26</th><th>Aug-26</th><th>Sep-26</th><th class="gw-cur"><span class="gw-pill">Oct-26</span></th><th>YTD'26</th></tr></thead>
+      <tbody>
+
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="9">Logo walk<span>000s</span></th><td class="gw-m">Logos, BoP</td><td class="gw-v gw-h">24.2</td><td class="gw-v gw-h">24.5</td><td class="gw-v gw-h">24.9</td><td class="gw-v gw-h">25.3</td><td class="gw-v gw-h gw-cur">25.6</td><td class="gw-v gw-ytd">22.1</td><td class="gw-gap"></td><td class="gw-v gw-h">34.7</td><td class="gw-v gw-h">34.8</td><td class="gw-v gw-h">34.9</td><td class="gw-v gw-h">34.9</td><td class="gw-v gw-h gw-cur">35.1</td><td class="gw-v gw-ytd">34.7</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New logos</td><td class="gw-v gw-h">0.828</td><td class="gw-v gw-h">0.791</td><td class="gw-v gw-h">0.757</td><td class="gw-v gw-h">0.808</td><td class="gw-v gw-h gw-cur">0.894</td><td class="gw-v gw-ytd">9.008</td><td class="gw-gap"></td><td class="gw-v gw-h">1.283</td><td class="gw-v gw-h">1.273</td><td class="gw-v gw-h">1.317</td><td class="gw-v gw-h">1.504</td><td class="gw-v gw-h gw-cur">1.720</td><td class="gw-v gw-ytd">13.7</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td><td class="gw-v gw-h">0.106</td><td class="gw-v gw-h">0.113</td><td class="gw-v gw-h">0.121</td><td class="gw-v gw-h">0.129</td><td class="gw-v gw-h gw-cur">0.146</td><td class="gw-v gw-ytd">1.598</td><td class="gw-gap"></td><td class="gw-v gw-h">0.551</td><td class="gw-v gw-h">0.599</td><td class="gw-v gw-h">0.572</td><td class="gw-v gw-h">0.660</td><td class="gw-v gw-h gw-cur">0.579</td><td class="gw-v gw-ytd">6.207</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net</td><td class="gw-v gw-h gw-neg">(0.682)</td><td class="gw-v gw-h gw-neg">(0.460)</td><td class="gw-v gw-h gw-neg">(0.523)</td><td class="gw-v gw-h gw-neg">(0.601)</td><td class="gw-v gw-h gw-neg gw-cur">(0.520)</td><td class="gw-v gw-ytd gw-neg">(6.541)</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(1.748)</td><td class="gw-v gw-h gw-neg">(1.792)</td><td class="gw-v gw-h gw-neg">(1.890)</td><td class="gw-v gw-h gw-neg">(1.961)</td><td class="gw-v gw-h gw-neg gw-cur">(1.801)</td><td class="gw-v gw-ytd gw-neg">(19.0)</td></tr>
+<tr class="gw-sub"><td class="gw-m">Churn<small>gross</small></td><td class="gw-v gw-h gw-neg">(1.122)</td><td class="gw-v gw-h gw-neg">(0.822)</td><td class="gw-v gw-h gw-neg">(0.814)</td><td class="gw-v gw-h gw-neg">(0.928)</td><td class="gw-v gw-h gw-neg gw-cur">(0.866)</td><td class="gw-v gw-ytd gw-neg">(10.4)</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(2.722)</td><td class="gw-v gw-h gw-neg">(2.757)</td><td class="gw-v gw-h gw-neg">(2.728)</td><td class="gw-v gw-h gw-neg">(2.804)</td><td class="gw-v gw-h gw-neg gw-cur">(2.776)</td><td class="gw-v gw-ytd gw-neg">(28.7)</td></tr>
+<tr class="gw-sub"><td class="gw-m">Reactivated</td><td class="gw-v gw-h">0.440</td><td class="gw-v gw-h">0.362</td><td class="gw-v gw-h">0.291</td><td class="gw-v gw-h">0.327</td><td class="gw-v gw-h gw-cur">0.346</td><td class="gw-v gw-ytd">3.884</td><td class="gw-gap"></td><td class="gw-v gw-h">0.974</td><td class="gw-v gw-h">0.965</td><td class="gw-v gw-h">0.838</td><td class="gw-v gw-h">0.843</td><td class="gw-v gw-h gw-cur">0.975</td><td class="gw-v gw-ytd">9.716</td></tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">Logos, EoP</td><td class="gw-v gw-h">24.5</td><td class="gw-v gw-h">24.9</td><td class="gw-v gw-h">25.3</td><td class="gw-v gw-h">25.6</td><td class="gw-v gw-h gw-cur">26.1</td><td class="gw-v gw-ytd">26.1</td><td class="gw-gap"></td><td class="gw-v gw-h">34.8</td><td class="gw-v gw-h">34.9</td><td class="gw-v gw-h">34.9</td><td class="gw-v gw-h">35.1</td><td class="gw-v gw-h gw-cur">35.6</td><td class="gw-v gw-ytd">35.6</td></tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly New Adds %</td><td class="gw-v gw-h">3.4%</td><td class="gw-v gw-h">3.2%</td><td class="gw-v gw-h">3.0%</td><td class="gw-v gw-h">3.2%</td><td class="gw-v gw-h gw-cur">3.5%</td><td class="gw-v gw-ytd">4.4%</td><td class="gw-gap"></td><td class="gw-v gw-h">3.7%</td><td class="gw-v gw-h">3.7%</td><td class="gw-v gw-h">3.8%</td><td class="gw-v gw-h">4.3%</td><td class="gw-v gw-h gw-cur">4.9%</td><td class="gw-v gw-ytd">5.6%</td></tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly Churn %</td><td class="gw-v gw-h">2.5%</td><td class="gw-v gw-h">2.4%</td><td class="gw-v gw-h">2.9%</td><td class="gw-v gw-h">2.9%</td><td class="gw-v gw-h gw-cur">2.6%</td><td class="gw-v gw-ytd">3.3%</td><td class="gw-gap"></td><td class="gw-v gw-h">5.3%</td><td class="gw-v gw-h">4.9%</td><td class="gw-v gw-h">4.9%</td><td class="gw-v gw-h">5.2%</td><td class="gw-v gw-h gw-cur">4.7%</td><td class="gw-v gw-ytd">5.6%</td></tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="10">ARR Walk<span>Spot, $M</span></th><td class="gw-m">ARR, BoP</td><td class="gw-v gw-h">17.2</td><td class="gw-v gw-h">18.4</td><td class="gw-v gw-h">20.0</td><td class="gw-v gw-h">21.0</td><td class="gw-v gw-h gw-cur">20.9</td><td class="gw-v gw-ytd">15.7</td><td class="gw-gap"></td><td class="gw-v gw-h">11.0</td><td class="gw-v gw-h">11.6</td><td class="gw-v gw-h">12.2</td><td class="gw-v gw-h">12.5</td><td class="gw-v gw-h gw-cur">12.4</td><td class="gw-v gw-ytd">10.9</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New (additions)</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.4</td><td class="gw-v gw-h">0.5</td><td class="gw-v gw-h">0.5</td><td class="gw-v gw-h gw-cur">0.5</td><td class="gw-v gw-ytd">4.6</td><td class="gw-gap"></td><td class="gw-v gw-h">0.5</td><td class="gw-v gw-h">0.4</td><td class="gw-v gw-h">0.4</td><td class="gw-v gw-h">0.5</td><td class="gw-v gw-h gw-cur">0.6</td><td class="gw-v gw-ytd">5.2</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h">0.0</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h gw-cur">0.1</td><td class="gw-v gw-ytd">0.8</td><td class="gw-gap"></td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h gw-cur">0.1</td><td class="gw-v gw-ytd">1.6</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net</td><td class="gw-v gw-h gw-neg">(0.3)</td><td class="gw-v gw-h gw-neg">(0.4)</td><td class="gw-v gw-h gw-neg">(0.5)</td><td class="gw-v gw-h gw-neg">(0.5)</td><td class="gw-v gw-h gw-neg gw-cur">(0.5)</td><td class="gw-v gw-ytd gw-neg">(4.9)</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(0.6)</td><td class="gw-v gw-h gw-neg">(0.7)</td><td class="gw-v gw-h gw-neg">(0.6)</td><td class="gw-v gw-h gw-neg">(0.6)</td><td class="gw-v gw-h gw-neg gw-cur">(0.6)</td><td class="gw-v gw-ytd gw-neg">(6.6)</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Expansion, net</td><td class="gw-v gw-h">0.5</td><td class="gw-v gw-h">1.5</td><td class="gw-v gw-h">0.4</td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h gw-cur">0.3</td><td class="gw-v gw-ytd">3.6</td><td class="gw-gap"></td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.4</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h gw-cur">0.2</td><td class="gw-v gw-ytd">2.2</td></tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">±</b>FX impact</td><td class="gw-v gw-h">0.7</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h">0.6</td><td class="gw-v gw-h gw-neg">(0.3)</td><td class="gw-v gw-h gw-neg gw-cur">(0.3)</td><td class="gw-v gw-ytd">1.4</td><td class="gw-gap"></td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h gw-neg">(0.4)</td><td class="gw-v gw-h gw-neg gw-cur">(0.3)</td><td class="gw-v gw-ytd">(0.8)</td></tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">ARR, EoP</td><td class="gw-v gw-h">18.4</td><td class="gw-v gw-h">20.0</td><td class="gw-v gw-h">21.0</td><td class="gw-v gw-h">20.9</td><td class="gw-v gw-h gw-cur">21.1</td><td class="gw-v gw-ytd">21.1</td><td class="gw-gap"></td><td class="gw-v gw-h">11.6</td><td class="gw-v gw-h">12.2</td><td class="gw-v gw-h">12.5</td><td class="gw-v gw-h">12.4</td><td class="gw-v gw-h gw-cur">12.4</td><td class="gw-v gw-ytd">12.4</td></tr>
+<tr class="gw-sub"><td class="gw-m">MoM growth</td><td class="gw-v gw-h">—</td><td class="gw-v gw-h">+9%</td><td class="gw-v gw-h">+5%</td><td class="gw-v gw-h">−0%</td><td class="gw-v gw-h gw-cur">+1%</td><td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td><td class="gw-v gw-h">—</td><td class="gw-v gw-h">+5%</td><td class="gw-v gw-h">+3%</td><td class="gw-v gw-h">−1%</td><td class="gw-v gw-h gw-cur">−0%</td><td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth</td><td class="gw-v gw-h">+44%</td><td class="gw-v gw-h">+51%</td><td class="gw-v gw-h">+58%</td><td class="gw-v gw-h">+51%</td><td class="gw-v gw-h gw-cur">+49%</td><td class="gw-v gw-ytd">+49%</td><td class="gw-gap"></td><td class="gw-v gw-h">+14%</td><td class="gw-v gw-h">+18%</td><td class="gw-v gw-h">+23%</td><td class="gw-v gw-h">+19%</td><td class="gw-v gw-h gw-cur">+18%</td><td class="gw-v gw-ytd">+18%</td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR</td><td class="gw-v gw-h">1.2</td><td class="gw-v gw-h">1.6</td><td class="gw-v gw-h">1.0</td><td class="gw-v gw-h">(0.1)</td><td class="gw-v gw-h gw-cur">0.1</td><td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td><td class="gw-v gw-h">0.6</td><td class="gw-v gw-h">0.6</td><td class="gw-v gw-h">0.4</td><td class="gw-v gw-h">(0.1)</td><td class="gw-v gw-h gw-cur">(0.0)</td><td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="4">Constant currency<span>$M, Oct-26 FX</span></th><td class="gw-m">ARR, EoP<small>c.c.</small></td><td class="gw-v gw-h">19.5</td><td class="gw-v gw-h">20.2</td><td class="gw-v gw-h">20.6</td><td class="gw-v gw-h">20.7</td><td class="gw-v gw-h gw-cur">21.1</td><td class="gw-v gw-ytd">21.1</td><td class="gw-gap"></td><td class="gw-v gw-h">12.2</td><td class="gw-v gw-h">12.3</td><td class="gw-v gw-h">12.3</td><td class="gw-v gw-h">12.3</td><td class="gw-v gw-h gw-cur">12.4</td><td class="gw-v gw-ytd">12.4</td></tr>
+<tr class="gw-sub"><td class="gw-m">MoM growth</td><td class="gw-v gw-h">—</td><td class="gw-v gw-h">+4%</td><td class="gw-v gw-h">+2%</td><td class="gw-v gw-h">+1%</td><td class="gw-v gw-h gw-cur">+2%</td><td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td><td class="gw-v gw-h">—</td><td class="gw-v gw-h">+1%</td><td class="gw-v gw-h">−0%</td><td class="gw-v gw-h">+0%</td><td class="gw-v gw-h gw-cur">+1%</td><td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth</td><td class="gw-v gw-h">+28%</td><td class="gw-v gw-h">+31%</td><td class="gw-v gw-h">+32%</td><td class="gw-v gw-h">+31%</td><td class="gw-v gw-h gw-cur">+31%</td><td class="gw-v gw-ytd">+31%</td><td class="gw-gap"></td><td class="gw-v gw-h">+2%</td><td class="gw-v gw-h">+2%</td><td class="gw-v gw-h">+3%</td><td class="gw-v gw-h">+3%</td><td class="gw-v gw-h gw-cur">+4%</td><td class="gw-v gw-ytd">+4%</td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR<small>c.c.</small></td><td class="gw-v gw-h">0.6</td><td class="gw-v gw-h">0.7</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h gw-cur">0.3</td><td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td><td class="gw-v gw-h">0.2</td><td class="gw-v gw-h">0.1</td><td class="gw-v gw-h">(0.0)</td><td class="gw-v gw-h">0.0</td><td class="gw-v gw-h gw-cur">0.1</td><td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="6">Unit economics</th><td class="gw-m">S&amp;M spend<small>$M</small></td><td class="gw-v gw-h">0.5</td><td class="gw-v gw-h">0.5</td><td class="gw-v gw-h">0.5</td><td class="gw-v gw-h">0.6</td><td class="gw-v gw-h gw-cur">0.6</td><td class="gw-v gw-ytd">4.8</td><td class="gw-gap"></td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h">0.3</td><td class="gw-v gw-h gw-cur">0.4</td><td class="gw-v gw-ytd">3.0</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC<small>$ / new logo</small></td><td class="gw-v gw-h">584</td><td class="gw-v gw-h">602</td><td class="gw-v gw-h">662</td><td class="gw-v gw-h">707</td><td class="gw-v gw-h gw-cur">720</td><td class="gw-v gw-ytd">531</td><td class="gw-gap"></td><td class="gw-v gw-h">233</td><td class="gw-v gw-h">254</td><td class="gw-v gw-h">238</td><td class="gw-v gw-h">203</td><td class="gw-v gw-h gw-cur">225</td><td class="gw-v gw-ytd">217</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC payback<small>months</small></td><td class="gw-v gw-h">12.0</td><td class="gw-v gw-h">14.9</td><td class="gw-v gw-h">13.4</td><td class="gw-v gw-h">13.4</td><td class="gw-v gw-h gw-cur">13.2</td><td class="gw-v gw-ytd">11.2</td><td class="gw-gap"></td><td class="gw-v gw-h">11.9</td><td class="gw-v gw-h">15.0</td><td class="gw-v gw-h">12.5</td><td class="gw-v gw-h">9.9</td><td class="gw-v gw-h gw-cur">8.8</td><td class="gw-v gw-ytd">10.8</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA<small>$ / month</small></td><td class="gw-v gw-h">63</td><td class="gw-v gw-h">67</td><td class="gw-v gw-h">69</td><td class="gw-v gw-h">68</td><td class="gw-v gw-h gw-cur">67</td><td class="gw-v gw-ytd">67</td><td class="gw-gap"></td><td class="gw-v gw-h">28</td><td class="gw-v gw-h">29</td><td class="gw-v gw-h">30</td><td class="gw-v gw-h">30</td><td class="gw-v gw-h gw-cur">29</td><td class="gw-v gw-ytd">29</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, new logos<small>$ / month</small></td><td class="gw-v gw-h">30</td><td class="gw-v gw-h">44</td><td class="gw-v gw-h">52</td><td class="gw-v gw-h">48</td><td class="gw-v gw-h gw-cur">48</td><td class="gw-v gw-ytd">42</td><td class="gw-gap"></td><td class="gw-v gw-h">35</td><td class="gw-v gw-h">25</td><td class="gw-v gw-h">27</td><td class="gw-v gw-h">26</td><td class="gw-v gw-h gw-cur">27</td><td class="gw-v gw-ytd">32</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, churned logos<small>$ / month</small></td><td class="gw-v gw-h">48</td><td class="gw-v gw-h">51</td><td class="gw-v gw-h">56</td><td class="gw-v gw-h">55</td><td class="gw-v gw-h gw-cur">53</td><td class="gw-v gw-ytd">50</td><td class="gw-gap"></td><td class="gw-v gw-h">25</td><td class="gw-v gw-h">28</td><td class="gw-v gw-h">27</td><td class="gw-v gw-h">26</td><td class="gw-v gw-h gw-cur">26</td><td class="gw-v gw-ytd">26</td></tr>
+      </tbody>
+    </table>
   </div>
+  <footer class="gw-ft">
+    <p><b>Core and Lite</b> segment SMEs by annual invoicing volume. Spot = actual FX; c.c. = restated at Oct-26 FX. YTD = Jan–Oct (YTD'26); the YTD column shows the accumulated flow or the cutoff-month value. Negatives in parentheses. <b>†</b> Total ARR = Core + Lite, excludes Alanube (company-wide ARR incl. Alanube is shown on the Monthly/YTD Performance slides). Bars: MoM ARR growth, c.c., common scale. Logo walk: Churn, net = Churn (gross) − Reactivated, derived so BoP + New + Recovered − Churn, net = EoP.</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 2</em></div>
+  </footer>
+</section>
+
+  <div class="slide-divider">↓</div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+<section class="slide gw-slide" aria-label="ARR by country, October 2026 summary">
+  <header class="gw-hd"><h2>ARR by Country</h2><span>October 2026</span></header>
+  <div class="gw-body" style="gap:26px;padding-top:18px">
+    <div class="gw-ks gw-c5">
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">ARR</div></div><div class="gw-k-val">$33.5M</div><div class="gw-k-dl"><div><b>YoY USD</b><span>+35.4%</span></div><div><b>YoY c.c.</b><span>+19.1%</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">Logos</div></div><div class="gw-k-val">61.7K</div><div class="gw-k-dl"><div><b>YoY</b><span>+11.0%</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">ARPA</div></div><div class="gw-k-val">$45.2<small>/ month</small></div><div class="gw-k-dl"><div><b>YoY USD</b><span>+22.0%</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">S&amp;M spend</div></div><div class="gw-k-val">$1,031K<small>/ month</small></div><div class="gw-k-dl"><div><b>vs Oct-24</b><span>+8%</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">CAC payback</div></div><div class="gw-k-val">11.2<small>months</small></div><div class="gw-k-dl"><div><b>in Oct-25</b><span class="gw-nt">16.1</span></div></div></div>
+    </div>
+    <table class="gw-ct">
+      <colgroup><col style="width:116px"><col style="width:140px"><col style="width:58px"><col style="width:58px"><col style="width:160px"><col style="width:12px"><col style="width:54px"><col style="width:58px"><col style="width:12px"><col><col><col><col></colgroup>
+      <thead>
+        <tr class="gw-seg"><th class="gw-blank"></th><th colspan="5">Scale &amp; growth</th><th class="gw-gap"></th><th colspan="2">Customers</th><th class="gw-gap"></th><th colspan="4">Efficiency<span>Oct-26, per month</span></th></tr>
+        <tr class="gw-per"><th></th><th class="gw-l">ARR · share</th><th>YoY USD</th><th>YoY c.c.</th><th class="gw-l" style="padding-left:6px">c.c. YoY, Apr-26–Oct-26</th><th class="gw-gap"></th><th>Logos</th><th>ARPA $/mo</th><th class="gw-gap"></th><th>S&amp;M $K</th><th>CAC $</th><th>Churn</th><th>Payback</th></tr>
+      </thead>
+      <tbody>
+
+<tr><th scope="row">Colombia</th><td><div class="gw-arr"><span class="gw-n">$22.5M</span><span class="gw-bar"><i style="width:67%"></i></span><span class="gw-p">67%</span></div></td><td>+40.1%</td><td class="gw-cc">+15.6%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY Apr-26 to Oct-26"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,22.9 20.0,23.1 36.0,21.4 52.0,19.9 68.0,19.5 84.0,20.8 100.0,20.7" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="20.7" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>45.9K</td><td>40.9</td><td class="gw-gap"></td><td>482</td><td>299</td><td>3.8%</td><td class="">10.4</td></tr>
+
+<tr><th scope="row">Mexico</th><td><div class="gw-arr"><span class="gw-n">$2.8M</span><span class="gw-bar"><i style="width:8%"></i></span><span class="gw-p">8%</span></div></td><td>+21.7%</td><td class="gw-cc">+21.7%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY Apr-26 to Oct-26"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,18.3 20.0,18.6 36.0,18.3 52.0,19.1 68.0,17.7 84.0,17.7 100.0,17.5" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="17.5" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>5.5K</td><td>43.1</td><td class="gw-gap"></td><td>236</td><td>801</td><td>4.4%</td><td class="gw-flag">29.3</td></tr>
+
+<tr><th scope="row">Dominican Republic</th><td><div class="gw-arr"><span class="gw-n">$5.3M</span><span class="gw-bar"><i style="width:16%"></i></span><span class="gw-p">16%</span></div></td><td>+29.0%</td><td class="gw-cc">+29.0%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY Apr-26 to Oct-26"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,16.5 20.0,16.5 36.0,16.3 52.0,18.2 68.0,17.9 84.0,14.5 100.0,13.6" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="13.6" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>5.3K</td><td>83.6</td><td class="gw-gap"></td><td>234</td><td>477</td><td>4.0%</td><td class="">7.1</td></tr>
+
+<tr><th scope="row">Costa Rica</th><td><div class="gw-arr"><span class="gw-n">$1.0M</span><span class="gw-bar"><i style="width:3%"></i></span><span class="gw-p">3%</span></div></td><td>+40.4%</td><td class="gw-cc">+40.4%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY Apr-26 to Oct-26"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,12.1 20.0,10.1 36.0,7.4 52.0,5.2 68.0,5.5 84.0,6.9 100.0,7.5" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="7.5" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>1.8K</td><td>46.8</td><td class="gw-gap"></td><td>37</td><td>294</td><td>4.5%</td><td class="">8.3</td></tr>
+
+<tr><th scope="row">Other</th><td><div class="gw-arr"><span class="gw-n">$1.9M</span><span class="gw-bar"><i style="width:6%"></i></span><span class="gw-p">6%</span></div></td><td>+22.2%</td><td class="gw-cc">+23.5%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY Apr-26 to Oct-26"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,26.0 20.0,24.9 36.0,22.7 52.0,21.4 68.0,16.1 84.0,15.8 100.0,16.5" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="16.5" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>3.4K</td><td>46.6</td><td class="gw-gap"></td><td>42</td><td>450</td><td>3.2%</td><td class="">—<sup>†</sup></td></tr>
+
+<tr class="gw-tot"><th scope="row">Total</th><td><div class="gw-arr"><span class="gw-n">$33.5M</span><span class="gw-bar"><i style="width:100%"></i></span><span class="gw-p">100%</span></div></td><td>+35.4%</td><td class="gw-cc">+19.1%</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY Apr-26 to Oct-26"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="4.0,21.6 20.0,21.6 36.0,20.1 52.0,19.3 68.0,18.6 84.0,19.0 100.0,18.9" fill="none" stroke="#0f172b" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="18.9" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>61.7K</td><td>45.2</td><td class="gw-gap"></td><td>1,031</td><td>394</td><td>3.8%</td><td class="">11.2</td></tr>
+
+      </tbody>
+    </table>
+  </div>
+  <footer class="gw-ft">
+    <p>Figures exclude Alanube (company-wide ARR incl. Alanube is shown on the Monthly/YTD Performance slides). ARR, Logos, ARPA, S&amp;M and CAC payback are all real. c.c. = constant currency. Efficiency = October 2026 (single month): S&amp;M $K per month; CAC = S&amp;M ÷ new logos; Churn = (Churn − Reactivated) ÷ BoP logos. Payback = CAC payback in months (country-level uses the same cohort model as the GLO figure); above 24 months in orange. Other = Total − four countries. <b>†</b> The cohort model doesn't cover Other's countries (Argentina, Chile, Panama, Peru, Spain, USA), so no payback is shown; n.m. = residual not meaningful.</p>
+    <div class="gw-key"><div><span><i></i>Payback &gt; 24 mo</span></div><em>Alegra · Confidential · 3</em></div>
+  </footer>
+</section>
+
+  <div class="slide-divider">↓</div>
+
+  
+  
+  
+<section class="slide gw-slide" aria-label="ARR by country, three-year detail, Oct-24 to Oct-26">
+  <header class="gw-hd"><h2>ARR by Country · Three-Year Detail</h2><span>Oct-24 → Oct-26</span></header>
+  <div class="gw-body" style="gap:12px;padding-top:10px">
+    <table class="gw-t gw-ap" style="--rh:14.0px"><colgroup><col style="width:120px"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"></colgroup><thead><tr class="gw-seg"><th class="gw-blk">Scale & growth</th><th class="gw-sq" colspan="3">ARR<span>$M</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">YoY in USD<span>%</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">YoY constant currency<span>%</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">ARR mix<span>%</span></th></tr><tr class="gw-per"><th></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th></tr></thead><tbody><tr><th scope="row">Colombia</th><td class="gw-v gw-h">12.1</td><td class="gw-v gw-h">16.0</td><td class="gw-v gw-cur">22.5</td><td class="gw-gap"></td><td class="gw-v gw-h">+43.2</td><td class="gw-v gw-h">+32.2</td><td class="gw-v gw-cur">+40.1</td><td class="gw-gap"></td><td class="gw-v gw-h">+50.1</td><td class="gw-v gw-h">+20.5</td><td class="gw-v gw-cur">+15.6</td><td class="gw-gap"></td><td class="gw-v gw-h">65</td><td class="gw-v gw-h">65</td><td class="gw-v gw-cur">67</td></tr><tr><th scope="row">Mexico</th><td class="gw-v gw-h">1.6</td><td class="gw-v gw-h">2.3</td><td class="gw-v gw-cur">2.8</td><td class="gw-gap"></td><td class="gw-v gw-h">+26.0</td><td class="gw-v gw-h">+43.7</td><td class="gw-v gw-cur">+21.7</td><td class="gw-gap"></td><td class="gw-v gw-h">+37.2</td><td class="gw-v gw-h">+34.2</td><td class="gw-v gw-cur">+21.7</td><td class="gw-gap"></td><td class="gw-v gw-h">9</td><td class="gw-v gw-h">9</td><td class="gw-v gw-cur">8</td></tr><tr><th scope="row">Dominican Republic</th><td class="gw-v gw-h">3.0</td><td class="gw-v gw-h">4.1</td><td class="gw-v gw-cur">5.3</td><td class="gw-gap"></td><td class="gw-v gw-h">+25.8</td><td class="gw-v gw-h">+37.8</td><td class="gw-v gw-cur">+29.0</td><td class="gw-gap"></td><td class="gw-v gw-h">+25.8</td><td class="gw-v gw-h">+37.8</td><td class="gw-v gw-cur">+29.0</td><td class="gw-gap"></td><td class="gw-v gw-h">16</td><td class="gw-v gw-h">17</td><td class="gw-v gw-cur">16</td></tr><tr><th scope="row">Costa Rica</th><td class="gw-v gw-h">0.6</td><td class="gw-v gw-h">0.7</td><td class="gw-v gw-cur">1.0</td><td class="gw-gap"></td><td class="gw-v gw-h">+45.6</td><td class="gw-v gw-h">+18.9</td><td class="gw-v gw-cur">+40.4</td><td class="gw-gap"></td><td class="gw-v gw-h">+45.6</td><td class="gw-v gw-h">+18.9</td><td class="gw-v gw-cur">+40.4</td><td class="gw-gap"></td><td class="gw-v gw-h">3</td><td class="gw-v gw-h">3</td><td class="gw-v gw-cur">3</td></tr><tr><th scope="row">Other</th><td class="gw-v gw-h">1.3</td><td class="gw-v gw-h">1.5</td><td class="gw-v gw-cur">1.9</td><td class="gw-gap"></td><td class="gw-v gw-h">+36.9</td><td class="gw-v gw-h">+15.3</td><td class="gw-v gw-cur">+22.2</td><td class="gw-gap"></td><td class="gw-v gw-h">+43.2</td><td class="gw-v gw-h">+19.4</td><td class="gw-v gw-cur">+23.5</td><td class="gw-gap"></td><td class="gw-v gw-h">7</td><td class="gw-v gw-h">6</td><td class="gw-v gw-cur">6</td></tr><tr class="gw-tot"><th scope="row">Total</th><td class="gw-v gw-h">18.7</td><td class="gw-v gw-h">24.7</td><td class="gw-v gw-cur">33.5</td><td class="gw-gap"></td><td class="gw-v gw-h">+38.1</td><td class="gw-v gw-h">+32.5</td><td class="gw-v gw-cur">+35.4</td><td class="gw-gap"></td><td class="gw-v gw-h">+44.8</td><td class="gw-v gw-h">+23.7</td><td class="gw-v gw-cur">+19.1</td><td class="gw-gap"></td><td class="gw-v gw-h">100</td><td class="gw-v gw-h">100</td><td class="gw-v gw-cur">100</td></tr></tbody></table>
+    <table class="gw-t gw-ap" style="--rh:14.0px"><colgroup><col style="width:120px"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"></colgroup><thead><tr class="gw-seg"><th class="gw-blk">Customers</th><th class="gw-sq" colspan="3">Logos<span>000s, EoP</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">Logos YoY<span>%</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">ARPA<span>$ / month</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">ARPA YoY<span>%, USD</span></th></tr><tr class="gw-per"><th></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th></tr></thead><tbody><tr><th scope="row">Colombia</th><td class="gw-v gw-h">41.5</td><td class="gw-v gw-h">42.9</td><td class="gw-v gw-cur">45.9</td><td class="gw-gap"></td><td class="gw-v gw-h">+20.9</td><td class="gw-v gw-h">+3.3</td><td class="gw-v gw-cur">+7.0</td><td class="gw-gap"></td><td class="gw-v gw-h">24.4</td><td class="gw-v gw-h">31.2</td><td class="gw-v gw-cur">40.9</td><td class="gw-gap"></td><td class="gw-v gw-h">+18.5</td><td class="gw-v gw-h">+28.0</td><td class="gw-v gw-cur">+30.9</td></tr><tr><th scope="row">Mexico</th><td class="gw-v gw-h">3.7</td><td class="gw-v gw-h">4.4</td><td class="gw-v gw-cur">5.5</td><td class="gw-gap"></td><td class="gw-v gw-h">+34.0</td><td class="gw-v gw-h">+17.9</td><td class="gw-v gw-cur">+25.2</td><td class="gw-gap"></td><td class="gw-v gw-h">36.4</td><td class="gw-v gw-h">44.3</td><td class="gw-v gw-cur">43.1</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(5.9)</td><td class="gw-v gw-h">+21.9</td><td class="gw-v gw-cur gw-neg">(2.8)</td></tr><tr><th scope="row">Dominican Republic</th><td class="gw-v gw-h">4.1</td><td class="gw-v gw-h">4.2</td><td class="gw-v gw-cur">5.3</td><td class="gw-gap"></td><td class="gw-v gw-h">+19.0</td><td class="gw-v gw-h">+1.7</td><td class="gw-v gw-cur">+27.2</td><td class="gw-gap"></td><td class="gw-v gw-h">60.8</td><td class="gw-v gw-h">82.4</td><td class="gw-v gw-cur">83.6</td><td class="gw-gap"></td><td class="gw-v gw-h">+5.7</td><td class="gw-v gw-h">+35.5</td><td class="gw-v gw-cur">+1.4</td></tr><tr><th scope="row">Costa Rica</th><td class="gw-v gw-h">1.0</td><td class="gw-v gw-h">1.3</td><td class="gw-v gw-cur">1.8</td><td class="gw-gap"></td><td class="gw-v gw-h">+46.7</td><td class="gw-v gw-h">+26.2</td><td class="gw-v gw-cur">+33.4</td><td class="gw-gap"></td><td class="gw-v gw-h">47.2</td><td class="gw-v gw-h">44.5</td><td class="gw-v gw-cur">46.8</td><td class="gw-gap"></td><td class="gw-v gw-h gw-neg">(0.8)</td><td class="gw-v gw-h gw-neg">(5.8)</td><td class="gw-v gw-cur">+5.3</td></tr><tr><th scope="row">Other</th><td class="gw-v gw-h">3.2</td><td class="gw-v gw-h">2.9</td><td class="gw-v gw-cur">3.4</td><td class="gw-gap"></td><td class="gw-v gw-h">+21.8</td><td class="gw-v gw-h gw-neg">(7.6)</td><td class="gw-v gw-cur">+15.6</td><td class="gw-gap"></td><td class="gw-v gw-h">35.4</td><td class="gw-v gw-h">44.1</td><td class="gw-v gw-cur">46.6</td><td class="gw-gap"></td><td class="gw-v gw-h">+12.4</td><td class="gw-v gw-h">+24.8</td><td class="gw-v gw-cur">+5.7</td></tr><tr class="gw-tot"><th scope="row">Total</th><td class="gw-v gw-h">53.5</td><td class="gw-v gw-h">55.6</td><td class="gw-v gw-cur">61.7</td><td class="gw-gap"></td><td class="gw-v gw-h">+22.0</td><td class="gw-v gw-h">+4.0</td><td class="gw-v gw-cur">+11.0</td><td class="gw-gap"></td><td class="gw-v gw-h">29.1</td><td class="gw-v gw-h">37.1</td><td class="gw-v gw-cur">45.2</td><td class="gw-gap"></td><td class="gw-v gw-h">+13.2</td><td class="gw-v gw-h">+27.4</td><td class="gw-v gw-cur">+22.0</td></tr></tbody></table>
+    <table class="gw-t gw-ap" style="--rh:14.0px"><colgroup><col style="width:120px"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"><col class="gw-c-gap"><col span="3"></colgroup><thead><tr class="gw-seg"><th class="gw-blk">GTM efficiency</th><th class="gw-sq" colspan="3">S&M spend<span>$K / month</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">CAC<span>$ / new logo</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">Logo churn<span>% / month</span></th><th class="gw-gap"></th><th class="gw-sq" colspan="3">CAC payback<span>months</span></th></tr><tr class="gw-per"><th></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th><th class="gw-gap"></th><th>Oct-24</th><th>Oct-25</th><th class="gw-cur">Oct-26</th></tr></thead><tbody><tr><th scope="row">Colombia</th><td class="gw-v gw-h">419</td><td class="gw-v gw-h">326</td><td class="gw-v gw-cur">482</td><td class="gw-gap"></td><td class="gw-v gw-h">237</td><td class="gw-v gw-h">224</td><td class="gw-v gw-cur">299</td><td class="gw-gap"></td><td class="gw-v gw-h">2.9</td><td class="gw-v gw-h">4.2</td><td class="gw-v gw-cur">3.8</td><td class="gw-gap"></td><td class="gw-v gw-h">14.5</td><td class="gw-v gw-h">10.0</td><td class="gw-v gw-cur">10.4</td></tr><tr><th scope="row">Mexico</th><td class="gw-v gw-h">250</td><td class="gw-v gw-h">188</td><td class="gw-v gw-cur">236</td><td class="gw-gap"></td><td class="gw-v gw-h">1,209</td><td class="gw-v gw-h">881</td><td class="gw-v gw-cur">801</td><td class="gw-gap"></td><td class="gw-v gw-h">3.5</td><td class="gw-v gw-h">3.5</td><td class="gw-v gw-cur">4.4</td><td class="gw-gap"></td><td class="gw-v gw-h gw-flag">83.2</td><td class="gw-v gw-h gw-flag">38.5</td><td class="gw-v gw-cur gw-flag">29.3</td></tr><tr><th scope="row">Dominican Republic</th><td class="gw-v gw-h">119</td><td class="gw-v gw-h">148</td><td class="gw-v gw-cur">234</td><td class="gw-gap"></td><td class="gw-v gw-h">710</td><td class="gw-v gw-h">1,066</td><td class="gw-v gw-cur">477</td><td class="gw-gap"></td><td class="gw-v gw-h">4.3</td><td class="gw-v gw-h">3.4</td><td class="gw-v gw-cur">4.0</td><td class="gw-gap"></td><td class="gw-v gw-h">19.1</td><td class="gw-v gw-h">18.5</td><td class="gw-v gw-cur">7.1</td></tr><tr><th scope="row">Costa Rica</th><td class="gw-v gw-h">54</td><td class="gw-v gw-h">72</td><td class="gw-v gw-cur">37</td><td class="gw-gap"></td><td class="gw-v gw-h">1,237</td><td class="gw-v gw-h">883</td><td class="gw-v gw-cur">294</td><td class="gw-gap"></td><td class="gw-v gw-h">4.3</td><td class="gw-v gw-h">6.3</td><td class="gw-v gw-cur">4.5</td><td class="gw-gap"></td><td class="gw-v gw-h">10.8</td><td class="gw-v gw-h gw-flag">25.2</td><td class="gw-v gw-cur">8.3</td></tr><tr><th scope="row">Other</th><td class="gw-v gw-h">115</td><td class="gw-v gw-h">96</td><td class="gw-v gw-cur">42</td><td class="gw-gap"></td><td class="gw-v gw-h">777</td><td class="gw-v gw-h">671</td><td class="gw-v gw-cur">450</td><td class="gw-gap"></td><td class="gw-v gw-h">n.m.</td><td class="gw-v gw-h">n.m.</td><td class="gw-v gw-cur">3.2</td><td class="gw-gap"></td><td class="gw-v gw-h">—</td><td class="gw-v gw-h">—</td><td class="gw-v gw-cur">—</td></tr><tr class="gw-tot"><th scope="row">Total</th><td class="gw-v gw-h">958</td><td class="gw-v gw-h">830</td><td class="gw-v gw-cur">1,031</td><td class="gw-gap"></td><td class="gw-v gw-h">410</td><td class="gw-v gw-h">408</td><td class="gw-v gw-cur">394</td><td class="gw-gap"></td><td class="gw-v gw-h">4.3</td><td class="gw-v gw-h">5.3</td><td class="gw-v gw-cur">3.8</td><td class="gw-gap"></td><td class="gw-v gw-h">21.5</td><td class="gw-v gw-h">16.1</td><td class="gw-v gw-cur">11.2</td></tr></tbody></table>
+  </div>
+  <footer class="gw-ft">
+    <p>Figures exclude Alanube (company-wide ARR incl. Alanube is shown on the Monthly/YTD Performance slides). Same cutoff month in each year (Oct-24, Oct-25, Oct-26); units in each header. Negatives in parentheses. c.c. = YoY growth ex-FX. ARPA = MRR ÷ active logos. CAC = S&amp;M ÷ new logos; S&amp;M and churn are single-month figures. Payback = CAC payback in months (country-level uses the same cohort model); above 24 months in orange. Other = Total − four countries; the cohort model doesn't cover Other's countries (no payback), and its churn is a residual (n.m. when not meaningful).</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 4</em></div>
+  </footer>
+</section>
+
   
   
 
@@ -5107,9 +3820,9 @@ body {
             
             <tr>
               <td class="metric-col"><span class="metric-name">Total Logos (EoP)</span></td>
-              <td class="val right core-col">19,390</td>
+              <td class="val right core-col">19,391</td>
               <td class="delta pos right core-col">+1.9%</td>
-              <td class="delta pos right core-col">+23.2%</td>
+              <td class="delta pos right core-col">+23.3%</td>
               <td class="val right lite-col">26,468</td>
               <td class="delta pos right lite-col">+0.8%</td>
               <td class="delta neg right lite-col">-2.4%</td>
@@ -5121,9 +3834,9 @@ body {
             
             <tr>
               <td class="metric-col"><span class="metric-name primary">Net Logo Adds</span></td>
-              <td class="val right core-col">+358</td>
-              <td class="delta pos right core-col">+132</td>
-              <td class="delta pos right core-col">+16</td>
+              <td class="val right core-col">+359</td>
+              <td class="delta pos right core-col">+133</td>
+              <td class="delta pos right core-col">+17</td>
               <td class="val right lite-col">+200</td>
               <td class="delta pos right lite-col">+145</td>
               <td class="delta pos right lite-col">+208</td>
@@ -5163,9 +3876,9 @@ body {
             
             <tr>
               <td class="metric-col"><span class="metric-name primary">Net New ARR</span></td>
-              <td class="val right core-col">$199K</td>
-              <td class="delta pos right core-col">+$483K</td>
-              <td class="delta neg right core-col">-$91K</td>
+              <td class="val right core-col">$201K</td>
+              <td class="delta pos right core-col">+$485K</td>
+              <td class="delta neg right core-col">-$89K</td>
               <td class="val alert right lite-col">$-41K</td>
               <td class="delta pos right lite-col">+$200K</td>
               <td class="delta neg right lite-col">-$108K</td>
@@ -5211,8 +3924,8 @@ body {
             <tr>
               <td class="metric-col" style="font-style:italic; padding-left:20px;">ARPA Churned Logos</td>
               <td class="right core-col">$48</td>
-              <td class="delta pos right core-col">-6.6%</td>
-              <td class="delta neg right core-col">+22.8%</td>
+              <td class="delta pos right core-col">-6.9%</td>
+              <td class="delta neg right core-col">+22.5%</td>
               <td class="right lite-col">$22</td>
               <td class="delta pos right lite-col">-1.5%</td>
               <td class="delta neg right lite-col">+18.2%</td>
@@ -5937,341 +4650,6 @@ body {
 
   
   
-  <div class="slide-divider">↓ &nbsp; Alanube</div>
-
-  <!-- REPLICA — ARR Walk Alanube (código idéntico al de 1_inicio.j2, SLIDE 9, que
-       queda oculto allá — ver nota ahí. Pedido explícito del usuario: "ojo acá es
-       una réplica, no traer lo que estaba en la sección 1". Incluye su propio
-       bloque de estilos porque .al-cur/.al-sp-col/.al-sp-sm/.al-tb no existían en
-       este archivo (sí existen .aw-* ya compartidos). -->
-  <style>
-    .aw-sum-table thead th.al-cur { color: #208080; background: rgba(48,184,183,0.09); border-radius: 4px 4px 0 0; font-weight: 700; }
-    .aw-sum-table tbody td.al-cur { background: rgba(48,184,183,0.07); color: #1a7e7f; font-weight: 600; }
-    .aw-sum-table tr.aw-rb td.al-cur { color: #1a7e7f !important; background: rgba(48,184,183,0.09); }
-    .al-sp-col { width: 6px !important; padding: 0 !important; border: none !important; background: transparent !important; }
-    .al-sp-sm  { width: 3px !important; padding: 0 !important; border-left: 1.5px solid #e2e8f0 !important; background: transparent !important; }
-    .al-tb td  { border-top: 1.5px solid #cbd5e1 !important; }
-  </style>
-  <div class="slide">
-    <div class="slide-header">
-      <span class="title">ARR Walk — Alanube · Historical quarterly + monthly</span>
-      <span class="period">October 2026</span>
-    </div>
-    <div class="aw-body-row">
-
-      
-      <div class="aw-sum-wrap" style="padding: 8px 32px 0 32px; align-items: center;">
-        <table class="aw-sum-table" style="width: auto; margin: 0 auto;">
-          <thead>
-            <tr>
-              <th>Consolidated Alanube</th>
-              <th>1Q25</th><th>2Q25</th><th>3Q25</th><th>4Q25</th><th>1Q26</th><th>2Q26</th><th>3Q26</th>
-              <th class="al-sp-col"></th>
-              <th class="al-cur">Sep-26</th><th class="al-cur">Oct-26</th>
-              <th class="aw-dh">MoM A%</th>
-              <th class="al-sp-sm"></th>
-              <th class="aw-ytd">YTD'25</th><th class="aw-ytd">YTD'26</th><th class="aw-dh">YTD Δ%</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-            <!-- Logo Walk -->
-            <tr class="aw-sh"><td colspan="16">Logo Walk</td></tr>
-            
-      <tr class="aw-rb">
-        <td><span class="aw-di aw-di-g"></span>Logos BoP</td>
-        <td>79</td><td>93</td><td>138</td><td>154</td><td>198</td><td>234</td><td>314</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">349</td><td class="al-cur">374</td>
-        <td>7%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">79</td>
-        <td class="aw-ytd">198</td>
-        <td>151%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>New Logos</td>
-        <td>15</td><td>48</td><td>18</td><td>50</td><td>46</td><td>83</td><td>76</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">27</td><td class="al-cur">42</td>
-        <td>56%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">95</td>
-        <td class="aw-ytd">247</td>
-        <td>160%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Recovered Logos</td>
-        <td>0</td><td>0</td><td>1</td><td>1</td><td>2</td><td>6</td><td>2</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">1</td><td class="al-cur">1</td>
-        <td>0%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">1</td>
-        <td class="aw-ytd">11</td>
-        <td>1000%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Churned Logos</td>
-        <td class="aw-nv">(1)</td><td class="aw-nv">(4)</td><td class="aw-nv">(3)</td><td class="aw-nv">(8)</td><td class="aw-nv">(11)</td><td class="aw-nv">(11)</td><td class="aw-nv">(16)</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur aw-nv">(2)</td><td class="al-cur aw-nv">(5)</td>
-        <td>150%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd aw-nv">(10)</td>
-        <td class="aw-ytd aw-nv">(43)</td>
-        <td>330%</td>
-      </tr>
-      
-            
-      <tr class="aw-rb al-tb">
-        <td><span class="aw-di aw-di-g"></span>Logos EoP</td>
-        <td>93</td><td>138</td><td>154</td><td>198</td><td>234</td><td>314</td><td>374</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">374</td><td class="al-cur">410</td>
-        <td>10%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">166</td>
-        <td class="aw-ytd">410</td>
-        <td>147%</td>
-      </tr>
-      
-            <tr class="aw-gap"><td colspan="16"></td></tr>
-
-            <!-- ARR Walk -->
-            <tr class="aw-sh"><td colspan="16">ARR Walk (MM USD)</td></tr>
-            
-      <tr class="aw-rb">
-        <td><span class="aw-di aw-di-g"></span>ARR BoP</td>
-        <td>0,30</td><td>0,33</td><td>0,44</td><td>0,51</td><td>0,64</td><td>0,96</td><td>1,03</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">1,15</td><td class="al-cur">1,15</td>
-        <td class="aw-nv">(0%)</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">0,30</td>
-        <td class="aw-ytd">0,64</td>
-        <td>110%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>New ARR</td>
-        <td>0,03</td><td>0,08</td><td>0,04</td><td>0,04</td><td>0,04</td><td>0,07</td><td>0,05</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">0,01</td><td class="al-cur">0,03</td>
-        <td>155%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">0,17</td>
-        <td class="aw-ytd">0,18</td>
-        <td>11%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Recovered ARR</td>
-        <td>0,00</td><td>0,00</td><td>0,00</td><td>0,00</td><td>0,01</td><td>0,01</td><td>0,01</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">0,01</td><td class="al-cur">0,00</td>
-        <td class="aw-nv">(94%)</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">0,00</td>
-        <td class="aw-ytd">0,03</td>
-        <td>1440%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Expansion ARR</td>
-        <td>0,09</td><td>0,09</td><td>0,16</td><td>0,40</td><td>0,48</td><td>0,09</td><td>0,13</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">0,02</td><td class="al-cur">0,05</td>
-        <td>181%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">0,64</td>
-        <td class="aw-ytd">0,74</td>
-        <td>17%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Contraction ARR</td>
-        <td class="aw-nv">(0,10)</td><td class="aw-nv">(0,04)</td><td class="aw-nv">(0,14)</td><td class="aw-nv">(0,29)</td><td class="aw-nv">(0,18)</td><td class="aw-nv">(0,09)</td><td class="aw-nv">(0,06)</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur aw-nv">(0,04)</td><td class="al-cur aw-nv">(0,02)</td>
-        <td>39%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd aw-nv">(0,29)</td>
-        <td class="aw-ytd aw-nv">(0,36)</td>
-        <td class="aw-nv">(26%)</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Churned ARR</td>
-        <td class="aw-nv">(0,00)</td><td class="aw-nv">(0,01)</td><td class="aw-nv">(0,00)</td><td class="aw-nv">(0,02)</td><td class="aw-nv">(0,01)</td><td class="aw-nv">(0,01)</td><td class="aw-nv">(0,01)</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur aw-nv">(0,00)</td><td class="al-cur aw-nv">(0,01)</td>
-        <td class="aw-nv">(2303%)</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd aw-nv">(0,01)</td>
-        <td class="aw-ytd aw-nv">(0,04)</td>
-        <td class="aw-nv">(203%)</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>FX</td>
-        <td>0,00</td><td class="aw-nv">(0,00)</td><td>0,00</td><td>0,00</td><td>0,00</td><td>0,00</td><td>0,01</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur aw-nv">(0,00)</td><td class="al-cur aw-nv">(0,00)</td>
-        <td>69%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">0,00</td>
-        <td class="aw-ytd">0,01</td>
-        <td>265%</td>
-      </tr>
-      
-            
-      <tr class="aw-rb al-tb">
-        <td><span class="aw-di aw-di-g"></span>ARR EoP</td>
-        <td>0,33</td><td>0,44</td><td>0,51</td><td>0,64</td><td>0,96</td><td>1,03</td><td>1,15</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">1,15</td><td class="al-cur">1,19</td>
-        <td>4%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">0,81</td>
-        <td class="aw-ytd">1,19</td>
-        <td>48%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>OTR (One-Time Revenue) — $K</td>
-        <td>1,0</td><td>13,9</td><td>22,6</td><td>13,8</td><td>5,6</td><td>11,5</td><td>9,4</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">4,3</td><td class="al-cur">7,3</td>
-        <td>69%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">41,0</td>
-        <td class="aw-ytd">33,8</td>
-        <td class="aw-nv">(18%)</td>
-      </tr>
-      
-            <tr class="aw-gap"><td colspan="16"></td></tr>
-
-            <!-- Finance Metrics -->
-            <tr class="aw-sh"><td colspan="16">Finance Metrics</td></tr>
-            
-      <tr class="aw-in">
-        <td>ARR Growth Rate MoM (%)</td>
-        <td>8.8%</td><td>34.2%</td><td>14.4%</td><td>25.7%</td><td>51.5%</td><td>6.9%</td><td>11.9%</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur aw-nv">(0.1%)</td><td class="al-cur">3.7%</td>
-        <td>2817%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">167.0%</td>
-        <td class="aw-ytd">87.8%</td>
-        <td class="aw-nv">(47%)</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>ARR Growth Rate YoY (%)</td>
-        <td>254.9%</td><td>78.3%</td><td>94.1%</td><td>110.1%</td><td>192.5%</td><td>133.0%</td><td>127.8%</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">127.8%</td><td class="al-cur">47.8%</td>
-        <td class="aw-nv">(63%)</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">219.5%</td>
-        <td class="aw-ytd">47.8%</td>
-        <td class="aw-nv">(78%)</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Avg. ARR per Logo</td>
-        <td>$295</td><td>$267</td><td>$274</td><td>$268</td><td>$343</td><td>$273</td><td>$257</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">$257</td><td class="al-cur">$243</td>
-        <td class="aw-nv">(5%)</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">$406</td>
-        <td class="aw-ytd">$243</td>
-        <td class="aw-nv">(40%)</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Avg. Monthly Churn Rate (%)</td>
-        <td class="aw-nv">(0.1%)</td><td class="aw-nv">(3.2%)</td><td class="aw-nv">(0.3%)</td><td class="aw-nv">(3.7%)</td><td class="aw-nv">(2.3%)</td><td class="aw-nv">(0.9%)</td><td class="aw-nv">(1.0%)</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur aw-nv">(0.0%)</td><td class="al-cur aw-nv">(1.0%)</td>
-        <td>2306%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd aw-nv">(4.8%)</td>
-        <td class="aw-ytd aw-nv">(7.0%)</td>
-        <td>44%</td>
-      </tr>
-      
-            <tr class="aw-gap"><td colspan="16"></td></tr>
-
-            <!-- Operation Metrics -->
-            <tr class="aw-sh"><td colspan="16">Operation Metrics</td></tr>
-            
-      <tr class="aw-in">
-        <td>Avg. Monthly Processed Docs (MM)</td>
-        <td>8,1</td><td>8,3</td><td>9,4</td><td>12,2</td><td>19,9</td><td>25,2</td><td>26,4</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">25,5</td><td class="al-cur">26,5</td>
-        <td>4%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">9,5</td>
-        <td class="aw-ytd">24,1</td>
-        <td>154%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Monthly Documents per Logo (k)</td>
-        <td>87,6</td><td>60,3</td><td>61,3</td><td>61,4</td><td>85,2</td><td>80,3</td><td>70,6</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">68,2</td><td class="al-cur">64,7</td>
-        <td class="aw-nv">(5%)</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">57,2</td>
-        <td class="aw-ytd">58,8</td>
-        <td>3%</td>
-      </tr>
-      
-            
-      <tr class="aw-in">
-        <td>Price per Document</td>
-        <td>0,3</td><td>0,6</td><td>0,7</td><td>0,9</td><td>0,9</td><td>1,1</td><td>1,4</td>
-        <td class="al-sp-col"></td>
-        <td class="al-cur">1,4</td><td class="al-cur">1,5</td>
-        <td>9%</td>
-        <td class="al-sp-sm"></td>
-        <td class="aw-ytd">1,2</td>
-        <td class="aw-ytd">1,7</td>
-        <td>44%</td>
-      </tr>
-      
-          </tbody>
-        </table>
-      </div><!-- /.aw-sum-wrap -->
-
-    </div><!-- /.aw-body-row -->
-  </div>
-
-  <div class="slide-divider">↓</div>
-
-  
 
   <!-- ============================================================
        SLIDE — ARR by Country — Version Comparison — agregada 2026-10-21,
@@ -6414,10 +4792,10 @@ body {
     const expArr    = [1.259700164050594, 1.0254776577554445, 1.6308003905937603, 1.1758815741358164, 2.0010064850324736, 1.121988024978227, 1.1526416538313087, 1.4673647759355803, 1.486750247320897, 1.9750484428104333, 3.560919957027492, 0.7552175421266112];
     const churnB    = [1.5638073498716698, 1.5331966642806278, 1.6728158066325614, 1.4961874925303233, 1.8097796701259934, 1.8820431051107618, 1.8140403554495843, 1.9418790341399945, 2.569822902677257, 1.8947541020926004, 1.9545334906742438, 0.648785488375516];
     const downB     = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    const netNew    = [0.5369181761426339, 0.21603695249291416, 0.9091344800143484, 0.5303494171842831, 1.5439256366535026, 0.6129994799571703, 1.0029545849164139, 1.8697457002666165, 0.8264608214064427, 1.883576820644578, 2.510282864276726, 0.14328964596248792];
+    const netNew    = [0.5369181761426325, 0.21603695249291696, 0.9091344800143442, 0.5303494171842844, 1.5439256366535066, 0.6129994799571648, 1.0029545849164165, 1.8697457002666136, 0.826460821406451, 1.8835768206445724, 2.5102828642767285, 0.144947026393882];
     const logosNew   = [2220.0, 2406.0, 2354.0, 2329.0, 2812.0, 2837.0, 3017.0, 3382.0, 3854.0, 2993.0, 2719.0, 1040.0];
     const logosExp   = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    const logosChurn = [2777.0, 2687.0, 3107.0, 2673.0, 3071.0, 3012.0, 2766.0, 2713.0, 3669.0, 3326.0, 2564.0, 867.0];
+    const logosChurn = [2777.0, 2687.0, 3107.0, 2673.0, 3071.0, 3012.0, 2766.0, 2713.0, 3669.0, 3326.0, 2564.0, 866.0];
     const logosDown  = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const qData      = [{"label": "1Q25", "bopArr": "$10.7M", "bopLogos": 18.23, "eopArr": "$12.2M", "eopLogos": 18.82}, {"label": "2Q25", "bopArr": "$12.2M", "bopLogos": 18.82, "eopArr": "$12.8M", "eopLogos": 19.45}, {"label": "3Q25", "bopArr": "$12.8M", "bopLogos": 19.45, "eopArr": "$13.8M", "eopLogos": 20.43}, {"label": "4Q25", "bopArr": "$13.8M", "bopLogos": 20.43, "eopArr": "$15.7M", "eopLogos": 22.07}, {"label": "1Q26", "bopArr": "$15.7M", "bopLogos": 22.07, "eopArr": "$16.5M", "eopLogos": 23.46}, {"label": "2Q26", "bopArr": "$16.5M", "bopLogos": 23.46, "eopArr": "$18.4M", "eopLogos": 24.48}, {"label": "3Q26", "bopArr": "$18.4M", "bopLogos": 24.48, "eopArr": "$20.9M", "eopLogos": 25.61}, {"label": "4Q26", "bopArr": "$20.9M", "bopLogos": 25.61, "eopArr": "$0K", "eopLogos": 0.0}];
     // Guard defensivo (2026-07-21, encontrado corriendo el linter estructural nuevo por
@@ -6449,7 +4827,7 @@ body {
     const expArr    = [1.0413388494889644, 0.7227011863674241, 1.5606432876629759, 0.8311466575013073, 2.096941789621307, 0.8294125681387394, 0.8384463828657837, 1.0844637826792445, 1.0512253670052267, 1.4140147193251533, 1.6754828066473226, 0.42857090596029956];
     const churnB    = [1.8317643189744994, 1.9901149856066185, 2.2772938122412785, 2.0697489601590378, 2.4189126838288995, 2.60159854346694, 2.5051830557230628, 2.8580009198371537, 3.2444927018603917, 2.4863236342560935, 2.5532800492541745, 0.8257761641204173];
     const downB     = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    const netNew    = [0.6387417025551586, 0.14272049770417017, 1.0055289603199116, 0.37563620528779973, 1.5117918824655838, -0.046724538494596256, 0.3184394533455251, 0.4874769318013815, -0.1469943163092728, 0.8015194829521961, 0.8577175882155025, -0.00920825860431092];
+    const netNew    = [0.6387417025551586, 0.14272049770416878, 1.0055289603199145, 0.37563620528779973, 1.5117918824655796, -0.046724538494592065, 0.31843945334552226, 0.4874769318013871, -0.14699431630927837, 0.801519482952199, 0.8577175882154968, -0.00920825860431092];
     const logosNew   = [6120.0, 7060.0, 7764.0, 6760.0, 6079.0, 5334.0, 5463.0, 6185.0, 5716.0, 5922.0, 5925.0, 2299.0];
     const logosExp   = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const logosChurn = [8150.0, 8332.0, 9686.0, 8097.0, 9298.0, 8738.0, 7863.0, 8616.0, 9369.0, 8253.0, 8289.0, 2776.0];
@@ -7315,9 +5693,9 @@ body {
     };
 
     // Entities — desde Metabase (dm_strategic.fact_customers_mrr + dm_sales.companies_relation_ids)
-    const entNewAdds = [279, 253, 267, 318, 385, 277, 317, 285, 278, 272, 315, 285, 391, 357, 317, 291, 314, 319, 325, 374, 418, 485, 498, 431, 456, 431, 489, 467, 470, 422, 397, 382, 461, 516];
-    const entChurn   = [178, 241, 197, 167, 195, 252, 206, 206, 274, 180, 204, 199, 290, 361, 274, 314, 222, 298, 221, 263, 252, 273, 339, 257, 355, 345, 273, 263, 284, 300, 307, 318, 333, 342];
-    const entStock   = [7185, 7197, 7267, 7418, 7608, 7633, 7744, 7823, 7827, 7919, 8030, 8116, 8217, 8213, 8256, 8233, 8325, 8346, 8450, 8561, 8727, 8939, 9098, 9272, 9373, 9459, 9675, 9879, 10065, 10187, 10277, 10341, 10469, 10643];
+    const entNewAdds = [279, 253, 267, 318, 385, 277, 318, 285, 278, 272, 315, 285, 391, 357, 317, 291, 314, 319, 325, 374, 419, 485, 498, 431, 456, 431, 489, 467, 470, 422, 397, 382, 463, 516];
+    const entChurn   = [178, 241, 197, 167, 195, 252, 206, 206, 274, 180, 204, 199, 290, 361, 274, 314, 222, 298, 221, 263, 252, 274, 339, 257, 355, 345, 273, 263, 284, 300, 307, 318, 333, 342];
+    const entStock   = [7185, 7197, 7267, 7418, 7608, 7633, 7745, 7824, 7828, 7920, 8031, 8117, 8218, 8214, 8257, 8234, 8326, 8347, 8451, 8562, 8729, 8940, 9099, 9273, 9374, 9460, 9676, 9880, 10066, 10188, 10278, 10342, 10472, 10646];
 
     if (document.getElementById('fw_entitiesLine')) new Chart(document.getElementById('fw_entitiesLine'), {
       type: 'line',
@@ -7354,9 +5732,9 @@ body {
     });
 
     // Logos — desde Metabase (dm_strategic.fact_customers_mrr + dm_sales.companies_relation_ids)
-    const lgNewAdds = [469, 424, 476, 501, 625, 493, 585, 510, 502, 484, 550, 504, 681, 654, 587, 608, 610, 607, 654, 675, 728, 803, 819, 816, 913, 782, 895, 819, 827, 738, 724, 707, 779, 854];
-    const lgChurn   = [333, 349, 322, 245, 317, 463, 327, 356, 488, 252, 365, 354, 445, 649, 399, 575, 356, 533, 446, 466, 433, 475, 573, 479, 671, 683, 475, 578, 580, 569, 558, 570, 626, 576];
-    const lgStock   = [10291, 10366, 10520, 10776, 11084, 11114, 11372, 11526, 11540, 11772, 11957, 12107, 12343, 12348, 12536, 12569, 12823, 12897, 13105, 13314, 13609, 13937, 14183, 14520, 14762, 14861, 15281, 15522, 15769, 15938, 16104, 16241, 16394, 16672];
+    const lgNewAdds = [469, 424, 476, 501, 625, 493, 586, 509, 502, 484, 550, 504, 681, 654, 587, 608, 610, 607, 654, 675, 729, 803, 819, 816, 912, 782, 895, 818, 827, 738, 724, 707, 780, 854];
+    const lgChurn   = [333, 349, 322, 245, 317, 463, 327, 356, 488, 252, 365, 354, 445, 649, 399, 575, 356, 533, 445, 467, 433, 475, 573, 479, 671, 682, 475, 577, 581, 569, 557, 570, 627, 574];
+    const lgStock   = [10290, 10365, 10519, 10775, 11083, 11113, 11372, 11525, 11539, 11771, 11956, 12106, 12342, 12347, 12535, 12568, 12822, 12896, 13105, 13313, 13609, 13937, 14183, 14520, 14761, 14861, 15281, 15522, 15768, 15937, 16104, 16241, 16394, 16674];
 
     if (document.getElementById('fw_logosLine')) new Chart(document.getElementById('fw_logosLine'), {
       type: 'line',
@@ -7480,7 +5858,7 @@ body {
   <div class="slide section-cover">
     <div class="eyebrow">Section 06</div>
     <div class="section-title">R&amp;D Investment</div>
-    <div class="section-sub">4Q26</div>
+    <div class="section-sub">October 2026</div>
     <div class="slide-num">1</div>
   </div>
 
@@ -7518,10 +5896,10 @@ body {
           
           <tr class="pp-product">
             <td>POS</td>
-            <td>11.74</td><td>11.91</td><td>12.03</td><td>12.00</td><td>11.93</td><td>12.09</td>
+            <td>11.74</td><td>11.91</td><td>12.03</td><td>12.00</td><td>11.93</td><td>12.10</td>
           </tr>
           <tr class="pp-metric"><td>% of total Logos</td><td class="pp-teal">19.9%</td><td class="pp-teal">20.1%</td><td class="pp-teal">20.1%</td><td class="pp-teal">19.9%</td><td class="pp-teal">19.6%</td><td class="pp-teal">19.6%</td></tr>
-          <tr class="pp-metric"><td>Churn rate %</td><td class="pp-teal">4.12%</td><td class="pp-teal">3.69%</td><td class="pp-teal">4.14%</td><td class="pp-teal">4.73%</td><td class="pp-teal">5.35%</td><td class="pp-teal">4.26%</td></tr>
+          <tr class="pp-metric"><td>Churn rate %</td><td class="pp-teal">4.12%</td><td class="pp-teal">3.69%</td><td class="pp-teal">4.14%</td><td class="pp-teal">4.73%</td><td class="pp-teal">5.35%</td><td class="pp-teal">4.25%</td></tr>
           <tr class="pp-metric"><td>Avg Ticket New Additions</td><td class="pp-blue">$17.94</td><td class="pp-blue">$18.04</td><td class="pp-blue">$17.31</td><td class="pp-blue">$18.47</td><td class="pp-blue">$18.48</td><td class="pp-blue">$18.71</td></tr>
           <tr class="pp-metric"><td>% of Core Subscribers</td><td class="pp-red">43.9%</td><td class="pp-red">44.1%</td><td class="pp-red">44.7%</td><td class="pp-red">45.3%</td><td class="pp-red">45.4%</td><td class="pp-red">45.6%</td></tr>
           <tr class="pp-gap"><td colspan="7"></td></tr>
@@ -7844,9 +6222,9 @@ body {
   <!-- ============================================================
        SLIDE 3 — People & Talent
        ============================================================ -->
-  <div class="hc-slide stale-slide"><div class="stale-overlay"><div class="stale-icon">⏳</div><div class="stale-title">Headcount (People & Talent) — contenido pendiente</div><div class="stale-sub">Esta sección mostraba 2026-09 — se ocultó para no publicar el mes equivocado.</div></div>
+  <div class="hc-slide">
     <div class="slide-header">
-      <span class="title">Headcount eases to 500 (-2.0% MoM) as attrition (17) outpaces new hires (8) — turnover rises to 3.40%, above FY25's 2.87% average</span>
+      <span class="title">Headcount edges up to 507 (+0.4% MoM) as new hires (13) outpace attrition (11) — turnover holds at 2.17%, below FY25's 2.85% average</span>
       <span class="period">October 2026</span>
     </div>
 
@@ -8060,7 +6438,7 @@ body {
   <div class="slide section-cover">
     <div class="eyebrow">Section 08</div>
     <div class="section-title">Appendix</div>
-    <div class="section-sub">4Q26</div>
+    <div class="section-sub">October 2026</div>
     <div class="slide-num">1</div>
   </div>
 

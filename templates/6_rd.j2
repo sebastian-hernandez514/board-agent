@@ -134,7 +134,7 @@
   <div class="slide section-cover">
     <div class="eyebrow">Section 06</div>
     <div class="section-title">R&amp;D Investment</div>
-    <div class="section-sub">{{ config.quarter_label }}</div>
+    <div class="section-sub">{% if metrics.is_quarter_end %}{{ config.quarter_label }}{% else %}{{ config.month_label }}{% endif %}</div>
     <div class="slide-num">1</div>
   </div>
 

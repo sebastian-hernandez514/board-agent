@@ -1307,6 +1307,262 @@
   {% endif %}{# /core_prod #}
   {% endif %}{# /Combined View oculto #}
 
+  {# ════════════════════════════════════════════════════════════════════════════
+     GROWTH SLIDES MENSUALES (2026-11-17) — misma estructura/diseño que las slides
+     rediseñadas de septiembre (A: ARR & Logo Walk GLO, B: Core vs Lite, C: ARR by Country,
+     D: ARR by Country · Three-Year Detail) pero en MESES: columnas = últimos meses (Jun→mes
+     de corte), bloque derecho = YTD en vez de LTM, MoM en vez de QoQ, y Three-Year Detail con
+     el mismo mes de corte en −24/−12/0 (oct-24, oct-25, oct-26). 100% en vivo desde
+     metrics.arr_walk_table / arr_walk_products / gw_country_detail. Reemplazan al loop
+     viejo GLO/Core/Lite (oculto abajo, reversible). #}
+  {% set mlast = config.month_label %}
+  {% macro mc(cells, negchk=false) %}{% for v in cells %}<td class="gw-v gw-h{% if negchk and v[0] in ['(','-','−'] %} gw-neg{% endif %}{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}{% endmacro %}
+  {% macro mcv(cells) %}{% for c in cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ c.v }}</td>{% endfor %}{% endmacro %}
+  {% macro ytd(row, neg=false) %}<td class="gw-v gw-h{% if neg %} gw-neg{% endif %}">{{ row.ytd_prev }}</td><td class="gw-v gw-cur{% if neg %} gw-neg{% endif %}">{{ row.ytd_cur }}</td><td class="gw-v gw-h">{{ row.ytd_vs }}</td>{% endmacro %}
+  {% macro ytd_na() %}<td class="gw-v gw-h gw-na">n.d.</td><td class="gw-v gw-cur gw-na">n.d.</td><td class="gw-v gw-h gw-na">n.d.</td>{% endmacro %}
+  {% macro mcn(cells) %}{% for v in cells %}<td class="gw-v gw-h gw-neg{% if loop.last %} gw-cur{% endif %}">({{ v }})</td>{% endfor %}{% endmacro %}
+  {% macro ytdn(row) %}<td class="gw-v gw-h gw-neg">({{ row.ytd_prev }})</td><td class="gw-v gw-cur gw-neg">({{ row.ytd_cur }})</td><td class="gw-v gw-h">{{ row.ytd_vs }}</td>{% endmacro %}
+  {% macro dlr(v) %}{{ v.replace('$','') }}{% endmacro %}
+  {% macro smf(v) %}{% if v.endswith('K') %}{{ "%.1f"|format(v.replace('$','').replace('K','')|float / 1000) }}{% else %}{{ v.replace('$','').replace('M','') }}{% endif %}{% endmacro %}
+
+  {% set g_tbl   = metrics.arr_walk_table %}
+  {% set g_logo  = g_tbl.sections | selectattr('label','equalto',"Logo EoP (000's)") | first %}
+  {% set g_arr   = g_tbl.sections | selectattr('label','equalto',"ARR Walk — Spot ($M)") | first %}
+  {% set g_saas  = g_tbl.sections | selectattr('label','equalto',"SaaS Metrics") | first %}
+  {% set g_eop_row      = g_logo.rows | selectattr('label','equalto',"Total EoP") | first %}
+  {% set g_newpct_row   = g_logo.rows | selectattr('label','equalto',"Logo Monthly New Adds %") | first %}
+  {% set g_churnpct_row = g_logo.rows | selectattr('label','equalto',"Logo Monthly Churn %") | first %}
+  {% set g_bop_row    = g_arr.rows | selectattr('label','equalto',"ARR BoP") | first %}
+  {% set g_add_row    = g_arr.rows | selectattr('label','equalto',"Additions") | first %}
+  {% set g_rec_row    = g_arr.rows | selectattr('label','equalto',"Recovered") | first %}
+  {% set g_nc_row     = g_arr.rows | selectattr('label','equalto',"Net Churn") | first %}
+  {% set g_ne_row     = g_arr.rows | selectattr('label','equalto',"Net Expansion") | first %}
+  {% set g_fx_row     = g_arr.rows | selectattr('label','equalto',"(+/−) FX Impact") | first %}
+  {% set g_arreop_row = g_arr.rows | selectattr('label','equalto',"ARR EoP") | first %}
+  {% set g_arrcc_row  = g_arr.rows | selectattr('label','equalto',"ARR EoP (Constant Currency)") | first %}
+  {% set g_sm_row      = g_saas.rows | selectattr('label','equalto',"S&M Total Spend") | first %}
+  {% set g_cac_row     = g_saas.rows | selectattr('label','equalto',"CAC") | first %}
+  {% set g_pb_row      = g_saas.rows | selectattr('label','equalto',"CAC Payback (meses)") | first %}
+  {% set g_arpa_row    = g_saas.rows | selectattr('label','equalto',"ARPA") | first %}
+  {% set g_arpaadd_row = g_saas.rows | selectattr('label','equalto',"ARPA Adds") | first %}
+  {% set g_arpachn_row = g_saas.rows | selectattr('label','equalto',"ARPA Churn") | first %}
+  {% set mN = g_tbl.quarters|length %}
+  {% set m_cur = g_tbl.quarters[-1] %}
+  <div class="slide-divider">↓</div>
+
+<section class="slide gw-slide" aria-label="ARR and logo walk, monthly and year to date, {{ mlast }}">
+  <header class="gw-hd"><h2>ARR &amp; Logo Walk GLO Alegra · Monthly and YTD</h2><span>{{ mlast }}</span></header>
+  <div class="gw-body">
+    <table class="gw-t" style="--gw-rh:11.5px;font-size:10px">
+      <colgroup><col class="gw-c-sec"><col style="width:142px"><col span="{{ mN }}"><col class="gw-c-gap"><col span="3"></colgroup>
+      <thead><tr class="gw-seg"><th colspan="2"></th><th class="gw-sq" colspan="{{ mN }}">Monthly</th><th class="gw-gap"></th><th class="gw-sltm" colspan="3">Year to date<span>Jan–{{ m_cur[:3] }}</span></th></tr><tr class="gw-per"><th colspan="2"></th>{% for q in g_tbl.quarters %}{% if loop.last %}<th class="gw-cur"><span class="gw-pill">{{ q }}</span></th>{% else %}<th>{{ q }}</th>{% endif %}{% endfor %}<th class="gw-gap"></th><th>{{ g_tbl.ytd_labels[0] }}</th><th class="gw-cur"><span class="gw-pill">{{ g_tbl.ytd_labels[1] }}</span></th><th>YTD Δ%</th></tr></thead>
+      <tbody>
+{% set lw = g_tbl.logo_walk.rows %}
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="9">Logo walk<span>000s</span></th><td class="gw-m">Logos, BoP</td>{{ mc(lw[0].cells) }}<td class="gw-gap"></td>{{ ytd(lw[0]) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New logos</td>{{ mc(lw[1].cells) }}<td class="gw-gap"></td>{{ ytd(lw[1]) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td>{{ mc(lw[2].cells) }}<td class="gw-gap"></td>{{ ytd(lw[2]) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net³</td>{{ mcn(lw[3].cells) }}<td class="gw-gap"></td>{{ ytdn(lw[3]) }}</tr>
+<tr class="gw-sub"><td class="gw-m">Churn<small>gross</small></td>{{ mcn(lw[4].cells) }}<td class="gw-gap"></td>{{ ytdn(lw[4]) }}</tr>
+<tr class="gw-sub"><td class="gw-m">Reactivated</td>{{ mc(lw[5].cells) }}<td class="gw-gap"></td>{{ ytd(lw[5]) }}</tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">Logos, EoP</td>{{ mc(lw[6].cells) }}<td class="gw-gap"></td>{{ ytd(lw[6]) }}</tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly New Adds %</td>{{ mc(g_newpct_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_newpct_row) }}</tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly Churn %</td>{{ mc(g_churnpct_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_churnpct_row) }}</tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="10">ARR Walk<span>Spot, $M</span></th><td class="gw-m">ARR, BoP</td>{{ mc(g_bop_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_bop_row) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New (additions)</td>{{ mc(g_add_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_add_row) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td>{{ mc(g_rec_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_rec_row) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net¹</td>{% for v in g_nc_row.cells %}<td class="gw-v gw-h gw-neg{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}<td class="gw-gap"></td>{{ ytd(g_nc_row, true) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Expansion, net</td>{{ mc(g_ne_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_ne_row) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">±</b>FX impact</td>{{ mc(g_fx_row.cells, true) }}<td class="gw-gap"></td>{{ ytd(g_fx_row) }}</tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">ARR, EoP</td>{{ mc(g_arreop_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_arreop_row) }}</tr>
+<tr class="gw-sub"><td class="gw-m">MoM growth<small>USD</small></td>{{ mcv(g_arreop_row.qoq_cells) }}<td class="gw-gap"></td>{{ ytd_na() }}</tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth<small>USD</small></td>{{ mcv(g_arreop_row.yoy_cells) }}<td class="gw-gap"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-cur">{{ g_arreop_row.yoy_cells[-1].v }}</td><td class="gw-v gw-h gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR</td>{{ mc(g_arreop_row.extra_sub.cells) }}<td class="gw-gap"></td>{{ ytd_na() }}</tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="4">Constant currency<span>$M, {{ m_cur }} FX</span></th><td class="gw-m">ARR, EoP<small>c.c.</small></td>{{ mc(g_arrcc_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_arrcc_row) }}</tr>
+<tr class="gw-sub"><td class="gw-m">MoM growth<small>c.c.</small></td>{{ mcv(g_arrcc_row.qoq_cells) }}<td class="gw-gap"></td>{{ ytd_na() }}</tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth<small>c.c.</small></td>{{ mcv(g_arrcc_row.yoy_cells) }}<td class="gw-gap"></td><td class="gw-v gw-h gw-na"></td><td class="gw-v gw-cur">{{ g_arrcc_row.yoy_cells[-1].v }}</td><td class="gw-v gw-h gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR<small>c.c.</small></td>{{ mc(g_arrcc_row.extra_sub.cells) }}<td class="gw-gap"></td>{{ ytd_na() }}</tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="6">Unit economics</th><td class="gw-m">S&amp;M spend<small>$M</small></td>{% for v in g_sm_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ smf(v) }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">{{ smf(g_sm_row.ytd_prev) }}</td><td class="gw-v gw-cur">{{ smf(g_sm_row.ytd_cur) }}</td><td class="gw-v gw-h">{{ g_sm_row.ytd_vs }}</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC<small>$ / new logo</small></td>{% for v in g_cac_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">{{ dlr(g_cac_row.ytd_prev) }}</td><td class="gw-v gw-cur">{{ dlr(g_cac_row.ytd_cur) }}</td><td class="gw-v gw-h">{{ g_cac_row.ytd_vs }}</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC payback<small>months</small></td>{{ mc(g_pb_row.cells) }}<td class="gw-gap"></td>{{ ytd(g_pb_row) }}</tr>
+<tr class="gw-row"><td class="gw-m">ARPA²<small>$ / month</small></td>{% for v in g_arpa_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">{{ dlr(g_arpa_row.ytd_prev) }}</td><td class="gw-v gw-cur">{{ dlr(g_arpa_row.ytd_cur) }}</td><td class="gw-v gw-h">{{ g_arpa_row.ytd_vs }}</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, new logos<small>$ / month</small></td>{% for v in g_arpaadd_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">{{ dlr(g_arpaadd_row.ytd_prev) }}</td><td class="gw-v gw-cur">{{ dlr(g_arpaadd_row.ytd_cur) }}</td><td class="gw-v gw-h">{{ g_arpaadd_row.ytd_vs }}</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, churned logos<small>$ / month</small></td>{% for v in g_arpachn_row.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-gap"></td><td class="gw-v gw-h">{{ dlr(g_arpachn_row.ytd_prev) }}</td><td class="gw-v gw-cur">{{ dlr(g_arpachn_row.ytd_cur) }}</td><td class="gw-v gw-h">{{ g_arpachn_row.ytd_vs }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="gw-ft">
+    <p>Logo walk in thousands of logos (e.g. 0.725 = 725 logos); ARR at spot FX in $M; negatives in parentheses. YTD = Jan–{{ m_cur[:3] }}; YTD columns show the {{ g_tbl.ytd_labels[0] }} and {{ g_tbl.ytd_labels[1] }} cutoff values (stock) or accumulated flows, and the YoY change; MoM growth stays "n.d." for a YTD window. Logo Monthly New Adds % = (New + Recovered) ÷ BoP logos; Logo Monthly Churn % = (Churn − Reactivated) ÷ BoP, from company-level classification (not raw per-segment logo counts, which double-count companies active in both Core and Lite). CAC = S&amp;M spend ÷ New logos; ARPA = (ARR EoP ÷ 12) ÷ Logos EoP. <b>¹</b> ARR Churn, net and Logo Monthly Churn % are both net of Reactivated only (Recovered excluded, shown separately). <b>²</b> ARPA = MRR ÷ logos. Excludes Alanube ($1.2M ARR; company-wide ARR incl. Alanube is shown on the Monthly/YTD Performance slides). <b>³</b> Logo walk: Logos, EoP = BoP + New + Recovered − Churn, net; Churn, net = Churn (gross) − Reactivated, derived from the logo balance so the walk foots (BoP = prior-month EoP, de-duplicated across Core and Lite). Figures may not sum due to rounding.</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 1</em></div>
+  </footer>
+</section>
+
+  <div class="slide-divider">↓</div>
+
+<section class="slide gw-slide" aria-label="Core vs Lite monthly performance, {{ mlast }}">
+  <header class="gw-hd"><h2>Core vs Lite Monthly Performance GLO Alegra</h2><span>{{ mlast }}</span></header>
+  <div class="gw-body">
+    {% set cb_core = metrics.arr_walk_products | selectattr('id','equalto','core') | first %}
+    {% set cb_lite = metrics.arr_walk_products | selectattr('id','equalto','lite') | first %}
+    {% set cb_core_tbl = cb_core.arr_walk_table %}
+    {% set cb_lite_tbl = cb_lite.arr_walk_table %}
+    {% set cb_core_logo = cb_core_tbl.sections | selectattr('label','equalto',"Logo EoP (000's)") | first %}
+    {% set cb_lite_logo = cb_lite_tbl.sections | selectattr('label','equalto',"Logo EoP (000's)") | first %}
+    {% set cb_core_arr  = cb_core_tbl.sections | selectattr('label','equalto',"ARR Walk — Spot ($M)") | first %}
+    {% set cb_lite_arr  = cb_lite_tbl.sections | selectattr('label','equalto',"ARR Walk — Spot ($M)") | first %}
+    {% set cb_core_saas = cb_core_tbl.sections | selectattr('label','equalto',"SaaS Metrics") | first %}
+    {% set cb_lite_saas = cb_lite_tbl.sections | selectattr('label','equalto',"SaaS Metrics") | first %}
+    {% set cb_core_eop = cb_core_logo.rows | selectattr('label','equalto',"Total EoP") | first %}
+    {% set cb_lite_eop = cb_lite_logo.rows | selectattr('label','equalto',"Total EoP") | first %}
+    {% set cb_core_newpct = cb_core_logo.rows | selectattr('label','equalto',"Logo Monthly New Adds %") | first %}
+    {% set cb_lite_newpct = cb_lite_logo.rows | selectattr('label','equalto',"Logo Monthly New Adds %") | first %}
+    {% set cb_core_churnpct = cb_core_logo.rows | selectattr('label','equalto',"Logo Monthly Churn %") | first %}
+    {% set cb_lite_churnpct = cb_lite_logo.rows | selectattr('label','equalto',"Logo Monthly Churn %") | first %}
+    {% set cb_core_bop = cb_core_arr.rows | selectattr('label','equalto',"ARR BoP") | first %}
+    {% set cb_lite_bop = cb_lite_arr.rows | selectattr('label','equalto',"ARR BoP") | first %}
+    {% set cb_core_add = cb_core_arr.rows | selectattr('label','equalto',"Additions") | first %}
+    {% set cb_lite_add = cb_lite_arr.rows | selectattr('label','equalto',"Additions") | first %}
+    {% set cb_core_rec = cb_core_arr.rows | selectattr('label','equalto',"Recovered") | first %}
+    {% set cb_lite_rec = cb_lite_arr.rows | selectattr('label','equalto',"Recovered") | first %}
+    {% set cb_core_nc  = cb_core_arr.rows | selectattr('label','equalto',"Net Churn") | first %}
+    {% set cb_lite_nc  = cb_lite_arr.rows | selectattr('label','equalto',"Net Churn") | first %}
+    {% set cb_core_ne  = cb_core_arr.rows | selectattr('label','equalto',"Net Expansion") | first %}
+    {% set cb_lite_ne  = cb_lite_arr.rows | selectattr('label','equalto',"Net Expansion") | first %}
+    {% set cb_core_fx  = cb_core_arr.rows | selectattr('label','equalto',"(+/−) FX Impact") | first %}
+    {% set cb_lite_fx  = cb_lite_arr.rows | selectattr('label','equalto',"(+/−) FX Impact") | first %}
+    {% set cb_core_arreop = cb_core_arr.rows | selectattr('label','equalto',"ARR EoP") | first %}
+    {% set cb_lite_arreop = cb_lite_arr.rows | selectattr('label','equalto',"ARR EoP") | first %}
+    {% set cb_core_arrcc  = cb_core_arr.rows | selectattr('label','equalto',"ARR EoP (Constant Currency)") | first %}
+    {% set cb_lite_arrcc  = cb_lite_arr.rows | selectattr('label','equalto',"ARR EoP (Constant Currency)") | first %}
+    {% set cb_core_sm = cb_core_saas.rows | selectattr('label','equalto',"S&M Total Spend") | first %}
+    {% set cb_lite_sm = cb_lite_saas.rows | selectattr('label','equalto',"S&M Total Spend") | first %}
+    {% set cb_core_cac = cb_core_saas.rows | selectattr('label','equalto',"CAC") | first %}
+    {% set cb_lite_cac = cb_lite_saas.rows | selectattr('label','equalto',"CAC") | first %}
+    {% set cb_core_pb = cb_core_saas.rows | selectattr('label','equalto',"CAC Payback (meses)") | first %}
+    {% set cb_lite_pb = cb_lite_saas.rows | selectattr('label','equalto',"CAC Payback (meses)") | first %}
+    {% set cb_core_arpa = cb_core_saas.rows | selectattr('label','equalto',"ARPA") | first %}
+    {% set cb_lite_arpa = cb_lite_saas.rows | selectattr('label','equalto',"ARPA") | first %}
+    {% set cb_core_arpaadd = cb_core_saas.rows | selectattr('label','equalto',"ARPA Adds") | first %}
+    {% set cb_lite_arpaadd = cb_lite_saas.rows | selectattr('label','equalto',"ARPA Adds") | first %}
+    {% set cb_core_arpachn = cb_core_saas.rows | selectattr('label','equalto',"ARPA Churn") | first %}
+    {% set cb_lite_arpachn = cb_lite_saas.rows | selectattr('label','equalto',"ARPA Churn") | first %}
+    {% set k_core_arr = cb_core_arreop.cells[-1]|float %}
+    {% set k_lite_arr = cb_lite_arreop.cells[-1]|float %}
+    {% set k_tot_arr  = k_core_arr + k_lite_arr %}
+    {% set k_tot_logos = g_eop_row.cells[-1]|float %}
+    {# escala común de las barras MoM c.c. de las 3 tarjetas (misma regla que septiembre: 17.2px = máximo absoluto) #}
+    {% set sc = namespace(mx=1.0) %}
+    {% for lst in [cb_core_arrcc.qoq_cells, cb_lite_arrcc.qoq_cells, g_arrcc_row.qoq_cells] %}{% for c in lst[-4:] %}{% set pv = (c.v|replace('%','')|replace('+','')|replace('−','-'))|float(0) %}{% if pv|abs > sc.mx %}{% set sc.mx = pv|abs %}{% endif %}{% endfor %}{% endfor %}
+    {% set kscale = 17.2 / sc.mx %}
+    {% macro spark(cells, lbls) %}<svg viewBox="0 0 160 46" width="160" height="46" role="img" aria-label="MoM ARR growth, constant currency, last four months"><text x="0" y="27.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">MoM</text><text x="0" y="36.8" font-size="7" font-weight="600" letter-spacing=".6" fill="#94a3b8">C.C.</text><line x1="32" x2="160" y1="29.8" y2="29.8" stroke="#cbd5e1" stroke-width=".8"/>{% set xs = [44.5, 75.5, 106.5, 136.5] %}{% for c in cells[-4:] %}{% set i = loop.index0 %}{% set last = loop.last %}{% set pv = (c.v|replace('%','')|replace('+','')|replace('−','-'))|float(0) %}{% set h = [pv|abs * kscale, 1.0]|max %}{% set w = 16 if last else 14 %}{% set x = xs[i] %}{% set cx = x + w/2 %}{% if pv >= 0 %}<rect x="{{ x }}" y="{{ '%.1f'|format(29.8 - h) }}" width="{{ w }}" height="{{ '%.1f'|format(h) }}" rx="1" fill="#0f172b" fill-opacity="{{ 1 if last else '.42' }}"/><text x="{{ cx }}" y="{{ '%.1f'|format(29.8 - h - 2.5) }}" text-anchor="middle" font-size="{{ 8 if last else 7 }}" font-weight="{{ 700 if last else 500 }}" fill="{{ '#0f172b' if last else '#64748b' }}">{{ c.v }}</text>{% else %}<rect x="{{ x }}" y="29.8" width="{{ w }}" height="{{ '%.1f'|format(h) }}" rx="1" fill="#0f172b" fill-opacity="{{ 1 if last else '.42' }}"/><text x="{{ cx }}" y="27.2" text-anchor="middle" font-size="{{ 8 if last else 7 }}" font-weight="{{ 700 if last else 500 }}" fill="{{ '#0f172b' if last else '#64748b' }}">{{ c.v }}</text>{% endif %}<text x="{{ cx }}" y="45" text-anchor="middle" font-size="6.5" font-weight="{{ 700 if last else 500 }}" letter-spacing=".3" fill="{{ '#1a7e7f' if last else '#94a3b8' }}">{{ lbls[i][:3] }}</text>{% endfor %}</svg>{% endmacro %}
+    {% macro usdm(v) %}{% set a = v.replace('(','').replace(')','').replace('-','').replace('−','') %}{% if v[0] in ['(','-','−'] and a|float(0) != 0 %}−${{ a }}M{% else %}${{ a }}M{% endif %}{% endmacro %}
+    {% set lb4 = g_tbl.quarters[-4:] %}
+    <div class="gw-ks gw-c3">
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--core)"></i>Core ARR</div><div class="gw-k-mix">{{ (k_core_arr / k_tot_arr * 100)|round|int }}% of ARR · {{ (cb_core_eop.cells[-1]|float / k_tot_logos * 100)|round|int }}% of logos</div></div><div class="gw-k-mid"><div class="gw-k-val">${{ cb_core_arreop.cells[-1] }}M</div>{{ spark(cb_core_arrcc.qoq_cells, lb4) }}</div><div class="gw-k-dl"><div><b>YoY USD</b><span>{{ cb_core_arreop.yoy_cells[-1].v }}</span></div><div><b>YoY c.c.</b><span>{{ cb_core_arrcc.yoy_cells[-1].v }}</span></div><div><b>Net new, M</b><span>{{ usdm(cb_core_arreop.extra_sub.cells[-1]) }}</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--lite)"></i>Lite ARR</div><div class="gw-k-mix">{{ (k_lite_arr / k_tot_arr * 100)|round|int }}% of ARR · {{ (cb_lite_eop.cells[-1]|float / k_tot_logos * 100)|round|int }}% of logos</div></div><div class="gw-k-mid"><div class="gw-k-val">${{ cb_lite_arreop.cells[-1] }}M</div>{{ spark(cb_lite_arrcc.qoq_cells, lb4) }}</div><div class="gw-k-dl"><div><b>YoY USD</b><span>{{ cb_lite_arreop.yoy_cells[-1].v }}</span></div><div><b>YoY c.c.</b><span>{{ cb_lite_arrcc.yoy_cells[-1].v }}</span></div><div><b>Net new, M</b><span>{{ usdm(cb_lite_arreop.extra_sub.cells[-1]) }}</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl"><i style="background:var(--navy)"></i>Total ARR<sup style="font-size:7px;margin-left:-3px">†</sup></div><div class="gw-k-mix">{{ g_eop_row.cells[-1] }}K paying logos</div></div><div class="gw-k-mid"><div class="gw-k-val">${{ g_arreop_row.cells[-1] }}M</div>{{ spark(g_arrcc_row.qoq_cells, lb4) }}</div><div class="gw-k-dl"><div><b>YoY USD</b><span>{{ g_arreop_row.yoy_cells[-1].v }}</span></div><div><b>YoY c.c.</b><span>{{ g_arrcc_row.yoy_cells[-1].v }}</span></div><div><b>Net new, M</b><span>{{ usdm(g_arreop_row.extra_sub.cells[-1]) }}</span></div></div></div>
+    </div>
+    {% macro ytdc(row, neg=false) %}<td class="gw-v gw-ytd{% if neg %} gw-neg{% endif %}">{{ row.ytd_cur }}</td>{% endmacro %}
+    <table class="gw-t" style="--gw-rh:9.7px;font-size:9px;line-height:1">
+      <colgroup><col class="gw-c-sec"><col style="width:130px"><col span="{{ mN + 1 }}"><col class="gw-c-gap"><col span="{{ mN + 1 }}"></colgroup>
+      <thead><tr class="gw-seg"><th colspan="2"></th><th class="gw-sc" colspan="{{ mN + 1 }}">Core<span>Larger SMEs by annual invoicing</span></th><th class="gw-gap"></th><th class="gw-sl" colspan="{{ mN + 1 }}">Lite<span>Smaller SMEs by annual invoicing</span></th></tr><tr class="gw-per"><th colspan="2"></th>{% for q in g_tbl.quarters %}{% if loop.last %}<th class="gw-cur"><span class="gw-pill">{{ q }}</span></th>{% else %}<th>{{ q }}</th>{% endif %}{% endfor %}<th>{{ g_tbl.ytd_labels[1] }}</th><th class="gw-gap"></th>{% for q in g_tbl.quarters %}{% if loop.last %}<th class="gw-cur"><span class="gw-pill">{{ q }}</span></th>{% else %}<th>{{ q }}</th>{% endif %}{% endfor %}<th>{{ g_tbl.ytd_labels[1] }}</th></tr></thead>
+      <tbody>
+{% set lwc = cb_core_tbl.logo_walk.rows %}{% set lwl = cb_lite_tbl.logo_walk.rows %}
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="9">Logo walk<span>000s</span></th><td class="gw-m">Logos, BoP</td>{{ mc(lwc[0].cells) }}{{ ytdc(lwc[0]) }}<td class="gw-gap"></td>{{ mc(lwl[0].cells) }}{{ ytdc(lwl[0]) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New logos</td>{{ mc(lwc[1].cells) }}{{ ytdc(lwc[1]) }}<td class="gw-gap"></td>{{ mc(lwl[1].cells) }}{{ ytdc(lwl[1]) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td>{{ mc(lwc[2].cells) }}{{ ytdc(lwc[2]) }}<td class="gw-gap"></td>{{ mc(lwl[2].cells) }}{{ ytdc(lwl[2]) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net</td>{{ mcn(lwc[3].cells) }}<td class="gw-v gw-ytd gw-neg">({{ lwc[3].ytd_cur }})</td><td class="gw-gap"></td>{{ mcn(lwl[3].cells) }}<td class="gw-v gw-ytd gw-neg">({{ lwl[3].ytd_cur }})</td></tr>
+<tr class="gw-sub"><td class="gw-m">Churn<small>gross</small></td>{{ mcn(lwc[4].cells) }}<td class="gw-v gw-ytd gw-neg">({{ lwc[4].ytd_cur }})</td><td class="gw-gap"></td>{{ mcn(lwl[4].cells) }}<td class="gw-v gw-ytd gw-neg">({{ lwl[4].ytd_cur }})</td></tr>
+<tr class="gw-sub"><td class="gw-m">Reactivated</td>{{ mc(lwc[5].cells) }}{{ ytdc(lwc[5]) }}<td class="gw-gap"></td>{{ mc(lwl[5].cells) }}{{ ytdc(lwl[5]) }}</tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">Logos, EoP</td>{{ mc(lwc[6].cells) }}{{ ytdc(lwc[6]) }}<td class="gw-gap"></td>{{ mc(lwl[6].cells) }}{{ ytdc(lwl[6]) }}</tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly New Adds %</td>{{ mc(cb_core_newpct.cells) }}{{ ytdc(cb_core_newpct) }}<td class="gw-gap"></td>{{ mc(cb_lite_newpct.cells) }}{{ ytdc(cb_lite_newpct) }}</tr>
+<tr class="gw-row"><td class="gw-m">Logo Monthly Churn %</td>{{ mc(cb_core_churnpct.cells) }}{{ ytdc(cb_core_churnpct) }}<td class="gw-gap"></td>{{ mc(cb_lite_churnpct.cells) }}{{ ytdc(cb_lite_churnpct) }}</tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="10">ARR Walk<span>Spot, $M</span></th><td class="gw-m">ARR, BoP</td>{{ mc(cb_core_bop.cells) }}{{ ytdc(cb_core_bop) }}<td class="gw-gap"></td>{{ mc(cb_lite_bop.cells) }}{{ ytdc(cb_lite_bop) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>New (additions)</td>{{ mc(cb_core_add.cells) }}{{ ytdc(cb_core_add) }}<td class="gw-gap"></td>{{ mc(cb_lite_add.cells) }}{{ ytdc(cb_lite_add) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Recovered</td>{{ mc(cb_core_rec.cells) }}{{ ytdc(cb_core_rec) }}<td class="gw-gap"></td>{{ mc(cb_lite_rec.cells) }}{{ ytdc(cb_lite_rec) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">−</b>Churn, net</td>{% for v in cb_core_nc.cells %}<td class="gw-v gw-h gw-neg{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}{{ ytdc(cb_core_nc, true) }}<td class="gw-gap"></td>{% for v in cb_lite_nc.cells %}<td class="gw-v gw-h gw-neg{% if loop.last %} gw-cur{% endif %}">{{ v }}</td>{% endfor %}{{ ytdc(cb_lite_nc, true) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">+</b>Expansion, net</td>{{ mc(cb_core_ne.cells) }}{{ ytdc(cb_core_ne) }}<td class="gw-gap"></td>{{ mc(cb_lite_ne.cells) }}{{ ytdc(cb_lite_ne) }}</tr>
+<tr class="gw-row"><td class="gw-m"><b class="gw-op">±</b>FX impact</td>{{ mc(cb_core_fx.cells, true) }}{{ ytdc(cb_core_fx) }}<td class="gw-gap"></td>{{ mc(cb_lite_fx.cells, true) }}{{ ytdc(cb_lite_fx) }}</tr>
+<tr class="gw-lvl gw-tot"><td class="gw-m">ARR, EoP</td>{{ mc(cb_core_arreop.cells) }}{{ ytdc(cb_core_arreop) }}<td class="gw-gap"></td>{{ mc(cb_lite_arreop.cells) }}{{ ytdc(cb_lite_arreop) }}</tr>
+<tr class="gw-sub"><td class="gw-m">MoM growth</td>{{ mcv(cb_core_arreop.qoq_cells) }}<td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td>{{ mcv(cb_lite_arreop.qoq_cells) }}<td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth</td>{{ mcv(cb_core_arreop.yoy_cells) }}<td class="gw-v gw-ytd">{{ cb_core_arreop.yoy_cells[-1].v }}</td><td class="gw-gap"></td>{{ mcv(cb_lite_arreop.yoy_cells) }}<td class="gw-v gw-ytd">{{ cb_lite_arreop.yoy_cells[-1].v }}</td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR</td>{{ mc(cb_core_arreop.extra_sub.cells) }}<td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td>{{ mc(cb_lite_arreop.extra_sub.cells) }}<td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-lvl gw-first"><th class="gw-sec" scope="rowgroup" rowspan="4">Constant currency<span>$M, {{ m_cur }} FX</span></th><td class="gw-m">ARR, EoP<small>c.c.</small></td>{{ mc(cb_core_arrcc.cells) }}{{ ytdc(cb_core_arrcc) }}<td class="gw-gap"></td>{{ mc(cb_lite_arrcc.cells) }}{{ ytdc(cb_lite_arrcc) }}</tr>
+<tr class="gw-sub"><td class="gw-m">MoM growth</td>{{ mcv(cb_core_arrcc.qoq_cells) }}<td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td>{{ mcv(cb_lite_arrcc.qoq_cells) }}<td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-sub"><td class="gw-m">YoY growth</td>{{ mcv(cb_core_arrcc.yoy_cells) }}<td class="gw-v gw-ytd">{{ cb_core_arrcc.yoy_cells[-1].v }}</td><td class="gw-gap"></td>{{ mcv(cb_lite_arrcc.yoy_cells) }}<td class="gw-v gw-ytd">{{ cb_lite_arrcc.yoy_cells[-1].v }}</td></tr>
+<tr class="gw-sub"><td class="gw-m">Net new ARR<small>c.c.</small></td>{{ mc(cb_core_arrcc.extra_sub.cells) }}<td class="gw-v gw-ytd gw-na"></td><td class="gw-gap"></td>{{ mc(cb_lite_arrcc.extra_sub.cells) }}<td class="gw-v gw-ytd gw-na"></td></tr>
+<tr class="gw-row gw-first"><th class="gw-sec" scope="rowgroup" rowspan="6">Unit economics</th><td class="gw-m">S&amp;M spend<small>$M</small></td>{% for v in cb_core_sm.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ smf(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ smf(cb_core_sm.ytd_cur) }}</td><td class="gw-gap"></td>{% for v in cb_lite_sm.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ smf(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ smf(cb_lite_sm.ytd_cur) }}</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC<small>$ / new logo</small></td>{% for v in cb_core_cac.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ dlr(cb_core_cac.ytd_cur) }}</td><td class="gw-gap"></td>{% for v in cb_lite_cac.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ dlr(cb_lite_cac.ytd_cur) }}</td></tr>
+<tr class="gw-row"><td class="gw-m">CAC payback<small>months</small></td>{{ mc(cb_core_pb.cells) }}{{ ytdc(cb_core_pb) }}<td class="gw-gap"></td>{{ mc(cb_lite_pb.cells) }}{{ ytdc(cb_lite_pb) }}</tr>
+<tr class="gw-row"><td class="gw-m">ARPA<small>$ / month</small></td>{% for v in cb_core_arpa.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ dlr(cb_core_arpa.ytd_cur) }}</td><td class="gw-gap"></td>{% for v in cb_lite_arpa.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ dlr(cb_lite_arpa.ytd_cur) }}</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, new logos<small>$ / month</small></td>{% for v in cb_core_arpaadd.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ dlr(cb_core_arpaadd.ytd_cur) }}</td><td class="gw-gap"></td>{% for v in cb_lite_arpaadd.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ dlr(cb_lite_arpaadd.ytd_cur) }}</td></tr>
+<tr class="gw-row"><td class="gw-m">ARPA, churned logos<small>$ / month</small></td>{% for v in cb_core_arpachn.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ dlr(cb_core_arpachn.ytd_cur) }}</td><td class="gw-gap"></td>{% for v in cb_lite_arpachn.cells %}<td class="gw-v gw-h{% if loop.last %} gw-cur{% endif %}">{{ dlr(v) }}</td>{% endfor %}<td class="gw-v gw-ytd">{{ dlr(cb_lite_arpachn.ytd_cur) }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="gw-ft">
+    <p><b>Core and Lite</b> segment SMEs by annual invoicing volume. Spot = actual FX; c.c. = restated at {{ m_cur }} FX. YTD = Jan–{{ m_cur[:3] }} ({{ g_tbl.ytd_labels[1] }}); the YTD column shows the accumulated flow or the cutoff-month value. Negatives in parentheses. <b>†</b> Total ARR = Core + Lite, excludes Alanube (company-wide ARR incl. Alanube is shown on the Monthly/YTD Performance slides). Bars: MoM ARR growth, c.c., common scale. Logo walk: Churn, net = Churn (gross) − Reactivated, derived so BoP + New + Recovered − Churn, net = EoP.</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 2</em></div>
+  </footer>
+</section>
+
+  <div class="slide-divider">↓</div>
+
+  {# ── C: ARR by Country (resumen mensual) — datos: metrics.gw_country_detail (corte = columna 3) #}
+  {% set gd = metrics.gw_country_detail %}
+  {% set gt = gd.rows[-1].cols[2] %}
+  {% set gt1 = gd.rows[-1].cols[1] %}
+  {% macro pctf(v) %}{% if v and v[0] == '(' %}−{{ v.replace('(','').replace(')','') }}%{% elif v == '—' or v == 'n.m.' %}{{ v }}{% else %}{{ v }}%{% endif %}{% endmacro %}
+  {% set spk = namespace(mx=1.0) %}
+  {% for r in gd.rows %}{% for v in r.spark %}{% if v > spk.mx %}{% set spk.mx = v %}{% endif %}{% endfor %}{% endfor %}
+  {% set sk = 23.8 / spk.mx %}
+<section class="slide gw-slide" aria-label="ARR by country, {{ mlast }} summary">
+  <header class="gw-hd"><h2>ARR by Country</h2><span>{{ mlast }}</span></header>
+  <div class="gw-body" style="gap:26px;padding-top:18px">
+    <div class="gw-ks gw-c5">
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">ARR</div></div><div class="gw-k-val">${{ gt.arr }}M</div><div class="gw-k-dl"><div><b>YoY USD</b><span>{{ pctf(gt.yoy_usd) }}</span></div><div><b>YoY c.c.</b><span>{{ pctf(gt.yoy_cc) }}</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">Logos</div></div><div class="gw-k-val">{{ gt.logos }}K</div><div class="gw-k-dl"><div><b>YoY</b><span>{{ pctf(gt.logos_yoy) }}</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">ARPA</div></div><div class="gw-k-val">${{ gt.arpa }}<small>/ month</small></div><div class="gw-k-dl"><div><b>YoY USD</b><span>{{ pctf(gt.arpa_yoy) }}</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">S&amp;M spend</div></div><div class="gw-k-val">${{ gt.sm }}K<small>/ month</small></div><div class="gw-k-dl"><div><b>vs {{ gd.cols[0] }}</b><span>{{ pctf(gd.sm_vs_first) }}</span></div></div></div>
+      <div class="gw-k"><div class="gw-k-top"><div class="gw-k-lbl">CAC payback</div></div><div class="gw-k-val">{{ gt.payback }}<small>months</small></div><div class="gw-k-dl"><div><b>in {{ gd.cols[1] }}</b><span class="gw-nt">{{ gt1.payback }}</span></div></div></div>
+    </div>
+    <table class="gw-ct">
+      <colgroup><col style="width:116px"><col style="width:140px"><col style="width:58px"><col style="width:58px"><col style="width:160px"><col style="width:12px"><col style="width:54px"><col style="width:58px"><col style="width:12px"><col><col><col><col></colgroup>
+      <thead>
+        <tr class="gw-seg"><th class="gw-blank"></th><th colspan="5">Scale &amp; growth</th><th class="gw-gap"></th><th colspan="2">Customers</th><th class="gw-gap"></th><th colspan="4">Efficiency<span>{{ gd.cols[2] }}, per month</span></th></tr>
+        <tr class="gw-per"><th></th><th class="gw-l">ARR · share</th><th>YoY USD</th><th>YoY c.c.</th><th class="gw-l" style="padding-left:6px">c.c. YoY, {{ gd.spark_labels[0] }}–{{ gd.spark_labels[-1] }}</th><th class="gw-gap"></th><th>Logos</th><th>ARPA $/mo</th><th class="gw-gap"></th><th>S&amp;M $K</th><th>CAC $</th><th>Churn</th><th>Payback</th></tr>
+      </thead>
+      <tbody>
+{% for r in gd.rows %}{% set c = r.cols[2] %}{% set isT = (r.key == 'total') %}
+<tr{% if isT %} class="gw-tot"{% endif %}><th scope="row">{{ r.name }}</th><td><div class="gw-arr"><span class="gw-n">${{ c.arr }}M</span><span class="gw-bar"><i style="width:{{ c.mix }}%"></i></span><span class="gw-p">{{ c.mix }}%</span></div></td><td>{{ pctf(c.yoy_usd) }}</td><td class="gw-cc">{{ pctf(c.yoy_cc) }}</td><td class="gw-spk"><svg width="152" height="29" viewBox="0 0 104 32" role="img" aria-label="c.c. YoY {{ gd.spark_labels[0] }} to {{ gd.spark_labels[-1] }}"><line x1="4" x2="100" y1="29.0" y2="29.0" stroke="#edf0f4" stroke-width="1"/><polyline points="{% for v in r.spark %}{{ '%.1f'|format(4 + loop.index0 * 16) }},{{ '%.1f'|format([[29 - v * sk, 2]|max, 31]|min) }}{% if not loop.last %} {% endif %}{% endfor %}" fill="none" stroke="{{ '#0f172b' if isT else '#94a3b8' }}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="100.0" cy="{{ '%.1f'|format([[29 - r.spark[-1] * sk, 2]|max, 31]|min) }}" r="2.8" fill="#1a7e7f"/></svg></td><td class="gw-gap"></td><td>{{ c.logos }}K</td><td>{{ c.arpa }}</td><td class="gw-gap"></td><td>{{ c.sm }}</td><td>{{ c.cac }}</td><td>{{ c.churn }}{% if c.churn not in ['—','n.m.'] %}%{% endif %}</td><td class="{{ 'gw-flag' if c.payback_flag else '' }}">{{ c.payback }}{% if r.key == 'other' %}<sup>†</sup>{% endif %}</td></tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <footer class="gw-ft">
+    <p>Figures exclude Alanube (company-wide ARR incl. Alanube is shown on the Monthly/YTD Performance slides). ARR, Logos, ARPA, S&amp;M and CAC payback are all real. c.c. = constant currency. Efficiency = {{ mlast }} (single month): S&amp;M $K per month; CAC = S&amp;M ÷ new logos; Churn = (Churn − Reactivated) ÷ BoP logos. Payback = CAC payback in months (country-level uses the same cohort model as the GLO figure); above 24 months in orange. Other = Total − four countries. <b>†</b> The cohort model doesn't cover Other's countries (Argentina, Chile, Panama, Peru, Spain, USA), so no payback is shown; n.m. = residual not meaningful.</p>
+    <div class="gw-key"><div><span><i></i>Payback &gt; 24 mo</span></div><em>Alegra · Confidential · 3</em></div>
+  </footer>
+</section>
+
+  <div class="slide-divider">↓</div>
+
+  {# ── D: ARR by Country · Three-Year Detail (mismo mes de corte en −24/−12/0) #}
+  {% macro dgrp_head(groups) %}<tr class="gw-per"><th></th>{% for g in groups %}{% for mm in gd.cols %}<th{% if loop.last %} class="gw-cur"{% endif %}>{{ mm }}</th>{% endfor %}{% if not loop.last %}<th class="gw-gap"></th>{% endif %}{% endfor %}</tr>{% endmacro %}
+  {% macro dtable(title, groups) %}<table class="gw-t gw-ap" style="--rh:14.0px"><colgroup><col style="width:120px">{% for g in groups %}<col span="3">{% if not loop.last %}<col class="gw-c-gap">{% endif %}{% endfor %}</colgroup><thead><tr class="gw-seg"><th class="gw-blk">{{ title }}</th>{% for g in groups %}<th class="gw-sq" colspan="3">{{ g[0] }}<span>{{ g[1] }}</span></th>{% if not loop.last %}<th class="gw-gap"></th>{% endif %}{% endfor %}</tr>{{ dgrp_head(groups) }}</thead><tbody>{% for r in gd.rows %}<tr{% if r.key == 'total' %} class="gw-tot"{% endif %}><th scope="row">{{ r.name }}</th>{% for g in groups %}{% for c in r.cols %}{% set v = c[g[2]] %}<td class="gw-v {{ 'gw-cur' if loop.last else 'gw-h' }}{% if v is string and v[0] == '(' %} gw-neg{% endif %}{% if g[2] == 'payback' and c.payback_flag %} gw-flag{% endif %}">{{ v }}</td>{% endfor %}{% if not loop.last %}<td class="gw-gap"></td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody></table>{% endmacro %}
+<section class="slide gw-slide" aria-label="ARR by country, three-year detail, {{ gd.cols[0] }} to {{ gd.cols[2] }}">
+  <header class="gw-hd"><h2>ARR by Country · Three-Year Detail</h2><span>{{ gd.cols[0] }} → {{ gd.cols[2] }}</span></header>
+  <div class="gw-body" style="gap:12px;padding-top:10px">
+    {{ dtable('Scale & growth', [('ARR','$M','arr'), ('YoY in USD','%','yoy_usd'), ('YoY constant currency','%','yoy_cc'), ('ARR mix','%','mix')]) }}
+    {{ dtable('Customers', [('Logos','000s, EoP','logos'), ('Logos YoY','%','logos_yoy'), ('ARPA','$ / month','arpa'), ('ARPA YoY','%, USD','arpa_yoy')]) }}
+    {{ dtable('GTM efficiency', [('S&M spend','$K / month','sm'), ('CAC','$ / new logo','cac'), ('Logo churn','% / month','churn'), ('CAC payback','months','payback')]) }}
+  </div>
+  <footer class="gw-ft">
+    <p>Figures exclude Alanube (company-wide ARR incl. Alanube is shown on the Monthly/YTD Performance slides). Same cutoff month in each year ({{ gd.cols[0] }}, {{ gd.cols[1] }}, {{ gd.cols[2] }}); units in each header. Negatives in parentheses. c.c. = YoY growth ex-FX. ARPA = MRR ÷ active logos. CAC = S&amp;M ÷ new logos; S&amp;M and churn are single-month figures. Payback = CAC payback in months (country-level uses the same cohort model); above 24 months in orange. Other = Total − four countries; the cohort model doesn't cover Other's countries (no payback), and its churn is a residual (n.m. when not meaningful).</p>
+    <div class="gw-key"><div><span><i></i>Negative / unfavorable</span><span><i class="gw-sw"></i>Latest period</span></div><em>Alegra · Confidential · 4</em></div>
+  </footer>
+</section>
+
+  {% if False %}{# Loop viejo GLO/Core/Lite mensual (diseño jul/ago) — oculto 2026-11-17 al restaurar las slides rediseñadas en meses; reversible #}
   <!-- ============================================================
        SLIDES 2–3 — ARR Walk Core & Lite (loop dinámico)
        ============================================================ -->
@@ -1400,6 +1656,7 @@
     </div>
   </div>
   {% endfor %}
+  {% endif %}{# /loop viejo oculto #}
   {% endif %}{# /ARR Walk mensual por producto #}
 
   <div class="slide-divider">↓ &nbsp; Countries Performance</div>
@@ -1505,7 +1762,7 @@
 
   {# Oculta 2026-10-24: pedido explícito del usuario — sacar la réplica de "ARR Walk —
      Alanube" de esta sección. Código intacto abajo, reversible cambiando False por True. #}
-  {% if not metrics.is_quarter_end %}
+  {% if False %}{# Alanube oculto por ahora — decisión del usuario 2026-11-17 (en meses no trimestrales estaba visible). Reversible: volver a `not metrics.is_quarter_end` #}
   <div class="slide-divider">↓ &nbsp; Alanube</div>
 
   <!-- REPLICA — ARR Walk Alanube (código idéntico al de 1_inicio.j2, SLIDE 9, que

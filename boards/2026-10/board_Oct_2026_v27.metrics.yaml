@@ -1,4 +1,4 @@
-generated_at: 2026-11-17 12:37
+generated_at: 2026-11-18 07:20
 cutoff_month: 2026-10
 arr_total: $34.7M
 is_quarter_end: false
@@ -14,6 +14,24 @@ arr_vs_budget_positive: true
 arr_yoy: +35.8%
 arr_yoy_positive: true
 arr_yoy_cc: +19.9%
+arr_mom_cc: +1.5%
+arr_mom_cc_positive: true
+new_mrr_mom_cc: +16.7%
+new_mrr_mom_cc_positive: true
+new_logos_yoy_cc: +28.4%
+new_logos_yoy_cc_positive: true
+new_logos_mom_cc: +13.1%
+new_logos_mom_cc_positive: true
+arr_vs_budget_cc: -6.9%
+arr_vs_budget_cc_positive: false
+new_mrr_vs_budget_cc: -25.0%
+new_mrr_vs_budget_cc_positive: false
+new_logos_vs_budget_cc: -22.8%
+new_logos_vs_budget_cc_positive: false
+new_mrr_ytd_vs_budget_cc: -22.3%
+new_mrr_ytd_vs_budget_cc_positive: false
+new_logos_ytd_vs_budget_cc: -22.2%
+new_logos_ytd_vs_budget_cc_positive: false
 arr_yoy_cc_positive: true
 arr_core_lite_split: Core 61% · Lite 36%
 arr_alanube_pct: 3%
@@ -104,9 +122,9 @@ arr_walk_products:
   churn_arr: $649K
   churn_qoq: -66.8%
   churn_yoy: -95.4%
-  net_new_arr: $143K
+  net_new_arr: $145K
   net_new_vs: vs $2.5M en 3Q26
-  net_new_qoq: -94.3%
+  net_new_qoq: -94.2%
   quarters:
   - 1Q24
   - 2Q24
@@ -173,18 +191,18 @@ arr_walk_products:
   - 0
   - 0
   arr_net_new:
-  - 0.5369181761426339
-  - 0.21603695249291416
-  - 0.9091344800143484
-  - 0.5303494171842831
-  - 1.5439256366535026
-  - 0.6129994799571703
-  - 1.0029545849164139
-  - 1.8697457002666165
-  - 0.8264608214064427
-  - 1.883576820644578
-  - 2.510282864276726
-  - 0.14328964596248792
+  - 0.5369181761426325
+  - 0.21603695249291696
+  - 0.9091344800143442
+  - 0.5303494171842844
+  - 1.5439256366535066
+  - 0.6129994799571648
+  - 1.0029545849164165
+  - 1.8697457002666136
+  - 0.826460821406451
+  - 1.8835768206445724
+  - 2.5102828642767285
+  - 0.144947026393882
   logos_new:
   - 2220.0
   - 2406.0
@@ -223,7 +241,7 @@ arr_walk_products:
   - 3669.0
   - 3326.0
   - 2564.0
-  - 867.0
+  - 866.0
   logos_contraction:
   - 0
   - 0
@@ -287,6 +305,295 @@ arr_walk_products:
     - Aug-26
     - Sep-26
     - Oct-26
+    logo_walk:
+      rows:
+      - label: Logos BoP
+        type: rb
+        dot: null
+        cells:
+        - '24.2'
+        - '24.5'
+        - '24.9'
+        - '25.3'
+        - '25.6'
+        qoq: +1%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: +1%
+          good: true
+        - v: +2%
+          good: true
+        - v: +1%
+          good: true
+        - v: +1%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '18.2'
+        ytd_cur: '22.1'
+        ytd_vs: +21%
+        ytd_vs_good: true
+        nv: false
+      - label: New Logos
+        type: in
+        dot: g
+        cells:
+        - '0.828'
+        - '0.791'
+        - '0.757'
+        - '0.808'
+        - '0.894'
+        qoq: +11%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: −4%
+          good: false
+        - v: −4%
+          good: false
+        - v: +7%
+          good: true
+        - v: +11%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '7.709'
+        ytd_cur: '9.008'
+        ytd_vs: +17%
+        ytd_vs_good: true
+        nv: false
+      - label: Recovered
+        type: in
+        dot: g
+        cells:
+        - '0.106'
+        - '0.113'
+        - '0.121'
+        - '0.129'
+        - '0.146'
+        qoq: +13%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: +7%
+          good: true
+        - v: +7%
+          good: true
+        - v: +7%
+          good: true
+        - v: +13%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '2.014'
+        ytd_cur: '1.598'
+        ytd_vs: −21%
+        ytd_vs_good: false
+        nv: false
+      - label: Net Churn
+        type: in
+        dot: r
+        cells:
+        - '0.682'
+        - '0.460'
+        - '0.523'
+        - '0.601'
+        - '0.520'
+        qoq: −13%
+        qoq_good: false
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: −33%
+          good: false
+        - v: +14%
+          good: true
+        - v: +15%
+          good: true
+        - v: −13%
+          good: false
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '7.106'
+        ytd_cur: '6.541'
+        ytd_vs: −8%
+        ytd_vs_good: false
+        nv: true
+      - label: Churn
+        type: in
+        dot: r
+        cells:
+        - '1.122'
+        - '0.822'
+        - '0.814'
+        - '0.928'
+        - '0.866'
+        qoq: −7%
+        qoq_good: false
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: −27%
+          good: false
+        - v: −1%
+          good: false
+        - v: +14%
+          good: true
+        - v: −7%
+          good: false
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '9.769'
+        ytd_cur: '10.4'
+        ytd_vs: +7%
+        ytd_vs_good: true
+        nv: true
+      - label: Reactivated
+        type: in
+        dot: g
+        cells:
+        - '0.440'
+        - '0.362'
+        - '0.291'
+        - '0.327'
+        - '0.346'
+        qoq: +6%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: −18%
+          good: false
+        - v: −20%
+          good: false
+        - v: +12%
+          good: true
+        - v: +6%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '2.663'
+        ytd_cur: '3.884'
+        ytd_vs: +46%
+        ytd_vs_good: true
+        nv: false
+      - label: Logos EoP
+        type: rb
+        dot: g
+        cells:
+        - '24.5'
+        - '24.9'
+        - '25.3'
+        - '25.6'
+        - '26.1'
+        qoq: +2%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: +2%
+          good: true
+        - v: +1%
+          good: true
+        - v: +1%
+          good: true
+        - v: +2%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '20.9'
+        ytd_cur: '26.1'
+        ytd_vs: +25%
+        ytd_vs_good: true
+        nv: false
     ytd_labels:
     - YTD'25
     - YTD'26
@@ -1091,16 +1398,16 @@ arr_walk_products:
   - 0
   arr_net_new:
   - 0.6387417025551586
-  - 0.14272049770417017
-  - 1.0055289603199116
+  - 0.14272049770416878
+  - 1.0055289603199145
   - 0.37563620528779973
-  - 1.5117918824655838
-  - -0.046724538494596256
-  - 0.3184394533455251
-  - 0.4874769318013815
-  - -0.1469943163092728
-  - 0.8015194829521961
-  - 0.8577175882155025
+  - 1.5117918824655796
+  - -0.046724538494592065
+  - 0.31843945334552226
+  - 0.4874769318013871
+  - -0.14699431630927837
+  - 0.801519482952199
+  - 0.8577175882154968
   - -0.00920825860431092
   logos_new:
   - 6120.0
@@ -1204,6 +1511,295 @@ arr_walk_products:
     - Aug-26
     - Sep-26
     - Oct-26
+    logo_walk:
+      rows:
+      - label: Logos BoP
+        type: rb
+        dot: null
+        cells:
+        - '34.7'
+        - '34.8'
+        - '34.9'
+        - '34.9'
+        - '35.1'
+        qoq: +1%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: +0%
+          good: true
+        - v: +0%
+          good: true
+        - v: −0%
+          good: false
+        - v: +1%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '36.4'
+        ytd_cur: '34.7'
+        ytd_vs: −4%
+        ytd_vs_good: false
+        nv: false
+      - label: New Logos
+        type: in
+        dot: g
+        cells:
+        - '1.283'
+        - '1.273'
+        - '1.317'
+        - '1.504'
+        - '1.720'
+        qoq: +14%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: −1%
+          good: false
+        - v: +3%
+          good: true
+        - v: +14%
+          good: true
+        - v: +14%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '12.1'
+        ytd_cur: '13.7'
+        ytd_vs: +13%
+        ytd_vs_good: true
+        nv: false
+      - label: Recovered
+        type: in
+        dot: g
+        cells:
+        - '0.551'
+        - '0.599'
+        - '0.572'
+        - '0.660'
+        - '0.579'
+        qoq: −12%
+        qoq_good: false
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: +9%
+          good: true
+        - v: −5%
+          good: false
+        - v: +15%
+          good: true
+        - v: −12%
+          good: false
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '6.791'
+        ytd_cur: '6.207'
+        ytd_vs: −9%
+        ytd_vs_good: false
+        nv: false
+      - label: Net Churn
+        type: in
+        dot: r
+        cells:
+        - '1.748'
+        - '1.792'
+        - '1.890'
+        - '1.961'
+        - '1.801'
+        qoq: −8%
+        qoq_good: false
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: +3%
+          good: true
+        - v: +5%
+          good: true
+        - v: +4%
+          good: true
+        - v: −8%
+          good: false
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '20.4'
+        ytd_cur: '19.0'
+        ytd_vs: −7%
+        ytd_vs_good: false
+        nv: true
+      - label: Churn
+        type: in
+        dot: r
+        cells:
+        - '2.722'
+        - '2.757'
+        - '2.728'
+        - '2.804'
+        - '2.776'
+        qoq: −1%
+        qoq_good: false
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: +1%
+          good: true
+        - v: −1%
+          good: false
+        - v: +3%
+          good: true
+        - v: −1%
+          good: false
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '28.5'
+        ytd_cur: '28.7'
+        ytd_vs: +1%
+        ytd_vs_good: true
+        nv: true
+      - label: Reactivated
+        type: in
+        dot: g
+        cells:
+        - '0.974'
+        - '0.965'
+        - '0.838'
+        - '0.843'
+        - '0.975'
+        qoq: +16%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: −1%
+          good: false
+        - v: −13%
+          good: false
+        - v: +1%
+          good: true
+        - v: +16%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '8.066'
+        ytd_cur: '9.716'
+        ytd_vs: +20%
+        ytd_vs_good: true
+        nv: false
+      - label: Logos EoP
+        type: rb
+        dot: g
+        cells:
+        - '34.8'
+        - '34.9'
+        - '34.9'
+        - '35.1'
+        - '35.6'
+        qoq: +1%
+        qoq_good: true
+        yoy: —
+        yoy_good: null
+        qoq_cells:
+        - v: —
+          good: null
+        - v: +0%
+          good: true
+        - v: −0%
+          good: false
+        - v: +1%
+          good: true
+        - v: +1%
+          good: true
+        yoy_cells:
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        - v: —
+          good: null
+        extra_sub: null
+        ytd_prev: '34.8'
+        ytd_cur: '35.6'
+        ytd_vs: +2%
+        ytd_vs_good: true
+        nv: false
     ytd_labels:
     - YTD'25
     - YTD'26
@@ -1966,14 +2562,14 @@ countries:
   butterfly_rows:
   - metric_name: Total Logos (EoP)
     core:
-      val: 19,390
+      val: 19,391
       val_negative: false
       mom: +1.9%
       mom_positive: true
-      yoy: +23.2%
+      yoy: +23.3%
       yoy_positive: true
       sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"><polyline points="1.0,12.0
-        4.8,10.2 8.6,9.4 12.5,8.9 16.3,7.5 20.1,6.6 23.9,6.2 27.7,5.7 31.5,4.6 35.4,3.8
+        4.8,10.2 8.6,9.4 12.5,8.9 16.3,7.5 20.1,6.6 23.9,6.2 27.7,5.8 31.5,4.6 35.4,3.8
         39.2,3.1 43.0,2.0" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"
         stroke-linejoin="round"/></svg>
     lite:
@@ -1989,11 +2585,11 @@ countries:
         stroke-linecap="round" stroke-linejoin="round"/></svg>
   - metric_name: Net Logo Adds
     core:
-      val: '+358'
+      val: '+359'
       val_negative: false
-      mom: '+132'
+      mom: '+133'
       mom_positive: true
-      yoy: '+16'
+      yoy: '+17'
       yoy_positive: true
       sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"><polyline points="1.0,4.5
         4.8,2.0 8.6,9.3 12.5,10.8 16.3,5.0 20.1,8.6 23.9,12.0 27.7,11.5 31.5,6.7 35.4,9.2
@@ -2058,11 +2654,11 @@ countries:
         stroke-linejoin="round"/></svg>
   - metric_name: Net New ARR
     core:
-      val: $199K
+      val: $201K
       val_negative: false
-      mom: +$483K
+      mom: +$485K
       mom_positive: true
-      yoy: -$91K
+      yoy: -$89K
       yoy_positive: false
       sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"><polyline points="1.0,7.9
         4.8,6.6 8.6,9.4 12.5,10.4 16.3,9.5 20.1,7.8 23.9,11.3 27.7,4.3 31.5,2.0 35.4,6.2
@@ -2112,7 +2708,7 @@ countries:
       yoy_positive: true
       sparkline_svg: <svg class="bf-spark" viewBox="0 0 44 14"><polyline points="1.0,12.0
         4.8,10.7 8.6,10.6 12.5,10.9 16.3,11.2 20.1,10.2 23.9,10.9 27.7,7.7 31.5,3.8
-        35.4,2.0 39.2,3.3 43.0,3.6" fill="none" stroke="#534AB7" stroke-width="1.5"
+        35.4,2.0 39.2,3.3 43.0,3.5" fill="none" stroke="#534AB7" stroke-width="1.5"
         stroke-linecap="round" stroke-linejoin="round"/></svg>
     lite:
       val: $25
@@ -2136,9 +2732,9 @@ countries:
     arpa_new_lite_yoy: +41.5%
     arpa_new_lite_yoy_positive: true
     arpa_churned_core: $48
-    arpa_churned_core_mom: -6.6%
+    arpa_churned_core_mom: -6.9%
     arpa_churned_core_mom_positive: false
-    arpa_churned_core_yoy: +22.8%
+    arpa_churned_core_yoy: +22.5%
     arpa_churned_core_yoy_positive: true
     arpa_churned_lite: $22
     arpa_churned_lite_mom: -1.5%
@@ -3048,7 +3644,7 @@ global_country:
   butterfly_rows:
   - metric_name: Total Logos (EoP)
     core:
-      val: 26,133
+      val: 26,134
       val_negative: false
       mom: +2.0%
       mom_positive: true
@@ -3065,11 +3661,11 @@ global_country:
       sparkline_svg: ''
   - metric_name: Net Logo Adds
     core:
-      val: '+519'
+      val: '+520'
       val_negative: false
-      mom: '+183'
+      mom: '+184'
       mom_positive: true
-      yoy: '+99'
+      yoy: '+100'
       yoy_positive: true
       sparkline_svg: ''
     lite:
@@ -3116,11 +3712,11 @@ global_country:
       sparkline_svg: ''
   - metric_name: Net New ARR
     core:
-      val: $143K
+      val: $145K
       val_negative: false
-      mom: +$230K
+      mom: +$232K
       mom_positive: true
-      yoy: -$208K
+      yoy: -$206K
       yoy_positive: false
       sparkline_svg: ''
     lite:
@@ -3239,10 +3835,10 @@ global_country:
 country_stock_eop:
   colombia:
     Core:
-      mrr_eop: 1218233.899303208
-      logos_eop: 19390.0
+      mrr_eop: 1218372.0143391576
+      logos_eop: 19391.0
     Lite:
-      mrr_eop: 655020.6888092634
+      mrr_eop: 655020.6888092632
       logos_eop: 26468.0
     combined:
       arr_yoy: +40.1%
@@ -3252,16 +3848,16 @@ country_stock_eop:
       sm_k: 482.0
       cac: 299.0
       churn_pct: 3.8
-      _arr_cur: 22479055.05734966
-      _arr_py: 16045098.73259867
-      _arrcc_cur: 22479055.05734966
-      _arrcc_py: 19450732.380436897
+      _arr_cur: 22480712.43778105
+      _arr_py: 16045098.732598672
+      _arrcc_cur: 22480712.43778105
+      _arrcc_py: 19450732.3804369
   mexico:
     Core:
-      mrr_eop: 136057.04556159416
+      mrr_eop: 136057.0455615942
       logos_eop: 2208.0
     Lite:
-      mrr_eop: 99204.97355072456
+      mrr_eop: 99204.97355072461
       logos_eop: 3252.0
     combined:
       arr_yoy: +21.7%
@@ -3271,13 +3867,13 @@ country_stock_eop:
       sm_k: 236.0
       cac: 801.0
       churn_pct: 4.4
-      _arr_cur: 2823144.2293478246
+      _arr_cur: 2823144.229347826
       _arr_py: 2319590.0695652165
-      _arrcc_cur: 2823144.2293478246
+      _arrcc_cur: 2823144.229347826
       _arrcc_py: 2319590.0695652165
   republicaDominicana:
     Core:
-      mrr_eop: 261803.98217054264
+      mrr_eop: 261803.98217054267
       logos_eop: 2281.0
     Lite:
       mrr_eop: 180839.1783333333
@@ -3318,7 +3914,7 @@ gw_country_summary:
   name: Colombia
   arr_m: 22.5
   logos_k: 45.9
-  arpa: 40.8
+  arpa: 40.9
   arr_yoy: +40.1%
   arr_yoy_positive: true
   arr_cc_yoy: +15.6%
@@ -3398,12 +3994,383 @@ gw_country_summary:
   churn_pct: 3.8
   payback: 11.2
   arr_share_pct: 100
+gw_country_detail:
+  cols:
+  - Oct-24
+  - Oct-25
+  - Oct-26
+  spark_labels:
+  - Apr-26
+  - May-26
+  - Jun-26
+  - Jul-26
+  - Aug-26
+  - Sep-26
+  - Oct-26
+  rows:
+  - key: colombia
+    name: Colombia
+    cols:
+    - m: Oct-24
+      arr: '12.1'
+      arr_raw: 12.134816959955785
+      yoy_usd: '+43.2'
+      yoy_cc: '+50.1'
+      mix: '65'
+      logos: '41.5'
+      logos_yoy: '+20.9'
+      arpa: '24.4'
+      arpa_yoy: '+18.5'
+      sm: '419'
+      sm_raw: 419.44728000000003
+      cac: '237'
+      churn: '2.9'
+      payback: '14.5'
+      payback_flag: false
+    - m: Oct-25
+      arr: '16.0'
+      arr_raw: 16.04509873259867
+      yoy_usd: '+32.2'
+      yoy_cc: '+20.5'
+      mix: '65'
+      logos: '42.9'
+      logos_yoy: '+3.3'
+      arpa: '31.2'
+      arpa_yoy: '+28.0'
+      sm: '326'
+      sm_raw: 326.18503000000004
+      cac: '224'
+      churn: '4.2'
+      payback: '10.0'
+      payback_flag: false
+    - m: Oct-26
+      arr: '22.5'
+      arr_raw: 22.48071243778105
+      yoy_usd: '+40.1'
+      yoy_cc: '+15.6'
+      mix: '67'
+      logos: '45.9'
+      logos_yoy: '+7.0'
+      arpa: '40.9'
+      arpa_yoy: '+30.9'
+      sm: '482'
+      sm_raw: 482.04170999999997
+      cac: '299'
+      churn: '3.8'
+      payback: '10.4'
+      payback_flag: false
+    spark:
+    - 11.4
+    - 11.2
+    - 14.3
+    - 17.2
+    - 17.8
+    - 15.4
+    - 15.6
+  - key: mexico
+    name: Mexico
+    cols:
+    - m: Oct-24
+      arr: '1.6'
+      arr_raw: 1.6147035238578678
+      yoy_usd: '+26.0'
+      yoy_cc: '+37.2'
+      mix: '9'
+      logos: '3.7'
+      logos_yoy: '+34.0'
+      arpa: '36.4'
+      arpa_yoy: (5.9)
+      sm: '250'
+      sm_raw: 250.19609000000003
+      cac: 1,209
+      churn: '3.5'
+      payback: '83.2'
+      payback_flag: true
+    - m: Oct-25
+      arr: '2.3'
+      arr_raw: 2.3195900695652165
+      yoy_usd: '+43.7'
+      yoy_cc: '+34.2'
+      mix: '9'
+      logos: '4.4'
+      logos_yoy: '+17.9'
+      arpa: '44.3'
+      arpa_yoy: '+21.9'
+      sm: '188'
+      sm_raw: 188.48955
+      cac: '881'
+      churn: '3.5'
+      payback: '38.5'
+      payback_flag: true
+    - m: Oct-26
+      arr: '2.8'
+      arr_raw: 2.823144229347826
+      yoy_usd: '+21.7'
+      yoy_cc: '+21.7'
+      mix: '8'
+      logos: '5.5'
+      logos_yoy: '+25.2'
+      arpa: '43.1'
+      arpa_yoy: (2.8)
+      sm: '236'
+      sm_raw: 236.20069999999998
+      cac: '801'
+      churn: '4.4'
+      payback: '29.3'
+      payback_flag: true
+    spark:
+    - 20.1
+    - 19.6
+    - 20.2
+    - 18.6
+    - 21.2
+    - 21.2
+    - 21.7
+  - key: republicaDominicana
+    name: Dominican Republic
+    cols:
+    - m: Oct-24
+      arr: '3.0'
+      arr_raw: 2.98668617
+      yoy_usd: '+25.8'
+      yoy_cc: '+25.8'
+      mix: '16'
+      logos: '4.1'
+      logos_yoy: '+19.0'
+      arpa: '60.8'
+      arpa_yoy: '+5.7'
+      sm: '119'
+      sm_raw: 119.21316
+      cac: '710'
+      churn: '4.3'
+      payback: '19.1'
+      payback_flag: false
+    - m: Oct-25
+      arr: '4.1'
+      arr_raw: 4.116284046840097
+      yoy_usd: '+37.8'
+      yoy_cc: '+37.8'
+      mix: '17'
+      logos: '4.2'
+      logos_yoy: '+1.7'
+      arpa: '82.4'
+      arpa_yoy: '+35.5'
+      sm: '148'
+      sm_raw: 148.16705
+      cac: 1,066
+      churn: '3.4'
+      payback: '18.5'
+      payback_flag: false
+    - m: Oct-26
+      arr: '5.3'
+      arr_raw: 5.311717926046511
+      yoy_usd: '+29.0'
+      yoy_cc: '+29.0'
+      mix: '16'
+      logos: '5.3'
+      logos_yoy: '+27.2'
+      arpa: '83.6'
+      arpa_yoy: '+1.4'
+      sm: '234'
+      sm_raw: 233.81982
+      cac: '477'
+      churn: '4.0'
+      payback: '7.1'
+      payback_flag: false
+    spark:
+    - 23.6
+    - 23.6
+    - 23.9
+    - 20.4
+    - 20.8
+    - 27.3
+    - 29.0
+  - key: costaRica
+    name: Costa Rica
+    cols:
+    - m: Oct-24
+      arr: '0.6'
+      arr_raw: 0.5891173499999984
+      yoy_usd: '+45.6'
+      yoy_cc: '+45.6'
+      mix: '3'
+      logos: '1.0'
+      logos_yoy: '+46.7'
+      arpa: '47.2'
+      arpa_yoy: (0.8)
+      sm: '54'
+      sm_raw: 54.42734999999999
+      cac: 1,237
+      churn: '4.3'
+      payback: '10.8'
+      payback_flag: false
+    - m: Oct-25
+      arr: '0.7'
+      arr_raw: 0.700508829999998
+      yoy_usd: '+18.9'
+      yoy_cc: '+18.9'
+      mix: '3'
+      logos: '1.3'
+      logos_yoy: '+26.2'
+      arpa: '44.5'
+      arpa_yoy: (5.8)
+      sm: '72'
+      sm_raw: 71.51033
+      cac: '883'
+      churn: '6.3'
+      payback: '25.2'
+      payback_flag: true
+    - m: Oct-26
+      arr: '1.0'
+      arr_raw: 0.9837421099999987
+      yoy_usd: '+40.4'
+      yoy_cc: '+40.4'
+      mix: '3'
+      logos: '1.8'
+      logos_yoy: '+33.4'
+      arpa: '46.8'
+      arpa_yoy: '+5.3'
+      sm: '37'
+      sm_raw: 36.774699999999996
+      cac: '294'
+      churn: '4.5'
+      payback: '8.3'
+      payback_flag: false
+    spark:
+    - 31.8
+    - 35.5
+    - 40.7
+    - 44.8
+    - 44.3
+    - 41.6
+    - 40.4
+  - key: other
+    name: Other
+    cols:
+    - m: Oct-24
+      arr: '1.3'
+      arr_raw: 1.3436526135833218
+      yoy_usd: '+36.9'
+      yoy_cc: '+43.2'
+      mix: '7'
+      logos: '3.2'
+      logos_yoy: '+21.8'
+      arpa: '35.4'
+      arpa_yoy: '+12.4'
+      sm: '115'
+      sm_raw: 114.96021999999998
+      cac: '777'
+      churn: n.m.
+      payback: —
+      payback_flag: false
+    - m: Oct-25
+      arr: '1.5'
+      arr_raw: 1.5491870551095894
+      yoy_usd: '+15.3'
+      yoy_cc: '+19.4'
+      mix: '6'
+      logos: '2.9'
+      logos_yoy: (7.6)
+      arpa: '44.1'
+      arpa_yoy: '+24.8'
+      sm: '96'
+      sm_raw: 95.98448999999988
+      cac: '671'
+      churn: n.m.
+      payback: —
+      payback_flag: false
+    - m: Oct-26
+      arr: '1.9'
+      arr_raw: 1.8923647941698134
+      yoy_usd: '+22.2'
+      yoy_cc: '+23.5'
+      mix: '6'
+      logos: '3.4'
+      logos_yoy: '+15.6'
+      arpa: '46.6'
+      arpa_yoy: '+5.7'
+      sm: '42'
+      sm_raw: 42.27045000000007
+      cac: '450'
+      churn: '3.2'
+      payback: —
+      payback_flag: false
+    spark:
+    - 5.6
+    - 7.7
+    - 11.9
+    - 14.4
+    - 24.2
+    - 24.9
+    - 23.5
+  - key: total
+    name: Total
+    cols:
+    - m: Oct-24
+      arr: '18.7'
+      arr_raw: 18.66897661739697
+      yoy_usd: '+38.1'
+      yoy_cc: '+44.8'
+      mix: '100'
+      logos: '53.5'
+      logos_yoy: '+22.0'
+      arpa: '29.1'
+      arpa_yoy: '+13.2'
+      sm: '958'
+      sm_raw: 958.2441
+      cac: '410'
+      churn: '4.3'
+      payback: '21.5'
+      payback_flag: false
+    - m: Oct-25
+      arr: '24.7'
+      arr_raw: 24.730668734113575
+      yoy_usd: '+32.5'
+      yoy_cc: '+23.7'
+      mix: '100'
+      logos: '55.6'
+      logos_yoy: '+4.0'
+      arpa: '37.1'
+      arpa_yoy: '+27.4'
+      sm: '830'
+      sm_raw: 830.3364499999999
+      cac: '408'
+      churn: '5.3'
+      payback: '16.1'
+      payback_flag: false
+    - m: Oct-26
+      arr: '33.5'
+      arr_raw: 33.491681497345205
+      yoy_usd: '+35.4'
+      yoy_cc: '+19.1'
+      mix: '100'
+      logos: '61.7'
+      logos_yoy: '+11.0'
+      arpa: '45.2'
+      arpa_yoy: '+22.0'
+      sm: 1,031
+      sm_raw: 1031.10738
+      cac: '394'
+      churn: '3.8'
+      payback: '11.2'
+      payback_flag: false
+    spark:
+    - 14.0
+    - 14.0
+    - 16.7
+    - 18.3
+    - 19.5
+    - 18.8
+    - 19.1
+  sm_vs_first: '+8'
 new_mrr_ytd: $747K
 new_mrr_ytd_yoy: +49.2%
 new_mrr_ytd_yoy_positive: true
 new_logos_ytd: 22.7k
 new_logos_ytd_yoy: +14.7%
 new_logos_ytd_yoy_positive: true
+new_logos_ytd_yoy_cc: +14.7%
+new_logos_ytd_yoy_cc_positive: true
 new_mrr_ytd_yoy_cc: +33.1%
 new_mrr_ytd_yoy_cc_positive: true
 arr_quarters:
@@ -3473,17 +4440,17 @@ arr_contraction:
 - 0
 arr_net_new:
 - 1.1756598786977912
-- 0.35875745019708294
-- 1.9146634403342615
+- 0.3587574501970857
+- 1.9146634403342586
 - 0.9059856224720841
-- 3.0557175191190846
-- 0.5662749414625755
+- 3.0557175191190877
+- 0.5662749414625726
 - 1.321394038261939
-- 2.357222632067995
+- 2.3572226320680008
 - 0.6794665050971713
-- 2.685096303596774
+- 2.6850963035967683
 - 3.36800045249223
-- 0.1340813873581756
+- 0.13573876778957247
 arr_chart_y_max: 5.8
 logos_new:
 - 8033.0
@@ -3523,7 +4490,7 @@ logos_churn:
 - 12354.0
 - 11565.0
 - 10852.0
-- 3643.0
+- 3642.0
 logos_contraction:
 - 0
 - 0
@@ -3579,22 +4546,22 @@ arr_q_cards:
   eopArr: $0K
   eopLogos: 0.0
 arr_eop_qtd: $33.5M
-net_new_arr_qtd: $134K
+net_new_arr_qtd: $136K
 net_new_arr_prev_qtd: $3.4M
 net_new_arr_qoq: -96.0%
 logos_eop_qtd: 61.7k
 logos_qoq: +1.7%
 logos_yoy: +11.0%
-smb_logos_eop: 61746
+smb_logos_eop: 61747
 smb_logos_yoy: +11.0%
 smb_logos_yoy_positive: true
-smb_logos_net_adds: 1017
-accountant_logos_eop: '16.672'
+smb_logos_net_adds: 1018
+accountant_logos_eop: '16.674'
 accountant_logos_mom: +1.7%
 accountant_logos_mom_positive: true
 accountant_logos_yoy: +19.6%
 accountant_logos_yoy_positive: true
-accountant_logos_net_adds: '+278'
+accountant_logos_net_adds: '+280'
 logo_churn_qoq: -67.3%
 logo_churn_yoy: -94.0%
 logo_churn_qtd_avg: N/A
@@ -3610,7 +4577,7 @@ arr_walk_raw_buckets:
   a_cross_new: 0
   a_cross_readop: 0
   a_cross_down: 0
-  a_fx: -331374.8293087352
+  a_fx: -329717.4488773383
 arr_walk_table:
   quarters:
   - Jun-26
@@ -3618,6 +4585,295 @@ arr_walk_table:
   - Aug-26
   - Sep-26
   - Oct-26
+  logo_walk:
+    rows:
+    - label: Logos BoP
+      type: rb
+      dot: null
+      cells:
+      - '59.0'
+      - '59.3'
+      - '59.8'
+      - '60.2'
+      - '60.7'
+      qoq: +1%
+      qoq_good: true
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      - v: +1%
+        good: true
+      - v: +1%
+        good: true
+      - v: +1%
+        good: true
+      - v: +1%
+        good: true
+      yoy_cells:
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      extra_sub: null
+      ytd_prev: '54.6'
+      ytd_cur: '56.8'
+      ytd_vs: +4%
+      ytd_vs_good: true
+      nv: false
+    - label: New Logos
+      type: in
+      dot: g
+      cells:
+      - '2.111'
+      - '2.064'
+      - '2.074'
+      - '2.312'
+      - '2.614'
+      qoq: +13%
+      qoq_good: true
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      - v: −2%
+        good: false
+      - v: +0%
+        good: true
+      - v: +11%
+        good: true
+      - v: +13%
+        good: true
+      yoy_cells:
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      extra_sub: null
+      ytd_prev: '19.8'
+      ytd_cur: '22.7'
+      ytd_vs: +15%
+      ytd_vs_good: true
+      nv: false
+    - label: Recovered
+      type: in
+      dot: g
+      cells:
+      - '0.650'
+      - '0.711'
+      - '0.693'
+      - '0.789'
+      - '0.725'
+      qoq: −8%
+      qoq_good: false
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      - v: +9%
+        good: true
+      - v: −3%
+        good: false
+      - v: +14%
+        good: true
+      - v: −8%
+        good: false
+      yoy_cells:
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      extra_sub: null
+      ytd_prev: '6.913'
+      ytd_cur: '7.179'
+      ytd_vs: +4%
+      ytd_vs_good: true
+      nv: false
+    - label: Net Churn
+      type: in
+      dot: r
+      cells:
+      - '2.423'
+      - '2.251'
+      - '2.413'
+      - '2.562'
+      - '2.321'
+      qoq: −9%
+      qoq_good: false
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      - v: −7%
+        good: false
+      - v: +7%
+        good: true
+      - v: +6%
+        good: true
+      - v: −9%
+        good: false
+      yoy_cells:
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      extra_sub: null
+      ytd_prev: '25.6'
+      ytd_cur: '24.9'
+      ytd_vs: −3%
+      ytd_vs_good: false
+      nv: true
+    - label: Churn
+      type: in
+      dot: r
+      cells:
+      - '3.837'
+      - '3.578'
+      - '3.542'
+      - '3.732'
+      - '3.642'
+      qoq: −2%
+      qoq_good: false
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      - v: −7%
+        good: false
+      - v: −1%
+        good: false
+      - v: +5%
+        good: true
+      - v: −2%
+        good: false
+      yoy_cells:
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      extra_sub: null
+      ytd_prev: '35.9'
+      ytd_cur: '38.4'
+      ytd_vs: +7%
+      ytd_vs_good: true
+      nv: true
+    - label: Reactivated
+      type: in
+      dot: g
+      cells:
+      - '1.414'
+      - '1.327'
+      - '1.129'
+      - '1.170'
+      - '1.321'
+      qoq: +13%
+      qoq_good: true
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      - v: −6%
+        good: false
+      - v: −15%
+        good: false
+      - v: +4%
+        good: true
+      - v: +13%
+        good: true
+      yoy_cells:
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      extra_sub: null
+      ytd_prev: '10.3'
+      ytd_cur: '13.5'
+      ytd_vs: +32%
+      ytd_vs_good: true
+      nv: false
+    - label: Logos EoP
+      type: rb
+      dot: g
+      cells:
+      - '59.3'
+      - '59.8'
+      - '60.2'
+      - '60.7'
+      - '61.7'
+      qoq: +2%
+      qoq_good: true
+      yoy: —
+      yoy_good: null
+      qoq_cells:
+      - v: —
+        good: null
+      - v: +1%
+        good: true
+      - v: +1%
+        good: true
+      - v: +1%
+        good: true
+      - v: +2%
+        good: true
+      yoy_cells:
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      - v: —
+        good: null
+      extra_sub: null
+      ytd_prev: '55.6'
+      ytd_cur: '61.7'
+      ytd_vs: +11%
+      ytd_vs_good: true
+      nv: false
   ytd_labels:
   - YTD'25
   - YTD'26
@@ -4373,31 +5629,31 @@ pp:
     logos_yoy: +25.3%
     logos_yoy_positive: true
     spark_arr:
-    - 14.817252006151557
-    - 15.704713804332949
+    - 14.817252006151561
+    - 15.704713804332945
     - 16.031830343179614
-    - 16.138949769531084
-    - 16.531174625739393
-    - 17.20381294634147
+    - 16.13894976953108
+    - 16.531174625739396
+    - 17.20381294634148
     - 17.191125168823742
     - 18.414751446383967
-    - 20.010854359091066
-    - 21.012110464124092
-    - 20.925034310660696
-    - 21.068323956623182
+    - 20.010854359091063
+    - 21.012110464124103
+    - 20.9250343106607
+    - 21.069981337054582
     spark_data:
-    - 14.817252006151557
-    - 15.704713804332949
+    - 14.817252006151561
+    - 15.704713804332945
     - 16.031830343179614
-    - 16.138949769531084
-    - 16.531174625739393
-    - 17.20381294634147
+    - 16.13894976953108
+    - 16.531174625739396
+    - 17.20381294634148
     - 17.191125168823742
     - 18.414751446383967
-    - 20.010854359091066
-    - 21.012110464124092
-    - 20.925034310660696
-    - 21.068323956623182
+    - 20.010854359091063
+    - 21.012110464124103
+    - 20.9250343106607
+    - 21.069981337054582
     spark_color: '#534AB7'
     spark_fill: '#534AB733'
   - id: lite
@@ -4414,31 +5670,31 @@ pp:
     logos_yoy: +2.4%
     logos_yoy_positive: true
     spark_arr:
-    - 10.795380485342418
-    - 10.918665664036507
+    - 10.795380485342415
+    - 10.918665664036512
     - 11.0139253444363
-    - 10.845980678484027
+    - 10.845980678484029
     - 10.771671347727235
     - 11.068773926145598
     - 10.975121121532295
-    - 11.573190830679431
-    - 12.169032074777375
-    - 12.527533519443692
-    - 12.430908418894933
-    - 12.421700160290621
+    - 11.573190830679433
+    - 12.16903207477738
+    - 12.527533519443686
+    - 12.43090841889493
+    - 12.42170016029062
     spark_data:
-    - 10.795380485342418
-    - 10.918665664036507
+    - 10.795380485342415
+    - 10.918665664036512
     - 11.0139253444363
-    - 10.845980678484027
+    - 10.845980678484029
     - 10.771671347727235
     - 11.068773926145598
     - 10.975121121532295
-    - 11.573190830679431
-    - 12.169032074777375
-    - 12.527533519443692
-    - 12.430908418894933
-    - 12.421700160290621
+    - 11.573190830679433
+    - 12.16903207477738
+    - 12.527533519443686
+    - 12.43090841889493
+    - 12.42170016029062
     spark_color: '#1D9E75'
     spark_fill: '#1D9E7533'
 gtm:
@@ -5049,7 +6305,7 @@ gtm:
     - 318
     - 385
     - 277
-    - 317
+    - 318
     - 285
     - 278
     - 272
@@ -5063,7 +6319,7 @@ gtm:
     - 319
     - 325
     - 374
-    - 418
+    - 419
     - 485
     - 498
     - 431
@@ -5075,7 +6331,7 @@ gtm:
     - 422
     - 397
     - 382
-    - 461
+    - 463
     - 516
     ent_churn:
     - 178
@@ -5099,7 +6355,7 @@ gtm:
     - 221
     - 263
     - 252
-    - 273
+    - 274
     - 339
     - 257
     - 355
@@ -5119,34 +6375,34 @@ gtm:
     - 7418
     - 7608
     - 7633
-    - 7744
-    - 7823
-    - 7827
-    - 7919
-    - 8030
-    - 8116
-    - 8217
-    - 8213
-    - 8256
-    - 8233
-    - 8325
-    - 8346
-    - 8450
-    - 8561
-    - 8727
-    - 8939
-    - 9098
-    - 9272
-    - 9373
-    - 9459
-    - 9675
-    - 9879
-    - 10065
-    - 10187
-    - 10277
-    - 10341
-    - 10469
-    - 10643
+    - 7745
+    - 7824
+    - 7828
+    - 7920
+    - 8031
+    - 8117
+    - 8218
+    - 8214
+    - 8257
+    - 8234
+    - 8326
+    - 8347
+    - 8451
+    - 8562
+    - 8729
+    - 8940
+    - 9099
+    - 9273
+    - 9374
+    - 9460
+    - 9676
+    - 9880
+    - 10066
+    - 10188
+    - 10278
+    - 10342
+    - 10472
+    - 10646
     lg_new_adds:
     - 469
     - 424
@@ -5154,8 +6410,8 @@ gtm:
     - 501
     - 625
     - 493
-    - 585
-    - 510
+    - 586
+    - 509
     - 502
     - 484
     - 550
@@ -5168,19 +6424,19 @@ gtm:
     - 607
     - 654
     - 675
-    - 728
+    - 729
     - 803
     - 819
     - 816
-    - 913
+    - 912
     - 782
     - 895
-    - 819
+    - 818
     - 827
     - 738
     - 724
     - 707
-    - 779
+    - 780
     - 854
     lg_churn:
     - 333
@@ -5201,57 +6457,57 @@ gtm:
     - 575
     - 356
     - 533
-    - 446
-    - 466
+    - 445
+    - 467
     - 433
     - 475
     - 573
     - 479
     - 671
-    - 683
+    - 682
     - 475
-    - 578
-    - 580
+    - 577
+    - 581
     - 569
-    - 558
+    - 557
     - 570
-    - 626
-    - 576
+    - 627
+    - 574
     lg_stock:
-    - 10291
-    - 10366
-    - 10520
-    - 10776
-    - 11084
-    - 11114
+    - 10290
+    - 10365
+    - 10519
+    - 10775
+    - 11083
+    - 11113
     - 11372
-    - 11526
-    - 11540
-    - 11772
-    - 11957
-    - 12107
-    - 12343
-    - 12348
-    - 12536
-    - 12569
-    - 12823
-    - 12897
+    - 11525
+    - 11539
+    - 11771
+    - 11956
+    - 12106
+    - 12342
+    - 12347
+    - 12535
+    - 12568
+    - 12822
+    - 12896
     - 13105
-    - 13314
+    - 13313
     - 13609
     - 13937
     - 14183
     - 14520
-    - 14762
+    - 14761
     - 14861
     - 15281
     - 15522
-    - 15769
-    - 15938
+    - 15768
+    - 15937
     - 16104
     - 16241
     - 16394
-    - 16672
+    - 16674
     q_idx:
     - 2
     - 5
@@ -6129,30 +7385,6 @@ gtm:
       delta_mom: -0.4
       delta_yoy: -6.1
     - rank: 12
-      contador: JM.P.3 MARLIS DORIA BALLESTA
-      pais: COL
-      mrr: 910.96
-      real: 30
-      asoc: 42
-      pot: null
-      sow_asoc: 71.4
-      sow_pot: null
-      nivel: Activo
-      delta_mom: 2.4
-      delta_yoy: 42.9
-    - rank: 13
-      contador: Kytian D. Gonzalez De Solis/ SG Soluciones
-      pais: REP
-      mrr: 2153.41
-      real: 30
-      asoc: 55
-      pot: null
-      sow_asoc: 54.5
-      sow_pot: null
-      nivel: Activo
-      delta_mom: 12.7
-      delta_yoy: 21.8
-    - rank: 14
       contador: AH.P.3 ANDERSON VALENZUELA VARGAS-SC
       pais: COL
       mrr: 887.93
@@ -6164,6 +7396,30 @@ gtm:
       nivel: Activo
       delta_mom: 2.0
       delta_yoy: 6.1
+    - rank: 13
+      contador: JM.P.3 MARLIS DORIA BALLESTA
+      pais: COL
+      mrr: 910.96
+      real: 30
+      asoc: 42
+      pot: null
+      sow_asoc: 71.4
+      sow_pot: null
+      nivel: Activo
+      delta_mom: 2.4
+      delta_yoy: 42.9
+    - rank: 14
+      contador: Kytian D. Gonzalez De Solis/ SG Soluciones
+      pais: REP
+      mrr: 2153.41
+      real: 30
+      asoc: 55
+      pot: null
+      sow_asoc: 54.5
+      sow_pot: null
+      nivel: Activo
+      delta_mom: 12.7
+      delta_yoy: 21.8
     - rank: 15
       contador: JR.P.3 ALEJANDRA MARCELA OROZO RUIZ - Manizales
       pais: COL
@@ -6213,18 +7469,6 @@ gtm:
       delta_mom: 5.9
       delta_yoy: null
     - rank: 19
-      contador: JR.P.3 Erika Velasquez - Medellin
-      pais: COL
-      mrr: 1035.32
-      real: 27
-      asoc: 30
-      pot: null
-      sow_asoc: 90.0
-      sow_pot: null
-      nivel: Activo
-      delta_mom: 0.0
-      delta_yoy: 6.7
-    - rank: 20
       contador: AH. P.3. SERFIS JA - JAVIER AYALA
       pais: COL
       mrr: 724.17
@@ -6236,6 +7480,18 @@ gtm:
       nivel: Activo
       delta_mom: 4.3
       delta_yoy: 2.1
+    - rank: 20
+      contador: JR.P.3 Erika Velasquez - Medellin
+      pais: COL
+      mrr: 1035.32
+      real: 27
+      asoc: 30
+      pot: null
+      sow_asoc: 90.0
+      sow_pot: null
+      nivel: Activo
+      delta_mom: 0.0
+      delta_yoy: 6.7
     sow_tot:
       mrr: 30518
       real: 752
@@ -6344,7 +7600,7 @@ rd:
     - '12.03'
     - '12.00'
     - '11.93'
-    - '12.09'
+    - '12.10'
     pct_logos:
     - 19.9%
     - 20.1%
@@ -6358,7 +7614,7 @@ rd:
     - 4.14%
     - 4.73%
     - 5.35%
-    - 4.26%
+    - 4.25%
     avg_ticket:
     - $17.94
     - $18.04
@@ -7688,7 +8944,7 @@ chart_arr_history:
   - 1415
   - 1027
   - -376
-  - -331
+  - -330
   net_new:
   - 586
   - -31
@@ -7705,7 +8961,7 @@ chart_arr_history:
   - 2192
   - 1360
   - -184
-  - 134
+  - 136
 alanube_walk:
   current_labels:
   - Sep-26
@@ -8066,52 +9322,52 @@ seg_stock_by_month:
   lite_eop: 109.45116928446771
   all_eop: 172.6394729493892
 - m: 2013-07
-  core_eop: 170.05569524811506
+  core_eop: 170.05569524811503
   lite_eop: 223.33981237944937
-  all_eop: 393.3955076275644
+  all_eop: 393.39550762756437
 - m: 2013-08
-  core_eop: 230.91134016106443
+  core_eop: 230.91134016106446
   lite_eop: 64.51934523809524
-  all_eop: 295.43068539915964
+  all_eop: 295.4306853991597
 - m: 2013-09
   core_eop: 660.3655193677264
   lite_eop: 153.86067396213303
   all_eop: 814.2261933298594
 - m: 2013-10
-  core_eop: 236.54332449628848
+  core_eop: 236.54332449628842
   lite_eop: 289.1085065394132
   all_eop: 525.6518310357017
 - m: 2013-11
-  core_eop: 299.39181061394385
+  core_eop: 299.3918106139438
   lite_eop: 294.7782578910857
-  all_eop: 594.1700685050296
+  all_eop: 594.1700685050295
 - m: 2013-12
   core_eop: 188.3268631506377
   lite_eop: 172.72581868321268
   all_eop: 361.0526818338504
 - m: 2014-01
-  core_eop: 444.47592853445735
-  lite_eop: 305.39233843537414
+  core_eop: 444.4759285344573
+  lite_eop: 305.3923384353742
   all_eop: 749.8682669698314
 - m: 2014-02
   core_eop: 425.4513493492108
-  lite_eop: 203.79631879797486
-  all_eop: 629.2476681471857
+  lite_eop: 203.79631879797483
+  all_eop: 629.2476681471855
 - m: 2014-03
   core_eop: 626.4011281877607
   lite_eop: 271.5068979271492
   all_eop: 897.90802611491
 - m: 2014-04
-  core_eop: 230.5068882622897
+  core_eop: 230.50688826228972
   lite_eop: 487.60872917460813
-  all_eop: 718.1156174368978
+  all_eop: 718.1156174368979
 - m: 2014-05
   core_eop: 588.141725413403
   lite_eop: 470.2302302947743
   all_eop: 1058.3719557081772
 - m: 2014-06
   core_eop: 871.8859825211866
-  lite_eop: 595.4033173667405
+  lite_eop: 595.4033173667403
   all_eop: 1467.289299887927
 - m: 2014-07
   core_eop: 1160.3455929314675
@@ -8139,18 +9395,18 @@ seg_stock_by_month:
   all_eop: 1474.7636378573727
 - m: 2015-01
   core_eop: 799.213847998332
-  lite_eop: 772.0695093133165
+  lite_eop: 772.0695093133166
   all_eop: 1571.2833573116486
 - m: 2015-02
-  core_eop: 931.0686015840223
-  lite_eop: 898.5549228650137
-  all_eop: 1829.623524449036
+  core_eop: 931.0686015840221
+  lite_eop: 898.5549228650139
+  all_eop: 1829.6235244490358
 - m: 2015-03
-  core_eop: 1015.2486254992914
+  core_eop: 1015.2486254992912
   lite_eop: 664.5771812809649
-  all_eop: 1679.8258067802562
+  all_eop: 1679.825806780256
 - m: 2015-04
-  core_eop: 987.6782703511598
+  core_eop: 987.6782703511599
   lite_eop: 1168.70018785283
   all_eop: 2156.37845820399
 - m: 2015-05
@@ -8159,22 +9415,22 @@ seg_stock_by_month:
   all_eop: 2374.5945419535365
 - m: 2015-06
   core_eop: 1558.456453365658
-  lite_eop: 1331.5244029275264
-  all_eop: 2889.9808562931844
+  lite_eop: 1331.5244029275266
+  all_eop: 2889.980856293185
 - m: 2015-07
-  core_eop: 2016.4997484093412
+  core_eop: 2016.499748409341
   lite_eop: 1621.0552744789688
-  all_eop: 3637.5550228883103
+  all_eop: 3637.55502288831
 - m: 2015-08
-  core_eop: 3129.251717631558
-  lite_eop: 3459.6892866070693
-  all_eop: 6588.941004238628
+  core_eop: 3129.2517176315573
+  lite_eop: 3459.689286607069
+  all_eop: 6588.941004238626
 - m: 2015-09
   core_eop: 8136.522860719537
   lite_eop: 8222.089540070652
   all_eop: 16358.612400790189
 - m: 2015-10
-  core_eop: 9460.87758488562
+  core_eop: 9460.877584885622
   lite_eop: 8707.699987004158
   all_eop: 18168.57757188978
 - m: 2015-11
@@ -8182,69 +9438,69 @@ seg_stock_by_month:
   lite_eop: 9108.318776762047
   all_eop: 20430.36151821167
 - m: 2015-12
-  core_eop: 10746.655399039879
+  core_eop: 10746.65539903988
   lite_eop: 8705.596993088533
-  all_eop: 19452.252392128412
+  all_eop: 19452.252392128416
 - m: 2016-01
   core_eop: 11619.261385541937
-  lite_eop: 9130.868001965006
-  all_eop: 20750.129387506942
+  lite_eop: 9130.868001965004
+  all_eop: 20750.12938750694
 - m: 2016-02
-  core_eop: 12859.201922275171
+  core_eop: 12859.20192227517
   lite_eop: 10390.27106946509
-  all_eop: 23249.472991740262
+  all_eop: 23249.47299174026
 - m: 2016-03
   core_eop: 15459.492805162083
-  lite_eop: 11003.465872210538
-  all_eop: 26462.95867737262
+  lite_eop: 11003.465872210543
+  all_eop: 26462.958677372626
 - m: 2016-04
   core_eop: 16940.15960534645
   lite_eop: 12183.915879802325
   all_eop: 29124.075485148773
 - m: 2016-05
-  core_eop: 17848.136192019632
-  lite_eop: 13552.975885638472
-  all_eop: 31401.112077658105
+  core_eop: 17848.136192019636
+  lite_eop: 13552.975885638474
+  all_eop: 31401.11207765811
 - m: 2016-06
-  core_eop: 18235.065362570414
+  core_eop: 18235.06536257041
   lite_eop: 13434.074040917989
-  all_eop: 31669.139403488403
+  all_eop: 31669.1394034884
 - m: 2016-07
   core_eop: 18620.48839028022
-  lite_eop: 13394.074119189088
+  lite_eop: 13394.07411918909
   all_eop: 32014.56250946931
 - m: 2016-08
   core_eop: 19752.555061526757
-  lite_eop: 13327.379540318707
+  lite_eop: 13327.37954031871
   all_eop: 33079.93460184547
 - m: 2016-09
-  core_eop: 22579.340661582868
-  lite_eop: 15347.883806541126
-  all_eop: 37927.224468124
+  core_eop: 22579.340661582857
+  lite_eop: 15347.883806541133
+  all_eop: 37927.22446812399
 - m: 2016-10
-  core_eop: 24200.513984956775
+  core_eop: 24200.51398495678
   lite_eop: 18634.2471401651
   all_eop: 42834.76112512188
 - m: 2016-11
-  core_eop: 22936.94035962314
-  lite_eop: 17918.431733454167
-  all_eop: 40855.372093077305
+  core_eop: 22936.94035962313
+  lite_eop: 17918.43173345417
+  all_eop: 40855.3720930773
 - m: 2016-12
-  core_eop: 23945.906045813004
-  lite_eop: 18515.2786150402
+  core_eop: 23945.906045813
+  lite_eop: 18515.278615040206
   all_eop: 42461.18466085321
 - m: 2017-01
   core_eop: 28043.782842143966
   lite_eop: 21706.94489555803
   all_eop: 49750.72773770199
 - m: 2017-02
-  core_eop: 30118.732117155745
-  lite_eop: 24313.006062204306
-  all_eop: 54431.73817936005
+  core_eop: 30118.73211715575
+  lite_eop: 24313.00606220431
+  all_eop: 54431.73817936006
 - m: 2017-03
-  core_eop: 32908.94656209138
-  lite_eop: 27462.721152380946
-  all_eop: 60371.66771447233
+  core_eop: 32908.9465620914
+  lite_eop: 27462.72115238095
+  all_eop: 60371.66771447235
 - m: 2017-04
   core_eop: 33768.19769959328
   lite_eop: 29462.60573033729
@@ -8254,9 +9510,9 @@ seg_stock_by_month:
   lite_eop: 31165.38442438882
   all_eop: 67422.52835791874
 - m: 2017-06
-  core_eop: 37901.9109067322
-  lite_eop: 31619.5601754826
-  all_eop: 69521.47108221479
+  core_eop: 37901.910906732206
+  lite_eop: 31619.560175482595
+  all_eop: 69521.4710822148
 - m: 2017-07
   core_eop: 41342.27142168826
   lite_eop: 33441.62744080299
@@ -8278,48 +9534,48 @@ seg_stock_by_month:
   lite_eop: 41835.73894527494
   all_eop: 86411.13216213517
 - m: 2017-12
-  core_eop: 47289.54291545872
+  core_eop: 47289.542915458704
   lite_eop: 44126.111746591654
   all_eop: 91415.65466205037
 - m: 2018-01
-  core_eop: 52742.6332469993
+  core_eop: 52742.63324699931
   lite_eop: 48707.138623482046
   all_eop: 101449.77187048135
 - m: 2018-02
-  core_eop: 52704.24751875232
-  lite_eop: 48935.72744945765
+  core_eop: 52704.247518752316
+  lite_eop: 48935.727449457656
   all_eop: 101639.97496820998
 - m: 2018-03
-  core_eop: 57701.787668643134
+  core_eop: 57701.78766864313
   lite_eop: 54243.1196978704
   all_eop: 111944.90736651354
 - m: 2018-04
   core_eop: 62954.413359664046
-  lite_eop: 58695.47337761027
+  lite_eop: 58695.47337761028
   all_eop: 121649.88673727433
 - m: 2018-05
   core_eop: 66092.6363444259
   lite_eop: 61109.09916513733
   all_eop: 127201.73550956324
 - m: 2018-06
-  core_eop: 68410.19011623421
+  core_eop: 68410.19011623423
   lite_eop: 61548.12073314239
   all_eop: 129958.3108493766
 - m: 2018-07
-  core_eop: 71259.0261688061
-  lite_eop: 65365.42493965094
+  core_eop: 71259.02616880611
+  lite_eop: 65365.42493965095
   all_eop: 136624.45110845705
 - m: 2018-08
   core_eop: 72511.27162525708
   lite_eop: 65252.42932703479
   all_eop: 137763.70095229187
 - m: 2018-09
-  core_eop: 74522.02238212698
+  core_eop: 74522.02238212699
   lite_eop: 66518.86497207492
-  all_eop: 141040.8873542019
+  all_eop: 141040.88735420193
 - m: 2018-10
   core_eop: 76607.80032492998
-  lite_eop: 68413.24692439631
+  lite_eop: 68413.24692439633
   all_eop: 145021.0472493263
 - m: 2018-11
   core_eop: 77264.9875761323
@@ -8339,27 +9595,27 @@ seg_stock_by_month:
   all_eop: 169419.6843864264
 - m: 2019-03
   core_eop: 98003.06797015171
-  lite_eop: 82193.51850077769
-  all_eop: 180196.58647092938
+  lite_eop: 82193.5185007777
+  all_eop: 180196.5864709294
 - m: 2019-04
-  core_eop: 103938.0324342704
+  core_eop: 103938.03243427043
   lite_eop: 89483.83716377255
-  all_eop: 193421.86959804295
+  all_eop: 193421.86959804298
 - m: 2019-05
   core_eop: 100895.47069572355
   lite_eop: 86838.77786048448
   all_eop: 187734.24855620804
 - m: 2019-06
-  core_eop: 106743.0652170082
-  lite_eop: 89390.28834829465
+  core_eop: 106743.06521700819
+  lite_eop: 89390.28834829466
   all_eop: 196133.35356530285
 - m: 2019-07
-  core_eop: 111167.9470993475
+  core_eop: 111167.94709934751
   lite_eop: 98794.54312216956
-  all_eop: 209962.49022151704
+  all_eop: 209962.49022151707
 - m: 2019-08
   core_eop: 107262.21151308023
-  lite_eop: 94152.55137473949
+  lite_eop: 94152.5513747395
   all_eop: 201414.76288781973
 - m: 2019-09
   core_eop: 114166.30276443531
@@ -8383,31 +9639,31 @@ seg_stock_by_month:
   all_eop: 255372.2863076082
 - m: 2020-02
   core_eop: 138849.86667275784
-  lite_eop: 119959.74801091972
+  lite_eop: 119959.74801091973
   all_eop: 258809.61468367756
 - m: 2020-03
   core_eop: 131368.85559143373
   lite_eop: 114734.75608767658
   all_eop: 246103.61167911033
 - m: 2020-04
-  core_eop: 113366.47568386089
+  core_eop: 113366.47568386086
   lite_eop: 99537.76994529049
-  all_eop: 212904.24562915138
+  all_eop: 212904.24562915135
 - m: 2020-05
   core_eop: 120663.59008611638
-  lite_eop: 103759.14573702171
+  lite_eop: 103759.1457370217
   all_eop: 224422.7358231381
 - m: 2020-06
   core_eop: 126235.75500176635
-  lite_eop: 113795.34494393434
-  all_eop: 240031.09994570067
+  lite_eop: 113795.34494393435
+  all_eop: 240031.0999457007
 - m: 2020-07
-  core_eop: 144509.9262490406
+  core_eop: 144509.92624904064
   lite_eop: 134443.02805655525
-  all_eop: 278952.95430559583
+  all_eop: 278952.9543055959
 - m: 2020-08
   core_eop: 143014.53479825024
-  lite_eop: 138674.25171850488
+  lite_eop: 138674.2517185049
   all_eop: 281688.7865167551
 - m: 2020-09
   core_eop: 158786.39336992963
@@ -8415,19 +9671,19 @@ seg_stock_by_month:
   all_eop: 318470.56098447705
 - m: 2020-10
   core_eop: 173582.3217703986
-  lite_eop: 168771.38661822045
-  all_eop: 342353.708388619
+  lite_eop: 168771.38661822048
+  all_eop: 342353.70838861907
 - m: 2020-11
   core_eop: 182457.16470038058
-  lite_eop: 178430.39547095518
-  all_eop: 360887.56017133576
+  lite_eop: 178430.39547095515
+  all_eop: 360887.5601713357
 - m: 2020-12
-  core_eop: 196253.39867762543
+  core_eop: 196253.3986776254
   lite_eop: 187422.31432027151
   all_eop: 383675.71299789695
 - m: 2021-01
-  core_eop: 199203.68744969435
-  lite_eop: 195714.51132161546
+  core_eop: 199203.68744969438
+  lite_eop: 195714.51132161543
   all_eop: 394918.1987713098
 - m: 2021-02
   core_eop: 205050.07510659305
@@ -8435,35 +9691,35 @@ seg_stock_by_month:
   all_eop: 412993.8205674383
 - m: 2021-03
   core_eop: 223249.72706216204
-  lite_eop: 228301.81960969587
+  lite_eop: 228301.8196096959
   all_eop: 451551.54667185794
 - m: 2021-04
   core_eop: 225533.536604441
-  lite_eop: 228207.60706794253
-  all_eop: 453741.1436723835
+  lite_eop: 228207.60706794256
+  all_eop: 453741.14367238356
 - m: 2021-05
   core_eop: 228530.1812837248
-  lite_eop: 226145.3232582637
+  lite_eop: 226145.32325826367
   all_eop: 454675.5045419885
 - m: 2021-06
-  core_eop: 240873.85229818567
-  lite_eop: 233578.80052836446
-  all_eop: 474452.6528265501
+  core_eop: 240873.8522981856
+  lite_eop: 233578.80052836443
+  all_eop: 474452.65282655007
 - m: 2021-07
-  core_eop: 251367.66196142705
-  lite_eop: 242073.60459179213
+  core_eop: 251367.66196142707
+  lite_eop: 242073.6045917921
   all_eop: 493441.2665532192
 - m: 2021-08
   core_eop: 253592.06053789816
-  lite_eop: 239051.37877048767
+  lite_eop: 239051.3787704877
   all_eop: 492643.43930838583
 - m: 2021-09
   core_eop: 266550.4221831487
-  lite_eop: 249177.31319621069
+  lite_eop: 249177.31319621066
   all_eop: 515727.73537935934
 - m: 2021-10
-  core_eop: 278383.10807998397
-  lite_eop: 256523.7558301227
+  core_eop: 278383.108079984
+  lite_eop: 256523.75583012268
   all_eop: 534906.8639101067
 - m: 2021-11
   core_eop: 287281.36896090984
@@ -8471,20 +9727,20 @@ seg_stock_by_month:
   all_eop: 551042.4958506783
 - m: 2021-12
   core_eop: 301390.80965243827
-  lite_eop: 270410.8824920703
-  all_eop: 571801.6921445086
+  lite_eop: 270410.8824920704
+  all_eop: 571801.6921445087
 - m: 2022-01
   core_eop: 307164.9737944634
   lite_eop: 272296.1695294674
   all_eop: 579461.1433239308
 - m: 2022-02
   core_eop: 319035.63289256184
-  lite_eop: 283483.11474022403
+  lite_eop: 283483.1147402241
   all_eop: 602518.7476327859
 - m: 2022-03
   core_eop: 350058.7138105089
-  lite_eop: 317828.79562690604
-  all_eop: 667887.5094374149
+  lite_eop: 317828.795626906
+  all_eop: 667887.5094374148
 - m: 2022-04
   core_eop: 357350.60370706214
   lite_eop: 319384.1405283479
@@ -8494,217 +9750,217 @@ seg_stock_by_month:
   lite_eop: 332347.14506427455
   all_eop: 702734.5829444942
 - m: 2022-06
-  core_eop: 361524.93318716617
-  lite_eop: 324045.67829707573
-  all_eop: 685570.6114842419
+  core_eop: 361524.9331871661
+  lite_eop: 324045.6782970757
+  all_eop: 685570.6114842418
 - m: 2022-07
   core_eop: 364504.6334136155
-  lite_eop: 323691.9749450041
-  all_eop: 688196.6083586196
+  lite_eop: 323691.97494500404
+  all_eop: 688196.6083586195
 - m: 2022-08
-  core_eop: 375494.3845245975
+  core_eop: 375494.38452459744
   lite_eop: 327434.9284096289
   all_eop: 702929.3129342264
 - m: 2022-09
   core_eop: 371153.3863086919
-  lite_eop: 326843.0168881436
+  lite_eop: 326843.01688814355
   all_eop: 697996.4031968354
 - m: 2022-10
-  core_eop: 360633.0904146422
+  core_eop: 360633.0904146421
   lite_eop: 318566.1466883524
-  all_eop: 679199.2371029946
+  all_eop: 679199.2371029945
 - m: 2022-11
   core_eop: 362251.74773505813
-  lite_eop: 322215.8521002597
+  lite_eop: 322215.85210025974
   all_eop: 684467.5998353178
 - m: 2022-12
-  core_eop: 396576.61854321073
+  core_eop: 396576.6185432108
   lite_eop: 353682.87448744447
   all_eop: 750259.4930306552
 - m: 2023-01
   core_eop: 428777.15175690566
-  lite_eop: 381411.5923584878
+  lite_eop: 381411.5923584877
   all_eop: 810188.7441153934
 - m: 2023-02
   core_eop: 437734.05150265363
   lite_eop: 379522.06613425724
   all_eop: 817256.1176369109
 - m: 2023-03
-  core_eop: 490056.8685254248
-  lite_eop: 404751.578320218
-  all_eop: 894808.4468456428
+  core_eop: 490056.86852542486
+  lite_eop: 404751.5783202181
+  all_eop: 894808.446845643
 - m: 2023-04
-  core_eop: 513131.17237937637
+  core_eop: 513131.1723793764
   lite_eop: 417275.21944552456
-  all_eop: 930406.3918249009
+  all_eop: 930406.391824901
 - m: 2023-05
   core_eop: 541449.7392043073
   lite_eop: 445227.4435013875
   all_eop: 986677.1827056948
 - m: 2023-06
-  core_eop: 566810.4924805237
-  lite_eop: 464159.849066719
-  all_eop: 1030970.3415472426
+  core_eop: 566810.4924805238
+  lite_eop: 464159.8490667191
+  all_eop: 1030970.3415472428
 - m: 2023-07
-  core_eop: 605874.707326484
+  core_eop: 605874.7073264839
   lite_eop: 488967.72592881566
-  all_eop: 1094842.4332552997
+  all_eop: 1094842.4332552995
 - m: 2023-08
   core_eop: 613320.0140618812
-  lite_eop: 484046.01254998805
-  all_eop: 1097366.0266118692
+  lite_eop: 484046.01254998817
+  all_eop: 1097366.0266118695
 - m: 2023-09
-  core_eop: 613417.8895120104
+  core_eop: 613417.8895120103
   lite_eop: 488643.03201865085
   all_eop: 1102060.9215306612
 - m: 2023-10
-  core_eop: 632462.9144260263
+  core_eop: 632462.9144260262
   lite_eop: 493745.00646885176
   all_eop: 1126207.920894878
 - m: 2023-11
-  core_eop: 658331.9892817371
-  lite_eop: 511848.15000115096
+  core_eop: 658331.989281737
+  lite_eop: 511848.150001151
   all_eop: 1170180.139282888
 - m: 2023-12
   core_eop: 706887.4480587555
-  lite_eop: 540421.2140876311
+  lite_eop: 540421.2140876312
   all_eop: 1247308.6621463867
 - m: 2024-01
-  core_eop: 704896.8899176981
+  core_eop: 704896.8899176982
   lite_eop: 540170.3283699338
   all_eop: 1245067.2182876319
 - m: 2024-02
-  core_eop: 719427.1928960724
+  core_eop: 719427.1928960723
   lite_eop: 558229.6453744222
-  all_eop: 1277656.8382704947
+  all_eop: 1277656.8382704945
 - m: 2024-03
-  core_eop: 751630.629403975
-  lite_eop: 593649.689300561
+  core_eop: 751630.6294039749
+  lite_eop: 593649.6893005611
   all_eop: 1345280.318704536
 - m: 2024-04
   core_eop: 768924.2410451537
-  lite_eop: 604350.8707673632
+  lite_eop: 604350.8707673633
   all_eop: 1373275.111812517
 - m: 2024-05
   core_eop: 796354.4692010495
   lite_eop: 626138.1315850307
   all_eop: 1422492.6007860801
 - m: 2024-06
-  core_eop: 769633.7087783845
+  core_eop: 769633.7087783846
   lite_eop: 605543.0641092418
-  all_eop: 1375176.7728876262
+  all_eop: 1375176.7728876264
 - m: 2024-07
-  core_eop: 806368.7645390274
+  core_eop: 806368.764539027
   lite_eop: 637825.6501818739
-  all_eop: 1444194.4147209013
+  all_eop: 1444194.4147209008
 - m: 2024-08
   core_eop: 855028.5153702158
-  lite_eop: 703539.2705225501
-  all_eop: 1558567.785892766
+  lite_eop: 703539.27052255
+  all_eop: 1558567.7858927657
 - m: 2024-09
-  core_eop: 845394.9154462469
-  lite_eop: 689337.1441359011
+  core_eop: 845394.9154462466
+  lite_eop: 689337.1441359014
   all_eop: 1534732.059582148
 - m: 2024-10
   core_eop: 854154.167984812
-  lite_eop: 701593.8834649356
+  lite_eop: 701593.8834649357
   all_eop: 1555748.0514497478
 - m: 2024-11
   core_eop: 844789.8886141315
-  lite_eop: 691416.5754669656
-  all_eop: 1536206.464081097
+  lite_eop: 691416.5754669657
+  all_eop: 1536206.4640810972
 - m: 2024-12
-  core_eop: 889590.7002116038
-  lite_eop: 720640.1612432178
+  core_eop: 889590.7002116037
+  lite_eop: 720640.161243218
   all_eop: 1610230.8614548217
 - m: 2025-01
   core_eop: 890762.8920479497
   lite_eop: 720029.3364534179
   all_eop: 1610792.2285013676
 - m: 2025-02
-  core_eop: 957543.3555623497
-  lite_eop: 787063.2982665126
+  core_eop: 957543.3555623495
+  lite_eop: 787063.2982665125
   all_eop: 1744606.6538288621
 - m: 2025-03
-  core_eop: 1018251.169932729
-  lite_eop: 846622.8181153497
-  all_eop: 1864873.9880480787
+  core_eop: 1018251.1699327292
+  lite_eop: 846622.8181153496
+  all_eop: 1864873.988048079
 - m: 2025-04
-  core_eop: 1011193.5188557198
-  lite_eop: 818192.314417128
+  core_eop: 1011193.51885572
+  lite_eop: 818192.3144171278
   all_eop: 1829385.8332728478
 - m: 2025-05
-  core_eop: 1039463.502175724
-  lite_eop: 838140.218881628
-  all_eop: 1877603.7210573521
+  core_eop: 1039463.5021757239
+  lite_eop: 838140.2188816285
+  all_eop: 1877603.7210573524
 - m: 2025-06
-  core_eop: 1069334.4599291598
-  lite_eop: 842729.1065741334
+  core_eop: 1069334.4599291596
+  lite_eop: 842729.1065741336
   all_eop: 1912063.5665032933
 - m: 2025-07
   core_eop: 1104281.7942612036
-  lite_eop: 856608.4857188357
-  all_eop: 1960890.2799800392
+  lite_eop: 856608.4857188358
+  all_eop: 1960890.2799800395
 - m: 2025-08
   core_eop: 1108724.861036571
-  lite_eop: 849587.909120409
+  lite_eop: 849587.9091204092
   all_eop: 1958312.77015698
 - m: 2025-09
   core_eop: 1152914.0086721943
   lite_eop: 869265.7276862605
   all_eop: 2022179.736358455
 - m: 2025-10
-  core_eop: 1182185.6530490816
+  core_eop: 1182185.6530490818
   lite_eop: 878703.4081270491
-  all_eop: 2060889.0611761305
+  all_eop: 2060889.061176131
 - m: 2025-11
-  core_eop: 1234771.0005126297
-  lite_eop: 899615.0404452016
+  core_eop: 1234771.00051263
+  lite_eop: 899615.0404452012
   all_eop: 2134386.0409578313
 - m: 2025-12
-  core_eop: 1308726.150361079
-  lite_eop: 909888.8053363756
-  all_eop: 2218614.9556974545
+  core_eop: 1308726.1503610788
+  lite_eop: 909888.8053363761
+  all_eop: 2218614.955697455
 - m: 2026-01
   core_eop: 1335985.8619316346
   lite_eop: 917827.1120363584
   all_eop: 2253812.973967993
 - m: 2026-02
-  core_eop: 1344912.4807942573
-  lite_eop: 903831.7232070022
-  all_eop: 2248744.2040012595
+  core_eop: 1344912.4807942568
+  lite_eop: 903831.7232070024
+  all_eop: 2248744.204001259
 - m: 2026-03
-  core_eop: 1377597.8854782826
+  core_eop: 1377597.885478283
   lite_eop: 897639.2789772695
-  all_eop: 2275237.164455552
+  all_eop: 2275237.1644555526
 - m: 2026-04
-  core_eop: 1433651.0788617893
+  core_eop: 1433651.0788617898
   lite_eop: 922397.8271787999
-  all_eop: 2356048.9060405893
+  all_eop: 2356048.90604059
 - m: 2026-05
-  core_eop: 1432593.764068645
+  core_eop: 1432593.7640686452
   lite_eop: 914593.426794358
   all_eop: 2347187.190863003
 - m: 2026-06
   core_eop: 1534562.6205319974
-  lite_eop: 964432.5692232859
+  lite_eop: 964432.5692232861
   all_eop: 2498995.1897552833
 - m: 2026-07
-  core_eop: 1667571.196590922
-  lite_eop: 1014086.006231448
+  core_eop: 1667571.1965909218
+  lite_eop: 1014086.0062314483
   all_eop: 2681657.20282237
 - m: 2026-08
-  core_eop: 1751009.2053436744
-  lite_eop: 1043961.1266203076
-  all_eop: 2794970.331963982
+  core_eop: 1751009.205343675
+  lite_eop: 1043961.1266203073
+  all_eop: 2794970.3319639824
 - m: 2026-09
-  core_eop: 1743752.8592217246
-  lite_eop: 1035909.0349079111
+  core_eop: 1743752.8592217248
+  lite_eop: 1035909.0349079109
   all_eop: 2779661.8941296358
 - m: 2026-10
-  core_eop: 1755693.663051932
-  lite_eop: 1035141.6800242185
-  all_eop: 2790835.3430761504
+  core_eop: 1755831.7780878816
+  lite_eop: 1035141.6800242183
+  all_eop: 2790973.4581121
 seg_flow_by_month:
 - m: 2026-10
   core_logos_new: 894.0
